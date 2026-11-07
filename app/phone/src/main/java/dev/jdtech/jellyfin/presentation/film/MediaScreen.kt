@@ -42,6 +42,7 @@ import dev.jdtech.jellyfin.presentation.film.components.TopContentScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
+import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
@@ -60,6 +61,9 @@ fun MediaScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (viewModel.shouldReload()) viewModel.loadData(silent = state.libraries.isNotEmpty())
     }
+
+    // CE (R8): Ctrl+F opens the search bar, which focuses its field when it expands.
+    KeyboardShortcuts.OnFind { if (!searchExpanded) onSearchExpand(true) }
 
     MediaScreenLayout(
         state = state,
