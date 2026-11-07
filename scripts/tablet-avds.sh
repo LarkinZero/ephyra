@@ -94,11 +94,12 @@ each() { # each <function> <name|all>
 }
 
 rotate() { # rotate <name> <portrait|landscape>
-  # user_rotation 0 is the natural orientation: landscape on the tablets, portrait on phone and fold.
+  # user_rotation 0 is the natural orientation: landscape on the tablets and the unfolded fold
+  # (its hinge is then vertical, so tabletop needs portrait), portrait on the phone.
   local rot=0 s
   s="$(serial "$1")"
   case "$1" in
-    ce_tablet_8|ce_tablet_10) if [ "$2" = portrait ]; then rot=1; fi ;;
+    ce_tablet_8|ce_tablet_10|ce_fold) if [ "$2" = portrait ]; then rot=1; fi ;;
     *) if [ "$2" = landscape ]; then rot=1; fi ;;
   esac
   "$ADB" -s "$s" shell settings put system accelerometer_rotation 0

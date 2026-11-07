@@ -4,51 +4,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/exo_controller">
 
-    <androidx.media3.ui.AspectRatioFrameLayout
-        android:id="@id/exo_content_frame"
+    <!-- Fills the player, except in tabletop posture on a foldable, where PlayerActivity ends it
+         at the fold (R9). The content frame sizes itself to the video and centres in it. -->
+    <FrameLayout
+        android:id="@+id/video_area"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
+        android:layout_height="match_parent">
 
-        <!-- Video surface will be inserted as the first child of the content frame. -->
-
-        <View
-            android:id="@id/exo_shutter"
+        <androidx.media3.ui.AspectRatioFrameLayout
+            android:id="@id/exo_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black" />
+            android:layout_gravity="center">
 
-        <ImageView
-            android:id="@id/exo_artwork"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            tools:ignore="ContentDescription" />
+            <!-- Video surface will be inserted as the first child of the content frame. -->
 
-        <ProgressBar
-            android:id="@id/exo_buffering"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true" />
+            <View
+                android:id="@id/exo_shutter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" />
 
-        <TextView
-            android:id="@id/exo_error_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="64dp"
-            android:background="@drawable/overlay_background"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.1"
-            android:paddingLeft="12dp"
-            android:paddingTop="4dp"
-            android:paddingRight="12dp"
-            android:paddingBottom="4dp"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
+            <ImageView
+                android:id="@id/exo_artwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                tools:ignore="ContentDescription" />
 
-    </androidx.media3.ui.AspectRatioFrameLayout>
+            <ProgressBar
+                android:id="@id/exo_buffering"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@id/exo_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="64dp"
+                android:background="@drawable/overlay_background"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.1"
+                android:paddingLeft="12dp"
+                android:paddingTop="4dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="4dp"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+        </androidx.media3.ui.AspectRatioFrameLayout>
+
+    </FrameLayout>
 
     <androidx.media3.ui.SubtitleView
         android:id="@id/exo_subtitles"
