@@ -60,8 +60,10 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import java.util.UUID
@@ -148,6 +150,12 @@ private fun MovieScreenLayout(
     onAction: (MovieAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
 ) {
+    // CE: medium and expanded windows get the hero layout (docs/tablet/4-design.md §6).
+    if (useWideItemLayout()) {
+        MovieWideLayout(state, downloaderState, onAction, onDownloaderAction)
+        return
+    }
+
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -314,6 +322,7 @@ private fun MovieScreenLayout(
             )
         }
 
+        LightStatusBarOverArtwork(state.movie != null, rememberTopBarBackgroundAlpha(scrollState))
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,

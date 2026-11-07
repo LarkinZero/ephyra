@@ -62,8 +62,10 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import dev.jdtech.jellyfin.utils.format
@@ -77,7 +79,7 @@ fun EpisodeScreen(
     navigateBack: () -> Unit,
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
-    navigateToSeason: (seasonId: UUID) -> Unit,
+    navigateToSeason: (seasonId: UUID, seriesId: UUID) -> Unit,
     viewModel: EpisodeViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
@@ -132,7 +134,7 @@ fun EpisodeScreen(
                 is EpisodeAction.OnBackClick -> navigateBack()
                 is EpisodeAction.OnHomeClick -> navigateHome()
                 is EpisodeAction.NavigateToPerson -> navigateToPerson(action.personId)
-                is EpisodeAction.NavigateToSeason -> navigateToSeason(action.seasonId)
+                is EpisodeAction.NavigateToSeason -> navigateToSeason(action.seasonId, action.seriesId)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -148,6 +150,12 @@ private fun EpisodeScreenLayout(
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
 ) {
+    // CE: medium and expanded windows get the hero layout (docs/tablet/4-design.md §6).
+    if (useWideItemLayout()) {
+        EpisodeWideLayout(state, downloaderState, onAction, onDownloaderAction)
+        return
+    }
+
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -310,6 +318,7 @@ private fun EpisodeScreenLayout(
             )
         }
 
+        LightStatusBarOverArtwork(state.episode != null, rememberTopBarBackgroundAlpha(scrollState))
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,
@@ -320,7 +329,7 @@ private fun EpisodeScreenLayout(
             Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
             state.episode?.let { episode ->
                 Button(
-                    onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId)) },
+                    onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId)) },
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = Color.Black.copy(alpha = 0.5f),
