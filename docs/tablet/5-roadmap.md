@@ -9,7 +9,7 @@ The work from [4-design.md](4-design.md) in build order. Each row is one issue a
 | R2 | ✅ #291 **Status bar over backdrops**: top `scrimOverArt` in the header, light status icons while the header is under the bar | §3, T12 | S | `ItemHeader.kt` | R1 |
 | R3 | ✅ #291 **Item pages hero layout**: `ItemHeroHeader`, `MovieWideLayout`, `ShowWideLayout`, `EpisodeWideLayout`; remove the R0 caps; Next Up as a row card | §6, T4, T5 | M | one `when` in `MovieScreen`, `ShowScreen`, `EpisodeScreen` | R1, R2 |
 | R4 | ✅ #290 **Rows, grids, search bar, downloads**: card and cell sizes from tokens; search bar cap; Downloads two columns; Favorites/Downloads title alignment | §4, §5, T9–T11 | M | `ItemCard.kt`, `HomeSection.kt`, `HomeView.kt`, `LibraryScreen.kt`, `CollectionGrid.kt`, `SearchBar.kt`, `DownloadsScreen.kt` (one modifier each) | R1 |
-| R5 | **Season list-detail** at expanded, including `EpisodeRoute` rendering as the season with a selection | §7 | L | `SeasonScreen.kt`, `EpisodeScreen.kt`, `NavigationRoot.kt` | R3 |
+| R5 | ✅ #PR **Season list-detail** at expanded, including `EpisodeRoute` rendering as the season with a selection | §7 | L | `SeasonScreen.kt`, `EpisodeScreen.kt`, `NavigationRoot.kt` | R3 |
 | R6 | ✅ #289 **Player orientation and edge gestures**: runtime orientation by width class, `GESTURE_EDGE_ZONE` at expanded | §9, T6, T7 | S | `AndroidManifest.xml`, `PlayerActivity.kt`, `PlayerGestureHelper.kt`, `Constants.kt` | — |
 | R7 | **Player controls at expanded**: `layout-w840dp` variants, trickplay and gesture panel sizes | §9, T8 | M | new resource folders only | R6 |
 | R8 | **Player keyboard and mouse**: key map, pointer shows controls; hover and right-click on cards; Ctrl+F | §9, §11, T15 | M | `PlayerActivity.kt`, `ItemCard.kt` | — |
@@ -29,7 +29,6 @@ Things deliberately **not** on the list:
 
 Small things the PRs above noted but did not finish; each fits in R5 or a one-line follow-up.
 
-- Season still has dark status-bar icons over dark artwork (T12): one `LightStatusBarOverArtwork` call with the lazy-list top-bar alpha. Goes with R5.
 - On Downloads at expanded width the storage summary spans the row: `widthIn(max)` can't shrink a full-span grid item, so the cap needs to go on the summary's inner content.
 - Next Up as a row card on the show page was only checked in a preview; the demo server had no Next Up.
-- Season cards in the show's seasons row now follow `Layout.cardVertical`; the Season page's own 120 dp header poster is unchanged until R5.
+- Season cards in the show's seasons row now follow `Layout.cardVertical`; the Season page's own 120 dp header poster is unchanged, also in the R5 list pane.
