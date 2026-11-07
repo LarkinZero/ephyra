@@ -616,6 +616,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         SeasonRoute(seasonId = seasonId.toString(), seriesId = seriesId.toString())
                     )
                 },
+            navigateToSeries =
+                resumedAction { seriesId ->
+                    navigator.navigateOrReuse(ShowRoute(showId = seriesId.toString()))
+                },
         )
     }
     entry<PersonRoute> { key ->
