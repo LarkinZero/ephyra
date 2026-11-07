@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/branding/ephyra/ephyra-banner.png" alt="Ephyra: a Jellyfin client for your phone and your TV" width="720">
+  <img src="images/branding/ephyra/ephyra-banner.png" alt="Ephyra: a Jellyfin client for your phone, tablet and TV" width="720">
 </p>
 
 <p align="center">
@@ -11,6 +11,7 @@
   <a href="https://midasvo.nl/ephyra/">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#what-ephyra-adds-to-findroid">What Ephyra adds</a> ·
+  <a href="#tablet">Tablet</a> ·
   <a href="#android-tv">Android TV</a> ·
   <a href="#bugs-and-contributions">Bugs and contributions</a> ·
   <a href="#privacy">Privacy</a>
@@ -22,13 +23,18 @@ Ephyra is a Jellyfin client for Android phones, tablets and Android TV, forked f
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, two active downloads with progress rings, and a downloaded movie"><br><sub>Downloads, with a storage breakdown</sub></td>
-    <td width="33%" align="center"><img src="images/screenshots/season.webp" alt="Season episode list showing downloaded, downloading and not yet downloaded episodes"><br><sub>Download progress per episode</sub></td>
-    <td width="33%" align="center"><img src="images/screenshots/download-quality.webp" alt="Download quality dialog listing original quality and bitrates from 4K down"><br><sub>Every download asks for a quality</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/home.webp" alt="Home with a backdrop carousel, Continue Watching and the start of Latest Movies"><br><sub>Home</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/movie.webp" alt="Movie page for Sahara with the backdrop, media chips, a Play button and the overview"><br><sub>Movie page</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/episode.webp" alt="Episode page with the episode still, season and episode number, Play button and overview"><br><sub>Episode page</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, three active downloads with progress rings, and a downloaded show"><br><sub>Downloads, with a storage breakdown</sub></td>
+    <td align="center"><img src="images/screenshots/season.webp" alt="Season episode list showing downloaded, downloading and not yet downloaded episodes"><br><sub>Download progress per episode</sub></td>
     <td align="center"><img src="images/screenshots/downloaded-show.webp" alt="Downloaded show page listing episodes by season with their sizes"><br><sub>A page per downloaded show</sub></td>
-    <td align="center"><img src="images/screenshots/subtitle-style.webp" alt="Subtitle style screen with a live preview of yellow subtitles"><br><sub>Subtitle styling, with a live preview</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/screenshots/download-quality.webp" alt="Download quality dialog listing original quality and bitrates from 4K down"><br><sub>Every download asks for a quality</sub></td>
+    <td align="center"><img src="images/screenshots/subtitle-style.webp" alt="Subtitle style screen with a live preview of coloured subtitles"><br><sub>Subtitle styling, with a live preview</sub></td>
     <td align="center"><img src="images/screenshots/home-rows.webp" alt="Home rows setting listing the Home rows with arrows to reorder them and switches to hide them"><br><sub>Choose and order the Home rows</sub></td>
   </tr>
   <tr>
@@ -36,7 +42,7 @@ Ephyra is a Jellyfin client for Android phones, tablets and Android TV, forked f
   </tr>
 </table>
 
-<sub>All artwork shown belongs to its respective owners.</sub>
+<sub>Screenshots use the public-domain library of the Jellyfin demo server. All artwork shown belongs to its respective owners.</sub>
 
 ## Install
 
@@ -111,24 +117,59 @@ filter stops the entry from switching to stable right after a release.
 - Error screens with Retry, and real empty states.
 - Long-press to copy text on detail screens. Option to hide cast and crew.
 
+**Tablet**: the same app, laid out for the width, [below](#tablet).
+
 **Android TV**: a separate app built for the remote, [below](#android-tv).
 
 The rest is Findroid's, and Findroid's changes are merged in regularly. Release-by-release detail
 is in the [changelog](CHANGELOG.md).
 
+## Tablet
+
+<table>
+  <tr>
+    <td colspan="2" align="center"><img src="images/screenshots/tablet-home.webp" alt="Tablet Home in landscape with a navigation rail on the left, a three-page backdrop carousel and a Continue Watching row"><br><sub>Home with a navigation rail and a wider carousel</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="images/screenshots/tablet-movie.webp" alt="Sahara's page on a tablet: a full-width backdrop with the poster, title, metadata, Play button and overview beside it, and the cast row below"><br><sub>Item pages with a hero and the poster beside the text</sub></td>
+    <td width="50%" align="center"><img src="images/screenshots/tablet-season.webp" alt="Pioneer One season 1 as a list-detail: the episode list on the left with an episode highlighted, that episode's details on the right"><br><sub>Seasons as list and detail side by side</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/screenshots/tablet-player.webp" alt="The player with its controls and an episode panel open on the right listing the season's episodes"><br><sub>Episode panel in the player</sub></td>
+    <td align="center"><img src="images/screenshots/tablet-library.webp" alt="The Movies library as a six-column poster grid"><br><sub>Grids use the width</sub></td>
+  </tr>
+</table>
+
+The phone app, laid out for the window rather than the device, so a tablet, an unfolded foldable, a
+split-screen half and a desktop window each get what fits:
+
+- Navigation rail from 600 dp. Home shows two or three carousel pages and wider cards.
+- Movie, show and episode pages put the poster and the text beside each other over a full-width
+  backdrop; text never runs wider than it can be read.
+- Seasons open as a list with the selected episode beside it on a landscape tablet. An episode
+  opened from Home or search lands in the same place.
+- Player: plays in the orientation you hold the tablet in, volume and brightness swipes only near
+  the edges, roomier controls, an episode panel, and a keyboard map (Space, arrows, M, L, Esc) and
+  mouse support.
+- Foldables: in tabletop posture the video sits above the fold and the controls below it.
+- Downloads in two columns, settings and forms at a readable width.
+
 ## Android TV
 
 <table>
   <tr>
-    <td colspan="2" align="center"><img src="images/screenshots/tv-home.webp" alt="TV Home with a large artwork hero for the focused item, a Suggestions row below it and a collapsed side drawer"><br><sub>Home, with a hero and a glow for the focused item</sub></td>
+    <td colspan="2" align="center"><img src="images/screenshots/tv-home.webp" alt="TV Home with a full-bleed backdrop hero for the focused movie, its title logo and runtime, and a Suggestions row with the focused card glowing"><br><sub>Home, with a hero and a glow for the focused item</sub></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="images/screenshots/tv-library.webp" alt="TV shows library grid with Hide watched and Sort by buttons, an A to Z bar on the right and a 4 of 44 counter"><br><sub>Library grid with an A to Z jump bar</sub></td>
-    <td width="50%" align="center"><img src="images/screenshots/tv-season.webp" alt="Bluey season 3 with season tabs, the details of the focused episode and a row of episodes"><br><sub>Episodes open in their season</sub></td>
+    <td width="50%" align="center"><img src="images/screenshots/tv-library.webp" alt="Movies library grid with Hide watched and Sort by buttons, an A to Z bar on the right and a 2 of 11 counter"><br><sub>Library grid with an A to Z jump bar</sub></td>
+    <td width="50%" align="center"><img src="images/screenshots/tv-season.webp" alt="Pioneer One season 1 with the details of the focused episode, Resume and Restart buttons, and a row of episodes"><br><sub>Episodes open in their season</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/screenshots/tv-player.webp" alt="Player overlay with the series name, episode title, ends-at time, previous and next buttons and an Up next header"><br><sub>Player overlay with the next episodes</sub></td>
-    <td align="center"><img src="images/screenshots/tv-trickplay.webp" alt="A trickplay thumbnail above the seek time while skipping forward"><br><sub>Trickplay thumbnails while seeking</sub></td>
+    <td align="center"><img src="images/screenshots/tv-movie.webp" alt="Movie page for Sahara with the overview, Play focused, trailer, played and favorite buttons, and genres, director and cast below"><br><sub>Movie page</sub></td>
+    <td align="center"><img src="images/screenshots/tv-player.webp" alt="Player overlay with the title, the clock, elapsed and remaining time, the seek bar and previous, pause, next, audio, subtitle and speed buttons"><br><sub>Player overlay</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="images/screenshots/tv-trickplay.webp" alt="A trickplay thumbnail above the seek time while skipping forward"><br><sub>Trickplay thumbnails while seeking</sub></td>
   </tr>
 </table>
 

@@ -473,6 +473,10 @@ section + section {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.shots.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .shots.four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -511,6 +515,7 @@ figcaption {
 
 @media (max-width: 480px) {
   .shots,
+  .shots.three,
   .shots.four {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

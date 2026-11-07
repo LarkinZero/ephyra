@@ -50,12 +50,24 @@ The bundles are in `app/{phone,tv}/build/outputs/bundle/libreRelease/`.
 The listing comes from `fastlane/metadata/android/en-US/`: title, short and full description,
 icon, feature graphic, TV banner and the changelog per versionCode.
 
-The phone screenshots there are still upstream Findroid's and must be replaced before the
-first upload. Take the new ones, and the TV screenshots (`images/tvScreenshots/` in the same folder, 1920×1080), on
-the Jellyfin demo server (`demo.jellyfin.org/stable`, user `demo`, no password), which only has
-public-domain films. Third-party artwork in listing screenshots risks an IP rejection.
+All four screenshot sets in `images/` are Ephyra's own, five each (`1_en-US.png` to
+`5_en-US.png`), taken on emulators signed in to the Jellyfin demo server
+(`demo.jellyfin.org/stable`, user `demo`, no password), which only has public-domain films. Keep
+it that way when retaking them: never a personal server, since third-party artwork in listing
+screenshots risks an IP rejection.
 
-The 10-inch tablet screenshots (`images/tenInchScreenshots/`, five landscape shots, four at 2560×1480 and the player at 2560×1600) are Ephyra's own, from the demo server on the `ce_tablet_10` emulator; [docs/tablet/6-test-matrix.md](tablet/6-test-matrix.md) says how to retake them. The seven-inch set (`images/sevenInchScreenshots/`) is still upstream Findroid's.
+| Set | Emulator | Size | Shots |
+|---|---|---|---|
+| `phoneScreenshots/` | `ce_phone_tmp` (`pixel_6`), dark theme | 1080×2160 (cropped from 1080×2400 for Play's 2:1 limit), player 2160×1080 | Home, Sahara, Movies, Pioneer One Season 1, player with controls |
+| `sevenInchScreenshots/` | `ce_tablet_8` set to 2048×1280 at 320 dpi (1024×640 dp), landscape, dark theme | 2048×1160 (taskbar cropped), player 2048×1280 | Home, Sahara, Movies, Pioneer One Season 1 in list-detail, player with controls |
+| `tenInchScreenshots/` | `ce_tablet_10` (`pixel_tablet`), landscape, dark theme | 2560×1480 (taskbar cropped), player 2560×1600 | as the seven-inch set |
+| `tvScreenshots/` | a throwaway `tv_1080p` AVD (`android-34;android-tv;x86`), x86 TV APK | 1920×1080 | Home with a focused card, Movies with the A–Z bar, Pioneer One Season 1, Sahara, player overlay |
+
+The phone and tablets run with the status bar in demo mode (12:00, full battery and Wi-Fi), and
+the player shots are taken a tap after playback starts so the controls show. On TV, the D-pad
+drives everything (`adb shell input keyevent DPAD_*`), the player overlay comes up with Down,
+and the open drawer is never captured. [docs/tablet/6-test-matrix.md](tablet/6-test-matrix.md)
+has the AVD script, the demo-mode commands and the crop.
 
 ## App content forms
 
