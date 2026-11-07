@@ -12,7 +12,7 @@ The work from [4-design.md](4-design.md) in build order. Each row is one issue a
 | R5 | ✅ #297 **Season list-detail** at expanded, including `EpisodeRoute` rendering as the season with a selection | §7 | L | `SeasonScreen.kt`, `EpisodeScreen.kt`, `NavigationRoot.kt` | R3 |
 | R6 | ✅ #289 **Player orientation and edge gestures**: runtime orientation by width class, `GESTURE_EDGE_ZONE` at expanded | §9, T6, T7 | S | `AndroidManifest.xml`, `PlayerActivity.kt`, `PlayerGestureHelper.kt`, `Constants.kt` | — |
 | R7 | ✅ #301 **Player controls at expanded**: `values-w840dp-h480dp` dimens, trickplay and gesture panel sizes | §9, T8 | M | new resource folders only | R6 |
-| R8 | **Player keyboard and mouse**: key map, pointer shows controls; hover and right-click on cards; Ctrl+F | §9, §11, T15 | M | `PlayerActivity.kt`, `ItemCard.kt` | — |
+| R8 | ✅ #310 **Player keyboard and mouse**: key map, pointer shows controls; hover and right-click on cards; Ctrl+F | §9, §11, T15 | M | `PlayerActivity.kt`, `ItemCard.kt` | — |
 | R9 | **Tabletop posture** in the player (reopens #51) | §10 | M | `PlayerActivity.kt`, `activity_player.xml` | R6 |
 | R10 | **Episode side sheet in the player** at expanded (upstream #480) | §9 | M | `activity_player.xml`, `PlayerActivity.kt`; new CE Compose sheet via `ComposeView` | R6, R7 |
 | R11 | ✅ #302 **Test matrix and store assets**: AVD script for the five sizes, a checklist in `6-test-matrix.md`, Ephyra tablet screenshots for `docs/play-store.md` / #177 | rule 9, §13 | S | docs only | R3, R5 |
