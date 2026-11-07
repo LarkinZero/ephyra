@@ -81,6 +81,7 @@ fun DownloadRow(
     modifier: Modifier = Modifier,
     supporting: String? = null,
     titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     metaColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     metaMinLines: Int = 1,
     showPlaybackProgress: Boolean = false,
@@ -93,7 +94,7 @@ fun DownloadRow(
 ) {
     Surface(
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = containerColor,
         modifier = modifier,
     ) {
         Column(

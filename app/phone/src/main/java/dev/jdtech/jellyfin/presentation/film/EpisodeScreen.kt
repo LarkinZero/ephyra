@@ -65,6 +65,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
 import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
@@ -80,6 +81,7 @@ fun EpisodeScreen(
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToSeason: (seasonId: UUID, seriesId: UUID) -> Unit,
+    navigateToSeries: (seriesId: UUID) -> Unit = {},
     viewModel: EpisodeViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
@@ -116,6 +118,24 @@ fun EpisodeScreen(
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    // CE: on an expanded window an episode opens as its season's list-detail with the episode
+    // selected, so Next Up, search and Downloads land where the season page would (4-design.md §7).
+    val loadedEpisode = state.episode
+    if (useSeasonListDetail() && loadedEpisode != null && loadedEpisode.id == episodeId) {
+        SeasonScreen(
+            seasonId = loadedEpisode.seasonId,
+            seriesId = loadedEpisode.seriesId,
+            initialEpisodeId = episodeId,
+            navigateBack = navigateBack,
+            navigateHome = navigateHome,
+            // Only the single-column season page navigates to an episode.
+            navigateToItem = {},
+            navigateToSeries = navigateToSeries,
+            navigateToPerson = navigateToPerson,
+        )
+        return
     }
 
     EpisodeScreenLayout(

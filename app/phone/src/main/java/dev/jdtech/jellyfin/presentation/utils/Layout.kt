@@ -117,3 +117,11 @@ object Layout {
  */
 @Composable
 fun useWideItemLayout(): Boolean = currentWidthClass() != WidthClass.Compact && !isCompactHeight()
+
+/**
+ * True when the Season page (and an episode opened on its own) should be the list-detail of
+ * docs/tablet/4-design.md §7: Expanded width with room in height. Medium windows and phones in
+ * landscape keep the single-column page.
+ */
+@Composable
+fun useSeasonListDetail(): Boolean = currentWidthClass() == WidthClass.Expanded && !isCompactHeight()

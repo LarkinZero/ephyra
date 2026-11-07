@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -68,18 +69,71 @@ fun EpisodeWideLayout(
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
 ) {
+    val scrollState = rememberScrollState()
+    val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        EpisodeWideContent(
+            state = state,
+            downloaderState = downloaderState,
+            onAction = onAction,
+            onDownloaderAction = onDownloaderAction,
+            scrollState = scrollState,
+        )
+
+        LightStatusBarOverArtwork(
+            hasArtwork = state.episode != null,
+            topBarBackgroundAlpha = topBarBackgroundAlpha,
+        )
+        ItemTopBar(
+            hasBackButton = true,
+            hasHomeButton = true,
+            backgroundAlpha = topBarBackgroundAlpha,
+            onBackClick = { onAction(EpisodeAction.OnBackClick) },
+            onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
+        ) {
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+            state.episode?.let { episode ->
+                Button(
+                    onClick = {
+                        onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId))
+                    },
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.Black.copy(alpha = 0.5f),
+                            contentColor = Color.White,
+                        ),
+                ) {
+                    Text(seasonName(episode))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The scrolling part of [EpisodeWideLayout] (hero, cast) and its download quality dialog, without
+ * the top bar. The Season list-detail (4-design.md §7) uses it as its detail pane, where the
+ * page's single top bar sits over the list.
+ */
+@Composable
+fun EpisodeWideContent(
+    state: EpisodeState,
+    downloaderState: () -> DownloaderState,
+    onAction: (EpisodeAction) -> Unit,
+    onDownloaderAction: (DownloaderAction) -> Unit,
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+) {
     val widthClass = currentWidthClass()
     val safePadding = rememberSafePadding()
     val margin = Layout.margin(widthClass)
     val rowPadding =
         PaddingValues(start = safePadding.start + margin, end = safePadding.end + margin)
 
-    val scrollState = rememberScrollState()
-    val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
-
     var downloadQualityDialogOpen by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         state.episode?.let { episode ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
                 ItemHeroHeader(
@@ -176,34 +230,6 @@ fun EpisodeWideLayout(
                     onRetryClick = { onAction(EpisodeAction.OnRetryClick) },
                 )
             }
-
-        LightStatusBarOverArtwork(
-            hasArtwork = state.episode != null,
-            topBarBackgroundAlpha = topBarBackgroundAlpha,
-        )
-        ItemTopBar(
-            hasBackButton = true,
-            hasHomeButton = true,
-            backgroundAlpha = topBarBackgroundAlpha,
-            onBackClick = { onAction(EpisodeAction.OnBackClick) },
-            onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
-        ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-            state.episode?.let { episode ->
-                Button(
-                    onClick = {
-                        onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId))
-                    },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Black.copy(alpha = 0.5f),
-                            contentColor = Color.White,
-                        ),
-                ) {
-                    Text(seasonName(episode))
-                }
-            }
-        }
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(
