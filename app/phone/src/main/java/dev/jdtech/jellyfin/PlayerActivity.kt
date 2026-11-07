@@ -38,6 +38,8 @@ import androidx.media3.common.Player
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowMetricsCalculator
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
@@ -135,6 +137,57 @@ class PlayerActivity : BasePlayerActivity() {
         }
     }
 
+    /**
+     * CE (R9, #51): the hinge, in window coordinates, while the window is in tabletop posture
+     * (half-opened, hinge horizontal); null otherwise. Set from [WindowInfoTracker].
+     */
+    private var tabletopFold: Rect? = null
+
+    /**
+     * CE (R9, #51): in tabletop posture the video (with its subtitles and the title bar) sits above
+     * the hinge, and the transport row, the time bar, the volume and brightness panels and the
+     * unlock button sit below it. Done with margins on views that normally fill the player, so
+     * leaving the posture puts every margin back to 0 and the layout is the usual one. Only views
+     * move: the player and its surface stay attached, so playback carries on.
+     *
+     * Ignored in picture-in-picture, and when the hinge doesn't cross the player (a window on one
+     * half of the screen).
+     */
+    private fun applyTabletopLayout() {
+        if (!::binding.isInitialized) return
+        val playerView = binding.playerView
+        val fold = tabletopFold
+        var videoBottom = 0
+        var controlsTop = 0
+        if (fold != null && !isInPictureInPictureMode && playerView.isLaidOut) {
+            val location = IntArray(2)
+            playerView.getLocationInWindow(location)
+            val foldTop = fold.top - location[1]
+            val foldBottom = fold.bottom - location[1]
+            if (foldTop > 0 && foldBottom < playerView.height) {
+                videoBottom = playerView.height - foldTop
+                controlsTop = foldBottom
+            }
+        }
+        val above = listOf<View?>(playerView.findViewById(R.id.video_area), playerView.subtitleView)
+        for (view in above) view?.setVerticalMargins(top = 0, bottom = videoBottom)
+        val below =
+            listOf<View?>(
+                playerView.findViewById(R.id.lower_controls),
+                playerView.findViewById(R.id.locked_player_view),
+                binding.gesturePanels,
+            )
+        for (view in below) view?.setVerticalMargins(top = controlsTop, bottom = 0)
+    }
+
+    private fun View.setVerticalMargins(top: Int, bottom: Int) {
+        val params = layoutParams as ViewGroup.MarginLayoutParams
+        if (params.topMargin == top && params.bottomMargin == bottom) return
+        params.topMargin = top
+        params.bottomMargin = bottom
+        layoutParams = params
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updatePlayerOrientation()
@@ -214,6 +267,12 @@ class PlayerActivity : BasePlayerActivity() {
         configureInsets(playerControls)
         configureInsets(lockedControls)
 
+        // CE (R9): the tabletop margins depend on the player's height, which changes without a
+        // new posture when the window is resized or rotated.
+        binding.playerView.addOnLayoutChangeListener { view, _, top, _, bottom, _, oldT, _, oldB ->
+            if (bottom - top != oldB - oldT) view.post { applyTabletopLayout() }
+        }
+
         if (appPreferences.getValue(appPreferences.playerGestures)) {
             playerGestureHelper =
                 PlayerGestureHelper(
@@ -248,6 +307,23 @@ class PlayerActivity : BasePlayerActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // CE (R9, #51): tabletop posture on a foldable.
+                launch {
+                    WindowInfoTracker.getOrCreate(this@PlayerActivity)
+                        .windowLayoutInfo(this@PlayerActivity)
+                        .collect { layoutInfo ->
+                            tabletopFold =
+                                layoutInfo.displayFeatures
+                                    .filterIsInstance<FoldingFeature>()
+                                    .firstOrNull {
+                                        it.state == FoldingFeature.State.HALF_OPENED &&
+                                            it.orientation == FoldingFeature.Orientation.HORIZONTAL
+                                    }
+                                    ?.bounds
+                            applyTabletopLayout()
+                        }
+                }
+
                 launch {
                     viewModel.uiState.collect { uiState ->
                         Timber.d("$uiState")
@@ -835,6 +911,7 @@ class PlayerActivity : BasePlayerActivity() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.isInPictureInPictureMode = isInPictureInPictureMode
+        applyTabletopLayout()
         when (isInPictureInPictureMode) {
             true -> {
                 binding.playerView.useController = false
