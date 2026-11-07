@@ -13,6 +13,72 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.2.0] — 2026-11-08
+
+Ephyra gets its own look, a real tablet layout and a lot more speed. The app now wears the
+Bioluminescence identity: deep navy chrome, cyan only for what is alive (playback, downloads,
+focus), violet for what is yours (favourites, watched, ratings), the Outfit typeface and round
+pill buttons; Material You dynamic colours are now an opt-in instead of the default. On a tablet,
+an unfolded foldable or a split-screen window the same app lays itself out for the width: a
+navigation rail, movie and show pages with the poster beside the text over a full-width backdrop,
+seasons as a list with the selected episode next to it, and a player that keeps the orientation
+you hold it in, with an episode panel, keyboard and mouse support and tabletop posture on
+foldables. Under the hood a performance pass across the whole app makes cold start, page loads,
+scrolling and playback start noticeably quicker, on TV as much as on the phone.
+
+### Added
+- Tablet and wide-window layouts: navigation rail, hero item pages for movies, shows and
+  episodes, seasons as list and detail side by side, wider cards and grids, Downloads in two
+  columns, readable text widths everywhere (#288, #290, #291, #297).
+- Player on wide windows: free orientation, volume and brightness swipes only near the edges,
+  roomier controls, an episode panel to switch episodes without leaving playback (#289, #301,
+  #314).
+- Player keyboard and mouse: Space, arrows, M (mute), L (lock), Esc, media keys; the mouse shows
+  the controls and the wheel seeks; Ctrl+F opens search (#310).
+- Foldables: in tabletop posture the video sits above the fold and the controls below it; the
+  controls resize when the window does (#313).
+- Profiles: user faces in the chrome, one-tap switching between users, default avatars (#248).
+- Media segments (intro, outro, recap, preview, commercial): one action per type, skip, ask or
+  ignore; the skip button follows the segment window on phone and hides after its window on TV
+  (#283).
+- HDR10+ and Dolby Atmos badges on movie and episode pages (#282).
+- Home: a switch for the remembered Home rows and a Clear cache row (#270).
+- About screens for phone and TV with install, server and device info (#223).
+- A swimming jellyfish on the welcome screen, specks on empty states and the TV screensaver
+  (#227, #235).
+
+### Changed
+- The Bioluminescence identity: the Ephyra palette is the default and dynamic colours are an
+  opt-in (#225); colour tokens (#224); Outfit for display, headline and title text (#228);
+  round shape roles and pill actions (#226); violet for favourite, watched and rating (#229);
+  a glow and a cyan focus ring on TV (#233, #242); buoyant motion and transitions (#234); TV item
+  pages fade to the surface colour (#237); the storage summary's Other segment is neutral (#246);
+  player dialogs tint the selected option with the accent (#244).
+- Performance: codec probe, database and sync jobs off the cold-start path (#260, #261); show,
+  season, person, movie and episode pages load their parts concurrently (#262, #274); fewer
+  recompositions in the TV player, Season and Main (#263); the Downloads screen loads in one
+  batch and polls less (#264, #277, #279, #293); batched database lookups, bigger library pages
+  and a lazier letter index (#265); Compose stability config and a carousel that pauses while
+  you scroll (#266); playback starts sooner (#267); screens reload on resume only when stale,
+  overlapping loads are cancelled and Home rows are cached (#268, #273, #275); a baseline
+  profile ships with the app (#269, #285); artwork loads at display size (#294); TV backdrops
+  are capped at 1280 px (#278).
+- The no-op "lazy trickplay" developer toggle is gone (#276).
+
+### Fixed
+- mpv reaches the ready state on the first restart when no seek is pending (#312).
+- Each player gets its own media session id (#231).
+- The "still watching?" prompt shows on TV (#243).
+- Status-bar icons stay readable over backdrops on item pages (#291, #297).
+- The HDR10+ wordmark is drawn at 16 dp so "10+" stays legible (#282).
+
+### Maintenance
+- Dependencies: Android Gradle plugin 9.5.1, Gradle 9.9.0, KSP 2.3.13, Navigation 3 1.2.1,
+  fragment-ktx 1.9.1, ZXing 3.5.4, GitHub Actions majors; Renovate configured and JDK pinned to
+  21 (#198–#207, #247).
+- Repository: Google Play metadata and screenshots, LF line endings enforced, the website and
+  README redone with new screenshots and a tablet section (#208, #311, #315).
+
 ## [v2.1.0] — 2026-11-06
 
 A dedicated Favorites destination across phone, tablet, and Android TV, smoother TV navigation,
@@ -582,6 +648,7 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.2.0]: https://github.com/midasvo/ephyra/releases/tag/v2.2.0
 [v2.1.0]: https://github.com/midasvo/ephyra/releases/tag/v2.1.0
 [v2.0.0]: https://github.com/midasvo/ephyra/releases/tag/v2.0.0
 [v1.2.0-ce.6]: https://github.com/midasvo/ephyra/releases/tag/v1.2.0-ce.6
