@@ -9,7 +9,7 @@ How to check a tablet change on the five sizes of [design rule 9](4-design.md). 
 | Phone | `ce_phone_tmp` | `pixel_6` | 412×915 dp (and 915×412 rotated) | 5580 |
 | 8" tablet | `ce_tablet_8` | `small_tablet`, resized to 1024×640 px at 160 dpi | 1024×640 dp | 5582 |
 | 10.5" tablet | `ce_tablet_10` | `pixel_tablet` | 1280×800 dp, both orientations (natural: landscape) | 5584 |
-| Foldable | `ce_fold` | `pixel_fold` (else `pixel_9_pro_fold`, `pixel_10_pro_fold`) | 841×701 dp outer, 2208×1840 dp inner | 5586 |
+| Foldable | `ce_fold` | `pixel_fold` (else `pixel_9_pro_fold`, `pixel_10_pro_fold`) | 841×701 dp unfolded (2208×1840 px at 420 dpi, natural: landscape) | 5586 |
 | 13" Chromebook | none | the `resizable` profile, or any AVD with the emulator window resized | 1600×900 dp | |
 
 All use `system-images;android-34;google_apis;x86_64` and `hw.keyboard = yes`. The ports are distinct from the TV AVDs and from `ce_tablet_tmp` (5562), so they can run side by side.
@@ -30,10 +30,10 @@ scripts/tablet-avds.sh stop ce_tablet_10
 scripts/tablet-avds.sh delete [name|all]
 ```
 
-- `portrait` and `landscape` turn off auto-rotate and set `user_rotation`. The script knows that the natural orientation of the tablets is landscape (so portrait is `user_rotation 1` there), and of the phone and fold is portrait.
+- `portrait` and `landscape` turn off auto-rotate and set `user_rotation`. The script knows that the natural orientation of the tablets and the unfolded fold is landscape (so portrait is `user_rotation 1` there), and of the phone is portrait.
 - `shot` is `screencap` plus `adb pull` with `MSYS_NO_PATHCONV=1`; redirecting `screencap` in PowerShell corrupts the PNG.
 - Install the `x86_64` debug APK (`./gradlew :app:phone:assembleLibreDebug`) and log in to the demo server (`https://demo.jellyfin.org/stable`, user `demo`, empty password).
-- Split-screen: `am start --windowingMode 6` and `am task resize <id> 0 0 1200 1600`. Fold and unfold: the emulator's Extended controls, Virtual sensors, Device posture.
+- Split-screen: `am start --windowingMode 6` and `am task resize <id> 0 0 1200 1600`. Fold and unfold: the emulator's Extended controls, Virtual sensors, Device posture, or `adb emu posture <id>` (1 closed, 2 half-opened, 3 opened). The unfolded fold's hinge is vertical in its natural landscape, so tabletop is half-opened in portrait: `adb shell wm user-rotation lock 1` (a posture change resets a plain `settings put system user_rotation`).
 - Delete the AVDs when done; they are 3 to 6 GB each.
 
 ## Screens to check

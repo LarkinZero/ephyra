@@ -146,7 +146,7 @@ The player is the second biggest gap after the item pages. It is View/XML (`Play
 
 ## 10. Foldables
 
-- **Tabletop posture** (issue #51, Google's fold-aware guidance): when `windowPosture.isTabletop` (half-opened, horizontal hinge), the player constrains the video surface to the area above the fold (`FoldingFeature.bounds.top`) and moves the control bar below it. Everything else keeps playing as before. Implemented in `PlayerActivity` with `WindowInfoTracker.windowLayoutInfo` (already a dependency); the Compose shell doesn't need it.
+- **Tabletop posture** (issue #51, Google's fold-aware guidance): when `windowPosture.isTabletop` (half-opened, horizontal hinge), the player constrains the video surface to the area above the fold (`FoldingFeature.bounds.top`) and moves the control bar below it. Everything else keeps playing as before. Implemented in `PlayerActivity` with `WindowInfoTracker.windowLayoutInfo` (already a dependency); the Compose shell doesn't need it. As built (R9), the title bar stays over the video, and the gesture panels and the unlock button move below the fold with the control bar; picture-in-picture ignores the posture.
 - **Book posture**: nothing special; the window is medium or expanded and the rules above apply. Dialogs and sheets are M3 and already avoid the hinge by being narrower than it.
 - **Fold/unfold during playback**: `PlayerActivity` already handles size `configChanges`; the gesture helper reads the view, not the display (#55). Test that the surface resizes without a rebuffer.
 
