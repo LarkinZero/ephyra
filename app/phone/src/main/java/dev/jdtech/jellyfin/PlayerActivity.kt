@@ -29,9 +29,14 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Space
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
@@ -44,14 +49,18 @@ import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowMetricsCalculator
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
+import dev.jdtech.jellyfin.film.presentation.season.SeasonState
+import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
+import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
 import dev.jdtech.jellyfin.presentation.player.QualitySelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.StillWatchingDialogFragment
 import dev.jdtech.jellyfin.presentation.player.TrackSelectionDialogFragment
+import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -146,10 +155,11 @@ class PlayerActivity : BasePlayerActivity() {
 
     /**
      * CE (R9, #51): in tabletop posture the video (with its subtitles and the title bar) sits above
-     * the hinge, and the transport row, the time bar, the volume and brightness panels and the
-     * unlock button sit below it. Done with margins on views that normally fill the player, so
-     * leaving the posture puts every margin back to 0 and the layout is the usual one. Only views
-     * move: the player and its surface stay attached, so playback carries on.
+     * the hinge, and the transport row, the time bar, the volume and brightness panels, the
+     * unlock button and the episode sheet (R10) sit below it. Done with margins on views that
+     * normally fill the player, so leaving the posture puts every margin back to 0 and the layout
+     * is the usual one. Only views move: the player and its surface stay attached, so playback
+     * carries on.
      *
      * Ignored in picture-in-picture, and when the hinge doesn't cross the player (a window on one
      * half of the screen).
@@ -177,6 +187,7 @@ class PlayerActivity : BasePlayerActivity() {
                 playerView.findViewById(R.id.lower_controls),
                 playerView.findViewById(R.id.locked_player_view),
                 binding.gesturePanels,
+                binding.episodeSheet,
             )
         for (view in below) view?.setVerticalMargins(top = controlsTop, bottom = 0)
     }
@@ -189,6 +200,12 @@ class PlayerActivity : BasePlayerActivity() {
         layoutParams = params
     }
 
+    /** CE (R9): whether the window is in R7's `w840dp-h480dp` bucket, the expanded player. */
+    private fun isExpandedWindow(): Boolean {
+        val config = resources.configuration
+        return config.screenWidthDp >= 840 && config.screenHeightDp >= 480
+    }
+
     /** CE (R9): whether the window was in R7's `w840dp-h480dp` bucket at the last resize. */
     private var expandedPlayerDimens: Boolean? = null
 
@@ -199,8 +216,7 @@ class PlayerActivity : BasePlayerActivity() {
      * left out: the chapter list inflates them each time it opens.
      */
     private fun applyPlayerDimens() {
-        val config = resources.configuration
-        val expanded = config.screenWidthDp >= 840 && config.screenHeightDp >= 480
+        val expanded = isExpandedWindow()
         if (expanded == expandedPlayerDimens) return
         expandedPlayerDimens = expanded
 
@@ -246,7 +262,98 @@ class PlayerActivity : BasePlayerActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updatePlayerOrientation()
-        if (::binding.isInitialized) applyPlayerDimens()
+        if (::binding.isInitialized) {
+            applyPlayerDimens()
+            updateEpisodesButton()
+        }
+    }
+
+    /**
+     * CE (R10, design §9): the episode sheet. Its season comes from [SeasonViewModel], created the
+     * first time the sheet opens; the sheet's content is set up then too.
+     */
+    private val seasonViewModel: SeasonViewModel by viewModels()
+    private val episodeSheetVisible = MutableTransitionState(false)
+    private var episodeSheetComposed = false
+    private lateinit var episodesButton: ImageButton
+    private lateinit var episodesSpace: Space
+
+    /** The controls' hide timeout, paused (0) while the sheet is open. */
+    private var controlsHideTimeoutMs = 0
+
+    /** Back, and Escape (which presses Back), closes the sheet before it leaves the player. */
+    private val episodeSheetBackCallback =
+        object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() = closeEpisodeSheet()
+        }
+
+    /**
+     * The episodes button is offered at expanded width (R7's bucket, read from the window, never
+     * the device type) while an episode plays, outside picture-in-picture. Leaving that closes
+     * the sheet at once.
+     */
+    private fun updateEpisodesButton() {
+        if (!::episodesButton.isInitialized) return
+        val show =
+            isExpandedWindow() &&
+                !isInPictureInPictureMode &&
+                viewModel.uiState.value.currentItem?.seasonId != null
+        episodesButton.isVisible = show
+        episodesSpace.isVisible = show
+        if (!show) closeEpisodeSheet(animate = false)
+    }
+
+    private fun openEpisodeSheet() {
+        val item = viewModel.uiState.value.currentItem ?: return
+        val seasonId = item.seasonId ?: return
+        if (isControlsLocked || isInPictureInPictureMode) return
+        if (seasonViewModel.shouldReload(seasonId)) {
+            seasonViewModel.loadSeason(seasonId = seasonId, seriesId = item.seriesId)
+        }
+        if (!episodeSheetComposed) {
+            episodeSheetComposed = true
+            binding.episodeSheet.setContent {
+                FindroidTheme(darkTheme = true) {
+                    val seasonState by seasonViewModel.state.collectAsStateWithLifecycle()
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    val currentItem = uiState.currentItem
+                    PlayerEpisodeSheet(
+                        visibleState = episodeSheetVisible,
+                        // Until the playing season has loaded, the sheet shows it loading rather
+                        // than the season it showed last.
+                        state =
+                            if (seasonState.season?.id == currentItem?.seasonId) seasonState
+                            else SeasonState(error = seasonState.error),
+                        seasonNumber = currentItem?.parentIndexNumber,
+                        currentEpisodeId = uiState.currentItemId,
+                        onEpisodeClick = { episode ->
+                            if (episode.id != uiState.currentItemId) {
+                                viewModel.playEpisode(episode.id)
+                            }
+                            closeEpisodeSheet()
+                        },
+                        onDismiss = { closeEpisodeSheet() },
+                        onClosed = { binding.episodeSheet.isVisible = false },
+                    )
+                }
+            }
+        }
+        binding.episodeSheet.isVisible = true
+        episodeSheetVisible.targetState = true
+        episodeSheetBackCallback.isEnabled = true
+        // The controls stay up while the sheet is open.
+        binding.playerView.controllerShowTimeoutMs = 0
+        binding.playerView.showController()
+    }
+
+    /** Closes the sheet with its fade, or at once when [animate] is false. */
+    private fun closeEpisodeSheet(animate: Boolean = true) {
+        if (!episodeSheetBackCallback.isEnabled) return
+        episodeSheetBackCallback.isEnabled = false
+        episodeSheetVisible.targetState = false
+        if (!animate) binding.episodeSheet.isVisible = false
+        // Restarts the hide timer when the controls are showing.
+        binding.playerView.controllerShowTimeoutMs = controlsHideTimeoutMs
     }
 
     private val isPipSupported by lazy {
@@ -361,6 +468,10 @@ class PlayerActivity : BasePlayerActivity() {
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
         val chaptersButton = binding.playerView.findViewById<ImageButton>(R.id.btn_chapters)
         val chaptersSpace = binding.playerView.findViewById<Space>(R.id.space_chapters)
+        episodesButton = binding.playerView.findViewById(R.id.btn_episodes)
+        episodesSpace = binding.playerView.findViewById(R.id.space_episodes)
+        controlsHideTimeoutMs = binding.playerView.controllerShowTimeoutMs
+        onBackPressedDispatcher.addCallback(this, episodeSheetBackCallback)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -424,6 +535,9 @@ class PlayerActivity : BasePlayerActivity() {
                             // Hide the spacer too so the controls bar does not end in dead space.
                             chaptersButton.isVisible = hasChapters
                             chaptersSpace.isVisible = hasChapters
+
+                            // Episodes (R10)
+                            updateEpisodesButton()
 
                             // File Loaded
                             if (fileLoaded) {
@@ -548,6 +662,7 @@ class PlayerActivity : BasePlayerActivity() {
         val lockedLayout = findViewById<FrameLayout>(R.id.locked_player_view)
 
         lockButton.setOnClickListener {
+            closeEpisodeSheet(animate = false)
             exoPlayerControlView.visibility = View.GONE
             lockedLayout.visibility = View.VISIBLE
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
@@ -589,6 +704,8 @@ class PlayerActivity : BasePlayerActivity() {
 
         pipButton.setOnClickListener { pictureInPicture() }
 
+        episodesButton.setOnClickListener { openEpisodeSheet() }
+
         // Set marker color
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(R.id.exo_progress)
         timeBar.setAdMarkerColor(Color.WHITE)
@@ -627,7 +744,7 @@ class PlayerActivity : BasePlayerActivity() {
      * | Up / Down | volume one step up / down, in the swipe's volume indicator |
      * | M | mute or unmute |
      * | L | lock or unlock the controls |
-     * | Escape | leave the player, as Back does |
+     * | Escape | close the episode sheet (R10), else leave the player, as Back does |
      * | Media next / previous | next / previous item in the queue |
      *
      * Any key but the media keys and Escape also shows the controls, or keeps them up. While the
@@ -649,7 +766,7 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
-            // On the up event, as Back is.
+            // On the up event, as Back is. Back closes the episode sheet first, when it is open.
             if (!down && !event.isCanceled) onBackPressedDispatcher.onBackPressed()
             return true
         }
@@ -969,6 +1086,7 @@ class PlayerActivity : BasePlayerActivity() {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.isInPictureInPictureMode = isInPictureInPictureMode
         applyTabletopLayout()
+        updateEpisodesButton()
         when (isInPictureInPictureMode) {
             true -> {
                 binding.playerView.useController = false

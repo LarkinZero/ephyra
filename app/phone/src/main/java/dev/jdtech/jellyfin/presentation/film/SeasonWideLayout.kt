@@ -532,9 +532,10 @@ private fun DownloadSummary(state: SeasonState, totalCount: Int, modifier: Modif
 /**
  * An episode in the list pane: still, title, `E2 · 38 mins`, watched tick and download state,
  * without the overview the detail pane shows. The selected row is drawn in `secondaryContainer`.
+ * Also the row of the player's episode sheet (R10), which has no download control.
  */
 @Composable
-private fun CompactEpisodeRow(
+internal fun CompactEpisodeRow(
     episode: FindroidEpisode,
     selected: Boolean,
     shape: Shape,
@@ -546,6 +547,7 @@ private fun CompactEpisodeRow(
     onDownloadCancelClick: (() -> Unit)? = null,
     onDownloadRetryClick: (() -> Unit)? = null,
     onDownloadRemoveClick: (() -> Unit)? = null,
+    showDownloadControl: Boolean = true,
 ) {
     val meta =
         buildList {
@@ -577,15 +579,18 @@ private fun CompactEpisodeRow(
         showPlayedBadge = true,
         onPlayClick = onPlayClick,
         onClick = onClick,
-        trailing = {
-            EpisodeDownloadControl(
-                downloadProgress = downloadProgress,
-                onDownloadClick = onDownloadClick,
-                onCancelClick = onDownloadCancelClick,
-                onRetryClick = onDownloadRetryClick,
-                onRemoveClick = onDownloadRemoveClick,
-            )
-        },
+        trailing =
+            if (showDownloadControl) {
+                {
+                    EpisodeDownloadControl(
+                        downloadProgress = downloadProgress,
+                        onDownloadClick = onDownloadClick,
+                        onCancelClick = onDownloadCancelClick,
+                        onRetryClick = onDownloadRetryClick,
+                        onRemoveClick = onDownloadRemoveClick,
+                    )
+                }
+            } else null,
         modifier = modifier.semantics { this.selected = selected },
     )
 }

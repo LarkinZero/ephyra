@@ -165,6 +165,25 @@
                     android:visibility="gone"
                     app:tint="@android:color/white" />
 
+                <!-- CE (R10): the episode sheet, at expanded width while an episode plays. -->
+                <Space
+                    android:id="@+id/space_episodes"
+                    android:layout_width="16dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <ImageButton
+                    android:id="@+id/btn_episodes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@drawable/transparent_circle_background"
+                    android:contentDescription="@string/episodes_label"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_list_video"
+                    android:visibility="gone"
+                    app:tint="@android:color/white" />
+
             </LinearLayout>
 
         </HorizontalScrollView>
