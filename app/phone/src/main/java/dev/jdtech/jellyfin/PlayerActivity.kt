@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.util.Rational
+import android.util.TypedValue
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -188,9 +189,64 @@ class PlayerActivity : BasePlayerActivity() {
         layoutParams = params
     }
 
+    /** CE (R9): whether the window was in R7's `w840dp-h480dp` bucket at the last resize. */
+    private var expandedPlayerDimens: Boolean? = null
+
+    /**
+     * CE (R9): applies the `player_*` dimens (R7) to the views that use them. The activity handles
+     * size changes itself, so the layout is inflated once; without this a tablet rotated from
+     * portrait to landscape during playback would keep the phone sizes. The chapter thumbnails are
+     * left out: the chapter list inflates them each time it opens.
+     */
+    private fun applyPlayerDimens() {
+        val config = resources.configuration
+        val expanded = config.screenWidthDp >= 840 && config.screenHeightDp >= 480
+        if (expanded == expandedPlayerDimens) return
+        expandedPlayerDimens = expanded
+
+        fun px(id: Int) = resources.getDimensionPixelSize(id)
+        fun View.size(width: Int = layoutParams.width, height: Int = layoutParams.height) {
+            if (layoutParams.width == width && layoutParams.height == height) return
+            layoutParams =
+                layoutParams.also {
+                    it.width = width
+                    it.height = height
+                }
+        }
+
+        val playerView = binding.playerView
+        val spacing = px(R.dimen.player_transport_spacing)
+        val transport = playerView.findViewById<ViewGroup>(R.id.transport_controls)
+        for (i in 0 until transport.childCount) {
+            (transport.getChildAt(i) as? Space)?.size(width = spacing)
+        }
+        playerView
+            .findViewById<View>(R.id.image_preview)
+            .size(px(R.dimen.player_image_preview_width), px(R.dimen.player_image_preview_height))
+        binding.progressScrubberTrickplay.size(
+            px(R.dimen.player_scrubber_trickplay_width),
+            px(R.dimen.player_scrubber_trickplay_height),
+        )
+        val panelWidth = px(R.dimen.player_gesture_panel_width)
+        binding.gestureVolumeLayout.size(width = panelWidth)
+        binding.gestureBrightnessLayout.size(width = panelWidth)
+        val barHeight = px(R.dimen.player_gesture_bar_height)
+        binding.gestureVolumeProgressBar.size(height = barHeight)
+        binding.gestureBrightnessProgressBar.size(height = barHeight)
+        val timeSize = resources.getDimension(R.dimen.player_time_text_size)
+        for (id in listOf(R.id.exo_position, R.id.exo_duration)) {
+            playerView.findViewById<TextView>(id).setTextSize(TypedValue.COMPLEX_UNIT_PX, timeSize)
+        }
+        val ripple = px(R.dimen.player_seek_ripple_size)
+        binding.imageFfwdAnimationRipple.size(ripple, ripple)
+        binding.imageRewindAnimationRipple.size(ripple, ripple)
+        binding.imagePlaybackAnimationRipple.size(ripple, ripple)
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updatePlayerOrientation()
+        if (::binding.isInitialized) applyPlayerDimens()
     }
 
     private val isPipSupported by lazy {
@@ -241,6 +297,7 @@ class PlayerActivity : BasePlayerActivity() {
 
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyPlayerDimens()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         viewModel.attachWindow(window)
 

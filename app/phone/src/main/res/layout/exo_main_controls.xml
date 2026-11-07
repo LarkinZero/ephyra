@@ -180,6 +180,7 @@
 
         <!-- The weighted spaces only shrink, when the window is too narrow for all five buttons. -->
         <LinearLayout
+            android:id="@+id/transport_controls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
