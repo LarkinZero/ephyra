@@ -536,18 +536,26 @@ class MPVPlayer(
                         isPlayerReady = true
                         val passed = startPassedToLoadMs
                         startPassedToLoadMs = null
-                        if (passed != null && passed == initialSeekTo) {
-                            // mpv opened at the start position already.
-                            initialSeekTo = 0L
-                        } else {
-                            applyInitialSeek()
-                        }
+                        val seeked =
+                            if (passed != null && passed == initialSeekTo) {
+                                // mpv opened at the start position already.
+                                initialSeekTo = 0L
+                                false
+                            } else {
+                                // A seek to 0 is redundant unless mpv was opened elsewhere.
+                                applyInitialSeek(skipZero = passed == null)
+                            }
                         if (playWhenReady) {
                             Timber.d("Starting playback...")
                             mpvLib.setPropertyBoolean("pause", false)
                         }
                         for (videoListener in videoListeners) {
                             videoListener.onRenderedFirstFrame()
+                        }
+                        // #303: without a seek no second restart follows, and that restart was
+                        // the only thing that set READY, so the player stayed BUFFERING forever.
+                        if (!seeked) {
+                            setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
                         }
                     } else {
                         setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
@@ -1137,13 +1145,21 @@ class MPVPlayer(
      * Issues the pending [initialSeekTo] to mpv once the current file is ready; until then it stays
      * pending and is applied from MPV_EVENT_PLAYBACK_RESTART. Does not notify listeners — callers
      * that represent an actual seek report the discontinuity themselves.
+     *
+     * @param skipZero Skip a seek to 0, for the initial seek right after the file loaded.
+     * @return Whether a seek was issued.
      */
-    private fun applyInitialSeek() {
-        if (!isPlayerReady) return
+    private fun applyInitialSeek(skipZero: Boolean = false): Boolean {
+        if (!isPlayerReady) return false
+        if (skipZero && initialSeekTo <= 0L) {
+            initialSeekTo = 0L
+            return false
+        }
         mpvLib.command(
             arrayOf("seek", "${initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)}", "absolute")
         )
         initialSeekTo = 0L
+        return true
     }
 
     private fun currentPositionInfo(): Player.PositionInfo =
