@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- R7: roomier player controls on an expanded window. h480dp keeps a phone in landscape
+         (about 915×411 dp) on the phone sizes; a tablet in portrait is under w840dp and keeps
+         them too. Nothing moves, it only grows (docs/tablet/4-design.md §9). -->
+    <dimen name="player_transport_spacing">48dp</dimen>
+    <dimen name="player_scrubber_trickplay_width">320dp</dimen>
+    <dimen name="player_scrubber_trickplay_height">180dp</dimen>
+    <dimen name="player_image_preview_width">240dp</dimen>
+    <dimen name="player_image_preview_height">135dp</dimen>
+    <dimen name="player_gesture_panel_width">80dp</dimen>
+    <dimen name="player_gesture_bar_height">160dp</dimen>
+    <dimen name="player_time_text_size">16sp</dimen>
+    <dimen name="player_chapter_thumbnail_width">160dp</dimen>
+    <dimen name="player_chapter_thumbnail_height">90dp</dimen>
+    <dimen name="player_seek_ripple_size">64dp</dimen>
+</resources>
