@@ -10,13 +10,13 @@ One issue per fix, grouped where the fix is the same pass over the code. Every f
 | [#304](https://github.com/midasvo/ephyra/issues/304) Media session gets no queue and no position | 2 | upstream | S | symptom reproduced, cause hypothesis |
 | [#305](https://github.com/midasvo/ephyra/issues/305) State machine drift: `playWhenReady`, duplicate callbacks, `ENDED` → `IDLE`, whole-second positions | 6, 7, 8 | upstream, plus the CE quality-switch call site | M | quality-switch half reproduced, rest hypothesis |
 | [#306](https://github.com/midasvo/ephyra/issues/306) Errors never surface, `release()` leaves posted events, stubs reachable from controllers | 3, 4, 5, 9 | upstream | M | hypotheses |
-| [#307](https://github.com/midasvo/ephyra/issues/307) Normalise CRLF line endings | 10 | CE | S | confirmed |
+| [#307](https://github.com/midasvo/ephyra/issues/307) Normalise CRLF line endings | 10 | CE | S | confirmed; closed, already done by [#311](https://github.com/midasvo/ephyra/pull/311) |
 | [#308](https://github.com/midasvo/ephyra/issues/308) Subtitle style preferences don't reach mpv | 11 | CE | M | hypothesis |
 | [#309](https://github.com/midasvo/ephyra/issues/309) Finish the test pass on the box and the TV AVD | the blank rows of [2-test-pass.md](2-test-pass.md) | n/a | | |
 
 Not filed: finding 12 (mpv is never transcoded) is by design and is dealt with in the verdict below; finding 13 is ExoPlayer behaving as #283 intended.
 
-The stuck loader (#303) is the one to fix first: it masks the queue, segment and trickplay rows for mpv, so the test pass in #309 is only worth running after it.
+The stuck loader (#303, fix in [#312](https://github.com/midasvo/ephyra/pull/312)) is the one to fix first: it masks the queue, segment and trickplay rows for mpv, so the test pass in #309 is only worth running after it.
 
 ### The mpv defaults
 
