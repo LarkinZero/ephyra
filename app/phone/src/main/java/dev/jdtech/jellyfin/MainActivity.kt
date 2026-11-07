@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPlaybackStopped
 import dev.jdtech.jellyfin.repository.PlaybackEvents
@@ -64,4 +66,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    // CE (R8): shortcuts such as Ctrl+F work whether or not anything has focus.
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean =
+        KeyboardShortcuts.onKeyEvent(event) || super.dispatchKeyEvent(event)
 }

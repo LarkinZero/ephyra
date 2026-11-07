@@ -142,7 +142,7 @@ The player is the second biggest gap after the item pages. It is View/XML (`Play
 
 **Picture-in-picture.** Already supported. The tablet test adds: entering PiP from portrait, Esc leaves PiP (tier 2), and the queue continues in PiP.
 
-**Keyboard and mouse (T15, tier 2).** In `PlayerActivity.onKeyDown`: Space = play/pause, Left/Right = seek −10 s / +30 s (the TV defaults from ADR work), Up/Down = volume, M = mute, F = toggle controls lock, Esc = exit PiP or leave the player (and cancel the next-episode countdown), media keys as the system sends them. Mouse movement shows the controls; the pointer hides with them.
+**Keyboard and mouse (T15, tier 2).** In `PlayerActivity.dispatchKeyEvent`, ahead of media3's `PlayerView`: Space = play/pause, Left/Right = seek −10 s / +30 s (the TV remote's steps, `playerTvSeekBackInc` / `playerTvSeekForwardInc`), Up/Down = volume one step with the swipe's volume panel, M = mute, L = lock or unlock the controls (L rather than F, which reads as "fullscreen" in most players), Esc = leave the player as Back does, media play/pause, next, previous, fast-forward and rewind act without showing the controls. Any other key shows the controls; once Tab has focused one of them the arrows and Space go to it. While locked only L, Esc and the media keys work. Mouse movement shows the controls and the pointer hides with them; the wheel seeks one step per notch. There is no next-episode countdown on the phone player to cancel, and a picture-in-picture window never takes key focus, so Esc cannot leave PiP. *(Built in R8.)*
 
 ## 10. Foldables
 
@@ -157,7 +157,7 @@ Tier 2 items that cost little and make the app usable on a Chromebook or with a 
 - Every clickable card and button is focusable (Compose does this) and shows the M3 focus indication; the rail is Tab-reachable.
 - Hover: cards use the M3 `hoverable` indication (a `surfaceContainerHigh` tint), play buttons raise their tonal elevation.
 - Right-click on a card opens the same menu as long-press, where a long-press menu exists.
-- Ctrl+F focuses search on the Media screen.
+- Ctrl+F focuses search on the Media screen (`MainActivity` passes it to the screen, so it works when nothing has focus). Library has no search of its own.
 
 ## 12. Screen matrix
 

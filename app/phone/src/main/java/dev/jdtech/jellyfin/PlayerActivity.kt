@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin
 
+import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -13,8 +14,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.util.Rational
+import android.view.InputDevice
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.PointerIcon
 import android.view.SurfaceView
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
@@ -28,6 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
@@ -78,6 +85,26 @@ class PlayerActivity : BasePlayerActivity() {
     private lateinit var skipSegmentButton: Button
 
     private var stillWatchingDialog: StillWatchingDialogFragment? = null
+
+    /** CE (R8): locks or unlocks the controls as their buttons do. Set in [onCreate]. */
+    private var toggleLock: () -> Unit = {}
+
+    /** CE (R8): wheel movement not yet turned into a seek; touchpads scroll in fractions. */
+    private var pendingScroll = 0f
+
+    private val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
+
+    /** CE (R8): the TV remote's seek steps (10 s back, 30 s forward unless changed on a TV). */
+    private val keySeekBackMs by lazy {
+        appPreferences.getValue(appPreferences.playerTvSeekBackInc).toLongOrNull() ?: 10_000L
+    }
+    private val keySeekForwardMs by lazy {
+        appPreferences.getValue(appPreferences.playerTvSeekForwardInc).toLongOrNull() ?: 30_000L
+    }
+
+    private val hideVolumeIndicator = Runnable {
+        binding.gestureVolumeLayout.visibility = View.GONE
+    }
 
     /**
      * CE (R6, T7): the orientation the player asks for while the controls are not locked. Phones
@@ -170,6 +197,13 @@ class PlayerActivity : BasePlayerActivity() {
                 if (visibility == View.GONE) {
                     hideSystemUI()
                 }
+                // CE (R8): a mouse pointer hides with the controls and comes back with them.
+                binding.playerView.pointerIcon =
+                    if (visibility == View.GONE) {
+                        PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL)
+                    } else {
+                        null
+                    }
                 updateSkipSegmentButton(viewModel.uiState.value)
             }
         )
@@ -394,6 +428,12 @@ class PlayerActivity : BasePlayerActivity() {
             isControlsLocked = false
         }
 
+        // CE (R8): the L key presses whichever of the two is showing.
+        toggleLock = {
+            if (isControlsLocked) unlockButton.performClick()
+            else if (lockButton.isEnabled) lockButton.performClick()
+        }
+
         subtitleButton.setOnClickListener {
             TrackSelectionDialogFragment.newInstance(C.TRACK_TYPE_TEXT)
                 .show(supportFragmentManager, "trackselectiondialog")
@@ -436,6 +476,224 @@ class PlayerActivity : BasePlayerActivity() {
             )
         }
         hideSystemUI()
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (::binding.isInitialized && onPlayerKey(event)) return true
+        return super.dispatchKeyEvent(event)
+    }
+
+    /**
+     * CE (R8, T15): the player's keyboard map. It runs before the view hierarchy, so media3's
+     * `PlayerView` only gets the keys this leaves alone. Returns true when the key was handled.
+     *
+     * | Key | Action |
+     * |---|---|
+     * | Space, media play/pause | play or pause |
+     * | Left / Right | seek back / forward by the TV steps |
+     * | Up / Down | volume one step up / down, in the swipe's volume indicator |
+     * | M | mute or unmute |
+     * | L | lock or unlock the controls |
+     * | Escape | leave the player, as Back does |
+     * | Media next / previous | next / previous item in the queue |
+     *
+     * Any key but the media keys and Escape also shows the controls, or keeps them up. While the
+     * controls are showing and one of them has focus (after Tab), the arrows and Space go to that
+     * control. With the controls locked only L, Escape and the media keys do anything.
+     */
+    private fun onPlayerKey(event: KeyEvent): Boolean {
+        // A picture-in-picture window takes no keys; leave everything to the system.
+        if (isInPictureInPictureMode) return false
+        val keyCode = event.keyCode
+        val down = event.action == KeyEvent.ACTION_DOWN
+
+        mediaKeyAction(keyCode)?.let { action ->
+            if (down && event.repeatCount == 0) {
+                viewModel.markUserInteraction()
+                action()
+            }
+            return true
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
+            // On the up event, as Back is.
+            if (!down && !event.isCanceled) onBackPressedDispatcher.onBackPressed()
+            return true
+        }
+
+        if (!down || KeyEvent.isModifierKey(keyCode) || isSystemKey(keyCode)) return false
+
+        val playerView = binding.playerView
+        // Judged before the controls are shown: showing them may move focus into them.
+        val controlFocused =
+            playerView.isControllerFullyVisible &&
+                currentFocus.let { it != null && it !== playerView && it.isInside(playerView) }
+        viewModel.markUserInteraction()
+        // Shows the controls, or restarts their hide timer when they are up.
+        if (playerView.useController) playerView.showController()
+
+        if (!event.hasNoModifiers()) return false
+        if (keyCode == KeyEvent.KEYCODE_L) {
+            if (event.repeatCount == 0) toggleLock()
+            return true
+        }
+        if (isControlsLocked) return false
+
+        val handled =
+            when (keyCode) {
+                KeyEvent.KEYCODE_SPACE -> {
+                    if (!controlFocused && event.repeatCount == 0) togglePlayPause()
+                    !controlFocused
+                }
+                KeyEvent.KEYCODE_DPAD_LEFT,
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (!controlFocused) {
+                        seekByStep(forward = keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    }
+                    !controlFocused
+                }
+                KeyEvent.KEYCODE_DPAD_UP,
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (!controlFocused) {
+                        changeVolume(
+                            if (keyCode == KeyEvent.KEYCODE_DPAD_UP) AudioManager.ADJUST_RAISE
+                            else AudioManager.ADJUST_LOWER
+                        )
+                    }
+                    !controlFocused
+                }
+                KeyEvent.KEYCODE_M -> {
+                    if (event.repeatCount == 0) changeVolume(AudioManager.ADJUST_TOGGLE_MUTE)
+                    true
+                }
+                else -> false
+            }
+        // Showing the controls puts focus on play/pause, which would turn the next arrow into
+        // focus navigation. A shortcut keeps focus where it was; Tab still moves into the controls.
+        if (handled && !controlFocused && currentFocus?.isInside(playerView) == true) {
+            // The player view itself, not its first focusable child.
+            val focusability = playerView.descendantFocusability
+            playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
+            playerView.requestFocus()
+            playerView.descendantFocusability = focusability
+        }
+        return handled
+    }
+
+    /** The media keys, which act without showing the controls. */
+    private fun mediaKeyAction(keyCode: Int): (() -> Unit)? {
+        val player = viewModel.player
+        return when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { -> togglePlayPause() }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { -> player.play() }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { -> player.pause() }
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { -> seekByStep(forward = true) }
+            KeyEvent.KEYCODE_MEDIA_REWIND -> { -> seekByStep(forward = false) }
+            KeyEvent.KEYCODE_MEDIA_NEXT -> { ->
+                if (player.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT)) player.seekToNext()
+            }
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> { ->
+                if (player.isCommandAvailable(Player.COMMAND_SEEK_TO_PREVIOUS)) {
+                    player.seekToPrevious()
+                }
+            }
+            else -> null
+        }
+    }
+
+    /** Keys the system acts on (volume, Back, Home, power...) are left to it. */
+    private fun isSystemKey(keyCode: Int): Boolean =
+        KeyEvent.isMediaSessionKey(keyCode) ||
+            keyCode == KeyEvent.KEYCODE_BACK ||
+            keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
+            keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+            keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
+            keyCode == KeyEvent.KEYCODE_HOME ||
+            keyCode == KeyEvent.KEYCODE_POWER ||
+            keyCode == KeyEvent.KEYCODE_APP_SWITCH
+
+    private fun View.isInside(ancestor: View): Boolean {
+        var current = parent
+        while (current is View) {
+            if (current === ancestor) return true
+            current = current.parent
+        }
+        return false
+    }
+
+    private fun togglePlayPause() {
+        viewModel.player.playWhenReady = !viewModel.player.playWhenReady
+    }
+
+    private fun seekByStep(forward: Boolean) {
+        val player = viewModel.player
+        val duration = player.duration
+        val target = player.currentPosition + if (forward) keySeekForwardMs else -keySeekBackMs
+        player.seekTo(
+            if (duration != C.TIME_UNSET && duration > 0) target.coerceIn(0L, duration)
+            else target.coerceAtLeast(0L)
+        )
+    }
+
+    /** One step of [AudioManager.adjustStreamVolume], shown in the swipe's volume indicator. */
+    @SuppressLint("SetTextI18n")
+    private fun changeVolume(direction: Int) {
+        try {
+            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, 0)
+        } catch (e: SecurityException) {
+            // Do Not Disturb can refuse a mute change.
+            Timber.w(e)
+            return
+        }
+        val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val volume =
+            if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) 0
+            else audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val percent = if (max > 0) volume * 100 / max else 0
+        binding.gestureVolumeProgressBar.max = max * 100
+        binding.gestureVolumeProgressBar.progress = volume * 100
+        binding.gestureVolumeText.text = "$percent%"
+        binding.gestureVolumeImage.setImageLevel(percent)
+        binding.gestureVolumeLayout.visibility = View.VISIBLE
+        binding.gestureVolumeLayout.removeCallbacks(hideVolumeIndicator)
+        binding.gestureVolumeLayout.postDelayed(hideVolumeIndicator, 1000)
+    }
+
+    /**
+     * CE (R8): the mouse in the player. Moving the pointer shows the controls and restarts their
+     * hide timer; the wheel seeks one Left/Right step per notch (up or right is forward). Taken at
+     * the activity, before the controls' buttons consume the hover events.
+     */
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        if (
+            ::binding.isInitialized &&
+                !isInPictureInPictureMode &&
+                event.isFromSource(InputDevice.SOURCE_MOUSE)
+        ) {
+            val playerView = binding.playerView
+            when (event.actionMasked) {
+                MotionEvent.ACTION_HOVER_MOVE ->
+                    if (playerView.useController) playerView.showController()
+                MotionEvent.ACTION_SCROLL ->
+                    if (!isControlsLocked) {
+                        pendingScroll +=
+                            event.getAxisValue(MotionEvent.AXIS_VSCROLL) +
+                                event.getAxisValue(MotionEvent.AXIS_HSCROLL)
+                        while (pendingScroll >= 1f) {
+                            pendingScroll -= 1f
+                            seekByStep(forward = true)
+                        }
+                        while (pendingScroll <= -1f) {
+                            pendingScroll += 1f
+                            seekByStep(forward = false)
+                        }
+                        viewModel.markUserInteraction()
+                        if (playerView.useController) playerView.showController()
+                        return true
+                    }
+            }
+        }
+        return super.dispatchGenericMotionEvent(event)
     }
 
     override fun onNewIntent(intent: Intent) {
