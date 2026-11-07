@@ -30,8 +30,8 @@
 
         <ImageView
             android:id="@+id/progress_scrubber_trickplay"
-            android:layout_width="272dp"
-            android:layout_height="153dp"
+            android:layout_width="@dimen/player_scrubber_trickplay_width"
+            android:layout_height="@dimen/player_scrubber_trickplay_height"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:background="@android:color/transparent"
@@ -52,7 +52,7 @@
 
     <LinearLayout
         android:id="@+id/gesture_volume_layout"
-        android:layout_width="64dp"
+        android:layout_width="@dimen/player_gesture_panel_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:layout_margin="16dp"
@@ -76,7 +76,7 @@
             android:id="@+id/gesture_volume_progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="8dp"
-            android:layout_height="125dp"
+            android:layout_height="@dimen/player_gesture_bar_height"
             android:progressDrawable="@drawable/progress_scale_drawable"
             tools:progress="58" />
 
@@ -91,7 +91,7 @@
 
     <LinearLayout
         android:id="@+id/gesture_brightness_layout"
-        android:layout_width="64dp"
+        android:layout_width="@dimen/player_gesture_panel_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
         android:layout_margin="16dp"
@@ -115,7 +115,7 @@
             android:id="@+id/gesture_brightness_progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="8dp"
-            android:layout_height="125dp"
+            android:layout_height="@dimen/player_gesture_bar_height"
             android:progressDrawable="@drawable/progress_scale_drawable"
             tools:progress="58" />
 
@@ -161,8 +161,8 @@
 
     <ImageView
         android:id="@+id/image_ffwd_animation_ripple"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/player_seek_ripple_size"
+        android:layout_height="@dimen/player_seek_ripple_size"
         android:layout_gravity="center_vertical|end"
         android:alpha="0"
         android:src="@drawable/transparent_circle"
@@ -170,8 +170,8 @@
 
     <ImageView
         android:id="@+id/image_rewind_animation_ripple"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/player_seek_ripple_size"
+        android:layout_height="@dimen/player_seek_ripple_size"
         android:layout_gravity="center_vertical|start"
         android:alpha="0"
         android:src="@drawable/transparent_circle"
@@ -179,8 +179,8 @@
 
     <ImageView
         android:id="@+id/image_playback_animation_ripple"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/player_seek_ripple_size"
+        android:layout_height="@dimen/player_seek_ripple_size"
         android:layout_gravity="center"
         android:alpha="0"
         android:src="@drawable/transparent_circle"

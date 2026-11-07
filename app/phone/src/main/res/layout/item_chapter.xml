@@ -12,8 +12,8 @@
 
     <ImageView
         android:id="@+id/chapter_thumbnail"
-        android:layout_width="120dp"
-        android:layout_height="68dp"
+        android:layout_width="@dimen/player_chapter_thumbnail_width"
+        android:layout_height="@dimen/player_chapter_thumbnail_height"
         android:layout_marginEnd="12dp"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
