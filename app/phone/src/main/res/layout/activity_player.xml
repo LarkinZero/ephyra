@@ -194,4 +194,11 @@
         android:alpha="0"
         android:src="@drawable/transparent_circle"
         tools:ignore="ContentDescription" />
+
+    <!-- CE (R10): the episode sheet, over everything else while it is open. -->
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/episode_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </FrameLayout>

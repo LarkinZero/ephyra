@@ -14,7 +14,7 @@ The work from [4-design.md](4-design.md) in build order. Each row is one issue a
 | R7 | ✅ #301 **Player controls at expanded**: `values-w840dp-h480dp` dimens, trickplay and gesture panel sizes | §9, T8 | M | new resource folders only | R6 |
 | R8 | ✅ #310 **Player keyboard and mouse**: key map, pointer shows controls; hover and right-click on cards; Ctrl+F | §9, §11, T15 | M | `PlayerActivity.kt`, `ItemCard.kt` | — |
 | R9 | ✅ #313 **Tabletop posture** in the player (reopens #51); R7's sizes re-applied on resize | §10 | M | `PlayerActivity.kt`, `activity_player.xml`, `exo_player_view.xml`, `exo_main_controls.xml` (a wrapper each) | R6 |
-| R10 | **Episode side sheet in the player** at expanded (upstream #480) | §9 | M | `activity_player.xml`, `PlayerActivity.kt`; new CE Compose sheet via `ComposeView` | R6, R7 |
+| R10 | ✅ #PR **Episode side sheet in the player** at expanded (upstream #480) | §9 | M | `activity_player.xml`, `PlayerActivity.kt`; new CE Compose sheet via `ComposeView` | R6, R7 |
 | R11 | ✅ #302 **Test matrix and store assets**: AVD script for the five sizes, a checklist in `6-test-matrix.md`, Ephyra tablet screenshots for `docs/play-store.md` / #177 | rule 9, §13 | S | docs only | R3, R5 |
 
 Order of value: R1–R3 fix what every tablet user sees first (the item page), R6 fixes the one thing users have reported upstream (gestures), R5 is the feature that makes the app feel built for a tablet. R8–R10 are the tier 2 and tier 1 extras; R10 is the only one that could be dropped without the design losing its shape.

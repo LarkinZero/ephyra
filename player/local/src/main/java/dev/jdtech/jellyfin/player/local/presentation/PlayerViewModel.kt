@@ -566,22 +566,46 @@ constructor(
      */
     fun playQueueItem(itemId: UUID) {
         markUserInteraction()
+        viewModelScope.launch { jumpToQueued(itemId) }
+    }
+
+    /**
+     * CE (R10): play [itemId], an episode picked in the phone player's episode sheet, from its
+     * beginning. An episode in the queue (the playing season, once [PlaylistManager.loadQueue] has
+     * run) is jumped to as [playQueueItem] does; any other starts over as the episode page's Play
+     * would, in this player.
+     */
+    fun playEpisode(itemId: UUID) {
+        markUserInteraction()
         viewModelScope.launch {
-            val playerItem =
-                try {
-                    playlistManager.jumpTo(itemId)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Timber.e(e, "Could not jump to queue item $itemId")
-                    null
-                } ?: return@launch
-            refreshPlayingSnapshot()
-            items = mutableListOf(playerItem)
-            player.setMediaItems(listOf(playerItem.toMediaItem()), 0, 0L)
-            player.prepare()
-            player.play()
+            playlistManager.loadQueue()
+            if (!jumpToQueued(itemId)) {
+                initializePlayer(
+                    itemId = itemId,
+                    itemKind = BaseItemKind.EPISODE.serialName,
+                    startFromBeginning = true,
+                )
+            }
         }
+    }
+
+    /** Restarts the player's playlist at [itemId] if it is queued. False when it is not. */
+    private suspend fun jumpToQueued(itemId: UUID): Boolean {
+        val playerItem =
+            try {
+                playlistManager.jumpTo(itemId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, "Could not jump to queue item $itemId")
+                null
+            } ?: return false
+        refreshPlayingSnapshot()
+        items = mutableListOf(playerItem)
+        player.setMediaItems(listOf(playerItem.toMediaItem()), 0, 0L)
+        player.prepare()
+        player.play()
+        return true
     }
 
     /** Downloaded items store their images relative to filesDir; the session needs a file URI. */

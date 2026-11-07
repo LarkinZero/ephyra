@@ -24,6 +24,8 @@ data class PlayerItem(
     val seriesName: String? = null,
     /** Series of an episode, the key for remembering the audio and subtitle choice. */
     val seriesId: UUID? = null,
+    /** CE (R10): season of an episode, for the phone player's episode sheet. */
+    val seasonId: UUID? = null,
     /** Server URL, or a path relative to filesDir for downloaded items. */
     val artworkUri: Uri? = null,
 ) : Parcelable
