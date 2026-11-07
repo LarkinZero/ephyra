@@ -12,7 +12,7 @@
   <link rel="canonical" href="https://midasvo.nl/ephyra/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Ephyra">
-  <meta property="og:description" content="A Jellyfin client for your phone and your TV.">
+  <meta property="og:description" content="A Jellyfin client for your phone, your tablet and your TV.">
   <meta property="og:url" content="https://midasvo.nl/ephyra/">
   <meta property="og:image" content="https://midasvo.nl/ephyra/images/branding/ephyra-feature-graphic.png">
   <meta property="og:image:width" content="1024">
@@ -27,6 +27,7 @@
     <a class="brand" href="#"><img src="images/branding/ephyra-mark.svg" alt="" width="28" height="28">Ephyra</a>
     <nav aria-label="Sections">
       <a href="#phone">Phone</a>
+      <a href="#tablet">Tablet</a>
       <a href="#tv">TV</a>
       <a href="#install">Install</a>
       <a class="optional" href="https://github.com/midasvo/ephyra">GitHub</a>
@@ -41,7 +42,7 @@
     <div class="wrap">
       <div class="hero-copy">
         <img class="hero-mark" src="images/branding/ephyra-mark.svg" alt="" width="96" height="96">
-        <h1 id="hero-title">A Jellyfin client for your phone and your TV.</h1>
+        <h1 id="hero-title">A Jellyfin client for your phone, your tablet and your TV.</h1>
         <p class="lead">Ephyra plays your Jellyfin library on Android phones, tablets and Android TV. It is forked from Findroid and adds downloads worth using, Dolby Vision, and a TV app built for the remote.</p>
         <div class="actions">
           <a class="btn btn-primary" href="https://github.com/midasvo/ephyra/releases/latest">
@@ -53,8 +54,8 @@
         <p class="meta">Free, GPLv3. Needs a Jellyfin server and Android 10 or newer.</p>
       </div>
       <div class="hero-shots">
-        <div class="tv"><img src="images/screenshots/tv-home.webp" alt="TV Home with a large artwork hero for the focused item and a Suggestions row below it" width="1280" height="720" fetchpriority="high"></div>
-        <div class="phone"><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, two active downloads with progress rings, and a downloaded movie" width="540" height="1095"></div>
+        <div class="tv"><img src="images/screenshots/tv-home.webp" alt="TV Home with a full-bleed backdrop hero for the focused movie and a Suggestions row with the focused card glowing" width="1280" height="720" fetchpriority="high"></div>
+        <div class="phone"><img src="images/screenshots/home.webp" alt="Home with a backdrop carousel, Continue Watching and the start of Latest Movies" width="540" height="1095"></div>
       </div>
     </div>
   </section>
@@ -78,7 +79,7 @@
           </ul>
         </div>
         <div class="shots four">
-          <figure><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, two active downloads with progress rings, and a downloaded movie" width="540" height="1095" loading="lazy"><figcaption>Downloads, with a storage breakdown</figcaption></figure>
+          <figure><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, three active downloads with progress rings, and a downloaded show" width="540" height="1095" loading="lazy"><figcaption>Downloads, with a storage breakdown</figcaption></figure>
           <figure><img src="images/screenshots/season.webp" alt="Season episode list showing downloaded, downloading and not yet downloaded episodes" width="540" height="1095" loading="lazy"><figcaption>Download progress per episode</figcaption></figure>
           <figure><img src="images/screenshots/download-quality.webp" alt="Download quality dialog listing original quality and bitrates from 4K down" width="540" height="1095" loading="lazy"><figcaption>Every download asks for a quality</figcaption></figure>
           <figure><img src="images/screenshots/downloaded-show.webp" alt="Downloaded show page listing episodes by season with their sizes" width="540" height="1095" loading="lazy"><figcaption>A page per downloaded show</figcaption></figure>
@@ -116,12 +117,43 @@
             <li>Long-press to copy text on detail screens. Option to hide cast and crew.</li>
           </ul>
         </div>
-        <div class="shots two">
+        <div class="shots four">
+          <figure><img src="images/screenshots/home.webp" alt="Home with a backdrop carousel, Continue Watching and the start of Latest Movies" width="540" height="1095" loading="lazy"><figcaption>Home</figcaption></figure>
+          <figure><img src="images/screenshots/movie.webp" alt="Movie page for Sahara with the backdrop, media chips, a Play button and the overview" width="540" height="1095" loading="lazy"><figcaption>Movie page</figcaption></figure>
+          <figure><img src="images/screenshots/library.webp" alt="Movies library grid of posters with the hide-watched and sort icons" width="540" height="1095" loading="lazy"><figcaption>Library grid</figcaption></figure>
           <figure><img src="images/screenshots/home-rows.webp" alt="Home rows setting listing the Home rows with arrows to reorder them and switches to hide them" width="540" height="1095" loading="lazy"><figcaption>Choose and order the Home rows</figcaption></figure>
         </div>
       </div>
 
-      <p class="meta">All artwork shown belongs to its respective owners.</p>
+      <p class="meta">Screenshots use the public-domain library of the Jellyfin demo server. All artwork shown belongs to its respective owners.</p>
+    </div>
+  </section>
+
+  <section id="tablet" aria-labelledby="tablet-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 id="tablet-title">On a tablet</h2>
+        <p>The phone app, laid out for the window rather than the device. A tablet, an unfolded foldable, a split-screen half and a desktop window each get what fits.</p>
+      </div>
+
+      <figure class="tv tv-hero reveal"><img src="images/screenshots/tablet-home.webp" alt="Tablet Home in landscape with a navigation rail on the left, a three-page backdrop carousel and a Continue Watching row" width="1280" height="740" loading="lazy"><figcaption>Home with a navigation rail and a wider carousel</figcaption></figure>
+
+      <div class="tv-grid reveal">
+        <figure class="tv"><img src="images/screenshots/tablet-movie.webp" alt="Sahara's page on a tablet: a full-width backdrop with the poster, title, metadata, Play button and overview beside it, and the cast row below" width="1280" height="740" loading="lazy"><figcaption>Item pages with a hero and the poster beside the text</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tablet-season.webp" alt="Pioneer One season 1 as a list-detail: the episode list on the left with an episode highlighted, that episode's details on the right" width="1280" height="740" loading="lazy"><figcaption>Seasons as list and detail side by side</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tablet-player.webp" alt="The player with its controls and an episode panel open on the right listing the season's episodes" width="1280" height="800" loading="lazy"><figcaption>Episode panel in the player</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tablet-library.webp" alt="The Movies library as a six-column poster grid" width="1280" height="740" loading="lazy"><figcaption>Grids use the width</figcaption></figure>
+      </div>
+
+      <ul class="tv-list reveal">
+        <li>Navigation rail from 600 dp. Home shows two or three carousel pages and wider cards.</li>
+        <li>Movie, show and episode pages put the poster and the text beside each other over a full-width backdrop.</li>
+        <li>Seasons open as a list with the selected episode beside it on a landscape tablet.</li>
+        <li>Player: plays in the orientation you hold it in, edge-only volume and brightness swipes, roomier controls, an episode panel.</li>
+        <li>Keyboard map (Space, arrows, M, L, Esc) and mouse support in the player; Ctrl+F for search.</li>
+        <li>Foldables: in tabletop posture the video sits above the fold and the controls below it.</li>
+        <li>Downloads in two columns, settings and forms at a readable width.</li>
+      </ul>
     </div>
   </section>
 
@@ -132,12 +164,12 @@
         <p>A separate app, built for the remote. Same login and server as the phone app, same releases.</p>
       </div>
 
-      <figure class="tv tv-hero reveal"><img src="images/screenshots/tv-home.webp" alt="TV Home with a large artwork hero for the focused item, a Suggestions row below it and a collapsed side drawer" width="1280" height="720" loading="lazy"><figcaption>Home, with a hero and a glow for the focused item</figcaption></figure>
+      <figure class="tv tv-hero reveal"><img src="images/screenshots/tv-home.webp" alt="TV Home with a full-bleed backdrop hero for the focused movie, its title logo and runtime, and a Suggestions row with the focused card glowing" width="1280" height="720" loading="lazy"><figcaption>Home, with a hero and a glow for the focused item</figcaption></figure>
 
       <div class="tv-grid reveal">
-        <figure class="tv"><img src="images/screenshots/tv-library.webp" alt="TV shows library grid with Hide watched and Sort by buttons, an A to Z bar on the right and a 4 of 44 counter" width="1280" height="720" loading="lazy"><figcaption>Library grid with an A to Z jump bar</figcaption></figure>
-        <figure class="tv"><img src="images/screenshots/tv-season.webp" alt="Bluey season 3 with season tabs, the details of the focused episode and a row of episodes" width="1280" height="720" loading="lazy"><figcaption>Episodes open in their season</figcaption></figure>
-        <figure class="tv"><img src="images/screenshots/tv-player.webp" alt="Player overlay with the series name, episode title, ends-at time, previous and next buttons and an Up next header" width="1280" height="720" loading="lazy"><figcaption>Player overlay with the next episodes</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tv-library.webp" alt="Movies library grid with Hide watched and Sort by buttons, an A to Z bar on the right and a 2 of 11 counter" width="1280" height="720" loading="lazy"><figcaption>Library grid with an A to Z jump bar</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tv-season.webp" alt="Pioneer One season 1 with the details of the focused episode, Resume and Restart buttons, and a row of episodes" width="1280" height="720" loading="lazy"><figcaption>Episodes open in their season</figcaption></figure>
+        <figure class="tv"><img src="images/screenshots/tv-player.webp" alt="Player overlay with the title, the clock, elapsed and remaining time, the seek bar and previous, pause, next, audio, subtitle and speed buttons" width="1280" height="720" loading="lazy"><figcaption>Player overlay</figcaption></figure>
         <figure class="tv"><img src="images/screenshots/tv-trickplay.webp" alt="A trickplay thumbnail above the seek time while skipping forward" width="1280" height="720" loading="lazy"><figcaption>Trickplay thumbnails while seeking</figcaption></figure>
       </div>
 

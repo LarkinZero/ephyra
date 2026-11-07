@@ -58,9 +58,9 @@ screenshots risks an IP rejection.
 
 | Set | Emulator | Size | Shots |
 |---|---|---|---|
-| `phoneScreenshots/` | `ce_phone_tmp` (`pixel_6`), dark theme | 1080×2400, player 2400×1080 | Home, Sahara, Movies, Pioneer One Season 1, player with controls |
+| `phoneScreenshots/` | `ce_phone_tmp` (`pixel_6`), dark theme | 1080×2160 (cropped from 1080×2400 for Play's 2:1 limit), player 2160×1080 | Home, Sahara, Movies, Pioneer One Season 1, player with controls |
 | `sevenInchScreenshots/` | `ce_tablet_8` set to 2048×1280 at 320 dpi (1024×640 dp), landscape, dark theme | 2048×1160 (taskbar cropped), player 2048×1280 | Home, Sahara, Movies, Pioneer One Season 1 in list-detail, player with controls |
-| `tenInchScreenshots/` | `ce_tablet_10` (`pixel_tablet`), landscape, light theme | 2560×1480 (taskbar cropped), player 2560×1600 | as the seven-inch set |
+| `tenInchScreenshots/` | `ce_tablet_10` (`pixel_tablet`), landscape, dark theme | 2560×1480 (taskbar cropped), player 2560×1600 | as the seven-inch set |
 | `tvScreenshots/` | a throwaway `tv_1080p` AVD (`android-34;android-tv;x86`), x86 TV APK | 1920×1080 | Home with a focused card, Movies with the A–Z bar, Pioneer One Season 1, Sahara, player overlay |
 
 The phone and tablets run with the status bar in demo mode (12:00, full battery and Wi-Fi), and
