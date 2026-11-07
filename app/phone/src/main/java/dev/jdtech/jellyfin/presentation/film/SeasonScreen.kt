@@ -69,6 +69,7 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
@@ -366,6 +367,7 @@ private fun SeasonScreenLayout(
             )
         }
 
+        LightStatusBarOverArtwork(state.season != null, rememberTopBarBackgroundAlpha(lazyListState))
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,
