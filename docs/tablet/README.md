@@ -9,6 +9,7 @@ Research into making the phone app (`app/phone`) a first-class tablet client, ne
 | [3-guidelines.md](3-guidelines.md) | What Android and Material ask of a tablet app (size classes, canonical layouts, adaptive quality tiers), and what peer apps do |
 | [4-design.md](4-design.md) | **The design:** rules, the layout per size class, every screen, the player, foldables, input, acceptance criteria |
 | [5-roadmap.md](5-roadmap.md) | The work in build order, sized, ready to become issues |
+| [6-test-matrix.md](6-test-matrix.md) | The five test sizes, the AVD script, the acceptance checklist and how the store screenshots are made |
 
 ## Test setup
 

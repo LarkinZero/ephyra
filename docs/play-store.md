@@ -50,10 +50,12 @@ The bundles are in `app/{phone,tv}/build/outputs/bundle/libreRelease/`.
 The listing comes from `fastlane/metadata/android/en-US/`: title, short and full description,
 icon, feature graphic, TV banner and the changelog per versionCode.
 
-The phone and tablet screenshots there are still upstream Findroid's and must be replaced before the
+The phone screenshots there are still upstream Findroid's and must be replaced before the
 first upload. Take the new ones, and the TV screenshots (`images/tvScreenshots/` in the same folder, 1920×1080), on
 the Jellyfin demo server (`demo.jellyfin.org/stable`, user `demo`, no password), which only has
 public-domain films. Third-party artwork in listing screenshots risks an IP rejection.
+
+The 10-inch tablet screenshots (`images/tenInchScreenshots/`, five landscape shots, four at 2560×1480 and the player at 2560×1600) are Ephyra's own, from the demo server on the `ce_tablet_10` emulator; [docs/tablet/6-test-matrix.md](tablet/6-test-matrix.md) says how to retake them. The seven-inch set (`images/sevenInchScreenshots/`) is still upstream Findroid's.
 
 ## App content forms
 
