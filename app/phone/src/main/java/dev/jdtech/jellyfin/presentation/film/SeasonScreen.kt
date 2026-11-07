@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +75,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -87,10 +89,15 @@ fun SeasonScreen(
     navigateToSeries: (seriesId: UUID) -> Unit,
     seriesId: UUID? = null,
     downloadsOnly: Boolean = false,
+    initialEpisodeId: UUID? = null,
+    navigateToPerson: (personId: UUID) -> Unit = {},
     viewModel: SeasonViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // CE: the episode selected in the expanded list-detail. Kept here, above the width branch, so
+    // a rotation to the single-column page and back keeps it (docs/tablet/4-design.md §7).
+    var selectedEpisodeId by rememberSaveable { mutableStateOf(initialEpisodeId) }
 
     ReloadOnResume(shouldReload = { viewModel.shouldReload(seasonId, downloadsOnly, stopEventFollows = true) }) {
         viewModel.loadSeason(seasonId = seasonId, downloadsOnly = downloadsOnly, seriesId = seriesId)
@@ -126,9 +133,7 @@ fun SeasonScreen(
         }
     }
 
-    SeasonScreenLayout(
-        state = state,
-        onAction = { action ->
+    val onAction: (SeasonAction) -> Unit = { action ->
             when (action) {
                 is SeasonAction.Play -> {
                     val intent = Intent(context, PlayerActivity::class.java)
@@ -143,7 +148,28 @@ fun SeasonScreen(
                 else -> Unit
             }
             viewModel.onAction(action)
-        },
+        }
+
+    // CE: expanded windows show the season as list-detail (docs/tablet/4-design.md §7).
+    if (useSeasonListDetail()) {
+        SeasonListDetail(
+            state = state,
+            selectedEpisodeId = selectedEpisodeId,
+            onSelectEpisode = { selectedEpisodeId = it },
+            onAction = onAction,
+            onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
+            onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
+            onReloadSeason = {
+                viewModel.loadSeason(seasonId = seasonId, downloadsOnly = downloadsOnly, seriesId = seriesId)
+            },
+            navigateToPerson = navigateToPerson,
+        )
+        return
+    }
+
+    SeasonScreenLayout(
+        state = state,
+        onAction = onAction,
         onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
         onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
     )

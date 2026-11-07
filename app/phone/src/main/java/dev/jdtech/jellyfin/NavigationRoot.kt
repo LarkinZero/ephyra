@@ -595,6 +595,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         ShowRoute(showId = seriesId.toString(), downloadsOnly = key.downloadsOnly)
                     )
                 },
+            navigateToPerson =
+                resumedAction { personId ->
+                    navigator.navigate(PersonRoute(personId = personId.toString()))
+                },
         )
     }
     entry<EpisodeRoute> { key ->

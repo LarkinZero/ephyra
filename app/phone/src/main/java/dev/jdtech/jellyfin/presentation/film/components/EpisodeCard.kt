@@ -77,8 +77,9 @@ fun EpisodeCard(
     )
 }
 
+/** The download control at the end of an episode row, also used by the Season list-detail. */
 @Composable
-private fun EpisodeDownloadControl(
+fun EpisodeDownloadControl(
     downloadProgress: DownloadProgress?,
     onDownloadClick: (() -> Unit)?,
     onCancelClick: (() -> Unit)?,
