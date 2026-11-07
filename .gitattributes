@@ -1,0 +1,22 @@
+# Keep every text file LF in the repository and in checkouts, whatever the platform.
+# Agents and editors on Windows kept committing CRLF, which turned small edits into
+# whole-file rewrites (docs/tablet/5-roadmap.md, "Left over").
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ttf binary
+*.otf binary
+*.jar binary
+*.aar binary
+*.apk binary
+*.so binary
+*.mp4 binary
+*.mkv binary
+
+# Windows batch files stay as they are (CRLF, upstream file)
+*.bat -text
