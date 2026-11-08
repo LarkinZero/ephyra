@@ -14,4 +14,9 @@ sealed interface UsersAction {
     data object OnAddClick : UsersAction
 
     data object OnBackClick : UsersAction
+
+    // CE (#299)
+    data class OnPinSubmit(val pin: String) : UsersAction
+
+    data object OnPinDismiss : UsersAction
 }

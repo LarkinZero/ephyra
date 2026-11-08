@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Ryd cache</string>
     <string name="settings_clear_cache_summary">Fjerner de cachede billeder og de huskede rækker på startsiden.</string>
     <string name="settings_cache_cleared">Cache ryddet</string>
+    <string name="ce_settings_profile_pin">Profil-pinkode</string>
+    <string name="ce_settings_profile_pin_summary">Lås denne profil på denne enhed</string>
 </resources>

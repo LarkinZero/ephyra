@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Skift server</string>
     <string name="ce_users_signed_in">Logget ind</string>
     <string name="ce_users_switch_user">Skift bruger</string>
+    <string name="ce_profile_pin">Profil-pinkode</string>
+    <string name="ce_profile_pin_summary">En pinkode holder andre ude af denne profil på denne enhed. Den bliver på denne enhed og sendes aldrig til serveren.</string>
+    <string name="ce_profile_pin_status_on">Denne profil er låst med en pinkode</string>
+    <string name="ce_profile_pin_status_off">Denne profil har ingen pinkode</string>
+    <string name="ce_profile_pin_set">Angiv pinkode</string>
+    <string name="ce_profile_pin_change">Skift pinkode</string>
+    <string name="ce_profile_pin_remove">Fjern pinkode</string>
+    <string name="ce_profile_pin_ask_on_start">Spørg om pinkoden ved start</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Når den er slået fra, spørges der kun om pinkoden ved skift til denne profil</string>
+    <string name="ce_profile_pin_enter">Indtast pinkoden til %1$s</string>
+    <string name="ce_profile_pin_enter_current">Indtast din nuværende pinkode</string>
+    <string name="ce_profile_pin_choose">Vælg en pinkode på 4 til 6 cifre</string>
+    <string name="ce_profile_pin_repeat">Indtast den nye pinkode igen</string>
+    <string name="ce_profile_pin_wrong">Forkert pinkode, prøv igen</string>
+    <string name="ce_profile_pin_mismatch">Pinkoderne var ikke ens. Vælg en pinkode igen.</string>
+    <string name="ce_profile_pin_forgot">Glemt pinkoden? Fjern denne bruger fra brugerlisten, og log ind igen med serverens adgangskode.</string>
+    <string name="ce_profile_pin_other_profile">Anden profil</string>
+    <string name="ce_profile_pin_label">Pinkode</string>
+    <string name="ce_profile_pin_delete">Slet ciffer</string>
+    <string name="ce_profile_pin_saved">Pinkode angivet</string>
+    <string name="ce_profile_pin_removed">Pinkode fjernet</string>
 </resources>

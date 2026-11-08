@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Vaihda palvelinta</string>
     <string name="ce_users_signed_in">Kirjautunut sisään</string>
     <string name="ce_users_switch_user">Vaihda käyttäjää</string>
+    <string name="ce_profile_pin">Profiilin PIN-koodi</string>
+    <string name="ce_profile_pin_summary">PIN-koodi pitää muut poissa tästä profiilista tällä laitteella. Se pysyy tällä laitteella eikä sitä koskaan lähetetä palvelimelle.</string>
+    <string name="ce_profile_pin_status_on">Tämä profiili on lukittu PIN-koodilla</string>
+    <string name="ce_profile_pin_status_off">Tällä profiililla ei ole PIN-koodia</string>
+    <string name="ce_profile_pin_set">Aseta PIN-koodi</string>
+    <string name="ce_profile_pin_change">Vaihda PIN-koodi</string>
+    <string name="ce_profile_pin_remove">Poista PIN-koodi</string>
+    <string name="ce_profile_pin_ask_on_start">Kysy PIN-koodia käynnistettäessä</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Kun pois päältä, PIN-koodia kysytään vain vaihdettaessa tähän profiiliin</string>
+    <string name="ce_profile_pin_enter">Anna käyttäjän %1$s PIN-koodi</string>
+    <string name="ce_profile_pin_enter_current">Anna nykyinen PIN-koodisi</string>
+    <string name="ce_profile_pin_choose">Valitse 4–6-numeroinen PIN-koodi</string>
+    <string name="ce_profile_pin_repeat">Anna uusi PIN-koodi uudelleen</string>
+    <string name="ce_profile_pin_wrong">Väärä PIN-koodi, yritä uudelleen</string>
+    <string name="ce_profile_pin_mismatch">PIN-koodit eivät täsmänneet. Valitse PIN-koodi uudelleen.</string>
+    <string name="ce_profile_pin_forgot">Unohditko PIN-koodin? Poista tämä käyttäjä käyttäjäluettelosta ja kirjaudu uudelleen palvelimen salasanalla.</string>
+    <string name="ce_profile_pin_other_profile">Muu profiili</string>
+    <string name="ce_profile_pin_label">PIN-koodi</string>
+    <string name="ce_profile_pin_delete">Poista numero</string>
+    <string name="ce_profile_pin_saved">PIN-koodi asetettu</string>
+    <string name="ce_profile_pin_removed">PIN-koodi poistettu</string>
 </resources>

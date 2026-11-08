@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Borrar la caché</string>
     <string name="settings_clear_cache_summary">Elimina las imágenes en caché y las filas de Inicio recordadas.</string>
     <string name="settings_cache_cleared">Caché borrada</string>
+    <string name="ce_settings_profile_pin">PIN del perfil</string>
+    <string name="ce_settings_profile_pin_summary">Bloquear este perfil en este dispositivo</string>
 </resources>

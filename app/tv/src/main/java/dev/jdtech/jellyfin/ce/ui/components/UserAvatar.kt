@@ -8,6 +8,7 @@ import androidx.tv.material3.MaterialTheme
 import dev.jdtech.jellyfin.core.presentation.ephyra.AvatarColors
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraAvatar
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.models.hasPin
 import dev.jdtech.jellyfin.models.primaryImageUrl
 
 /** A user's avatar in the TV theme. [baseUrl] is the server the user belongs to. */
@@ -18,12 +19,15 @@ fun UserAvatar(
     size: Dp,
     modifier: Modifier = Modifier,
     current: Boolean = false,
+    /** CE (#299): show the lock badge when the profile has a PIN. */
+    showLock: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
     val highest = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest
     val onHighest = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+    val high = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHigh
     val colors =
-        remember(scheme, highest, onHighest) {
+        remember(scheme, highest, onHighest, high) {
             AvatarColors(
                 containers =
                     listOf(
@@ -35,6 +39,8 @@ fun UserAvatar(
                 badgeContainer = scheme.primary,
                 badgeContent = scheme.onPrimary,
                 badgeRing = scheme.surface,
+                lockContainer = high,
+                lockContent = onHighest,
             )
         }
     EphyraAvatar(
@@ -45,5 +51,6 @@ fun UserAvatar(
         colors = colors,
         modifier = modifier,
         current = current,
+        locked = showLock && user.hasPin,
     )
 }

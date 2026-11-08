@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Cambia server</string>
     <string name="ce_users_signed_in">Accesso effettuato</string>
     <string name="ce_users_switch_user">Cambia utente</string>
+    <string name="ce_profile_pin">PIN del profilo</string>
+    <string name="ce_profile_pin_summary">Un PIN impedisce ad altri di entrare in questo profilo su questo dispositivo. Resta su questo dispositivo e non viene mai inviato al server.</string>
+    <string name="ce_profile_pin_status_on">Questo profilo è bloccato con un PIN</string>
+    <string name="ce_profile_pin_status_off">Questo profilo non ha un PIN</string>
+    <string name="ce_profile_pin_set">Imposta PIN</string>
+    <string name="ce_profile_pin_change">Cambia PIN</string>
+    <string name="ce_profile_pin_remove">Rimuovi PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Chiedi il PIN all\'avvio</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Se disattivato, il PIN viene chiesto solo quando si passa a questo profilo</string>
+    <string name="ce_profile_pin_enter">Inserisci il PIN di %1$s</string>
+    <string name="ce_profile_pin_enter_current">Inserisci il PIN attuale</string>
+    <string name="ce_profile_pin_choose">Scegli un PIN da 4 a 6 cifre</string>
+    <string name="ce_profile_pin_repeat">Inserisci di nuovo il nuovo PIN</string>
+    <string name="ce_profile_pin_wrong">PIN errato, riprova</string>
+    <string name="ce_profile_pin_mismatch">I PIN non corrispondono. Scegli di nuovo un PIN.</string>
+    <string name="ce_profile_pin_forgot">Hai dimenticato il PIN? Rimuovi questo utente dall\'elenco utenti e accedi di nuovo con la password del server.</string>
+    <string name="ce_profile_pin_other_profile">Altro profilo</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Elimina cifra</string>
+    <string name="ce_profile_pin_saved">PIN impostato</string>
+    <string name="ce_profile_pin_removed">PIN rimosso</string>
 </resources>

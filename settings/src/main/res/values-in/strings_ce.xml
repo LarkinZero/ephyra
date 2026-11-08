@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Hapus cache</string>
     <string name="settings_clear_cache_summary">Menghapus gambar yang di-cache dan baris Beranda yang diingat.</string>
     <string name="settings_cache_cleared">Cache dihapus</string>
+    <string name="ce_settings_profile_pin">PIN profil</string>
+    <string name="ce_settings_profile_pin_summary">Kunci profil ini di perangkat ini</string>
 </resources>

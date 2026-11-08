@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">सर्वर बदलें</string>
     <string name="ce_users_signed_in">साइन इन है</string>
     <string name="ce_users_switch_user">उपयोगकर्ता बदलें</string>
+    <string name="ce_profile_pin">प्रोफ़ाइल PIN</string>
+    <string name="ce_profile_pin_summary">PIN इस डिवाइस पर दूसरों को इस प्रोफ़ाइल से दूर रखता है। यह इसी डिवाइस पर रहता है और कभी सर्वर पर नहीं भेजा जाता।</string>
+    <string name="ce_profile_pin_status_on">यह प्रोफ़ाइल PIN से लॉक है</string>
+    <string name="ce_profile_pin_status_off">इस प्रोफ़ाइल का कोई PIN नहीं है</string>
+    <string name="ce_profile_pin_set">PIN सेट करें</string>
+    <string name="ce_profile_pin_change">PIN बदलें</string>
+    <string name="ce_profile_pin_remove">PIN हटाएँ</string>
+    <string name="ce_profile_pin_ask_on_start">शुरू होने पर PIN पूछें</string>
+    <string name="ce_profile_pin_ask_on_start_summary">बंद होने पर, PIN केवल इस प्रोफ़ाइल पर स्विच करते समय पूछा जाता है</string>
+    <string name="ce_profile_pin_enter">%1$s का PIN डालें</string>
+    <string name="ce_profile_pin_enter_current">अपना मौजूदा PIN डालें</string>
+    <string name="ce_profile_pin_choose">4 से 6 अंकों का PIN चुनें</string>
+    <string name="ce_profile_pin_repeat">नया PIN फिर से डालें</string>
+    <string name="ce_profile_pin_wrong">गलत PIN, फिर से कोशिश करें</string>
+    <string name="ce_profile_pin_mismatch">PIN मेल नहीं खाए। फिर से PIN चुनें।</string>
+    <string name="ce_profile_pin_forgot">PIN भूल गए? इस उपयोगकर्ता को उपयोगकर्ता सूची से हटाएँ और सर्वर पासवर्ड से फिर से साइन इन करें।</string>
+    <string name="ce_profile_pin_other_profile">दूसरी प्रोफ़ाइल</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">अंक मिटाएँ</string>
+    <string name="ce_profile_pin_saved">PIN सेट हो गया</string>
+    <string name="ce_profile_pin_removed">PIN हटा दिया गया</string>
 </resources>

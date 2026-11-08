@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Sunucu değiştir</string>
     <string name="ce_users_signed_in">Oturum açıldı</string>
     <string name="ce_users_switch_user">Kullanıcı değiştir</string>
+    <string name="ce_profile_pin">Profil PIN\'i</string>
+    <string name="ce_profile_pin_summary">PIN, başkalarının bu cihazda bu profile girmesini engeller. Bu cihazda kalır ve hiçbir zaman sunucuya gönderilmez.</string>
+    <string name="ce_profile_pin_status_on">Bu profil bir PIN ile kilitli</string>
+    <string name="ce_profile_pin_status_off">Bu profilin PIN\'i yok</string>
+    <string name="ce_profile_pin_set">PIN belirle</string>
+    <string name="ce_profile_pin_change">PIN\'i değiştir</string>
+    <string name="ce_profile_pin_remove">PIN\'i kaldır</string>
+    <string name="ce_profile_pin_ask_on_start">Başlangıçta PIN sor</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Kapalıyken PIN yalnızca bu profile geçerken sorulur</string>
+    <string name="ce_profile_pin_enter">%1$s için PIN\'i girin</string>
+    <string name="ce_profile_pin_enter_current">Mevcut PIN\'inizi girin</string>
+    <string name="ce_profile_pin_choose">4 ile 6 haneli bir PIN seçin</string>
+    <string name="ce_profile_pin_repeat">Yeni PIN\'i tekrar girin</string>
+    <string name="ce_profile_pin_wrong">Yanlış PIN, tekrar deneyin</string>
+    <string name="ce_profile_pin_mismatch">PIN\'ler eşleşmedi. Tekrar bir PIN seçin.</string>
+    <string name="ce_profile_pin_forgot">PIN\'i mi unuttunuz? Bu kullanıcıyı kullanıcı listesinden kaldırın ve sunucu parolasıyla yeniden oturum açın.</string>
+    <string name="ce_profile_pin_other_profile">Başka profil</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Rakamı sil</string>
+    <string name="ce_profile_pin_saved">PIN belirlendi</string>
+    <string name="ce_profile_pin_removed">PIN kaldırıldı</string>
 </resources>

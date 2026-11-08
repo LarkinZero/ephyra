@@ -48,6 +48,9 @@ data class AvatarColors(
     val badgeContainer: Color,
     val badgeContent: Color,
     val badgeRing: Color,
+    /** CE (#299): the lock badge, a neutral chip colour (VISION §3.4). */
+    val lockContainer: Color,
+    val lockContent: Color,
 )
 
 /** Which of [count] colours a user gets. Deterministic, so a user keeps their colour. */
@@ -73,7 +76,8 @@ private fun String.firstGrapheme(): String {
 
 /**
  * A user's round avatar: their profile picture, or their initials on a colour from [colors] until
- * it loads and when it fails. [current] adds a check badge for the signed-in user.
+ * it loads and when it fails. [current] adds a check badge for the signed-in user, [locked] a lock
+ * badge for a profile with a PIN (#299).
  */
 @Composable
 fun EphyraAvatar(
@@ -85,6 +89,7 @@ fun EphyraAvatar(
     modifier: Modifier = Modifier,
     current: Boolean = false,
     contentDescription: String? = null,
+    locked: Boolean = false,
 ) {
     val (container, onContainer) = colors.containers[avatarColorIndex(seed, colors.containers.size)]
     val semanticsModifier =
@@ -131,6 +136,29 @@ fun EphyraAvatar(
                     onSuccess = { pictureShown = true },
                     modifier = Modifier.size(size),
                 )
+            }
+        }
+        if (locked) {
+            val badgeSize = maxOf(16.dp, size * 0.28f)
+            val ring = 2.dp
+            Box(
+                modifier =
+                    Modifier.align(Alignment.TopEnd)
+                        .size(badgeSize + ring * 2)
+                        .background(colors.badgeRing, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier.size(badgeSize).background(colors.lockContainer, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_lock),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(colors.lockContent),
+                        modifier = Modifier.size(badgeSize * 0.6f),
+                    )
+                }
             }
         }
         if (current) {

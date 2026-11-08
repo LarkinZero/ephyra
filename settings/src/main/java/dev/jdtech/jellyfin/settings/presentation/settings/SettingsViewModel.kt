@@ -865,6 +865,17 @@ class SettingsViewModel @Inject constructor(
                             descriptionStringRes = R.string.pref_ask_user_on_start_summary,
                             backendPreference = appPreferences.askUserOnStart,
                         ),
+                        // CE (#299)
+                        PreferenceCategory(
+                            nameStringResource = R.string.ce_settings_profile_pin,
+                            descriptionStringRes = R.string.ce_settings_profile_pin_summary,
+                            iconDrawableId = R.drawable.ic_lock,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.NavigateToProfilePin)
+                                }
+                            },
+                        ),
                     )
             ),
             PreferenceGroup(

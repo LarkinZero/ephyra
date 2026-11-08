@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Сменить сервер</string>
     <string name="ce_users_signed_in">Выполнен вход</string>
     <string name="ce_users_switch_user">Сменить пользователя</string>
+    <string name="ce_profile_pin">PIN-код профиля</string>
+    <string name="ce_profile_pin_summary">PIN-код не даёт другим входить в этот профиль на этом устройстве. Он хранится на этом устройстве и никогда не отправляется на сервер.</string>
+    <string name="ce_profile_pin_status_on">Этот профиль защищён PIN-кодом</string>
+    <string name="ce_profile_pin_status_off">У этого профиля нет PIN-кода</string>
+    <string name="ce_profile_pin_set">Задать PIN-код</string>
+    <string name="ce_profile_pin_change">Изменить PIN-код</string>
+    <string name="ce_profile_pin_remove">Удалить PIN-код</string>
+    <string name="ce_profile_pin_ask_on_start">Спрашивать PIN-код при запуске</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Если выключено, PIN-код спрашивается только при переключении на этот профиль</string>
+    <string name="ce_profile_pin_enter">Введите PIN-код для %1$s</string>
+    <string name="ce_profile_pin_enter_current">Введите текущий PIN-код</string>
+    <string name="ce_profile_pin_choose">Выберите PIN-код из 4–6 цифр</string>
+    <string name="ce_profile_pin_repeat">Введите новый PIN-код ещё раз</string>
+    <string name="ce_profile_pin_wrong">Неверный PIN-код, попробуйте ещё раз</string>
+    <string name="ce_profile_pin_mismatch">PIN-коды не совпали. Выберите PIN-код заново.</string>
+    <string name="ce_profile_pin_forgot">Забыли PIN-код? Удалите этого пользователя из списка пользователей и войдите снова с паролем сервера.</string>
+    <string name="ce_profile_pin_other_profile">Другой профиль</string>
+    <string name="ce_profile_pin_label">PIN-код</string>
+    <string name="ce_profile_pin_delete">Удалить цифру</string>
+    <string name="ce_profile_pin_saved">PIN-код задан</string>
+    <string name="ce_profile_pin_removed">PIN-код удалён</string>
 </resources>

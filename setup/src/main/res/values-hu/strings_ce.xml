@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Szerverváltás</string>
     <string name="ce_users_signed_in">Bejelentkezve</string>
     <string name="ce_users_switch_user">Felhasználóváltás</string>
+    <string name="ce_profile_pin">Profil PIN-kódja</string>
+    <string name="ce_profile_pin_summary">A PIN-kód távol tartja másokat ettől a profiltól ezen az eszközön. Ezen az eszközön marad, és soha nem kerül elküldésre a szervernek.</string>
+    <string name="ce_profile_pin_status_on">Ez a profil PIN-kóddal zárolva van</string>
+    <string name="ce_profile_pin_status_off">Ennek a profilnak nincs PIN-kódja</string>
+    <string name="ce_profile_pin_set">PIN-kód beállítása</string>
+    <string name="ce_profile_pin_change">PIN-kód módosítása</string>
+    <string name="ce_profile_pin_remove">PIN-kód eltávolítása</string>
+    <string name="ce_profile_pin_ask_on_start">PIN-kód kérése indításkor</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Kikapcsolva a PIN-kódot csak erre a profilra váltáskor kéri</string>
+    <string name="ce_profile_pin_enter">Add meg %1$s PIN-kódját</string>
+    <string name="ce_profile_pin_enter_current">Add meg a jelenlegi PIN-kódodat</string>
+    <string name="ce_profile_pin_choose">Válassz egy 4–6 számjegyű PIN-kódot</string>
+    <string name="ce_profile_pin_repeat">Add meg újra az új PIN-kódot</string>
+    <string name="ce_profile_pin_wrong">Hibás PIN-kód, próbáld újra</string>
+    <string name="ce_profile_pin_mismatch">A PIN-kódok nem egyeztek. Válassz újra PIN-kódot.</string>
+    <string name="ce_profile_pin_forgot">Elfelejtetted a PIN-kódot? Távolítsd el ezt a felhasználót a felhasználók listájából, és jelentkezz be újra a szerver jelszavával.</string>
+    <string name="ce_profile_pin_other_profile">Másik profil</string>
+    <string name="ce_profile_pin_label">PIN-kód</string>
+    <string name="ce_profile_pin_delete">Számjegy törlése</string>
+    <string name="ce_profile_pin_saved">PIN-kód beállítva</string>
+    <string name="ce_profile_pin_removed">PIN-kód eltávolítva</string>
 </resources>

@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Van server wisselen</string>
     <string name="ce_users_signed_in">Ingelogd</string>
     <string name="ce_users_switch_user">Van gebruiker wisselen</string>
+    <string name="ce_profile_pin">Profielpincode</string>
+    <string name="ce_profile_pin_summary">Een pincode houdt anderen op dit apparaat uit dit profiel. Hij blijft op dit apparaat en wordt nooit naar de server gestuurd.</string>
+    <string name="ce_profile_pin_status_on">Dit profiel is vergrendeld met een pincode</string>
+    <string name="ce_profile_pin_status_off">Dit profiel heeft geen pincode</string>
+    <string name="ce_profile_pin_set">Pincode instellen</string>
+    <string name="ce_profile_pin_change">Pincode wijzigen</string>
+    <string name="ce_profile_pin_remove">Pincode verwijderen</string>
+    <string name="ce_profile_pin_ask_on_start">Bij het opstarten om de pincode vragen</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Als dit uit staat, wordt alleen om de pincode gevraagd bij het wisselen naar dit profiel</string>
+    <string name="ce_profile_pin_enter">Voer de pincode voor %1$s in</string>
+    <string name="ce_profile_pin_enter_current">Voer je huidige pincode in</string>
+    <string name="ce_profile_pin_choose">Kies een pincode van 4 tot 6 cijfers</string>
+    <string name="ce_profile_pin_repeat">Voer de nieuwe pincode nog een keer in</string>
+    <string name="ce_profile_pin_wrong">Verkeerde pincode, probeer het opnieuw</string>
+    <string name="ce_profile_pin_mismatch">De pincodes kwamen niet overeen. Kies opnieuw een pincode.</string>
+    <string name="ce_profile_pin_forgot">Pincode vergeten? Verwijder deze gebruiker uit de gebruikerslijst en log opnieuw in met het serverwachtwoord.</string>
+    <string name="ce_profile_pin_other_profile">Ander profiel</string>
+    <string name="ce_profile_pin_label">Pincode</string>
+    <string name="ce_profile_pin_delete">Cijfer wissen</string>
+    <string name="ce_profile_pin_saved">Pincode ingesteld</string>
+    <string name="ce_profile_pin_removed">Pincode verwijderd</string>
 </resources>

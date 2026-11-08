@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Chuyển máy chủ</string>
     <string name="ce_users_signed_in">Đã đăng nhập</string>
     <string name="ce_users_switch_user">Chuyển người dùng</string>
+    <string name="ce_profile_pin">Mã PIN hồ sơ</string>
+    <string name="ce_profile_pin_summary">Mã PIN ngăn người khác vào hồ sơ này trên thiết bị này. Mã được lưu trên thiết bị này và không bao giờ được gửi tới máy chủ.</string>
+    <string name="ce_profile_pin_status_on">Hồ sơ này được khóa bằng mã PIN</string>
+    <string name="ce_profile_pin_status_off">Hồ sơ này chưa có mã PIN</string>
+    <string name="ce_profile_pin_set">Đặt mã PIN</string>
+    <string name="ce_profile_pin_change">Đổi mã PIN</string>
+    <string name="ce_profile_pin_remove">Xóa mã PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Hỏi mã PIN khi khởi động</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Khi tắt, mã PIN chỉ được hỏi khi chuyển sang hồ sơ này</string>
+    <string name="ce_profile_pin_enter">Nhập mã PIN của %1$s</string>
+    <string name="ce_profile_pin_enter_current">Nhập mã PIN hiện tại</string>
+    <string name="ce_profile_pin_choose">Chọn mã PIN gồm 4 đến 6 chữ số</string>
+    <string name="ce_profile_pin_repeat">Nhập lại mã PIN mới</string>
+    <string name="ce_profile_pin_wrong">Sai mã PIN, hãy thử lại</string>
+    <string name="ce_profile_pin_mismatch">Hai mã PIN không khớp. Hãy chọn lại mã PIN.</string>
+    <string name="ce_profile_pin_forgot">Quên mã PIN? Hãy xóa người dùng này khỏi danh sách người dùng và đăng nhập lại bằng mật khẩu máy chủ.</string>
+    <string name="ce_profile_pin_other_profile">Hồ sơ khác</string>
+    <string name="ce_profile_pin_label">Mã PIN</string>
+    <string name="ce_profile_pin_delete">Xóa chữ số</string>
+    <string name="ce_profile_pin_saved">Đã đặt mã PIN</string>
+    <string name="ce_profile_pin_removed">Đã xóa mã PIN</string>
 </resources>

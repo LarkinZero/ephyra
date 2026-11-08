@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Очистить кэш</string>
     <string name="settings_clear_cache_summary">Удаляет кэшированные изображения и запомненные ряды на главной.</string>
     <string name="settings_cache_cleared">Кэш очищен</string>
+    <string name="ce_settings_profile_pin">PIN-код профиля</string>
+    <string name="ce_settings_profile_pin_summary">Заблокировать этот профиль на этом устройстве</string>
 </resources>

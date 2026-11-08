@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Schimbă serverul</string>
     <string name="ce_users_signed_in">Autentificat</string>
     <string name="ce_users_switch_user">Schimbă utilizatorul</string>
+    <string name="ce_profile_pin">PIN-ul profilului</string>
+    <string name="ce_profile_pin_summary">Un PIN îi ține pe ceilalți departe de acest profil pe acest dispozitiv. Rămâne pe acest dispozitiv și nu este trimis niciodată la server.</string>
+    <string name="ce_profile_pin_status_on">Acest profil este blocat cu un PIN</string>
+    <string name="ce_profile_pin_status_off">Acest profil nu are PIN</string>
+    <string name="ce_profile_pin_set">Setează PIN</string>
+    <string name="ce_profile_pin_change">Schimbă PIN-ul</string>
+    <string name="ce_profile_pin_remove">Elimină PIN-ul</string>
+    <string name="ce_profile_pin_ask_on_start">Cere PIN-ul la pornire</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Când este dezactivat, PIN-ul este cerut doar la comutarea pe acest profil</string>
+    <string name="ce_profile_pin_enter">Introdu PIN-ul pentru %1$s</string>
+    <string name="ce_profile_pin_enter_current">Introdu PIN-ul actual</string>
+    <string name="ce_profile_pin_choose">Alege un PIN de 4 până la 6 cifre</string>
+    <string name="ce_profile_pin_repeat">Introdu din nou noul PIN</string>
+    <string name="ce_profile_pin_wrong">PIN greșit, încearcă din nou</string>
+    <string name="ce_profile_pin_mismatch">PIN-urile nu s-au potrivit. Alege din nou un PIN.</string>
+    <string name="ce_profile_pin_forgot">Ai uitat PIN-ul? Elimină acest utilizator din lista de utilizatori și conectează-te din nou cu parola serverului.</string>
+    <string name="ce_profile_pin_other_profile">Alt profil</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Șterge cifra</string>
+    <string name="ce_profile_pin_saved">PIN setat</string>
+    <string name="ce_profile_pin_removed">PIN eliminat</string>
 </resources>

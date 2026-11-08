@@ -11,6 +11,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.core.presentation.ephyra.AvatarColors
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraAvatar
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.models.hasPin
 import dev.jdtech.jellyfin.models.primaryImageUrl
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 
@@ -22,6 +23,8 @@ fun UserAvatar(
     size: Dp,
     modifier: Modifier = Modifier,
     current: Boolean = false,
+    /** CE (#299): show the lock badge when the profile has a PIN. */
+    showLock: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
     val colors =
@@ -37,6 +40,8 @@ fun UserAvatar(
                 badgeContainer = scheme.primary,
                 badgeContent = scheme.onPrimary,
                 badgeRing = scheme.surface,
+                lockContainer = scheme.surfaceContainerHigh,
+                lockContent = scheme.onSurfaceVariant,
             )
         }
     EphyraAvatar(
@@ -47,6 +52,7 @@ fun UserAvatar(
         colors = colors,
         modifier = modifier,
         current = current,
+        locked = showLock && user.hasPin,
     )
 }
 

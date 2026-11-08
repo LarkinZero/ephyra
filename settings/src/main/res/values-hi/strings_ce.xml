@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">कैश (cache) साफ़ करें</string>
     <string name="settings_clear_cache_summary">कैश की गई छवियाँ और याद रखी गई होम की पंक्तियाँ हटाता है।</string>
     <string name="settings_cache_cleared">कैश साफ़ किया गया</string>
+    <string name="ce_settings_profile_pin">प्रोफ़ाइल PIN</string>
+    <string name="ce_settings_profile_pin_summary">इस डिवाइस पर इस प्रोफ़ाइल को लॉक करें</string>
 </resources>

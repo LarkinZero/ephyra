@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Vymazať vyrovnávaciu pamäť</string>
     <string name="settings_clear_cache_summary">Odstráni obrázky vo vyrovnávacej pamäti a zapamätané riadky domovskej obrazovky.</string>
     <string name="settings_cache_cleared">Vyrovnávacia pamäť bola vymazaná</string>
+    <string name="ce_settings_profile_pin">PIN profilu</string>
+    <string name="ce_settings_profile_pin_summary">Zamknúť tento profil v tomto zariadení</string>
 </resources>

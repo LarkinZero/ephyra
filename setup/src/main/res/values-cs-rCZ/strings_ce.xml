@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Přepnout server</string>
     <string name="ce_users_signed_in">Přihlášen</string>
     <string name="ce_users_switch_user">Přepnout uživatele</string>
+    <string name="ce_profile_pin">PIN profilu</string>
+    <string name="ce_profile_pin_summary">PIN brání ostatním vstoupit do tohoto profilu na tomto zařízení. Zůstává v tomto zařízení a nikdy se neodesílá na server.</string>
+    <string name="ce_profile_pin_status_on">Tento profil je zamčený PINem</string>
+    <string name="ce_profile_pin_status_off">Tento profil nemá PIN</string>
+    <string name="ce_profile_pin_set">Nastavit PIN</string>
+    <string name="ce_profile_pin_change">Změnit PIN</string>
+    <string name="ce_profile_pin_remove">Odebrat PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Ptát se na PIN při spuštění</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Když je vypnuto, PIN se vyžaduje jen při přepnutí na tento profil</string>
+    <string name="ce_profile_pin_enter">Zadejte PIN pro %1$s</string>
+    <string name="ce_profile_pin_enter_current">Zadejte současný PIN</string>
+    <string name="ce_profile_pin_choose">Zvolte PIN o 4 až 6 číslicích</string>
+    <string name="ce_profile_pin_repeat">Zadejte nový PIN znovu</string>
+    <string name="ce_profile_pin_wrong">Nesprávný PIN, zkuste to znovu</string>
+    <string name="ce_profile_pin_mismatch">PINy se neshodují. Zvolte PIN znovu.</string>
+    <string name="ce_profile_pin_forgot">Zapomněli jste PIN? Odeberte tohoto uživatele ze seznamu uživatelů a znovu se přihlaste heslem k serveru.</string>
+    <string name="ce_profile_pin_other_profile">Jiný profil</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Smazat číslici</string>
+    <string name="ce_profile_pin_saved">PIN nastaven</string>
+    <string name="ce_profile_pin_removed">PIN odebrán</string>
 </resources>

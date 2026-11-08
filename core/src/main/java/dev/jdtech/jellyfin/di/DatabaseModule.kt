@@ -11,6 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.jdtech.jellyfin.database.MIGRATION_6_7
 import dev.jdtech.jellyfin.database.ServerDatabase
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.profilelock.ProfileLock
 import javax.inject.Singleton
 
 @Module
@@ -26,4 +27,9 @@ object DatabaseModule {
             .build()
             .getServerDatabaseDao()
     }
+
+    // CE (#299): one per process, so an unlocked profile stays unlocked across screens.
+    @Singleton
+    @Provides
+    fun provideProfileLock(database: ServerDatabaseDao): ProfileLock = ProfileLock(database)
 }

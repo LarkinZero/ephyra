@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Wyczyść pamięć podręczną</string>
     <string name="settings_clear_cache_summary">Usuwa obrazy z pamięci podręcznej i zapamiętane wiersze ekranu głównego.</string>
     <string name="settings_cache_cleared">Wyczyszczono pamięć podręczną</string>
+    <string name="ce_settings_profile_pin">PIN profilu</string>
+    <string name="ce_settings_profile_pin_summary">Zablokuj ten profil na tym urządzeniu</string>
 </resources>

@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.core.presentation.ephyra.reducedMotion
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.models.hasPin
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
@@ -108,7 +109,44 @@ fun UserItem(
                         if (focused) onFocused(user)
                     },
             ) {
-                UserAvatar(user = user, baseUrl = baseUrl, size = UserItemAvatarSize)
+                // The lock badge is drawn below, outside the circle, like the current badge.
+                UserAvatar(
+                    user = user,
+                    baseUrl = baseUrl,
+                    size = UserItemAvatarSize,
+                    showLock = false,
+                )
+            }
+            // CE (#299): a profile with a PIN.
+            if (user.hasPin) {
+                val badgeSize = UserItemAvatarSize * 0.28f
+                Box(
+                    modifier =
+                        Modifier.align(Alignment.TopEnd)
+                            .zIndex(1f)
+                            .size(badgeSize + 4.dp)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier =
+                            Modifier.size(badgeSize)
+                                .background(
+                                    androidx.compose.material3.MaterialTheme.colorScheme
+                                        .surfaceContainerHigh,
+                                    CircleShape,
+                                ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(CoreR.drawable.ic_lock),
+                            contentDescription = null,
+                            colorFilter =
+                                ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                            modifier = Modifier.size(badgeSize * 0.6f),
+                        )
+                    }
+                }
             }
             if (current) {
                 val badgeSize = UserItemAvatarSize * 0.28f

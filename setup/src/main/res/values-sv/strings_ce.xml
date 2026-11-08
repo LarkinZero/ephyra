@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Byt server</string>
     <string name="ce_users_signed_in">Inloggad</string>
     <string name="ce_users_switch_user">Byt användare</string>
+    <string name="ce_profile_pin">Profilens pinkod</string>
+    <string name="ce_profile_pin_summary">En pinkod håller andra borta från den här profilen på den här enheten. Den stannar på enheten och skickas aldrig till servern.</string>
+    <string name="ce_profile_pin_status_on">Den här profilen är låst med en pinkod</string>
+    <string name="ce_profile_pin_status_off">Den här profilen har ingen pinkod</string>
+    <string name="ce_profile_pin_set">Ange pinkod</string>
+    <string name="ce_profile_pin_change">Byt pinkod</string>
+    <string name="ce_profile_pin_remove">Ta bort pinkod</string>
+    <string name="ce_profile_pin_ask_on_start">Fråga efter pinkoden vid start</string>
+    <string name="ce_profile_pin_ask_on_start_summary">När det är av frågas pinkoden bara vid byte till den här profilen</string>
+    <string name="ce_profile_pin_enter">Ange pinkoden för %1$s</string>
+    <string name="ce_profile_pin_enter_current">Ange din nuvarande pinkod</string>
+    <string name="ce_profile_pin_choose">Välj en pinkod med 4 till 6 siffror</string>
+    <string name="ce_profile_pin_repeat">Ange den nya pinkoden igen</string>
+    <string name="ce_profile_pin_wrong">Fel pinkod, försök igen</string>
+    <string name="ce_profile_pin_mismatch">Pinkoderna stämde inte överens. Välj en pinkod igen.</string>
+    <string name="ce_profile_pin_forgot">Glömt pinkoden? Ta bort den här användaren från användarlistan och logga in igen med serverns lösenord.</string>
+    <string name="ce_profile_pin_other_profile">Annan profil</string>
+    <string name="ce_profile_pin_label">Pinkod</string>
+    <string name="ce_profile_pin_delete">Radera siffra</string>
+    <string name="ce_profile_pin_saved">Pinkoden har angetts</string>
+    <string name="ce_profile_pin_removed">Pinkoden har tagits bort</string>
 </resources>

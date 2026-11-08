@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Cache wissen</string>
     <string name="settings_clear_cache_summary">Verwijdert de gecachete afbeeldingen en de onthouden rijen op Home.</string>
     <string name="settings_cache_cleared">Cache gewist</string>
+    <string name="ce_settings_profile_pin">Profielpincode</string>
+    <string name="ce_settings_profile_pin_summary">Dit profiel op dit apparaat vergrendelen</string>
 </resources>

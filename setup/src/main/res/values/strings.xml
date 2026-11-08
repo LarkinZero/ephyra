@@ -51,4 +51,25 @@
     <string name="ce_users_switch_server">Switch server</string>
     <string name="ce_users_signed_in">Signed in</string>
     <string name="ce_users_switch_user">Switch user</string>
+    <string name="ce_profile_pin">Profile PIN</string>
+    <string name="ce_profile_pin_summary">A PIN keeps others out of this profile on this device. It stays on this device and is never sent to the server.</string>
+    <string name="ce_profile_pin_status_on">This profile is locked with a PIN</string>
+    <string name="ce_profile_pin_status_off">This profile has no PIN</string>
+    <string name="ce_profile_pin_set">Set PIN</string>
+    <string name="ce_profile_pin_change">Change PIN</string>
+    <string name="ce_profile_pin_remove">Remove PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Ask for the PIN at start</string>
+    <string name="ce_profile_pin_ask_on_start_summary">When off, the PIN is only asked when switching to this profile</string>
+    <string name="ce_profile_pin_enter">Enter the PIN for %1$s</string>
+    <string name="ce_profile_pin_enter_current">Enter your current PIN</string>
+    <string name="ce_profile_pin_choose">Choose a PIN of 4 to 6 digits</string>
+    <string name="ce_profile_pin_repeat">Enter the new PIN again</string>
+    <string name="ce_profile_pin_wrong">Wrong PIN, try again</string>
+    <string name="ce_profile_pin_mismatch">The PINs did not match. Choose a PIN again.</string>
+    <string name="ce_profile_pin_forgot">Forgot the PIN? Remove this user from the user list and sign in again with the server password.</string>
+    <string name="ce_profile_pin_other_profile">Other profile</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Delete digit</string>
+    <string name="ce_profile_pin_saved">PIN set</string>
+    <string name="ce_profile_pin_removed">PIN removed</string>
 </resources>

@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">נקה מטמון</string>
     <string name="settings_clear_cache_summary">מסיר את התמונות השמורות במטמון ואת שורות דף הבית שנשמרו.</string>
     <string name="settings_cache_cleared">המטמון נוקה</string>
+    <string name="ce_settings_profile_pin">קוד PIN לפרופיל</string>
+    <string name="ce_settings_profile_pin_summary">נעילת הפרופיל הזה במכשיר הזה</string>
 </resources>

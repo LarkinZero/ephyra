@@ -24,6 +24,9 @@ sealed interface SettingsEvent {
 
     data object RestartActivity : SettingsEvent
 
+    // CE (#299)
+    data object NavigateToProfilePin : SettingsEvent
+
     /** The Clear cache row did its work. */
     data object CacheCleared : SettingsEvent
 }

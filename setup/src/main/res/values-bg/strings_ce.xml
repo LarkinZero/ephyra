@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Смяна на сървъра</string>
     <string name="ce_users_signed_in">Влезли сте</string>
     <string name="ce_users_switch_user">Смяна на потребителя</string>
+    <string name="ce_profile_pin">ПИН на профила</string>
+    <string name="ce_profile_pin_summary">ПИН кодът не позволява на други да влизат в този профил на това устройство. Той остава на това устройство и никога не се изпраща към сървъра.</string>
+    <string name="ce_profile_pin_status_on">Този профил е заключен с ПИН</string>
+    <string name="ce_profile_pin_status_off">Този профил няма ПИН</string>
+    <string name="ce_profile_pin_set">Задаване на ПИН</string>
+    <string name="ce_profile_pin_change">Промяна на ПИН</string>
+    <string name="ce_profile_pin_remove">Премахване на ПИН</string>
+    <string name="ce_profile_pin_ask_on_start">Питане за ПИН при стартиране</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Когато е изключено, ПИН се иска само при превключване към този профил</string>
+    <string name="ce_profile_pin_enter">Въведете ПИН за %1$s</string>
+    <string name="ce_profile_pin_enter_current">Въведете текущия си ПИН</string>
+    <string name="ce_profile_pin_choose">Изберете ПИН от 4 до 6 цифри</string>
+    <string name="ce_profile_pin_repeat">Въведете новия ПИН отново</string>
+    <string name="ce_profile_pin_wrong">Грешен ПИН, опитайте отново</string>
+    <string name="ce_profile_pin_mismatch">ПИН кодовете не съвпадат. Изберете ПИН отново.</string>
+    <string name="ce_profile_pin_forgot">Забравили сте ПИН кода? Премахнете този потребител от списъка с потребители и влезте отново с паролата за сървъра.</string>
+    <string name="ce_profile_pin_other_profile">Друг профил</string>
+    <string name="ce_profile_pin_label">ПИН</string>
+    <string name="ce_profile_pin_delete">Изтриване на цифра</string>
+    <string name="ce_profile_pin_saved">ПИН е зададен</string>
+    <string name="ce_profile_pin_removed">ПИН е премахнат</string>
 </resources>

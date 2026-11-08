@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Tøm hurtigminnet</string>
     <string name="settings_clear_cache_summary">Fjernar dei mellomlagra bilda og dei hugsa radene på startsida.</string>
     <string name="settings_cache_cleared">Hurtigminnet er tømt</string>
+    <string name="ce_settings_profile_pin">PIN-kode for profilen</string>
+    <string name="ce_settings_profile_pin_summary">Lås denne profilen på denne eininga</string>
 </resources>

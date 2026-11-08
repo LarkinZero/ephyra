@@ -37,6 +37,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.presentation.components.UserAvatar
+import dev.jdtech.jellyfin.presentation.setup.pin.SwitchPinDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.setup.R as SetupR
@@ -82,6 +83,9 @@ fun ProfileBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
     )
+
+    // CE (#299)
+    SwitchPinDialog(state = state, onAction = viewModel::onAction)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
