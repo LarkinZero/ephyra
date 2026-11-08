@@ -45,5 +45,8 @@ interface SetupRepository {
 
     suspend fun setCurrentUser(userId: UUID)
 
+    /** CE (#299): no profile is open on the current server; the app goes to the user selection. */
+    suspend fun clearCurrentUser()
+
     suspend fun setCurrentAddress(addressId: UUID)
 }

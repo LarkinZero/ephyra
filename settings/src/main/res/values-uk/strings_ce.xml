@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Очистити кеш</string>
     <string name="settings_clear_cache_summary">Видаляє кешовані зображення та запам\'ятовані ряди на головній.</string>
     <string name="settings_cache_cleared">Кеш очищено</string>
+    <string name="ce_settings_profile_pin">PIN-код профілю</string>
+    <string name="ce_settings_profile_pin_summary">Заблокувати цей профіль на цьому пристрої</string>
 </resources>

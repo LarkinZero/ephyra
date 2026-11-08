@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">캐시 지우기</string>
     <string name="settings_clear_cache_summary">캐시된 이미지와 기억해 둔 홈 행을 삭제합니다.</string>
     <string name="settings_cache_cleared">캐시를 지웠습니다</string>
+    <string name="ce_settings_profile_pin">프로필 PIN</string>
+    <string name="ce_settings_profile_pin_summary">이 기기에서 이 프로필 잠그기</string>
 </resources>

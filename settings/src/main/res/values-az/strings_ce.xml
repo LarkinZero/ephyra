@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Keşi təmizlə</string>
     <string name="settings_clear_cache_summary">Keşlənmiş şəkilləri və yadda saxlanmış Əsas səhifə sıralarını silir.</string>
     <string name="settings_cache_cleared">Keş təmizləndi</string>
+    <string name="ce_settings_profile_pin">Profil PIN kodu</string>
+    <string name="ce_settings_profile_pin_summary">Bu profili bu cihazda kilidlə</string>
 </resources>

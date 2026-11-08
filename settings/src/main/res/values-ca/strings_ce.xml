@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Esborra la memòria cau</string>
     <string name="settings_clear_cache_summary">Elimina les imatges de la memòria cau i les files de l\'inici recordades.</string>
     <string name="settings_cache_cleared">S\'ha esborrat la memòria cau</string>
+    <string name="ce_settings_profile_pin">PIN del perfil</string>
+    <string name="ce_settings_profile_pin_summary">Bloqueja aquest perfil en aquest dispositiu</string>
 </resources>

@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">清除缓存</string>
     <string name="settings_clear_cache_summary">移除缓存的图片和记住的主页行。</string>
     <string name="settings_cache_cleared">缓存已清除</string>
+    <string name="ce_settings_profile_pin">个人资料 PIN 码</string>
+    <string name="ce_settings_profile_pin_summary">在此设备上锁定此个人资料</string>
 </resources>

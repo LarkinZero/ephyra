@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Changer de serveur</string>
     <string name="ce_users_signed_in">Connecté</string>
     <string name="ce_users_switch_user">Changer d\'utilisateur</string>
+    <string name="ce_profile_pin">Code PIN du profil</string>
+    <string name="ce_profile_pin_summary">Un code PIN empêche les autres d\'ouvrir ce profil sur cet appareil. Il reste sur cet appareil et n\'est jamais envoyé au serveur.</string>
+    <string name="ce_profile_pin_status_on">Ce profil est verrouillé par un code PIN</string>
+    <string name="ce_profile_pin_status_off">Ce profil n\'a pas de code PIN</string>
+    <string name="ce_profile_pin_set">Définir un code PIN</string>
+    <string name="ce_profile_pin_change">Modifier le code PIN</string>
+    <string name="ce_profile_pin_remove">Supprimer le code PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Demander le code PIN au démarrage</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Si désactivé, le code PIN n\'est demandé qu\'en passant à ce profil</string>
+    <string name="ce_profile_pin_enter">Saisissez le code PIN de %1$s</string>
+    <string name="ce_profile_pin_enter_current">Saisissez votre code PIN actuel</string>
+    <string name="ce_profile_pin_choose">Choisissez un code PIN de 4 à 6 chiffres</string>
+    <string name="ce_profile_pin_repeat">Saisissez à nouveau le nouveau code PIN</string>
+    <string name="ce_profile_pin_wrong">Code PIN incorrect, réessayez</string>
+    <string name="ce_profile_pin_mismatch">Les codes PIN ne correspondent pas. Choisissez à nouveau un code PIN.</string>
+    <string name="ce_profile_pin_forgot">Code PIN oublié ? Supprimez cet utilisateur de la liste des utilisateurs et reconnectez-vous avec le mot de passe du serveur.</string>
+    <string name="ce_profile_pin_other_profile">Autre profil</string>
+    <string name="ce_profile_pin_label">Code PIN</string>
+    <string name="ce_profile_pin_delete">Effacer le chiffre</string>
+    <string name="ce_profile_pin_saved">Code PIN défini</string>
+    <string name="ce_profile_pin_removed">Code PIN supprimé</string>
 </resources>

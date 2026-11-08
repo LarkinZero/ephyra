@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Serveri dəyiş</string>
     <string name="ce_users_signed_in">Daxil olunub</string>
     <string name="ce_users_switch_user">İstifadəçini dəyiş</string>
+    <string name="ce_profile_pin">Profil PIN kodu</string>
+    <string name="ce_profile_pin_summary">PIN kodu başqalarının bu cihazda bu profilə girməsinə mane olur. O, bu cihazda qalır və heç vaxt serverə göndərilmir.</string>
+    <string name="ce_profile_pin_status_on">Bu profil PIN kodu ilə kilidlənib</string>
+    <string name="ce_profile_pin_status_off">Bu profilin PIN kodu yoxdur</string>
+    <string name="ce_profile_pin_set">PIN kodu təyin et</string>
+    <string name="ce_profile_pin_change">PIN kodu dəyiş</string>
+    <string name="ce_profile_pin_remove">PIN kodu sil</string>
+    <string name="ce_profile_pin_ask_on_start">Başlanğıcda PIN kodu soruş</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Söndürüldükdə PIN kodu yalnız bu profilə keçərkən soruşulur</string>
+    <string name="ce_profile_pin_enter">%1$s üçün PIN kodu daxil edin</string>
+    <string name="ce_profile_pin_enter_current">Cari PIN kodunuzu daxil edin</string>
+    <string name="ce_profile_pin_choose">4-6 rəqəmli PIN kodu seçin</string>
+    <string name="ce_profile_pin_repeat">Yeni PIN kodu yenidən daxil edin</string>
+    <string name="ce_profile_pin_wrong">Yanlış PIN kodu, yenidən cəhd edin</string>
+    <string name="ce_profile_pin_mismatch">PIN kodları uyğun gəlmədi. PIN kodu yenidən seçin.</string>
+    <string name="ce_profile_pin_forgot">PIN kodu unutmusunuz? Bu istifadəçini istifadəçi siyahısından silin və server parolu ilə yenidən daxil olun.</string>
+    <string name="ce_profile_pin_other_profile">Başqa profil</string>
+    <string name="ce_profile_pin_label">PIN kodu</string>
+    <string name="ce_profile_pin_delete">Rəqəmi sil</string>
+    <string name="ce_profile_pin_saved">PIN kodu təyin edildi</string>
+    <string name="ce_profile_pin_removed">PIN kodu silindi</string>
 </resources>

@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Ganti server</string>
     <string name="ce_users_signed_in">Sudah masuk</string>
     <string name="ce_users_switch_user">Ganti pengguna</string>
+    <string name="ce_profile_pin">PIN profil</string>
+    <string name="ce_profile_pin_summary">PIN mencegah orang lain masuk ke profil ini di perangkat ini. PIN tetap di perangkat ini dan tidak pernah dikirim ke server.</string>
+    <string name="ce_profile_pin_status_on">Profil ini dikunci dengan PIN</string>
+    <string name="ce_profile_pin_status_off">Profil ini tidak memiliki PIN</string>
+    <string name="ce_profile_pin_set">Atur PIN</string>
+    <string name="ce_profile_pin_change">Ubah PIN</string>
+    <string name="ce_profile_pin_remove">Hapus PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Minta PIN saat mulai</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Jika nonaktif, PIN hanya diminta saat beralih ke profil ini</string>
+    <string name="ce_profile_pin_enter">Masukkan PIN untuk %1$s</string>
+    <string name="ce_profile_pin_enter_current">Masukkan PIN Anda saat ini</string>
+    <string name="ce_profile_pin_choose">Pilih PIN 4 sampai 6 digit</string>
+    <string name="ce_profile_pin_repeat">Masukkan PIN baru sekali lagi</string>
+    <string name="ce_profile_pin_wrong">PIN salah, coba lagi</string>
+    <string name="ce_profile_pin_mismatch">PIN tidak cocok. Pilih PIN lagi.</string>
+    <string name="ce_profile_pin_forgot">Lupa PIN? Hapus pengguna ini dari daftar pengguna dan masuk lagi dengan kata sandi server.</string>
+    <string name="ce_profile_pin_other_profile">Profil lain</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Hapus digit</string>
+    <string name="ce_profile_pin_saved">PIN diatur</string>
+    <string name="ce_profile_pin_removed">PIN dihapus</string>
 </resources>

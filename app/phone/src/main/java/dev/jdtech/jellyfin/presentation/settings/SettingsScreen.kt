@@ -61,6 +61,7 @@ fun SettingsScreen(
     navigateToAbout: () -> Unit,
     navigateToSubtitleStyle: () -> Unit,
     navigateToHomeRows: () -> Unit,
+    navigateToProfilePin: () -> Unit,
     navigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -80,6 +81,7 @@ fun SettingsScreen(
             is SettingsEvent.NavigateToAbout -> navigateToAbout()
             is SettingsEvent.NavigateToSubtitleStyle -> navigateToSubtitleStyle()
             is SettingsEvent.NavigateToHomeRows -> navigateToHomeRows()
+            is SettingsEvent.NavigateToProfilePin -> navigateToProfilePin()
             is SettingsEvent.CacheCleared ->
                 Toast.makeText(context, SettingsR.string.settings_cache_cleared, Toast.LENGTH_SHORT)
                     .show()

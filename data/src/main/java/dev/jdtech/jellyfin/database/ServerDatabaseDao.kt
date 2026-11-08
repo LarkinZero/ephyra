@@ -94,6 +94,21 @@ interface ServerDatabaseDao {
     @Query("UPDATE servers SET currentUserId = :userId WHERE id = :serverId")
     suspend fun updateServerCurrentUser(serverId: String, userId: UUID)
 
+    // CE (#299): profile PIN.
+    @Query("UPDATE servers SET currentUserId = NULL WHERE id = :serverId")
+    suspend fun clearServerCurrentUser(serverId: String)
+
+    @Query("UPDATE users SET pinHash = :hash, pinSalt = :salt WHERE id = :id")
+    suspend fun updateUserPin(id: UUID, hash: String?, salt: String?)
+
+    @Query("UPDATE users SET pinOnStart = :pinOnStart WHERE id = :id")
+    suspend fun updateUserPinOnStart(id: UUID, pinOnStart: Boolean)
+
+    @Query(
+        "SELECT * FROM users WHERE id = (SELECT currentUserId FROM servers WHERE id = :serverId)"
+    )
+    fun observeServerCurrentUser(serverId: String): Flow<User?>
+
     @Query(
         "SELECT * FROM users WHERE id = (SELECT currentUserId FROM servers WHERE id = :serverId)"
     )

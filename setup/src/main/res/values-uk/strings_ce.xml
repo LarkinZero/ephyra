@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Змінити сервер</string>
     <string name="ce_users_signed_in">Виконано вхід</string>
     <string name="ce_users_switch_user">Змінити користувача</string>
+    <string name="ce_profile_pin">PIN-код профілю</string>
+    <string name="ce_profile_pin_summary">PIN-код не дає іншим входити в цей профіль на цьому пристрої. Він зберігається на цьому пристрої й ніколи не надсилається на сервер.</string>
+    <string name="ce_profile_pin_status_on">Цей профіль захищено PIN-кодом</string>
+    <string name="ce_profile_pin_status_off">Цей профіль не має PIN-коду</string>
+    <string name="ce_profile_pin_set">Задати PIN-код</string>
+    <string name="ce_profile_pin_change">Змінити PIN-код</string>
+    <string name="ce_profile_pin_remove">Видалити PIN-код</string>
+    <string name="ce_profile_pin_ask_on_start">Запитувати PIN-код під час запуску</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Якщо вимкнено, PIN-код запитується лише під час переходу до цього профілю</string>
+    <string name="ce_profile_pin_enter">Введіть PIN-код для %1$s</string>
+    <string name="ce_profile_pin_enter_current">Введіть поточний PIN-код</string>
+    <string name="ce_profile_pin_choose">Виберіть PIN-код із 4–6 цифр</string>
+    <string name="ce_profile_pin_repeat">Введіть новий PIN-код ще раз</string>
+    <string name="ce_profile_pin_wrong">Неправильний PIN-код, спробуйте ще раз</string>
+    <string name="ce_profile_pin_mismatch">PIN-коди не збіглися. Виберіть PIN-код знову.</string>
+    <string name="ce_profile_pin_forgot">Забули PIN-код? Видаліть цього користувача зі списку користувачів і увійдіть знову з паролем сервера.</string>
+    <string name="ce_profile_pin_other_profile">Інший профіль</string>
+    <string name="ce_profile_pin_label">PIN-код</string>
+    <string name="ce_profile_pin_delete">Видалити цифру</string>
+    <string name="ce_profile_pin_saved">PIN-код задано</string>
+    <string name="ce_profile_pin_removed">PIN-код видалено</string>
 </resources>

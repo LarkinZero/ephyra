@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Svuota la cache</string>
     <string name="settings_clear_cache_summary">Rimuove le immagini nella cache e le righe della Home memorizzate.</string>
     <string name="settings_cache_cleared">Cache svuotata</string>
+    <string name="ce_settings_profile_pin">PIN del profilo</string>
+    <string name="ce_settings_profile_pin_summary">Blocca questo profilo su questo dispositivo</string>
 </resources>

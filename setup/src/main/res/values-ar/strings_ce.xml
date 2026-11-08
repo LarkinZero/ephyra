@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">تبديل الخادم</string>
     <string name="ce_users_signed_in">تم تسجيل الدخول</string>
     <string name="ce_users_switch_user">تبديل المستخدم</string>
+    <string name="ce_profile_pin">رمز PIN للملف الشخصي</string>
+    <string name="ce_profile_pin_summary">يمنع رمز PIN الآخرين من فتح هذا الملف الشخصي على هذا الجهاز. يبقى على هذا الجهاز ولا يُرسل أبدًا إلى الخادم.</string>
+    <string name="ce_profile_pin_status_on">هذا الملف الشخصي مقفل برمز PIN</string>
+    <string name="ce_profile_pin_status_off">لا يوجد رمز PIN لهذا الملف الشخصي</string>
+    <string name="ce_profile_pin_set">تعيين رمز PIN</string>
+    <string name="ce_profile_pin_change">تغيير رمز PIN</string>
+    <string name="ce_profile_pin_remove">إزالة رمز PIN</string>
+    <string name="ce_profile_pin_ask_on_start">طلب رمز PIN عند البدء</string>
+    <string name="ce_profile_pin_ask_on_start_summary">عند الإيقاف، يُطلب رمز PIN فقط عند التبديل إلى هذا الملف الشخصي</string>
+    <string name="ce_profile_pin_enter">أدخل رمز PIN الخاص بـ %1$s</string>
+    <string name="ce_profile_pin_enter_current">أدخل رمز PIN الحالي</string>
+    <string name="ce_profile_pin_choose">اختر رمز PIN من 4 إلى 6 أرقام</string>
+    <string name="ce_profile_pin_repeat">أدخل رمز PIN الجديد مرة أخرى</string>
+    <string name="ce_profile_pin_wrong">رمز PIN خاطئ، حاول مرة أخرى</string>
+    <string name="ce_profile_pin_mismatch">رمزا PIN غير متطابقين. اختر رمز PIN مرة أخرى.</string>
+    <string name="ce_profile_pin_forgot">هل نسيت رمز PIN؟ أزل هذا المستخدم من قائمة المستخدمين وسجّل الدخول مرة أخرى بكلمة مرور الخادم.</string>
+    <string name="ce_profile_pin_other_profile">ملف شخصي آخر</string>
+    <string name="ce_profile_pin_label">رمز PIN</string>
+    <string name="ce_profile_pin_delete">حذف رقم</string>
+    <string name="ce_profile_pin_saved">تم تعيين رمز PIN</string>
+    <string name="ce_profile_pin_removed">تمت إزالة رمز PIN</string>
 </resources>

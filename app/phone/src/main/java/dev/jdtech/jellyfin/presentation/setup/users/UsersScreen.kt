@@ -41,6 +41,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
+import dev.jdtech.jellyfin.presentation.setup.pin.SwitchPinDialog
 import dev.jdtech.jellyfin.presentation.setup.components.UserItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -208,6 +209,8 @@ private fun UsersScreenLayout(
             modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
         )
 
+        // CE (#299)
+        SwitchPinDialog(state = state, onAction = onAction)
         if (openDeleteDialog && selectedUser != null) {
             AlertDialog(
                 title = { Text(text = stringResource(SetupR.string.remove_user_dialog)) },

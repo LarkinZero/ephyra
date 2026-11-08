@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">サーバーを切り替え</string>
     <string name="ce_users_signed_in">サインイン済み</string>
     <string name="ce_users_switch_user">ユーザーを切り替え</string>
+    <string name="ce_profile_pin">プロフィールのPIN</string>
+    <string name="ce_profile_pin_summary">PINがあると、このデバイスで他の人がこのプロフィールに入れなくなります。PINはこのデバイスに保存され、サーバーには送信されません。</string>
+    <string name="ce_profile_pin_status_on">このプロフィールはPINでロックされています</string>
+    <string name="ce_profile_pin_status_off">このプロフィールにはPINがありません</string>
+    <string name="ce_profile_pin_set">PINを設定</string>
+    <string name="ce_profile_pin_change">PINを変更</string>
+    <string name="ce_profile_pin_remove">PINを削除</string>
+    <string name="ce_profile_pin_ask_on_start">起動時にPINを確認</string>
+    <string name="ce_profile_pin_ask_on_start_summary">オフの場合、このプロフィールに切り替えるときだけPINを確認します</string>
+    <string name="ce_profile_pin_enter">%1$sのPINを入力</string>
+    <string name="ce_profile_pin_enter_current">現在のPINを入力</string>
+    <string name="ce_profile_pin_choose">4〜6桁のPINを選んでください</string>
+    <string name="ce_profile_pin_repeat">新しいPINをもう一度入力</string>
+    <string name="ce_profile_pin_wrong">PINが違います。もう一度お試しください</string>
+    <string name="ce_profile_pin_mismatch">PINが一致しませんでした。もう一度PINを選んでください。</string>
+    <string name="ce_profile_pin_forgot">PINを忘れた場合は、このユーザーをユーザー一覧から削除し、サーバーのパスワードで再度サインインしてください。</string>
+    <string name="ce_profile_pin_other_profile">別のプロフィール</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">1桁削除</string>
+    <string name="ce_profile_pin_saved">PINを設定しました</string>
+    <string name="ce_profile_pin_removed">PINを削除しました</string>
 </resources>

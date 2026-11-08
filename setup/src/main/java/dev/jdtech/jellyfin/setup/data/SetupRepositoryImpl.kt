@@ -305,6 +305,11 @@ class SetupRepositoryImpl(
         }
     }
 
+    override suspend fun clearCurrentUser() {
+        val server = getCurrentServer() ?: return
+        database.clearServerCurrentUser(server.id)
+    }
+
     override suspend fun setCurrentAddress(addressId: UUID) {
         val server = getCurrentServer() ?: return
         val address = database.getAddress(id = addressId)

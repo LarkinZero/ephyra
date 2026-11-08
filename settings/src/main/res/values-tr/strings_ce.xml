@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Önbelleği temizle</string>
     <string name="settings_clear_cache_summary">Önbellekteki görselleri ve hatırlanan ana sayfa satırlarını kaldırır.</string>
     <string name="settings_cache_cleared">Önbellek temizlendi</string>
+    <string name="ce_settings_profile_pin">Profil PIN\'i</string>
+    <string name="ce_settings_profile_pin_summary">Bu profili bu cihazda kilitle</string>
 </resources>

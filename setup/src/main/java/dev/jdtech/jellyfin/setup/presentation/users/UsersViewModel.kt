@@ -3,18 +3,25 @@ package dev.jdtech.jellyfin.setup.presentation.users
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.profilelock.ProfileLock
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
+import dev.jdtech.jellyfin.setup.presentation.pin.PinError
+import dev.jdtech.jellyfin.setup.presentation.pin.PinPrompt
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import timber.log.Timber
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel
-class UsersViewModel @Inject constructor(private val repository: SetupRepository) : ViewModel() {
+class UsersViewModel
+@Inject
+constructor(private val repository: SetupRepository, private val profileLock: ProfileLock) :
+    ViewModel() {
     private val _state = MutableStateFlow(UsersState())
     val state = _state.asStateFlow()
 
@@ -32,6 +39,7 @@ class UsersViewModel @Inject constructor(private val repository: SetupRepository
                     users = users,
                     serverName = server.name,
                     currentUserId = server.currentUserId,
+                    pinPrompt = _state.value.pinPrompt,
                 )
             )
 
@@ -75,9 +83,33 @@ class UsersViewModel @Inject constructor(private val repository: SetupRepository
 
     private fun loginAsUser(userId: UUID) {
         viewModelScope.launch {
-            repository.setCurrentUser(userId)
+            // CE (#299): a profile with a PIN opens only after the PIN.
+            if (profileLock.needsPinToSwitch(userId)) {
+                val name = _state.value.users.firstOrNull { it.id == userId }?.name.orEmpty()
+                _state.update { it.copy(pinPrompt = PinPrompt(userId = userId, userName = name)) }
+                return@launch
+            }
+            switchTo(userId)
+        }
+    }
 
-            eventsChannel.send(UsersEvent.NavigateToHome)
+    private suspend fun switchTo(userId: UUID) {
+        // Unlocked before it becomes current, so the start lock never shows for it.
+        profileLock.unlock(userId)
+        repository.setCurrentUser(userId)
+
+        eventsChannel.send(UsersEvent.NavigateToHome)
+    }
+
+    private fun submitPin(pin: String) {
+        val prompt = _state.value.pinPrompt ?: return
+        viewModelScope.launch {
+            if (profileLock.verifyPin(prompt.userId, pin)) {
+                _state.update { it.copy(pinPrompt = null) }
+                switchTo(prompt.userId)
+            } else {
+                _state.update { it.copy(pinPrompt = prompt.rejected(PinError.WRONG)) }
+            }
         }
     }
 
@@ -89,6 +121,9 @@ class UsersViewModel @Inject constructor(private val repository: SetupRepository
             is UsersAction.OnDeleteUser -> {
                 deleteUser(action.userId)
             }
+            is UsersAction.OnPinSubmit -> submitPin(action.pin)
+            // Cancelled: stay on the profile that was open.
+            is UsersAction.OnPinDismiss -> _state.update { it.copy(pinPrompt = null) }
             else -> Unit
         }
     }

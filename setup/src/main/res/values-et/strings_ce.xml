@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Vaheta serverit</string>
     <string name="ce_users_signed_in">Sisse logitud</string>
     <string name="ce_users_switch_user">Vaheta kasutajat</string>
+    <string name="ce_profile_pin">Profiili PIN-kood</string>
+    <string name="ce_profile_pin_summary">PIN-kood hoiab teised selles seadmes sellest profiilist eemal. See jääb sellesse seadmesse ja seda ei saadeta kunagi serverisse.</string>
+    <string name="ce_profile_pin_status_on">See profiil on PIN-koodiga lukus</string>
+    <string name="ce_profile_pin_status_off">Sellel profiilil pole PIN-koodi</string>
+    <string name="ce_profile_pin_set">Määra PIN-kood</string>
+    <string name="ce_profile_pin_change">Muuda PIN-koodi</string>
+    <string name="ce_profile_pin_remove">Eemalda PIN-kood</string>
+    <string name="ce_profile_pin_ask_on_start">Küsi PIN-koodi käivitamisel</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Kui väljas, küsitakse PIN-koodi ainult sellele profiilile vahetamisel</string>
+    <string name="ce_profile_pin_enter">Sisesta kasutaja %1$s PIN-kood</string>
+    <string name="ce_profile_pin_enter_current">Sisesta praegune PIN-kood</string>
+    <string name="ce_profile_pin_choose">Vali 4–6-kohaline PIN-kood</string>
+    <string name="ce_profile_pin_repeat">Sisesta uus PIN-kood uuesti</string>
+    <string name="ce_profile_pin_wrong">Vale PIN-kood, proovi uuesti</string>
+    <string name="ce_profile_pin_mismatch">PIN-koodid ei kattunud. Vali PIN-kood uuesti.</string>
+    <string name="ce_profile_pin_forgot">Unustasid PIN-koodi? Eemalda see kasutaja kasutajate loendist ja logi serveri parooliga uuesti sisse.</string>
+    <string name="ce_profile_pin_other_profile">Muu profiil</string>
+    <string name="ce_profile_pin_label">PIN-kood</string>
+    <string name="ce_profile_pin_delete">Kustuta number</string>
+    <string name="ce_profile_pin_saved">PIN-kood määratud</string>
+    <string name="ce_profile_pin_removed">PIN-kood eemaldatud</string>
 </resources>

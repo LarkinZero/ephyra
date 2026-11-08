@@ -63,6 +63,8 @@ import dev.jdtech.jellyfin.presentation.settings.HomeRowsScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
 import dev.jdtech.jellyfin.presentation.settings.SubtitleStyleScreen
+import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinGateScreen
+import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinScreen
 import dev.jdtech.jellyfin.presentation.setup.addresses.ServerAddressesScreen
 import dev.jdtech.jellyfin.presentation.setup.addserver.AddServerScreen
 import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
@@ -116,6 +118,7 @@ fun NavigationRoot(
     hasCurrentUser: Boolean,
     showFavoritesTab: Boolean = true,
     askUserOnStart: Boolean = false,
+    profileLocked: Boolean = false,
 ) {
     val setupComplete = hasServers && hasCurrentServer && hasCurrentUser
 
@@ -181,7 +184,10 @@ fun NavigationRoot(
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionState by permissionViewModel.state.collectAsStateWithLifecycle()
 
-    if (setupComplete) {
+    if (setupComplete && profileLocked) {
+        // CE (#299): the profile's PIN comes before Home, and before anything Home would load.
+        ProfilePinGateScreen()
+    } else if (setupComplete) {
         // Upgrader interstitial: shown before the home screen until the user decides or
         // dismisses it for this session.
         if (permissionState.showInterstitial) {
@@ -650,8 +656,12 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
             navigateToSubtitleStyle = dropUnlessResumed { navigator.navigate(SubtitleStyleRoute) },
             navigateToHomeRows = dropUnlessResumed { navigator.navigate(HomeRowsRoute) },
+            navigateToProfilePin = dropUnlessResumed { navigator.navigate(ProfilePinRoute) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
+    }
+    entry<ProfilePinRoute> {
+        ProfilePinScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
     }
     entry<HomeRowsRoute> { HomeRowsScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
     entry<SubtitleStyleRoute> {

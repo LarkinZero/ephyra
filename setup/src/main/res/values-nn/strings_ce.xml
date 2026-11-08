@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Byt tenar</string>
     <string name="ce_users_signed_in">Logga inn</string>
     <string name="ce_users_switch_user">Byt brukar</string>
+    <string name="ce_profile_pin">PIN-kode for profilen</string>
+    <string name="ce_profile_pin_summary">Ein PIN-kode held andre ute av denne profilen på denne eininga. Han blir verande på denne eininga og blir aldri send til tenaren.</string>
+    <string name="ce_profile_pin_status_on">Denne profilen er låst med PIN-kode</string>
+    <string name="ce_profile_pin_status_off">Denne profilen har ingen PIN-kode</string>
+    <string name="ce_profile_pin_set">Set PIN-kode</string>
+    <string name="ce_profile_pin_change">Endra PIN-kode</string>
+    <string name="ce_profile_pin_remove">Fjern PIN-kode</string>
+    <string name="ce_profile_pin_ask_on_start">Spør om PIN-koden ved oppstart</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Når dette er av, blir det berre spurt om PIN-koden ved byte til denne profilen</string>
+    <string name="ce_profile_pin_enter">Skriv inn PIN-koden for %1$s</string>
+    <string name="ce_profile_pin_enter_current">Skriv inn den noverande PIN-koden</string>
+    <string name="ce_profile_pin_choose">Vel ein PIN-kode på 4 til 6 siffer</string>
+    <string name="ce_profile_pin_repeat">Skriv inn den nye PIN-koden ein gong til</string>
+    <string name="ce_profile_pin_wrong">Feil PIN-kode, prøv igjen</string>
+    <string name="ce_profile_pin_mismatch">PIN-kodane var ikkje like. Vel ein PIN-kode på nytt.</string>
+    <string name="ce_profile_pin_forgot">Gløymt PIN-koden? Fjern denne brukaren frå brukarlista og logg inn på nytt med passordet til tenaren.</string>
+    <string name="ce_profile_pin_other_profile">Anna profil</string>
+    <string name="ce_profile_pin_label">PIN-kode</string>
+    <string name="ce_profile_pin_delete">Slett siffer</string>
+    <string name="ce_profile_pin_saved">PIN-koden er sett</string>
+    <string name="ce_profile_pin_removed">PIN-koden er fjerna</string>
 </resources>

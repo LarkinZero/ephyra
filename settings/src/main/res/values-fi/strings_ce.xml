@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Tyhjennä välimuisti</string>
     <string name="settings_clear_cache_summary">Poistaa välimuistissa olevat kuvat ja muistetut etusivun rivit.</string>
     <string name="settings_cache_cleared">Välimuisti tyhjennetty</string>
+    <string name="ce_settings_profile_pin">Profiilin PIN-koodi</string>
+    <string name="ce_settings_profile_pin_summary">Lukitse tämä profiili tällä laitteella</string>
 </resources>

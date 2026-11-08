@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.profilelock.ProfileLock
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.NetworkConnectivity
 import javax.inject.Inject
@@ -24,6 +25,7 @@ constructor(
     private val appPreferences: AppPreferences,
     private val database: ServerDatabaseDao,
     private val networkConnectivity: NetworkConnectivity,
+    private val profileLock: ProfileLock,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
@@ -98,13 +100,35 @@ constructor(
                     enabled && usersCount > 1
                 }
 
+            // CE (#299): the current profile has a PIN that this process has not been given yet.
+            val profileLocked =
+                appPreferences.observe(appPreferences.currentServer).flatMapLatest { serverId ->
+                    if (serverId == null) {
+                        flowOf(false)
+                    } else {
+                        combine(
+                            database.observeServerCurrentUser(serverId),
+                            profileLock.unlockedUserIds,
+                        ) { user, unlockedUserIds ->
+                            ProfileLock.isLockedOnStart(user, unlockedUserIds)
+                        }
+                    }
+                }
+
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
                     appPreferences.observe(appPreferences.offlineMode),
                     appPreferences.observe(appPreferences.showFavoritesTab),
                     askUserOnStart,
-                ) { flags, dynamicColors, offlineMode, showFavoritesTab, askUserOnStart ->
+                    profileLocked,
+                ) { values ->
+                    val flags = values[0] as SetupFlags
+                    val dynamicColors = values[1] as Boolean
+                    val offlineMode = values[2] as Boolean
+                    val showFavoritesTab = values[3] as Boolean
+                    val askUserOnStart = values[4] as Boolean
+                    val profileLocked = values[5] as Boolean
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -114,6 +138,7 @@ constructor(
                         isOfflineMode = offlineMode || !networkConnectivity.isOnline(),
                         showFavoritesTab = showFavoritesTab,
                         askUserOnStart = askUserOnStart,
+                        profileLocked = profileLocked,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -136,4 +161,6 @@ data class MainState(
     val isOfflineMode: Boolean = false,
     val showFavoritesTab: Boolean = true,
     val askUserOnStart: Boolean = false,
+    /** CE (#299): the current profile asks for its PIN before Home shows. */
+    val profileLocked: Boolean = false,
 )

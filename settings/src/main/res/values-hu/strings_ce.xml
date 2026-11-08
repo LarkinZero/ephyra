@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Gyorsítótár törlése</string>
     <string name="settings_clear_cache_summary">Eltávolítja a gyorsítótárazott képeket és a megjegyzett kezdőlapi sorokat.</string>
     <string name="settings_cache_cleared">Gyorsítótár törölve</string>
+    <string name="ce_settings_profile_pin">Profil PIN-kódja</string>
+    <string name="ce_settings_profile_pin_summary">A profil zárolása ezen az eszközön</string>
 </resources>

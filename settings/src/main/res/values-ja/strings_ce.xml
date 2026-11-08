@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">キャッシュを消去</string>
     <string name="settings_clear_cache_summary">キャッシュされた画像と記憶したホームの行を削除します。</string>
     <string name="settings_cache_cleared">キャッシュを消去しました</string>
+    <string name="ce_settings_profile_pin">プロフィールのPIN</string>
+    <string name="ce_settings_profile_pin_summary">このデバイスでこのプロフィールをロック</string>
 </resources>

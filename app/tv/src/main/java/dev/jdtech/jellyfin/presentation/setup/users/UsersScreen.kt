@@ -37,6 +37,7 @@ import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import dev.jdtech.jellyfin.api.JellyfinApi
+import dev.jdtech.jellyfin.ce.presentation.pin.TvSwitchPinDialog
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.models.User
@@ -194,6 +195,9 @@ private fun UsersScreenLayout(state: UsersState, onAction: (UsersAction) -> Unit
             }
         }
     }
+
+    // CE (#299)
+    TvSwitchPinDialog(state = state, onAction = onAction)
 
     removing?.let { user ->
         RemoveUserDialog(

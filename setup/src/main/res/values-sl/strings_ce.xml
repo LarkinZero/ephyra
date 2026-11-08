@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Zamenjaj strežnik</string>
     <string name="ce_users_signed_in">Prijavljen</string>
     <string name="ce_users_switch_user">Zamenjaj uporabnika</string>
+    <string name="ce_profile_pin">PIN profila</string>
+    <string name="ce_profile_pin_summary">PIN preprečuje drugim vstop v ta profil v tej napravi. Ostane v tej napravi in se nikoli ne pošlje strežniku.</string>
+    <string name="ce_profile_pin_status_on">Ta profil je zaklenjen s PIN-om</string>
+    <string name="ce_profile_pin_status_off">Ta profil nima PIN-a</string>
+    <string name="ce_profile_pin_set">Nastavi PIN</string>
+    <string name="ce_profile_pin_change">Spremeni PIN</string>
+    <string name="ce_profile_pin_remove">Odstrani PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Zahtevaj PIN ob zagonu</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Ko je izklopljeno, se PIN zahteva le ob preklopu na ta profil</string>
+    <string name="ce_profile_pin_enter">Vnesite PIN za %1$s</string>
+    <string name="ce_profile_pin_enter_current">Vnesite trenutni PIN</string>
+    <string name="ce_profile_pin_choose">Izberite PIN s 4 do 6 števkami</string>
+    <string name="ce_profile_pin_repeat">Znova vnesite novi PIN</string>
+    <string name="ce_profile_pin_wrong">Napačen PIN, poskusite znova</string>
+    <string name="ce_profile_pin_mismatch">PIN-a se ne ujemata. Znova izberite PIN.</string>
+    <string name="ce_profile_pin_forgot">Ste pozabili PIN? Odstranite tega uporabnika s seznama uporabnikov in se znova prijavite z geslom strežnika.</string>
+    <string name="ce_profile_pin_other_profile">Drug profil</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Izbriši števko</string>
+    <string name="ce_profile_pin_saved">PIN nastavljen</string>
+    <string name="ce_profile_pin_removed">PIN odstranjen</string>
 </resources>

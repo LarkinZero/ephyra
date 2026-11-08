@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">切換伺服器</string>
     <string name="ce_users_signed_in">已登入</string>
     <string name="ce_users_switch_user">切換用戶</string>
+    <string name="ce_profile_pin">個人檔案 PIN</string>
+    <string name="ce_profile_pin_summary">PIN 可以防止其他人喺呢部裝置入呢個個人檔案。PIN 只會留喺呢部裝置，永遠唔會傳去伺服器。</string>
+    <string name="ce_profile_pin_status_on">呢個個人檔案已經用 PIN 鎖住</string>
+    <string name="ce_profile_pin_status_off">呢個個人檔案冇 PIN</string>
+    <string name="ce_profile_pin_set">設定 PIN</string>
+    <string name="ce_profile_pin_change">更改 PIN</string>
+    <string name="ce_profile_pin_remove">移除 PIN</string>
+    <string name="ce_profile_pin_ask_on_start">啟動時要求輸入 PIN</string>
+    <string name="ce_profile_pin_ask_on_start_summary">關閉時，只會喺切換去呢個個人檔案時要求 PIN</string>
+    <string name="ce_profile_pin_enter">輸入 %1$s 嘅 PIN</string>
+    <string name="ce_profile_pin_enter_current">輸入你而家嘅 PIN</string>
+    <string name="ce_profile_pin_choose">揀一個 4 至 6 位數嘅 PIN</string>
+    <string name="ce_profile_pin_repeat">再輸入一次新 PIN</string>
+    <string name="ce_profile_pin_wrong">PIN 唔啱，請再試</string>
+    <string name="ce_profile_pin_mismatch">兩次 PIN 唔一樣。請再揀過 PIN。</string>
+    <string name="ce_profile_pin_forgot">唔記得 PIN？喺使用者清單移除呢個使用者，再用伺服器密碼重新登入。</string>
+    <string name="ce_profile_pin_other_profile">其他個人檔案</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">刪除數字</string>
+    <string name="ce_profile_pin_saved">已設定 PIN</string>
+    <string name="ce_profile_pin_removed">已移除 PIN</string>
 </resources>

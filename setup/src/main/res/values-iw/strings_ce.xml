@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">החלפת שרת</string>
     <string name="ce_users_signed_in">מחובר</string>
     <string name="ce_users_switch_user">החלפת משתמש</string>
+    <string name="ce_profile_pin">קוד PIN לפרופיל</string>
+    <string name="ce_profile_pin_summary">קוד PIN מונע מאחרים להיכנס לפרופיל הזה במכשיר הזה. הוא נשאר במכשיר הזה ולעולם לא נשלח לשרת.</string>
+    <string name="ce_profile_pin_status_on">הפרופיל הזה נעול בקוד PIN</string>
+    <string name="ce_profile_pin_status_off">לפרופיל הזה אין קוד PIN</string>
+    <string name="ce_profile_pin_set">הגדרת קוד PIN</string>
+    <string name="ce_profile_pin_change">שינוי קוד PIN</string>
+    <string name="ce_profile_pin_remove">הסרת קוד PIN</string>
+    <string name="ce_profile_pin_ask_on_start">לבקש את קוד ה-PIN בהפעלה</string>
+    <string name="ce_profile_pin_ask_on_start_summary">כשכבוי, קוד ה-PIN נדרש רק במעבר לפרופיל הזה</string>
+    <string name="ce_profile_pin_enter">יש להזין את קוד ה-PIN של %1$s</string>
+    <string name="ce_profile_pin_enter_current">יש להזין את קוד ה-PIN הנוכחי</string>
+    <string name="ce_profile_pin_choose">יש לבחור קוד PIN בן 4 עד 6 ספרות</string>
+    <string name="ce_profile_pin_repeat">יש להזין שוב את קוד ה-PIN החדש</string>
+    <string name="ce_profile_pin_wrong">קוד PIN שגוי, יש לנסות שוב</string>
+    <string name="ce_profile_pin_mismatch">קודי ה-PIN אינם תואמים. יש לבחור קוד PIN שוב.</string>
+    <string name="ce_profile_pin_forgot">שכחת את קוד ה-PIN? יש להסיר את המשתמש הזה מרשימת המשתמשים ולהתחבר שוב עם סיסמת השרת.</string>
+    <string name="ce_profile_pin_other_profile">פרופיל אחר</string>
+    <string name="ce_profile_pin_label">קוד PIN</string>
+    <string name="ce_profile_pin_delete">מחיקת ספרה</string>
+    <string name="ce_profile_pin_saved">קוד ה-PIN הוגדר</string>
+    <string name="ce_profile_pin_removed">קוד ה-PIN הוסר</string>
 </resources>

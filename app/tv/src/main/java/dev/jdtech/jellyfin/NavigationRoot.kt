@@ -21,6 +21,8 @@ import dev.jdtech.jellyfin.ce.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.ce.presentation.film.LibraryScreen
 import dev.jdtech.jellyfin.ce.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.ce.presentation.film.ShowScreen
+import dev.jdtech.jellyfin.ce.presentation.pin.TvProfilePinGateScreen
+import dev.jdtech.jellyfin.ce.presentation.pin.TvProfilePinScreen
 import dev.jdtech.jellyfin.ce.presentation.player.TvPlayerScreen
 import dev.jdtech.jellyfin.ce.presentation.settings.HomeRowsScreen
 import dev.jdtech.jellyfin.ce.presentation.settings.about.AboutScreen
@@ -55,6 +57,7 @@ fun NavigationRoot(
     hasCurrentServer: Boolean,
     hasCurrentUser: Boolean,
     askUserOnStart: Boolean = false,
+    profileLocked: Boolean = false,
     watchNextLink: WatchNextLink? = null,
     onWatchNextLinkOpened: () -> Unit = {},
 ) {
@@ -131,7 +134,11 @@ fun NavigationRoot(
 
     // Upgrader interstitial: shown before the home screen until the user decides or
     // dismisses it for this session.
-    if (setupComplete && permissionState.showInterstitial) {
+    if (setupComplete && profileLocked) {
+        // CE (#299): the profile's PIN comes before Home, and before a Watch Next program plays
+        // (its routes wait on the stack underneath).
+        TvProfilePinGateScreen()
+    } else if (setupComplete && permissionState.showInterstitial) {
         PermissionScreen(
             viewModel = permissionViewModel,
             onDecided = {},
@@ -425,6 +432,7 @@ private fun EntryProviderScope<NavKey>.tvEntries(
             navigateToUsers = dropUnlessResumed { navigate(UsersRoute) },
             navigateToServers = dropUnlessResumed { navigate(ServersRoute) },
             navigateToHomeRows = dropUnlessResumed { navigate(HomeRowsRoute) },
+            navigateToProfilePin = dropUnlessResumed { navigate(ProfilePinRoute) },
             navigateToAbout = dropUnlessResumed { navigate(AboutRoute) },
             navigateToSubSettings =
                 resumedAction { indexes -> navigate(SettingsSubRoute(indexes = indexes)) },
@@ -436,12 +444,14 @@ private fun EntryProviderScope<NavKey>.tvEntries(
             navigateToUsers = dropUnlessResumed { navigate(UsersRoute) },
             navigateToServers = dropUnlessResumed { navigate(ServersRoute) },
             navigateToHomeRows = dropUnlessResumed { navigate(HomeRowsRoute) },
+            navigateToProfilePin = dropUnlessResumed { navigate(ProfilePinRoute) },
             navigateToAbout = dropUnlessResumed { navigate(AboutRoute) },
             navigateToSubSettings =
                 resumedAction { indexes -> navigate(SettingsSubRoute(indexes = indexes)) },
         )
     }
     entry<HomeRowsRoute> { HomeRowsScreen() }
+    entry<ProfilePinRoute> { TvProfilePinScreen() }
     entry<AboutRoute> {
         AboutScreen(
             navigateToLicenses = dropUnlessResumed { navigate(LicensesRoute) },

@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">清除快取</string>
     <string name="settings_clear_cache_summary">移除已快取嘅圖片同記住咗嘅主頁行列。</string>
     <string name="settings_cache_cleared">已清除快取</string>
+    <string name="ce_settings_profile_pin">個人檔案 PIN</string>
+    <string name="ce_settings_profile_pin_summary">喺呢部裝置鎖住呢個個人檔案</string>
 </resources>

@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Изчистване на кеша</string>
     <string name="settings_clear_cache_summary">Премахва кешираните изображения и запомнените редове на началния екран.</string>
     <string name="settings_cache_cleared">Кешът е изчистен</string>
+    <string name="ce_settings_profile_pin">ПИН на профила</string>
+    <string name="ce_settings_profile_pin_summary">Заключване на този профил на това устройство</string>
 </resources>

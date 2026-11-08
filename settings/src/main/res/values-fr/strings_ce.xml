@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Vider le cache</string>
     <string name="settings_clear_cache_summary">Supprime les images en cache et les rangées de l\'accueil mémorisées.</string>
     <string name="settings_cache_cleared">Cache vidé</string>
+    <string name="ce_settings_profile_pin">Code PIN du profil</string>
+    <string name="ce_settings_profile_pin_summary">Verrouiller ce profil sur cet appareil</string>
 </resources>

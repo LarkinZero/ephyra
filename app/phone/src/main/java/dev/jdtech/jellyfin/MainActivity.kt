@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                             hasCurrentUser = state.hasCurrentUser,
                             showFavoritesTab = state.showFavoritesTab,
                             askUserOnStart = state.askUserOnStart,
+                            profileLocked = state.profileLocked,
                         )
                     }
                 }

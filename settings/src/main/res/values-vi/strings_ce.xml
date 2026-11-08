@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Xóa bộ nhớ đệm</string>
     <string name="settings_clear_cache_summary">Xóa các hình ảnh đã lưu đệm và các hàng Trang chủ đã ghi nhớ.</string>
     <string name="settings_cache_cleared">Đã xóa bộ nhớ đệm</string>
+    <string name="ce_settings_profile_pin">Mã PIN hồ sơ</string>
+    <string name="ce_settings_profile_pin_summary">Khóa hồ sơ này trên thiết bị này</string>
 </resources>

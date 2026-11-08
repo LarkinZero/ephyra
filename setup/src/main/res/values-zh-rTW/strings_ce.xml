@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">切換伺服器</string>
     <string name="ce_users_signed_in">已登入</string>
     <string name="ce_users_switch_user">切換使用者</string>
+    <string name="ce_profile_pin">個人檔案 PIN 碼</string>
+    <string name="ce_profile_pin_summary">PIN 碼可防止他人在此裝置上進入此個人檔案。PIN 碼只會儲存在此裝置上，絕不會傳送到伺服器。</string>
+    <string name="ce_profile_pin_status_on">此個人檔案已用 PIN 碼鎖定</string>
+    <string name="ce_profile_pin_status_off">此個人檔案沒有 PIN 碼</string>
+    <string name="ce_profile_pin_set">設定 PIN 碼</string>
+    <string name="ce_profile_pin_change">變更 PIN 碼</string>
+    <string name="ce_profile_pin_remove">移除 PIN 碼</string>
+    <string name="ce_profile_pin_ask_on_start">啟動時要求輸入 PIN 碼</string>
+    <string name="ce_profile_pin_ask_on_start_summary">關閉後，只會在切換到此個人檔案時要求輸入 PIN 碼</string>
+    <string name="ce_profile_pin_enter">輸入 %1$s 的 PIN 碼</string>
+    <string name="ce_profile_pin_enter_current">輸入目前的 PIN 碼</string>
+    <string name="ce_profile_pin_choose">選擇一組 4 到 6 位數的 PIN 碼</string>
+    <string name="ce_profile_pin_repeat">再次輸入新的 PIN 碼</string>
+    <string name="ce_profile_pin_wrong">PIN 碼錯誤，請再試一次</string>
+    <string name="ce_profile_pin_mismatch">兩次輸入的 PIN 碼不一致。請重新選擇 PIN 碼。</string>
+    <string name="ce_profile_pin_forgot">忘記 PIN 碼？請從使用者清單中移除此使用者，再以伺服器密碼重新登入。</string>
+    <string name="ce_profile_pin_other_profile">其他個人檔案</string>
+    <string name="ce_profile_pin_label">PIN 碼</string>
+    <string name="ce_profile_pin_delete">刪除數字</string>
+    <string name="ce_profile_pin_saved">已設定 PIN 碼</string>
+    <string name="ce_profile_pin_removed">已移除 PIN 碼</string>
 </resources>

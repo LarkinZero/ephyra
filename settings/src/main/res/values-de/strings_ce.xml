@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">Cache leeren</string>
     <string name="settings_clear_cache_summary">Entfernt die zwischengespeicherten Bilder und die gemerkten Zeilen der Startseite.</string>
     <string name="settings_cache_cleared">Cache geleert</string>
+    <string name="ce_settings_profile_pin">Profil-PIN</string>
+    <string name="ce_settings_profile_pin_summary">Dieses Profil auf diesem Gerät sperren</string>
 </resources>

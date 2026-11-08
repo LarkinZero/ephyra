@@ -7,4 +7,25 @@
     <string name="ce_users_switch_server">Canvia de servidor</string>
     <string name="ce_users_signed_in">Sessió iniciada</string>
     <string name="ce_users_switch_user">Canvia d\'usuari</string>
+    <string name="ce_profile_pin">PIN del perfil</string>
+    <string name="ce_profile_pin_summary">Un PIN impedeix que altres persones entrin en aquest perfil en aquest dispositiu. Es queda en aquest dispositiu i mai s\'envia al servidor.</string>
+    <string name="ce_profile_pin_status_on">Aquest perfil està bloquejat amb un PIN</string>
+    <string name="ce_profile_pin_status_off">Aquest perfil no té PIN</string>
+    <string name="ce_profile_pin_set">Estableix el PIN</string>
+    <string name="ce_profile_pin_change">Canvia el PIN</string>
+    <string name="ce_profile_pin_remove">Elimina el PIN</string>
+    <string name="ce_profile_pin_ask_on_start">Demana el PIN en iniciar</string>
+    <string name="ce_profile_pin_ask_on_start_summary">Si està desactivat, el PIN només es demana en canviar a aquest perfil</string>
+    <string name="ce_profile_pin_enter">Introdueix el PIN de %1$s</string>
+    <string name="ce_profile_pin_enter_current">Introdueix el PIN actual</string>
+    <string name="ce_profile_pin_choose">Tria un PIN de 4 a 6 xifres</string>
+    <string name="ce_profile_pin_repeat">Torna a introduir el PIN nou</string>
+    <string name="ce_profile_pin_wrong">PIN incorrecte, torna-ho a provar</string>
+    <string name="ce_profile_pin_mismatch">Els PIN no coincideixen. Torna a triar un PIN.</string>
+    <string name="ce_profile_pin_forgot">Has oblidat el PIN? Elimina aquest usuari de la llista d\'usuaris i torna a iniciar la sessió amb la contrasenya del servidor.</string>
+    <string name="ce_profile_pin_other_profile">Un altre perfil</string>
+    <string name="ce_profile_pin_label">PIN</string>
+    <string name="ce_profile_pin_delete">Esborra la xifra</string>
+    <string name="ce_profile_pin_saved">PIN establert</string>
+    <string name="ce_profile_pin_removed">PIN eliminat</string>
 </resources>

@@ -154,4 +154,6 @@
     <string name="settings_clear_cache_title">مسح التخزين المؤقت</string>
     <string name="settings_clear_cache_summary">يزيل الصور المخزّنة مؤقتًا وصفوف الصفحة الرئيسية المحفوظة.</string>
     <string name="settings_cache_cleared">تم مسح التخزين المؤقت</string>
+    <string name="ce_settings_profile_pin">رمز PIN للملف الشخصي</string>
+    <string name="ce_settings_profile_pin_summary">اقفل هذا الملف الشخصي على هذا الجهاز</string>
 </resources>
