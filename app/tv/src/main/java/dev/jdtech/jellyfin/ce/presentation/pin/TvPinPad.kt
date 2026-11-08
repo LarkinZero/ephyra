@@ -11,13 +11,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,17 +85,22 @@ fun TvPinPad(
     modifier: Modifier = Modifier,
 ) {
     val firstKey = remember { FocusRequester() }
+    // tv-material's buttons keep the click handler of their first composition for the D-pad's OK,
+    // and a new step hands in a new [pin] state. Read both through these, never from the closure.
+    val currentPin by rememberUpdatedState(pin)
+    val currentOnSubmit by rememberUpdatedState(onSubmit)
 
     fun type(digit: Char) {
-        if (pin.value.length < ProfilePinHasher.MAX_LENGTH) pin.value += digit
+        if (currentPin.value.length < ProfilePinHasher.MAX_LENGTH) currentPin.value += digit
     }
 
     fun delete() {
-        pin.value = pin.value.dropLast(1)
+        currentPin.value = currentPin.value.dropLast(1)
     }
 
     fun submit() {
-        if (ProfilePinHasher.isValid(pin.value)) onSubmit(pin.value)
+        val value = currentPin.value
+        if (ProfilePinHasher.isValid(value)) currentOnSubmit(value)
     }
 
     LaunchedEffect(Unit) { runCatching { firstKey.requestFocus() } }
@@ -164,13 +170,15 @@ fun TvPinPad(
                 PadKey(onClick = { type('0') }) {
                     Text(text = "0", style = MaterialTheme.typography.titleLarge)
                 }
-                PadKey(
-                    onClick = ::submit,
-                    modifier =
-                        Modifier.alpha(if (ProfilePinHasher.isValid(pin.value)) 1f else 0.4f)
-                            .testTag("ce_pin_ok"),
-                ) {
-                    Icon(painter = painterResource(CoreR.drawable.ic_check), contentDescription = null)
+                // Dimmed, not disabled, until the PIN is long enough: focus can still rest on it. The
+                // icon is dimmed rather than the key, so the focus ring outside it is not cut off.
+                PadKey(onClick = ::submit, modifier = Modifier.testTag("ce_pin_ok")) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_check),
+                        contentDescription = null,
+                        modifier =
+                            Modifier.alpha(if (ProfilePinHasher.isValid(pin.value)) 1f else 0.4f),
+                    )
                 }
             }
         }
@@ -218,8 +226,6 @@ private fun PinDots(count: Int, error: Boolean, modifier: Modifier = Modifier) {
                         )
             )
         }
-        // Keeps the row's width when a fifth and sixth dot come.
-        repeat(ProfilePinHasher.MAX_LENGTH - slots) { Spacer(modifier = Modifier.width(16.dp)) }
     }
 }
 

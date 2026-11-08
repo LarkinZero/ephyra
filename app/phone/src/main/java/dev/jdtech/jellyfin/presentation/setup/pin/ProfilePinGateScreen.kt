@@ -2,9 +2,15 @@ package dev.jdtech.jellyfin.presentation.setup.pin
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.MutableState
+import dev.jdtech.jellyfin.models.User
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
@@ -62,49 +68,77 @@ private fun ProfilePinGateLayout(
     val pin = rememberPinState(prompt)
 
     RootLayout {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-            modifier =
-                Modifier.align(Alignment.Center)
-                    .imePadding()
-                    .padding(horizontal = 24.dp)
-                    .widthIn(max = 400.dp)
-                    .fillMaxWidth()
-                    .testTag("ce_pin_gate"),
-        ) {
-            UserAvatar(user = user, baseUrl = baseUrl, size = 96.dp, showLock = false)
-            Text(
-                text = stringResource(SetupR.string.ce_profile_pin_enter, user.name),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-            )
-            PinField(
-                prompt = prompt,
-                pin = pin,
-                onSubmit = { onAction(ProfilePinGateAction.OnPinSubmit(it)) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = { onAction(ProfilePinGateAction.OnPinSubmit(pin.value)) },
-                enabled = ProfilePinHasher.isValid(pin.value),
-                modifier = Modifier.fillMaxWidth(),
+        // RootLayout keeps clear of the keyboard (safeDrawing includes the IME). Scrolls when the
+        // keyboard leaves too little room (a phone in landscape), centred otherwise.
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val minHeight = maxHeight
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement =
+                    Arrangement.spacedBy(MaterialTheme.spacings.medium, Alignment.CenterVertically),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .heightIn(min = minHeight)
+                        .padding(horizontal = 24.dp, vertical = MaterialTheme.spacings.medium)
+                        .testTag("ce_pin_gate"),
             ) {
-                Text(stringResource(SetupR.string.confirm))
+                PinGateContent(
+                    user = user,
+                    prompt = prompt,
+                    pin = pin,
+                    baseUrl = baseUrl,
+                    onAction = onAction,
+                )
             }
-            OutlinedButton(
-                onClick = { onAction(ProfilePinGateAction.OnCancel) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(SetupR.string.ce_profile_pin_other_profile))
-            }
-            Text(
-                text = stringResource(SetupR.string.ce_profile_pin_forgot),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
         }
+    }
+}
+
+@Composable
+private fun PinGateContent(
+    user: User,
+    prompt: PinPrompt,
+    pin: MutableState<String>,
+    baseUrl: String?,
+    onAction: (ProfilePinGateAction) -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+        modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
+    ) {
+        UserAvatar(user = user, baseUrl = baseUrl, size = 96.dp, showLock = false)
+        Text(
+            text = stringResource(SetupR.string.ce_profile_pin_enter, user.name),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+        )
+        PinField(
+            prompt = prompt,
+            pin = pin,
+            onSubmit = { onAction(ProfilePinGateAction.OnPinSubmit(it)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Button(
+            onClick = { onAction(ProfilePinGateAction.OnPinSubmit(pin.value)) },
+            enabled = ProfilePinHasher.isValid(pin.value),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(SetupR.string.confirm))
+        }
+        OutlinedButton(
+            onClick = { onAction(ProfilePinGateAction.OnCancel) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(SetupR.string.ce_profile_pin_other_profile))
+        }
+        Text(
+            text = stringResource(SetupR.string.ce_profile_pin_forgot),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
