@@ -273,4 +273,5 @@
     <string name="pref_ask_user_on_start_summary">When this server has more than one user, the app opens on the user list instead of Home</string>
     <string name="ce_settings_profile_pin">Profile PIN</string>
     <string name="ce_settings_profile_pin_summary">Lock this profile on this device</string>
+    <string name="ce_settings_profile_lock">Profile lock</string>
 </resources>

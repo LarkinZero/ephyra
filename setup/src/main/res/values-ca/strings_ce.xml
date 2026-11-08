@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Esborra la xifra</string>
     <string name="ce_profile_pin_saved">PIN establert</string>
     <string name="ce_profile_pin_removed">PIN eliminat</string>
+    <string name="ce_profile_lock">Bloqueig del perfil</string>
+    <string name="ce_profile_lock_summary">Un PIN o un patró impedeix que altres persones entrin en aquest perfil en aquest dispositiu. Es queda en aquest dispositiu i mai no s\'envia al servidor.</string>
+    <string name="ce_profile_lock_status_pattern">Aquest perfil està bloquejat amb un patró</string>
+    <string name="ce_profile_lock_status_off">Aquest perfil no està bloquejat</string>
+    <string name="ce_profile_lock_type">Tipus de bloqueig</string>
+    <string name="ce_profile_lock_type_pin_summary">De 4 a 6 dígits</string>
+    <string name="ce_profile_lock_type_pattern">Patró</string>
+    <string name="ce_profile_lock_ask_on_start">Demana el desbloqueig en iniciar</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Si està desactivat, el bloqueig només es demana en canviar a aquest perfil</string>
+    <string name="ce_profile_pattern_change">Canvia el patró</string>
+    <string name="ce_profile_pattern_remove">Elimina el patró</string>
+    <string name="ce_profile_pattern_enter">Dibuixa el patró de %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Dibuixa el patró actual</string>
+    <string name="ce_profile_pattern_choose">Dibuixa un patró que connecti almenys 4 punts</string>
+    <string name="ce_profile_pattern_repeat">Torna a dibuixar el patró nou</string>
+    <string name="ce_profile_pattern_wrong">Patró incorrecte, torna-ho a provar</string>
+    <string name="ce_profile_pattern_mismatch">Els patrons no coincideixen. Torna a dibuixar un patró.</string>
+    <string name="ce_profile_pattern_too_short">Connecta almenys 4 punts</string>
+    <string name="ce_profile_pattern_forgot">Has oblidat el patró? Elimina aquest usuari de la llista d\'usuaris i torna a iniciar la sessió amb la contrasenya del servidor.</string>
+    <string name="ce_profile_pattern_saved">Patró establert</string>
+    <string name="ce_profile_pattern_removed">Patró eliminat</string>
+    <string name="ce_profile_pattern_grid">Patró de desbloqueig, una graella de 3 per 3 punts</string>
 </resources>

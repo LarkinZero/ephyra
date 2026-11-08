@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">快取已清除</string>
     <string name="ce_settings_profile_pin">個人檔案 PIN 碼</string>
     <string name="ce_settings_profile_pin_summary">在此裝置上鎖定此個人檔案</string>
+    <string name="ce_settings_profile_lock">個人檔案鎖</string>
 </resources>

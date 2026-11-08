@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">캐시를 지웠습니다</string>
     <string name="ce_settings_profile_pin">프로필 PIN</string>
     <string name="ce_settings_profile_pin_summary">이 기기에서 이 프로필 잠그기</string>
+    <string name="ce_settings_profile_lock">프로필 잠금</string>
 </resources>

@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Kustuta number</string>
     <string name="ce_profile_pin_saved">PIN-kood määratud</string>
     <string name="ce_profile_pin_removed">PIN-kood eemaldatud</string>
+    <string name="ce_profile_lock">Profiili lukk</string>
+    <string name="ce_profile_lock_summary">PIN-kood või muster hoiab teised sellest profiilist selles seadmes eemal. See jääb sellesse seadmesse ja seda ei saadeta kunagi serverisse.</string>
+    <string name="ce_profile_lock_status_pattern">See profiil on lukustatud mustriga</string>
+    <string name="ce_profile_lock_status_off">See profiil pole lukustatud</string>
+    <string name="ce_profile_lock_type">Luku tüüp</string>
+    <string name="ce_profile_lock_type_pin_summary">4 kuni 6 numbrit</string>
+    <string name="ce_profile_lock_type_pattern">Muster</string>
+    <string name="ce_profile_lock_ask_on_start">Küsi käivitamisel avamist</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Kui see on väljas, küsitakse lukku ainult sellele profiilile lülitumisel</string>
+    <string name="ce_profile_pattern_change">Muuda mustrit</string>
+    <string name="ce_profile_pattern_remove">Eemalda muster</string>
+    <string name="ce_profile_pattern_enter">Joonista kasutaja %1$s muster</string>
+    <string name="ce_profile_pattern_enter_current">Joonista oma praegune muster</string>
+    <string name="ce_profile_pattern_choose">Joonista muster, mis ühendab vähemalt 4 punkti</string>
+    <string name="ce_profile_pattern_repeat">Joonista uus muster uuesti</string>
+    <string name="ce_profile_pattern_wrong">Vale muster, proovi uuesti</string>
+    <string name="ce_profile_pattern_mismatch">Mustrid ei kattunud. Joonista muster uuesti.</string>
+    <string name="ce_profile_pattern_too_short">Ühenda vähemalt 4 punkti</string>
+    <string name="ce_profile_pattern_forgot">Unustasid mustri? Eemalda see kasutaja kasutajate loendist ja logi serveri parooliga uuesti sisse.</string>
+    <string name="ce_profile_pattern_saved">Muster määratud</string>
+    <string name="ce_profile_pattern_removed">Muster eemaldatud</string>
+    <string name="ce_profile_pattern_grid">Avamismuster, 3 × 3 punktist koosnev ruudustik</string>
 </resources>

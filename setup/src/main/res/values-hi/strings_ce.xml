@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">अंक मिटाएँ</string>
     <string name="ce_profile_pin_saved">PIN सेट हो गया</string>
     <string name="ce_profile_pin_removed">PIN हटा दिया गया</string>
+    <string name="ce_profile_lock">प्रोफ़ाइल लॉक</string>
+    <string name="ce_profile_lock_summary">PIN या पैटर्न इस डिवाइस पर दूसरों को इस प्रोफ़ाइल से दूर रखता है। यह इसी डिवाइस पर रहता है और कभी सर्वर पर नहीं भेजा जाता।</string>
+    <string name="ce_profile_lock_status_pattern">यह प्रोफ़ाइल पैटर्न से लॉक है</string>
+    <string name="ce_profile_lock_status_off">यह प्रोफ़ाइल लॉक नहीं है</string>
+    <string name="ce_profile_lock_type">लॉक का प्रकार</string>
+    <string name="ce_profile_lock_type_pin_summary">4 से 6 अंक</string>
+    <string name="ce_profile_lock_type_pattern">पैटर्न</string>
+    <string name="ce_profile_lock_ask_on_start">शुरू होने पर अनलॉक करने को कहें</string>
+    <string name="ce_profile_lock_ask_on_start_summary">बंद होने पर, लॉक केवल इस प्रोफ़ाइल पर स्विच करते समय पूछा जाता है</string>
+    <string name="ce_profile_pattern_change">पैटर्न बदलें</string>
+    <string name="ce_profile_pattern_remove">पैटर्न हटाएँ</string>
+    <string name="ce_profile_pattern_enter">%1$s का पैटर्न बनाएँ</string>
+    <string name="ce_profile_pattern_enter_current">अपना मौजूदा पैटर्न बनाएँ</string>
+    <string name="ce_profile_pattern_choose">ऐसा पैटर्न बनाएँ जो कम से कम 4 बिंदुओं को जोड़े</string>
+    <string name="ce_profile_pattern_repeat">नया पैटर्न फिर से बनाएँ</string>
+    <string name="ce_profile_pattern_wrong">गलत पैटर्न, फिर से कोशिश करें</string>
+    <string name="ce_profile_pattern_mismatch">पैटर्न मेल नहीं खाए। फिर से पैटर्न बनाएँ।</string>
+    <string name="ce_profile_pattern_too_short">कम से कम 4 बिंदु जोड़ें</string>
+    <string name="ce_profile_pattern_forgot">पैटर्न भूल गए? इस उपयोगकर्ता को उपयोगकर्ता सूची से हटाएँ और सर्वर पासवर्ड से फिर से साइन इन करें।</string>
+    <string name="ce_profile_pattern_saved">पैटर्न सेट किया गया</string>
+    <string name="ce_profile_pattern_removed">पैटर्न हटाया गया</string>
+    <string name="ce_profile_pattern_grid">अनलॉक पैटर्न, 3 × 3 बिंदुओं का ग्रिड</string>
 </resources>

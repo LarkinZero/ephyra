@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Radera siffra</string>
     <string name="ce_profile_pin_saved">Pinkoden har angetts</string>
     <string name="ce_profile_pin_removed">Pinkoden har tagits bort</string>
+    <string name="ce_profile_lock">Profillås</string>
+    <string name="ce_profile_lock_summary">En pinkod eller ett mönster håller andra borta från den här profilen på den här enheten. Den stannar på den här enheten och skickas aldrig till servern.</string>
+    <string name="ce_profile_lock_status_pattern">Den här profilen är låst med ett mönster</string>
+    <string name="ce_profile_lock_status_off">Den här profilen är inte låst</string>
+    <string name="ce_profile_lock_type">Låstyp</string>
+    <string name="ce_profile_lock_type_pin_summary">4 till 6 siffror</string>
+    <string name="ce_profile_lock_type_pattern">Mönster</string>
+    <string name="ce_profile_lock_ask_on_start">Be om upplåsning vid start</string>
+    <string name="ce_profile_lock_ask_on_start_summary">När det är av efterfrågas låset bara vid byte till den här profilen</string>
+    <string name="ce_profile_pattern_change">Ändra mönster</string>
+    <string name="ce_profile_pattern_remove">Ta bort mönster</string>
+    <string name="ce_profile_pattern_enter">Rita mönstret för %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Rita ditt nuvarande mönster</string>
+    <string name="ce_profile_pattern_choose">Rita ett mönster som förbinder minst 4 punkter</string>
+    <string name="ce_profile_pattern_repeat">Rita det nya mönstret igen</string>
+    <string name="ce_profile_pattern_wrong">Fel mönster, försök igen</string>
+    <string name="ce_profile_pattern_mismatch">Mönstren matchade inte. Rita ett mönster igen.</string>
+    <string name="ce_profile_pattern_too_short">Förbind minst 4 punkter</string>
+    <string name="ce_profile_pattern_forgot">Glömt mönstret? Ta bort den här användaren från användarlistan och logga in igen med serverlösenordet.</string>
+    <string name="ce_profile_pattern_saved">Mönster angivet</string>
+    <string name="ce_profile_pattern_removed">Mönster borttaget</string>
+    <string name="ce_profile_pattern_grid">Upplåsningsmönster, ett rutnät med 3 gånger 3 punkter</string>
 </resources>

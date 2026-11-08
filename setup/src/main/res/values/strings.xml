@@ -72,4 +72,26 @@
     <string name="ce_profile_pin_delete">Delete digit</string>
     <string name="ce_profile_pin_saved">PIN set</string>
     <string name="ce_profile_pin_removed">PIN removed</string>
+    <string name="ce_profile_lock">Profile lock</string>
+    <string name="ce_profile_lock_summary">A PIN or a pattern keeps others out of this profile on this device. It stays on this device and is never sent to the server.</string>
+    <string name="ce_profile_lock_status_pattern">This profile is locked with a pattern</string>
+    <string name="ce_profile_lock_status_off">This profile is not locked</string>
+    <string name="ce_profile_lock_type">Lock type</string>
+    <string name="ce_profile_lock_type_pin_summary">4 to 6 digits</string>
+    <string name="ce_profile_lock_type_pattern">Pattern</string>
+    <string name="ce_profile_lock_ask_on_start">Ask to unlock at start</string>
+    <string name="ce_profile_lock_ask_on_start_summary">When off, the lock is only asked when switching to this profile</string>
+    <string name="ce_profile_pattern_change">Change pattern</string>
+    <string name="ce_profile_pattern_remove">Remove pattern</string>
+    <string name="ce_profile_pattern_enter">Draw the pattern for %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Draw your current pattern</string>
+    <string name="ce_profile_pattern_choose">Draw a pattern that connects at least 4 dots</string>
+    <string name="ce_profile_pattern_repeat">Draw the new pattern again</string>
+    <string name="ce_profile_pattern_wrong">Wrong pattern, try again</string>
+    <string name="ce_profile_pattern_mismatch">The patterns did not match. Draw a pattern again.</string>
+    <string name="ce_profile_pattern_too_short">Connect at least 4 dots</string>
+    <string name="ce_profile_pattern_forgot">Forgot the pattern? Remove this user from the user list and sign in again with the server password.</string>
+    <string name="ce_profile_pattern_saved">Pattern set</string>
+    <string name="ce_profile_pattern_removed">Pattern removed</string>
+    <string name="ce_profile_pattern_grid">Unlock pattern, a grid of 3 by 3 dots</string>
 </resources>

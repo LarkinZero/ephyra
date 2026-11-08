@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">刪除數字</string>
     <string name="ce_profile_pin_saved">已設定 PIN</string>
     <string name="ce_profile_pin_removed">已移除 PIN</string>
+    <string name="ce_profile_lock">個人檔案鎖</string>
+    <string name="ce_profile_lock_summary">PIN 或者圖案可以喺呢部裝置防止其他人入呢個個人檔案。佢只會留喺呢部裝置，永遠唔會傳去伺服器。</string>
+    <string name="ce_profile_lock_status_pattern">呢個個人檔案用圖案鎖住咗</string>
+    <string name="ce_profile_lock_status_off">呢個個人檔案冇鎖</string>
+    <string name="ce_profile_lock_type">鎖嘅類型</string>
+    <string name="ce_profile_lock_type_pin_summary">4 至 6 位數字</string>
+    <string name="ce_profile_lock_type_pattern">圖案</string>
+    <string name="ce_profile_lock_ask_on_start">開啟時要求解鎖</string>
+    <string name="ce_profile_lock_ask_on_start_summary">關閉之後，淨係喺轉去呢個個人檔案嗰陣先會要求解鎖</string>
+    <string name="ce_profile_pattern_change">更改圖案</string>
+    <string name="ce_profile_pattern_remove">移除圖案</string>
+    <string name="ce_profile_pattern_enter">畫出 %1$s 嘅圖案</string>
+    <string name="ce_profile_pattern_enter_current">畫出你而家嘅圖案</string>
+    <string name="ce_profile_pattern_choose">畫一個連住最少 4 點嘅圖案</string>
+    <string name="ce_profile_pattern_repeat">再畫一次新圖案</string>
+    <string name="ce_profile_pattern_wrong">圖案唔啱，請再試</string>
+    <string name="ce_profile_pattern_mismatch">兩個圖案唔一樣。請重新畫圖案。</string>
+    <string name="ce_profile_pattern_too_short">最少連住 4 點</string>
+    <string name="ce_profile_pattern_forgot">唔記得圖案？喺用戶清單移除呢個用戶，再用伺服器密碼重新登入。</string>
+    <string name="ce_profile_pattern_saved">已經設定圖案</string>
+    <string name="ce_profile_pattern_removed">已經移除圖案</string>
+    <string name="ce_profile_pattern_grid">解鎖圖案，3 × 3 點嘅格仔</string>
 </resources>

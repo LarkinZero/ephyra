@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">删除数字</string>
     <string name="ce_profile_pin_saved">已设置 PIN 码</string>
     <string name="ce_profile_pin_removed">已移除 PIN 码</string>
+    <string name="ce_profile_lock">个人资料锁</string>
+    <string name="ce_profile_lock_summary">PIN 码或图案可防止他人在此设备上进入此个人资料。它只保存在此设备上，绝不会发送到服务器。</string>
+    <string name="ce_profile_lock_status_pattern">此个人资料已用图案锁定</string>
+    <string name="ce_profile_lock_status_off">此个人资料未锁定</string>
+    <string name="ce_profile_lock_type">锁定类型</string>
+    <string name="ce_profile_lock_type_pin_summary">4 至 6 位数字</string>
+    <string name="ce_profile_lock_type_pattern">图案</string>
+    <string name="ce_profile_lock_ask_on_start">启动时要求解锁</string>
+    <string name="ce_profile_lock_ask_on_start_summary">关闭后，仅在切换到此个人资料时要求解锁</string>
+    <string name="ce_profile_pattern_change">更改图案</string>
+    <string name="ce_profile_pattern_remove">移除图案</string>
+    <string name="ce_profile_pattern_enter">绘制 %1$s 的图案</string>
+    <string name="ce_profile_pattern_enter_current">绘制您当前的图案</string>
+    <string name="ce_profile_pattern_choose">绘制至少连接 4 个点的图案</string>
+    <string name="ce_profile_pattern_repeat">再次绘制新图案</string>
+    <string name="ce_profile_pattern_wrong">图案错误，请重试</string>
+    <string name="ce_profile_pattern_mismatch">两次图案不一致。请重新绘制图案。</string>
+    <string name="ce_profile_pattern_too_short">至少连接 4 个点</string>
+    <string name="ce_profile_pattern_forgot">忘记图案？请从用户列表中移除此用户，然后使用服务器密码重新登录。</string>
+    <string name="ce_profile_pattern_saved">图案已设置</string>
+    <string name="ce_profile_pattern_removed">图案已移除</string>
+    <string name="ce_profile_pattern_grid">解锁图案，3 × 3 点的网格</string>
 </resources>

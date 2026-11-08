@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">1桁削除</string>
     <string name="ce_profile_pin_saved">PINを設定しました</string>
     <string name="ce_profile_pin_removed">PINを削除しました</string>
+    <string name="ce_profile_lock">プロフィールのロック</string>
+    <string name="ce_profile_lock_summary">PINまたはパターンで、このデバイス上のこのプロフィールを他の人から守ります。このデバイスにのみ保存され、サーバーには送信されません。</string>
+    <string name="ce_profile_lock_status_pattern">このプロフィールはパターンでロックされています</string>
+    <string name="ce_profile_lock_status_off">このプロフィールはロックされていません</string>
+    <string name="ce_profile_lock_type">ロックの種類</string>
+    <string name="ce_profile_lock_type_pin_summary">4〜6桁の数字</string>
+    <string name="ce_profile_lock_type_pattern">パターン</string>
+    <string name="ce_profile_lock_ask_on_start">起動時にロック解除を求める</string>
+    <string name="ce_profile_lock_ask_on_start_summary">オフにすると、このプロフィールに切り替えるときだけロック解除を求めます</string>
+    <string name="ce_profile_pattern_change">パターンを変更</string>
+    <string name="ce_profile_pattern_remove">パターンを削除</string>
+    <string name="ce_profile_pattern_enter">%1$sのパターンを描いてください</string>
+    <string name="ce_profile_pattern_enter_current">現在のパターンを描いてください</string>
+    <string name="ce_profile_pattern_choose">4つ以上の点をつなぐパターンを描いてください</string>
+    <string name="ce_profile_pattern_repeat">新しいパターンをもう一度描いてください</string>
+    <string name="ce_profile_pattern_wrong">パターンが違います。もう一度お試しください</string>
+    <string name="ce_profile_pattern_mismatch">パターンが一致しませんでした。もう一度パターンを描いてください。</string>
+    <string name="ce_profile_pattern_too_short">4つ以上の点をつないでください</string>
+    <string name="ce_profile_pattern_forgot">パターンを忘れた場合は、ユーザー一覧からこのユーザーを削除し、サーバーのパスワードでもう一度サインインしてください。</string>
+    <string name="ce_profile_pattern_saved">パターンを設定しました</string>
+    <string name="ce_profile_pattern_removed">パターンを削除しました</string>
+    <string name="ce_profile_pattern_grid">ロック解除パターン、3×3の点のグリッド</string>
 </resources>

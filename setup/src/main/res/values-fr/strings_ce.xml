@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Effacer le chiffre</string>
     <string name="ce_profile_pin_saved">Code PIN défini</string>
     <string name="ce_profile_pin_removed">Code PIN supprimé</string>
+    <string name="ce_profile_lock">Verrouillage du profil</string>
+    <string name="ce_profile_lock_summary">Un code PIN ou un schéma empêche les autres d\'accéder à ce profil sur cet appareil. Il reste sur cet appareil et n\'est jamais envoyé au serveur.</string>
+    <string name="ce_profile_lock_status_pattern">Ce profil est verrouillé par un schéma</string>
+    <string name="ce_profile_lock_status_off">Ce profil n\'est pas verrouillé</string>
+    <string name="ce_profile_lock_type">Type de verrouillage</string>
+    <string name="ce_profile_lock_type_pin_summary">4 à 6 chiffres</string>
+    <string name="ce_profile_lock_type_pattern">Schéma</string>
+    <string name="ce_profile_lock_ask_on_start">Demander le déverrouillage au démarrage</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Désactivé, le verrouillage n\'est demandé qu\'en passant à ce profil</string>
+    <string name="ce_profile_pattern_change">Modifier le schéma</string>
+    <string name="ce_profile_pattern_remove">Supprimer le schéma</string>
+    <string name="ce_profile_pattern_enter">Tracez le schéma de %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Tracez votre schéma actuel</string>
+    <string name="ce_profile_pattern_choose">Tracez un schéma qui relie au moins 4 points</string>
+    <string name="ce_profile_pattern_repeat">Tracez à nouveau le nouveau schéma</string>
+    <string name="ce_profile_pattern_wrong">Schéma incorrect, réessayez</string>
+    <string name="ce_profile_pattern_mismatch">Les schémas ne correspondent pas. Tracez à nouveau un schéma.</string>
+    <string name="ce_profile_pattern_too_short">Reliez au moins 4 points</string>
+    <string name="ce_profile_pattern_forgot">Schéma oublié ? Supprimez cet utilisateur de la liste des utilisateurs et reconnectez-vous avec le mot de passe du serveur.</string>
+    <string name="ce_profile_pattern_saved">Schéma défini</string>
+    <string name="ce_profile_pattern_removed">Schéma supprimé</string>
+    <string name="ce_profile_pattern_grid">Schéma de déverrouillage, une grille de 3 points sur 3</string>
 </resources>

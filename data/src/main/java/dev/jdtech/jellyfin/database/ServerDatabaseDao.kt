@@ -98,8 +98,12 @@ interface ServerDatabaseDao {
     @Query("UPDATE servers SET currentUserId = NULL WHERE id = :serverId")
     suspend fun clearServerCurrentUser(serverId: String)
 
-    @Query("UPDATE users SET pinHash = :hash, pinSalt = :salt WHERE id = :id")
+    // CE (#330): a PIN, or no lock (null hash), resets the lock type to `pin`.
+    @Query("UPDATE users SET pinHash = :hash, pinSalt = :salt, lockType = 'pin' WHERE id = :id")
     suspend fun updateUserPin(id: UUID, hash: String?, salt: String?)
+
+    @Query("UPDATE users SET pinHash = :hash, pinSalt = :salt, lockType = 'pattern' WHERE id = :id")
+    suspend fun updateUserPattern(id: UUID, hash: String, salt: String)
 
     @Query("UPDATE users SET pinOnStart = :pinOnStart WHERE id = :id")
     suspend fun updateUserPinOnStart(id: UUID, pinOnStart: Boolean)

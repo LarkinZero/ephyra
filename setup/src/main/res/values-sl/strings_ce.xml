@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Izbriši števko</string>
     <string name="ce_profile_pin_saved">PIN nastavljen</string>
     <string name="ce_profile_pin_removed">PIN odstranjen</string>
+    <string name="ce_profile_lock">Zaklepanje profila</string>
+    <string name="ce_profile_lock_summary">PIN ali vzorec preprečuje drugim dostop do tega profila v tej napravi. Ostane v tej napravi in se nikoli ne pošlje strežniku.</string>
+    <string name="ce_profile_lock_status_pattern">Ta profil je zaklenjen z vzorcem</string>
+    <string name="ce_profile_lock_status_off">Ta profil ni zaklenjen</string>
+    <string name="ce_profile_lock_type">Vrsta zaklepanja</string>
+    <string name="ce_profile_lock_type_pin_summary">4 do 6 števk</string>
+    <string name="ce_profile_lock_type_pattern">Vzorec</string>
+    <string name="ce_profile_lock_ask_on_start">Ob zagonu zahtevaj odklepanje</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Ko je izklopljeno, se zaklepanje zahteva samo ob preklopu na ta profil</string>
+    <string name="ce_profile_pattern_change">Spremeni vzorec</string>
+    <string name="ce_profile_pattern_remove">Odstrani vzorec</string>
+    <string name="ce_profile_pattern_enter">Narišite vzorec za %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Narišite svoj trenutni vzorec</string>
+    <string name="ce_profile_pattern_choose">Narišite vzorec, ki poveže vsaj 4 pike</string>
+    <string name="ce_profile_pattern_repeat">Še enkrat narišite novi vzorec</string>
+    <string name="ce_profile_pattern_wrong">Napačen vzorec, poskusite znova</string>
+    <string name="ce_profile_pattern_mismatch">Vzorca se ne ujemata. Znova narišite vzorec.</string>
+    <string name="ce_profile_pattern_too_short">Povežite vsaj 4 pike</string>
+    <string name="ce_profile_pattern_forgot">Ste pozabili vzorec? Odstranite tega uporabnika s seznama uporabnikov in se znova prijavite z geslom strežnika.</string>
+    <string name="ce_profile_pattern_saved">Vzorec nastavljen</string>
+    <string name="ce_profile_pattern_removed">Vzorec odstranjen</string>
+    <string name="ce_profile_pattern_grid">Vzorec za odklepanje, mreža 3 × 3 pik</string>
 </resources>

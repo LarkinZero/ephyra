@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Cache ryddet</string>
     <string name="ce_settings_profile_pin">Profil-pinkode</string>
     <string name="ce_settings_profile_pin_summary">Lås denne profil på denne enhed</string>
+    <string name="ce_settings_profile_lock">Profillås</string>
 </resources>

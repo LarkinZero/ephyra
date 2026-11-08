@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Wyczyszczono pamięć podręczną</string>
     <string name="ce_settings_profile_pin">PIN profilu</string>
     <string name="ce_settings_profile_pin_summary">Zablokuj ten profil na tym urządzeniu</string>
+    <string name="ce_settings_profile_lock">Blokada profilu</string>
 </resources>

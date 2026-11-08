@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Đã xóa bộ nhớ đệm</string>
     <string name="ce_settings_profile_pin">Mã PIN hồ sơ</string>
     <string name="ce_settings_profile_pin_summary">Khóa hồ sơ này trên thiết bị này</string>
+    <string name="ce_settings_profile_lock">Khóa hồ sơ</string>
 </resources>

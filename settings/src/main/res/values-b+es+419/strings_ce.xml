@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Cache borrada</string>
     <string name="ce_settings_profile_pin">PIN del perfil</string>
     <string name="ce_settings_profile_pin_summary">Bloquear este perfil en este dispositivo</string>
+    <string name="ce_settings_profile_lock">Bloqueo del perfil</string>
 </resources>
