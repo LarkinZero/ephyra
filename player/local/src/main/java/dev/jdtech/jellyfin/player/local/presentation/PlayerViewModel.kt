@@ -71,6 +71,7 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.ceil
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -201,6 +202,12 @@ constructor(
 
     /** The item whose series audio and subtitle choice was last applied, so it happens once. */
     private var appliedTrackPreferenceItemId: String? = null
+
+    /**
+     * CE (#296): the playing series' saved audio and subtitle choice, read from Room while its
+     * first item buffers. See [seriesTrackPreferences].
+     */
+    private var trackPreferences: Pair<UUID, Deferred<List<SeriesTrackPreferenceDto>>>? = null
 
     private val displayRefreshRateManager = DisplayRefreshRateManager(appPreferences)
     private val trackSelector = DefaultTrackSelector(application)
@@ -530,6 +537,8 @@ constructor(
                     playbackPosition
                 }
 
+            // Read the series' track choice alongside buffering, so it is there when the tracks are.
+            startItem.seriesId?.let { seriesTrackPreferences(it) }
             player.setMediaItems(mediaItems, 0, startPosition)
             player.prepare()
             player.play()
@@ -1162,13 +1171,17 @@ constructor(
                     positionInLanguage = choice.positionInLanguage,
                 )
             }
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                database.insertSeriesTrackPreference(preference)
-            } catch (e: Exception) {
-                Timber.e(e)
-            }
-        }
+        // Also the choice for the series' next items, read back once written (#296).
+        trackPreferences =
+            seriesId to
+                viewModelScope.async(Dispatchers.IO) {
+                    try {
+                        database.insertSeriesTrackPreference(preference)
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                    }
+                    readSeriesTrackPreferences(userId, seriesId)
+                }
     }
 
     override fun onTracksChanged(tracks: Tracks) {
@@ -1185,24 +1198,24 @@ constructor(
         for (trackType in listOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT)) {
             parameters = parameters.clearOverridesOfType(trackType).setTrackTypeDisabled(trackType, false)
         }
-        player.trackSelectionParameters = parameters.build()
+        val reset = parameters.build()
 
-        val seriesId = currentPlayerItem()?.seriesId ?: return
-        val userId = jellyfinApi.userId ?: return
-        viewModelScope.launch {
-            val preferences =
-                try {
-                    withContext(Dispatchers.IO) {
-                        database.getSeriesTrackPreferences(userId, seriesId)
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    return@launch
-                }
+        val preferences = currentPlayerItem()?.seriesId?.let { seriesTrackPreferences(it) }
+        if (preferences == null) {
+            player.trackSelectionParameters = reset
+            return
+        }
+        // Normally read while the item buffered (#296): then the choice goes in with the reset, as
+        // one track selection before the first frame, and nothing switches or rebuffers after it.
+        // Otherwise reset now and apply the choice once it is read.
+        val ready = preferences.isCompleted
+        if (!ready) player.trackSelectionParameters = reset
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val stored = preferences.await()
             if (player.currentMediaItem?.mediaId != itemId) return@launch
 
-            var applied = player.trackSelectionParameters.buildUpon()
-            for (preference in preferences) {
+            var applied = (if (ready) reset else player.trackSelectionParameters).buildUpon()
+            for (preference in stored) {
                 val trackType = preference.trackType
                 if (preference.disabled) {
                     if (trackType == C.TRACK_TYPE_TEXT) {
@@ -1231,6 +1244,32 @@ constructor(
             player.trackSelectionParameters = applied.build()
         }
     }
+
+    /**
+     * The saved choice for [seriesId], read on IO once per series and kept for its next items.
+     * Null without a logged-in user. A read error gives no choice, as if none was saved.
+     */
+    private fun seriesTrackPreferences(seriesId: UUID): Deferred<List<SeriesTrackPreferenceDto>>? {
+        trackPreferences?.let { (id, preferences) -> if (id == seriesId) return preferences }
+        val userId = jellyfinApi.userId ?: return null
+        val preferences =
+            viewModelScope.async(Dispatchers.IO) { readSeriesTrackPreferences(userId, seriesId) }
+        trackPreferences = seriesId to preferences
+        return preferences
+    }
+
+    private suspend fun readSeriesTrackPreferences(
+        userId: UUID,
+        seriesId: UUID,
+    ): List<SeriesTrackPreferenceDto> =
+        try {
+            database.getSeriesTrackPreferences(userId, seriesId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e)
+            emptyList()
+        }
 
     fun switchToTrack(trackType: @C.TrackType Int, index: Int) {
         markUserInteraction()
