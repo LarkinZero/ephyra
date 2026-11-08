@@ -84,36 +84,50 @@ class JellyfinRepositoryImpl(
             jellyfinApi.userViewApi.getUserViews(currentUserId).content.items
         }
 
+    // CE (#281): the item getters fall back to the copy in Room (a download, or the show and season
+    // of a downloaded episode) when the server fails or is slow, see serverOrStored.
     override suspend fun getEpisode(itemId: UUID): FindroidEpisode =
         withContext(Dispatchers.IO) {
-            jellyfinApi.libraryApi
-                .getItem(itemId, currentUserId)
-                .content
-                .toFindroidEpisode(this@JellyfinRepositoryImpl, database)!!
+            val stored = database.getEpisodeOrNull(itemId)
+            serverOrStored(stored?.let { dto -> suspend { dto.toFindroidEpisode(database, currentUserId) } }) {
+                jellyfinApi.libraryApi
+                    .getItem(itemId, currentUserId)
+                    .content
+                    .toFindroidEpisode(this@JellyfinRepositoryImpl, database)!!
+            }
         }
 
     override suspend fun getMovie(itemId: UUID): FindroidMovie =
         withContext(Dispatchers.IO) {
-            jellyfinApi.libraryApi
-                .getItem(itemId, currentUserId)
-                .content
-                .toFindroidMovie(this@JellyfinRepositoryImpl, database)
+            val stored = database.getMovieOrNull(itemId)
+            serverOrStored(stored?.let { dto -> suspend { dto.toFindroidMovie(database, currentUserId) } }) {
+                jellyfinApi.libraryApi
+                    .getItem(itemId, currentUserId)
+                    .content
+                    .toFindroidMovie(this@JellyfinRepositoryImpl, database)
+            }
         }
 
     override suspend fun getShow(itemId: UUID): FindroidShow =
         withContext(Dispatchers.IO) {
-            jellyfinApi.libraryApi
-                .getItem(itemId, currentUserId)
-                .content
-                .toFindroidShow(this@JellyfinRepositoryImpl)
+            val stored = database.getShowOrNull(itemId)
+            serverOrStored(stored?.let { dto -> suspend { dto.toFindroidShow(database, currentUserId) } }) {
+                jellyfinApi.libraryApi
+                    .getItem(itemId, currentUserId)
+                    .content
+                    .toFindroidShow(this@JellyfinRepositoryImpl)
+            }
         }
 
     override suspend fun getSeason(itemId: UUID): FindroidSeason =
         withContext(Dispatchers.IO) {
-            jellyfinApi.libraryApi
-                .getItem(itemId, currentUserId)
-                .content
-                .toFindroidSeason(this@JellyfinRepositoryImpl)
+            val stored = database.getSeasonOrNull(itemId)
+            serverOrStored(stored?.let { dto -> suspend { dto.toFindroidSeason(database, currentUserId) } }) {
+                jellyfinApi.libraryApi
+                    .getItem(itemId, currentUserId)
+                    .content
+                    .toFindroidSeason(this@JellyfinRepositoryImpl)
+            }
         }
 
     override suspend fun getLibraries(): List<FindroidCollection> =
@@ -125,11 +139,30 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getItem(itemId: UUID): FindroidItem? =
         withContext(Dispatchers.IO) {
-            jellyfinApi.libraryApi
-                .getItem(itemId = itemId, userId = currentUserId)
-                .content
-                .toFindroidItem(this@JellyfinRepositoryImpl)
+            serverOrStored(storedItem(itemId)) {
+                jellyfinApi.libraryApi
+                    .getItem(itemId = itemId, userId = currentUserId)
+                    .content
+                    .toFindroidItem(this@JellyfinRepositoryImpl)
+            }
         }
+
+    /** CE (#281): builds [itemId] from Room, or null when Room doesn't have it. */
+    private suspend fun storedItem(itemId: UUID): (suspend () -> FindroidItem)? {
+        database.getMovieOrNull(itemId)?.let {
+            return suspend { it.toFindroidMovie(database, currentUserId) }
+        }
+        database.getEpisodeOrNull(itemId)?.let {
+            return suspend { it.toFindroidEpisode(database, currentUserId) }
+        }
+        database.getShowOrNull(itemId)?.let {
+            return suspend { it.toFindroidShow(database, currentUserId) }
+        }
+        database.getSeasonOrNull(itemId)?.let {
+            return suspend { it.toFindroidSeason(database, currentUserId) }
+        }
+        return null
+    }
 
     override suspend fun getItems(
         parentId: UUID?,

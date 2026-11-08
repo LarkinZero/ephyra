@@ -13,6 +13,7 @@ import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.ReloadPolicy
+import dev.jdtech.jellyfin.repository.serverOrStoredList
 import dev.jdtech.jellyfin.utils.Downloader
 import java.util.UUID
 import javax.inject.Inject
@@ -153,19 +154,35 @@ constructor(
                         }
                     }
                     val resolvedSeriesId = knownSeriesId ?: seasonAsync.await().seriesId
+                    // CE (#281): with downloads in this season, an unreachable server is no
+                    // error: the page lists the downloaded episodes, as the Downloads tab does.
                     val episodesAsync = async {
-                        repository.getEpisodes(
-                            seriesId = resolvedSeriesId,
-                            seasonId = seasonId,
-                            fields = seasonEpisodeFields,
-                            offline = downloadsOnly,
-                        )
+                        val stored =
+                            repository.getEpisodes(
+                                seriesId = resolvedSeriesId,
+                                seasonId = seasonId,
+                                offline = true,
+                            )
+                        if (downloadsOnly) stored
+                        else
+                            serverOrStoredList(stored) {
+                                repository.getEpisodes(
+                                    seriesId = resolvedSeriesId,
+                                    seasonId = seasonId,
+                                    fields = seasonEpisodeFields,
+                                )
+                            }
                     }
                     val seriesSeasonsAsync = async {
-                        if (includeSeriesSeasons) {
-                            repository.getSeasons(resolvedSeriesId, offline = downloadsOnly)
-                        } else {
+                        if (!includeSeriesSeasons) {
                             emptyList()
+                        } else {
+                            val stored = repository.getSeasons(resolvedSeriesId, offline = true)
+                            if (downloadsOnly) stored
+                            else
+                                serverOrStoredList(stored) {
+                                    repository.getSeasons(resolvedSeriesId)
+                                }
                         }
                     }
                     val season = seasonAsync.await()

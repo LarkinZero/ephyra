@@ -15,6 +15,8 @@ import dev.jdtech.jellyfin.models.mergeDuplicateRoles
 import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.ReloadPolicy
+import dev.jdtech.jellyfin.repository.serverOrStored
+import dev.jdtech.jellyfin.repository.serverOrStoredList
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import java.util.UUID
@@ -85,9 +87,28 @@ constructor(
                 // try/catch (see HomeViewModel.loadData).
                 coroutineScope {
                     val showAsync = async { repository.getShow(showId) }
-                    val nextUpAsync = async { if (downloadsOnly) null else getNextUp(showId) }
-                    val seasonsAsync =
-                        async { repository.getSeasons(showId, offline = downloadsOnly) }
+                    // CE (#281): the seasons with downloads, from Room. When there are any, an
+                    // unreachable server is no error: the page shows what Room has, as the
+                    // Downloads tab does.
+                    val storedSeasonsAsync = async { repository.getSeasons(showId, offline = true) }
+                    val nextUpAsync = async {
+                        if (downloadsOnly) null
+                        else
+                            serverOrStored(
+                                storedSeasonsAsync.await().takeIf { it.isNotEmpty() }?.let {
+                                    suspend { null }
+                                }
+                            ) {
+                                getNextUp(showId)
+                            }
+                    }
+                    val seasonsAsync = async {
+                        if (downloadsOnly) storedSeasonsAsync.await()
+                        else
+                            serverOrStoredList(storedSeasonsAsync.await()) {
+                                repository.getSeasons(showId)
+                            }
+                    }
                     // The download counts are extras: when they fail, the page still shows.
                     val localCountsAsync = async { optional { getLocalEpisodeCounts(showId) } }
                     val serverTotalsAsync =
