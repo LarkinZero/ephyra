@@ -61,6 +61,7 @@ import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
+import dev.jdtech.jellyfin.player.local.mpv.mpvSubtitleOptionChanges
 import dev.jdtech.jellyfin.player.local.mpv.mpvSubtitleOptions
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.PlaybackEvents
@@ -83,7 +84,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -421,15 +421,14 @@ constructor(
             else -> throw RuntimeException("$playerBackend is not a valid player backend")
         }
 
-        // CE (#300): mpv takes a subtitle setting changed while it plays (from the settings, with
+        // CE (#300, #308): mpv takes a subtitle setting changed while it plays (from the settings, with
         // the player in picture-in-picture). ExoPlayer's SubtitleView is styled when the player
         // screen opens.
         (player as? MPVPlayer)?.let { mpvPlayer ->
             viewModelScope.launch {
-                appPreferences
-                    .observe(appPreferences.subtitleOverrideEmbeddedStyles)
-                    .drop(1)
-                    .collect { mpvPlayer.updateSubtitleOptions(appPreferences.mpvSubtitleOptions()) }
+                appPreferences.mpvSubtitleOptionChanges().collect {
+                    mpvPlayer.updateSubtitleOptions(it)
+                }
             }
         }
 
