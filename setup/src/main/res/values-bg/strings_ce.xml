@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Изтриване на цифра</string>
     <string name="ce_profile_pin_saved">ПИН е зададен</string>
     <string name="ce_profile_pin_removed">ПИН е премахнат</string>
+    <string name="ce_profile_lock">Заключване на профила</string>
+    <string name="ce_profile_lock_summary">ПИН или фигура пазят този профил от други хора на това устройство. Остават на това устройство и никога не се изпращат към сървъра.</string>
+    <string name="ce_profile_lock_status_pattern">Този профил е заключен с фигура</string>
+    <string name="ce_profile_lock_status_off">Този профил не е заключен</string>
+    <string name="ce_profile_lock_type">Тип заключване</string>
+    <string name="ce_profile_lock_type_pin_summary">От 4 до 6 цифри</string>
+    <string name="ce_profile_lock_type_pattern">Фигура</string>
+    <string name="ce_profile_lock_ask_on_start">Искане за отключване при стартиране</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Когато е изключено, заключването се иска само при превключване към този профил</string>
+    <string name="ce_profile_pattern_change">Промяна на фигурата</string>
+    <string name="ce_profile_pattern_remove">Премахване на фигурата</string>
+    <string name="ce_profile_pattern_enter">Начертайте фигурата за %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Начертайте текущата си фигура</string>
+    <string name="ce_profile_pattern_choose">Начертайте фигура, която свързва поне 4 точки</string>
+    <string name="ce_profile_pattern_repeat">Начертайте новата фигура отново</string>
+    <string name="ce_profile_pattern_wrong">Грешна фигура, опитайте отново</string>
+    <string name="ce_profile_pattern_mismatch">Фигурите не съвпадат. Начертайте фигура отново.</string>
+    <string name="ce_profile_pattern_too_short">Свържете поне 4 точки</string>
+    <string name="ce_profile_pattern_forgot">Забравихте фигурата? Премахнете този потребител от списъка с потребители и влезте отново с паролата за сървъра.</string>
+    <string name="ce_profile_pattern_saved">Фигурата е зададена</string>
+    <string name="ce_profile_pattern_removed">Фигурата е премахната</string>
+    <string name="ce_profile_pattern_grid">Фигура за отключване, мрежа от 3 на 3 точки</string>
 </resources>

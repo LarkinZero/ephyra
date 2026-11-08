@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">حذف رقم</string>
     <string name="ce_profile_pin_saved">تم تعيين رمز PIN</string>
     <string name="ce_profile_pin_removed">تمت إزالة رمز PIN</string>
+    <string name="ce_profile_lock">قفل الملف الشخصي</string>
+    <string name="ce_profile_lock_summary">يمنع رمز PIN أو النمط الآخرين من الدخول إلى هذا الملف الشخصي على هذا الجهاز. يبقى على هذا الجهاز ولا يُرسل أبدًا إلى الخادم.</string>
+    <string name="ce_profile_lock_status_pattern">هذا الملف الشخصي مقفل بنمط</string>
+    <string name="ce_profile_lock_status_off">هذا الملف الشخصي غير مقفل</string>
+    <string name="ce_profile_lock_type">نوع القفل</string>
+    <string name="ce_profile_lock_type_pin_summary">من 4 إلى 6 أرقام</string>
+    <string name="ce_profile_lock_type_pattern">النمط</string>
+    <string name="ce_profile_lock_ask_on_start">طلب فتح القفل عند البدء</string>
+    <string name="ce_profile_lock_ask_on_start_summary">عند الإيقاف، يُطلب القفل فقط عند التبديل إلى هذا الملف الشخصي</string>
+    <string name="ce_profile_pattern_change">تغيير النمط</string>
+    <string name="ce_profile_pattern_remove">إزالة النمط</string>
+    <string name="ce_profile_pattern_enter">ارسم النمط الخاص بـ %1$s</string>
+    <string name="ce_profile_pattern_enter_current">ارسم نمطك الحالي</string>
+    <string name="ce_profile_pattern_choose">ارسم نمطًا يصل 4 نقاط على الأقل</string>
+    <string name="ce_profile_pattern_repeat">ارسم النمط الجديد مرة أخرى</string>
+    <string name="ce_profile_pattern_wrong">نمط خاطئ، حاول مرة أخرى</string>
+    <string name="ce_profile_pattern_mismatch">النمطان غير متطابقين. ارسم نمطًا مرة أخرى.</string>
+    <string name="ce_profile_pattern_too_short">صِل 4 نقاط على الأقل</string>
+    <string name="ce_profile_pattern_forgot">هل نسيت النمط؟ أزل هذا المستخدم من قائمة المستخدمين وسجّل الدخول مرة أخرى بكلمة مرور الخادم.</string>
+    <string name="ce_profile_pattern_saved">تم تعيين النمط</string>
+    <string name="ce_profile_pattern_removed">تمت إزالة النمط</string>
+    <string name="ce_profile_pattern_grid">نمط فتح القفل، شبكة من 3 × 3 نقاط</string>
 </resources>

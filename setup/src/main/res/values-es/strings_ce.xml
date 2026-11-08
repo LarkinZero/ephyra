@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Borrar dígito</string>
     <string name="ce_profile_pin_saved">PIN establecido</string>
     <string name="ce_profile_pin_removed">PIN quitado</string>
+    <string name="ce_profile_lock">Bloqueo del perfil</string>
+    <string name="ce_profile_lock_summary">Un PIN o un patrón impide que otras personas entren en este perfil en este dispositivo. Se queda en este dispositivo y nunca se envía al servidor.</string>
+    <string name="ce_profile_lock_status_pattern">Este perfil está bloqueado con un patrón</string>
+    <string name="ce_profile_lock_status_off">Este perfil no está bloqueado</string>
+    <string name="ce_profile_lock_type">Tipo de bloqueo</string>
+    <string name="ce_profile_lock_type_pin_summary">De 4 a 6 dígitos</string>
+    <string name="ce_profile_lock_type_pattern">Patrón</string>
+    <string name="ce_profile_lock_ask_on_start">Pedir el desbloqueo al iniciar</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Si está desactivado, el bloqueo solo se pide al cambiar a este perfil</string>
+    <string name="ce_profile_pattern_change">Cambiar patrón</string>
+    <string name="ce_profile_pattern_remove">Quitar patrón</string>
+    <string name="ce_profile_pattern_enter">Dibuja el patrón de %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Dibuja tu patrón actual</string>
+    <string name="ce_profile_pattern_choose">Dibuja un patrón que una al menos 4 puntos</string>
+    <string name="ce_profile_pattern_repeat">Dibuja el nuevo patrón otra vez</string>
+    <string name="ce_profile_pattern_wrong">Patrón incorrecto, inténtalo de nuevo</string>
+    <string name="ce_profile_pattern_mismatch">Los patrones no coinciden. Dibuja un patrón otra vez.</string>
+    <string name="ce_profile_pattern_too_short">Une al menos 4 puntos</string>
+    <string name="ce_profile_pattern_forgot">¿Has olvidado el patrón? Quita este usuario de la lista de usuarios y vuelve a iniciar sesión con la contraseña del servidor.</string>
+    <string name="ce_profile_pattern_saved">Patrón establecido</string>
+    <string name="ce_profile_pattern_removed">Patrón quitado</string>
+    <string name="ce_profile_pattern_grid">Patrón de desbloqueo, una cuadrícula de 3 por 3 puntos</string>
 </resources>

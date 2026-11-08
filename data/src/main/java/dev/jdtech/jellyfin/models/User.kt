@@ -33,8 +33,31 @@ data class User(
     val pinSalt: String? = null,
     /** Whether a profile with a PIN also asks for it when the app starts in it (not only on a switch). */
     @ColumnInfo(defaultValue = "1") val pinOnStart: Boolean = true,
+    /**
+     * CE (#330): what [pinHash] is the hash of, [ProfileLockType.value]: `pin` (digits) or
+     * `pattern` (dots on a 3×3 grid). One lock type per profile; `pin` when the profile has none.
+     */
+    @ColumnInfo(defaultValue = "pin") val lockType: String = ProfileLockType.PIN.value,
 )
 
-/** CE (#299): the profile is locked behind a local PIN. */
+/** CE (#330): how a locked profile is unlocked. TV only offers [PIN]. */
+enum class ProfileLockType(val value: String) {
+    PIN("pin"),
+    PATTERN("pattern");
+
+    companion object {
+        /** Unknown values read as [PIN], the type every lock had before #330. */
+        fun fromValue(value: String?): ProfileLockType =
+            entries.firstOrNull { it.value == value } ?: PIN
+    }
+}
+
+/**
+ * CE (#299): the profile is locked behind a local PIN, or since #330 a pattern ([profileLockType]).
+ */
 val User.hasPin: Boolean
     get() = pinHash != null
+
+/** CE (#330): the type of the profile's lock, or null when it has none. */
+val User.profileLockType: ProfileLockType?
+    get() = if (hasPin) ProfileLockType.fromValue(lockType) else null

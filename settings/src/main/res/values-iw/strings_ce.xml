@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">המטמון נוקה</string>
     <string name="ce_settings_profile_pin">קוד PIN לפרופיל</string>
     <string name="ce_settings_profile_pin_summary">נעילת הפרופיל הזה במכשיר הזה</string>
+    <string name="ce_settings_profile_lock">נעילת פרופיל</string>
 </resources>

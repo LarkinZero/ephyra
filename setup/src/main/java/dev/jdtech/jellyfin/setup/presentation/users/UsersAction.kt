@@ -18,5 +18,8 @@ sealed interface UsersAction {
     // CE (#299)
     data class OnPinSubmit(val pin: String) : UsersAction
 
+    /** CE (#330): the pattern drawn for a profile locked with one. */
+    data class OnPatternSubmit(val dots: List<Int>) : UsersAction
+
     data object OnPinDismiss : UsersAction
 }

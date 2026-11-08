@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Cache-ul a fost golit</string>
     <string name="ce_settings_profile_pin">PIN-ul profilului</string>
     <string name="ce_settings_profile_pin_summary">Blochează acest profil pe acest dispozitiv</string>
+    <string name="ce_settings_profile_lock">Blocarea profilului</string>
 </resources>

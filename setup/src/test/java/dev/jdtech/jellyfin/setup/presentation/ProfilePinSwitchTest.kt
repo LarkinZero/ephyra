@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.setup.presentation
 
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.models.ProfileLockType
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.profilelock.ProfileLock
@@ -200,6 +201,121 @@ class ProfilePinSwitchTest {
         assertFalse(viewModel.state.value.hasPin)
     }
 
+    // CE (#330): the pattern lock.
+    private val square = listOf(0, 1, 4, 3)
+    private val zed = listOf(0, 1, 2, 4, 6, 7, 8)
+
+    @Test
+    fun `setting a pattern draws it twice and a mismatch starts over`() = runTest {
+        val viewModel = ProfilePinSettingsViewModel(repository, lock)
+
+        viewModel.onAction(ProfilePinSettingsAction.OnSetLockClick(ProfileLockType.PATTERN))
+        assertEquals(PinStep.New, viewModel.state.value.step)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.prompt?.lockType)
+        // Too short: not taken, the step stays.
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(listOf(0, 1, 2)))
+        assertEquals(PinStep.New, viewModel.state.value.step)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(zed))
+        assertEquals(PinStep.Confirm("0-1-2-4-6-7-8"), viewModel.state.value.step)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        assertEquals(PinStep.New, viewModel.state.value.step)
+        assertEquals(PinError.MISMATCH, viewModel.state.value.prompt?.error)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.prompt?.lockType)
+        assertFalse(lock.hasPin(kid.id))
+
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(zed))
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(zed))
+
+        assertNull(viewModel.state.value.step)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.lockType)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.changedLockType)
+        assertTrue(lock.verifyPattern(kid.id, zed))
+        assertFalse(ProfileLock.isLockedOnStart(users[kid.id], lock.unlockedUserIds.value))
+    }
+
+    @Test
+    fun `switching between PIN and pattern asks for the current lock`() = runTest {
+        server.currentUserId = adult.id
+        lock.unlock(adult.id)
+        val viewModel = ProfilePinSettingsViewModel(repository, lock)
+
+        // PIN to pattern: the PIN first. A pattern is not the current lock.
+        viewModel.onAction(ProfilePinSettingsAction.OnSetLockClick(ProfileLockType.PATTERN))
+        assertEquals(PinStep.Current(forRemoval = false), viewModel.state.value.step)
+        assertEquals(ProfileLockType.PIN, viewModel.state.value.prompt?.lockType)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        assertEquals(PinError.WRONG, viewModel.state.value.prompt?.error)
+        viewModel.onAction(ProfilePinSettingsAction.OnPinSubmit("2468"))
+        assertEquals(PinStep.New, viewModel.state.value.step)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.prompt?.lockType)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        assertEquals(ProfileLockType.PATTERN, lock.lockType(adult.id))
+        assertFalse(lock.verifyPin(adult.id, "2468"))
+
+        // And back: the pattern first.
+        viewModel.onAction(ProfilePinSettingsAction.OnSetLockClick(ProfileLockType.PIN))
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.prompt?.lockType)
+        viewModel.onAction(ProfilePinSettingsAction.OnPinSubmit("2468"))
+        assertEquals(PinError.WRONG, viewModel.state.value.prompt?.error)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        assertEquals(ProfileLockType.PIN, viewModel.state.value.prompt?.lockType)
+        viewModel.onAction(ProfilePinSettingsAction.OnPinSubmit("1111"))
+        viewModel.onAction(ProfilePinSettingsAction.OnPinSubmit("1111"))
+        assertEquals(ProfileLockType.PIN, lock.lockType(adult.id))
+        assertTrue(lock.verifyPin(adult.id, "1111"))
+        assertFalse(lock.verifyPattern(adult.id, square))
+    }
+
+    @Test
+    fun `removing a pattern asks for it`() = runTest {
+        server.currentUserId = adult.id
+        lock.setPattern(adult.id, square)
+        val viewModel = ProfilePinSettingsViewModel(repository, lock)
+
+        viewModel.onAction(ProfilePinSettingsAction.OnRemoveClick)
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.prompt?.lockType)
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(zed))
+        assertTrue(lock.hasPin(adult.id))
+        viewModel.onAction(ProfilePinSettingsAction.OnPatternSubmit(square))
+        assertNull(lock.lockType(adult.id))
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.changedLockType)
+    }
+
+    @Test
+    fun `switching to a pattern profile asks for the pattern`() = runTest {
+        lock.setPattern(adult.id, square)
+        lock.unlock(kid.id)
+        val viewModel = UsersViewModel(repository, lock)
+        viewModel.loadUsers()
+
+        viewModel.onAction(UsersAction.OnUserClick(adult.id))
+        assertEquals(ProfileLockType.PATTERN, viewModel.state.value.pinPrompt?.lockType)
+        viewModel.onAction(UsersAction.OnPatternSubmit(zed))
+        assertEquals(PinError.WRONG, viewModel.state.value.pinPrompt?.error)
+        assertEquals(kid.id, server.currentUserId)
+
+        viewModel.onAction(UsersAction.OnPatternSubmit(square))
+        assertEquals(UsersEvent.NavigateToHome, viewModel.events.first())
+        assertEquals(adult.id, server.currentUserId)
+    }
+
+    @Test
+    fun `the start lock of a pattern profile shows the grid`() = runTest {
+        lock.setPattern(adult.id, square)
+        server.currentUserId = adult.id
+        val restarted = ProfileLock(fakeDao(), Dispatchers.Unconfined)
+
+        val gate = ProfilePinGateViewModel(repository, restarted)
+        assertEquals(ProfileLockType.PATTERN, gate.state.value.prompt?.lockType)
+        gate.onAction(ProfilePinGateAction.OnPatternSubmit(zed))
+        assertEquals(PinError.WRONG, gate.state.value.prompt?.error)
+        assertTrue(ProfileLock.isLockedOnStart(users[adult.id], restarted.unlockedUserIds.value))
+
+        gate.onAction(ProfilePinGateAction.OnPatternSubmit(square))
+        assertFalse(ProfileLock.isLockedOnStart(users[adult.id], restarted.unlockedUserIds.value))
+    }
+
     private fun fakeDao(): ServerDatabaseDao =
         Proxy.newProxyInstance(
             ServerDatabaseDao::class.java.classLoader,
@@ -210,7 +326,24 @@ class ProfilePinSwitchTest {
                 "updateUserPin" -> {
                     val id = args[0] as UUID
                     users[id]?.let {
-                        users[id] = it.copy(pinHash = args[1] as String?, pinSalt = args[2] as String?)
+                        users[id] =
+                            it.copy(
+                                pinHash = args[1] as String?,
+                                pinSalt = args[2] as String?,
+                                lockType = "pin",
+                            )
+                    }
+                    Unit
+                }
+                "updateUserPattern" -> {
+                    val id = args[0] as UUID
+                    users[id]?.let {
+                        users[id] =
+                            it.copy(
+                                pinHash = args[1] as String,
+                                pinSalt = args[2] as String,
+                                lockType = "pattern",
+                            )
                     }
                     Unit
                 }

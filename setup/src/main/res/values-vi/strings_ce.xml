@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Xóa chữ số</string>
     <string name="ce_profile_pin_saved">Đã đặt mã PIN</string>
     <string name="ce_profile_pin_removed">Đã xóa mã PIN</string>
+    <string name="ce_profile_lock">Khóa hồ sơ</string>
+    <string name="ce_profile_lock_summary">Mã PIN hoặc hình mở khóa giúp người khác không vào được hồ sơ này trên thiết bị này. Nó chỉ lưu trên thiết bị này và không bao giờ được gửi lên máy chủ.</string>
+    <string name="ce_profile_lock_status_pattern">Hồ sơ này được khóa bằng hình mở khóa</string>
+    <string name="ce_profile_lock_status_off">Hồ sơ này không bị khóa</string>
+    <string name="ce_profile_lock_type">Kiểu khóa</string>
+    <string name="ce_profile_lock_type_pin_summary">4 đến 6 chữ số</string>
+    <string name="ce_profile_lock_type_pattern">Hình mở khóa</string>
+    <string name="ce_profile_lock_ask_on_start">Yêu cầu mở khóa khi khởi động</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Khi tắt, chỉ yêu cầu mở khóa khi chuyển sang hồ sơ này</string>
+    <string name="ce_profile_pattern_change">Đổi hình mở khóa</string>
+    <string name="ce_profile_pattern_remove">Xóa hình mở khóa</string>
+    <string name="ce_profile_pattern_enter">Vẽ hình mở khóa của %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Vẽ hình mở khóa hiện tại của bạn</string>
+    <string name="ce_profile_pattern_choose">Vẽ hình nối ít nhất 4 điểm</string>
+    <string name="ce_profile_pattern_repeat">Vẽ lại hình mở khóa mới</string>
+    <string name="ce_profile_pattern_wrong">Sai hình mở khóa, hãy thử lại</string>
+    <string name="ce_profile_pattern_mismatch">Hai hình không khớp. Hãy vẽ lại hình mở khóa.</string>
+    <string name="ce_profile_pattern_too_short">Nối ít nhất 4 điểm</string>
+    <string name="ce_profile_pattern_forgot">Quên hình mở khóa? Hãy xóa người dùng này khỏi danh sách người dùng và đăng nhập lại bằng mật khẩu máy chủ.</string>
+    <string name="ce_profile_pattern_saved">Đã đặt hình mở khóa</string>
+    <string name="ce_profile_pattern_removed">Đã xóa hình mở khóa</string>
+    <string name="ce_profile_pattern_grid">Hình mở khóa, lưới 3 × 3 điểm</string>
 </resources>

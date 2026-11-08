@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Ziffer löschen</string>
     <string name="ce_profile_pin_saved">PIN festgelegt</string>
     <string name="ce_profile_pin_removed">PIN entfernt</string>
+    <string name="ce_profile_lock">Profilsperre</string>
+    <string name="ce_profile_lock_summary">Eine PIN oder ein Muster hält andere von diesem Profil auf diesem Gerät fern. Sie bleibt auf diesem Gerät und wird nie an den Server gesendet.</string>
+    <string name="ce_profile_lock_status_pattern">Dieses Profil ist mit einem Muster gesperrt</string>
+    <string name="ce_profile_lock_status_off">Dieses Profil ist nicht gesperrt</string>
+    <string name="ce_profile_lock_type">Art der Sperre</string>
+    <string name="ce_profile_lock_type_pin_summary">4 bis 6 Ziffern</string>
+    <string name="ce_profile_lock_type_pattern">Muster</string>
+    <string name="ce_profile_lock_ask_on_start">Beim Start zum Entsperren auffordern</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Wenn aus, wird die Sperre nur beim Wechsel zu diesem Profil abgefragt</string>
+    <string name="ce_profile_pattern_change">Muster ändern</string>
+    <string name="ce_profile_pattern_remove">Muster entfernen</string>
+    <string name="ce_profile_pattern_enter">Zeichne das Muster für %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Zeichne dein aktuelles Muster</string>
+    <string name="ce_profile_pattern_choose">Zeichne ein Muster, das mindestens 4 Punkte verbindet</string>
+    <string name="ce_profile_pattern_repeat">Zeichne das neue Muster noch einmal</string>
+    <string name="ce_profile_pattern_wrong">Falsches Muster, versuche es noch einmal</string>
+    <string name="ce_profile_pattern_mismatch">Die Muster stimmen nicht überein. Zeichne erneut ein Muster.</string>
+    <string name="ce_profile_pattern_too_short">Verbinde mindestens 4 Punkte</string>
+    <string name="ce_profile_pattern_forgot">Muster vergessen? Entferne diesen Benutzer aus der Benutzerliste und melde dich mit dem Serverpasswort erneut an.</string>
+    <string name="ce_profile_pattern_saved">Muster festgelegt</string>
+    <string name="ce_profile_pattern_removed">Muster entfernt</string>
+    <string name="ce_profile_pattern_grid">Entsperrmuster, ein Raster aus 3 × 3 Punkten</string>
 </resources>

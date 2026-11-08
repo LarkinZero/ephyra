@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Hapus digit</string>
     <string name="ce_profile_pin_saved">PIN diatur</string>
     <string name="ce_profile_pin_removed">PIN dihapus</string>
+    <string name="ce_profile_lock">Kunci profil</string>
+    <string name="ce_profile_lock_summary">PIN atau pola menjaga orang lain agar tidak masuk ke profil ini di perangkat ini. Kunci tetap di perangkat ini dan tidak pernah dikirim ke server.</string>
+    <string name="ce_profile_lock_status_pattern">Profil ini dikunci dengan pola</string>
+    <string name="ce_profile_lock_status_off">Profil ini tidak dikunci</string>
+    <string name="ce_profile_lock_type">Jenis kunci</string>
+    <string name="ce_profile_lock_type_pin_summary">4 sampai 6 digit</string>
+    <string name="ce_profile_lock_type_pattern">Pola</string>
+    <string name="ce_profile_lock_ask_on_start">Minta buka kunci saat mulai</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Jika nonaktif, kunci hanya diminta saat beralih ke profil ini</string>
+    <string name="ce_profile_pattern_change">Ubah pola</string>
+    <string name="ce_profile_pattern_remove">Hapus pola</string>
+    <string name="ce_profile_pattern_enter">Gambar pola untuk %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Gambar pola Anda saat ini</string>
+    <string name="ce_profile_pattern_choose">Gambar pola yang menghubungkan minimal 4 titik</string>
+    <string name="ce_profile_pattern_repeat">Gambar pola baru sekali lagi</string>
+    <string name="ce_profile_pattern_wrong">Pola salah, coba lagi</string>
+    <string name="ce_profile_pattern_mismatch">Pola tidak cocok. Gambar pola lagi.</string>
+    <string name="ce_profile_pattern_too_short">Hubungkan minimal 4 titik</string>
+    <string name="ce_profile_pattern_forgot">Lupa pola? Hapus pengguna ini dari daftar pengguna dan masuk lagi dengan sandi server.</string>
+    <string name="ce_profile_pattern_saved">Pola disetel</string>
+    <string name="ce_profile_pattern_removed">Pola dihapus</string>
+    <string name="ce_profile_pattern_grid">Pola buka kunci, kisi 3 × 3 titik</string>
 </resources>

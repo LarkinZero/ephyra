@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">מחיקת ספרה</string>
     <string name="ce_profile_pin_saved">קוד ה-PIN הוגדר</string>
     <string name="ce_profile_pin_removed">קוד ה-PIN הוסר</string>
+    <string name="ce_profile_lock">נעילת פרופיל</string>
+    <string name="ce_profile_lock_summary">קוד PIN או קו ביטול נעילה מונעים מאחרים להיכנס לפרופיל הזה במכשיר הזה. הם נשארים במכשיר הזה ולעולם לא נשלחים לשרת.</string>
+    <string name="ce_profile_lock_status_pattern">הפרופיל הזה נעול בקו ביטול נעילה</string>
+    <string name="ce_profile_lock_status_off">הפרופיל הזה לא נעול</string>
+    <string name="ce_profile_lock_type">סוג הנעילה</string>
+    <string name="ce_profile_lock_type_pin_summary">4 עד 6 ספרות</string>
+    <string name="ce_profile_lock_type_pattern">קו ביטול נעילה</string>
+    <string name="ce_profile_lock_ask_on_start">לבקש ביטול נעילה בהפעלה</string>
+    <string name="ce_profile_lock_ask_on_start_summary">כשהאפשרות כבויה, הנעילה נדרשת רק במעבר לפרופיל הזה</string>
+    <string name="ce_profile_pattern_change">שינוי קו ביטול הנעילה</string>
+    <string name="ce_profile_pattern_remove">הסרת קו ביטול הנעילה</string>
+    <string name="ce_profile_pattern_enter">יש לשרטט את קו ביטול הנעילה של %1$s</string>
+    <string name="ce_profile_pattern_enter_current">יש לשרטט את קו ביטול הנעילה הנוכחי</string>
+    <string name="ce_profile_pattern_choose">יש לשרטט קו שמחבר לפחות 4 נקודות</string>
+    <string name="ce_profile_pattern_repeat">יש לשרטט שוב את הקו החדש</string>
+    <string name="ce_profile_pattern_wrong">קו שגוי, כדאי לנסות שוב</string>
+    <string name="ce_profile_pattern_mismatch">הקווים לא תאמו. יש לשרטט קו שוב.</string>
+    <string name="ce_profile_pattern_too_short">יש לחבר לפחות 4 נקודות</string>
+    <string name="ce_profile_pattern_forgot">שכחת את קו ביטול הנעילה? יש להסיר את המשתמש הזה מרשימת המשתמשים ולהתחבר שוב עם הסיסמה של השרת.</string>
+    <string name="ce_profile_pattern_saved">קו ביטול הנעילה הוגדר</string>
+    <string name="ce_profile_pattern_removed">קו ביטול הנעילה הוסר</string>
+    <string name="ce_profile_pattern_grid">קו ביטול נעילה, רשת של 3 על 3 נקודות</string>
 </resources>

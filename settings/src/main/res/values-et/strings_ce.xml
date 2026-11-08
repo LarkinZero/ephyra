@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Vahemälu tühjendatud</string>
     <string name="ce_settings_profile_pin">Profiili PIN-kood</string>
     <string name="ce_settings_profile_pin_summary">Lukusta see profiil selles seadmes</string>
+    <string name="ce_settings_profile_lock">Profiili lukk</string>
 </resources>

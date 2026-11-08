@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">تم مسح التخزين المؤقت</string>
     <string name="ce_settings_profile_pin">رمز PIN للملف الشخصي</string>
     <string name="ce_settings_profile_pin_summary">اقفل هذا الملف الشخصي على هذا الجهاز</string>
+    <string name="ce_settings_profile_lock">قفل الملف الشخصي</string>
 </resources>

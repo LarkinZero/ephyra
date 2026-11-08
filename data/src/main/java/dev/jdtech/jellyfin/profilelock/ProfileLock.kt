@@ -1,7 +1,9 @@
 package dev.jdtech.jellyfin.profilelock
 
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.models.ProfileLockType
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.models.profileLockType
 import dev.jdtech.jellyfin.models.hasPin
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,6 +19,9 @@ import kotlinx.coroutines.withContext
  * The PIN is a salted hash on the user's row ([User.pinHash]); it never leaves the device. A profile
  * stays unlocked until the app switches to another profile or the process ends. Removing the user or
  * its server, or signing in again (which rewrites the row), removes the PIN.
+ *
+ * Since #330 the lock can also be an unlock pattern ([User.lockType]), offered on phone only. A
+ * profile has one lock at a time: setting a pattern replaces its PIN and the other way round.
  *
  * One instance per process: `core` provides it as a singleton.
  */
@@ -50,9 +55,26 @@ class ProfileLock(
         database.updateUserPin(userId, hash, salt)
     }
 
+    /**
+     * CE (#330): sets or replaces the lock with a pattern, replacing a PIN. Unlocks the profile, as
+     * [setPin] does.
+     */
+    suspend fun setPattern(userId: UUID, dots: List<Int>) {
+        require(ProfilePattern.isValid(dots)) { "A pattern connects 4 or more distinct dots" }
+        val salt = ProfilePinHasher.newSalt()
+        val hash =
+            withContext(hashDispatcher) { ProfilePinHasher.hash(ProfilePattern.serialize(dots), salt) }
+        unlock(userId)
+        database.updateUserPattern(userId, hash, salt)
+    }
+
+    /** Removes the profile's lock, PIN or pattern. */
     suspend fun clearPin(userId: UUID) {
         database.updateUserPin(userId, null, null)
     }
+
+    /** CE (#330): the type of the profile's lock, or null when it has none. */
+    suspend fun lockType(userId: UUID): ProfileLockType? = database.getUser(userId)?.profileLockType
 
     /** Changed from inside the profile, so it stays open when the start lock is turned on. */
     suspend fun setPinOnStart(userId: UUID, pinOnStart: Boolean) {
@@ -60,12 +82,24 @@ class ProfileLock(
         database.updateUserPinOnStart(userId, pinOnStart)
     }
 
-    /** True when [pin] is the profile's PIN, or the profile has none. */
-    suspend fun verifyPin(userId: UUID, pin: String): Boolean {
+    /** True when [pin] is the profile's PIN, or the profile has no lock. False for a pattern lock. */
+    suspend fun verifyPin(userId: UUID, pin: String): Boolean =
+        verify(userId, ProfileLockEntry.Pin(pin))
+
+    /** CE (#330): true when [dots] is the profile's pattern, or the profile has no lock. */
+    suspend fun verifyPattern(userId: UUID, dots: List<Int>): Boolean =
+        verify(userId, ProfileLockEntry.Pattern(dots))
+
+    /**
+     * CE (#330): true when [entry] unlocks the profile, or the profile has no lock. An entry of the
+     * other type (digits for a pattern lock) never does.
+     */
+    suspend fun verify(userId: UUID, entry: ProfileLockEntry): Boolean {
         val user = database.getUser(userId) ?: return false
         val hash = user.pinHash ?: return true
         val salt = user.pinSalt ?: return false
-        return withContext(hashDispatcher) { ProfilePinHasher.verify(pin, salt, hash) }
+        if (user.profileLockType != entry.type) return false
+        return withContext(hashDispatcher) { ProfilePinHasher.verify(entry, salt, hash) }
     }
 
     /** Whether switching to [userId] has to ask for its PIN first. */

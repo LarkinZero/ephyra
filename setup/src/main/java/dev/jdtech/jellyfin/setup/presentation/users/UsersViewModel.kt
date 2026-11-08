@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.profilelock.ProfileLock
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
+import dev.jdtech.jellyfin.models.ProfileLockType
+import dev.jdtech.jellyfin.profilelock.ProfileLockEntry
 import dev.jdtech.jellyfin.setup.presentation.pin.PinError
 import dev.jdtech.jellyfin.setup.presentation.pin.PinPrompt
 import java.util.UUID
@@ -85,8 +87,15 @@ constructor(private val repository: SetupRepository, private val profileLock: Pr
         viewModelScope.launch {
             // CE (#299): a profile with a PIN opens only after the PIN.
             if (profileLock.needsPinToSwitch(userId)) {
-                val name = _state.value.users.firstOrNull { it.id == userId }?.name.orEmpty()
-                _state.update { it.copy(pinPrompt = PinPrompt(userId = userId, userName = name)) }
+                val user = _state.value.users.firstOrNull { it.id == userId }
+                val prompt =
+                    PinPrompt(
+                        userId = userId,
+                        userName = user?.name.orEmpty(),
+                        // CE (#330): the grid for a pattern lock.
+                        lockType = profileLock.lockType(userId) ?: ProfileLockType.PIN,
+                    )
+                _state.update { it.copy(pinPrompt = prompt) }
                 return@launch
             }
             switchTo(userId)
@@ -101,10 +110,10 @@ constructor(private val repository: SetupRepository, private val profileLock: Pr
         eventsChannel.send(UsersEvent.NavigateToHome)
     }
 
-    private fun submitPin(pin: String) {
+    private fun submitPin(entry: ProfileLockEntry) {
         val prompt = _state.value.pinPrompt ?: return
         viewModelScope.launch {
-            if (profileLock.verifyPin(prompt.userId, pin)) {
+            if (profileLock.verify(prompt.userId, entry)) {
                 _state.update { it.copy(pinPrompt = null) }
                 switchTo(prompt.userId)
             } else {
@@ -121,7 +130,8 @@ constructor(private val repository: SetupRepository, private val profileLock: Pr
             is UsersAction.OnDeleteUser -> {
                 deleteUser(action.userId)
             }
-            is UsersAction.OnPinSubmit -> submitPin(action.pin)
+            is UsersAction.OnPinSubmit -> submitPin(ProfileLockEntry.Pin(action.pin))
+            is UsersAction.OnPatternSubmit -> submitPin(ProfileLockEntry.Pattern(action.dots))
             // Cancelled: stay on the profile that was open.
             is UsersAction.OnPinDismiss -> _state.update { it.copy(pinPrompt = null) }
             else -> Unit

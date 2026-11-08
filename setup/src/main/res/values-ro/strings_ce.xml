@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Șterge cifra</string>
     <string name="ce_profile_pin_saved">PIN setat</string>
     <string name="ce_profile_pin_removed">PIN eliminat</string>
+    <string name="ce_profile_lock">Blocarea profilului</string>
+    <string name="ce_profile_lock_summary">Un PIN sau un model îi ține pe ceilalți departe de acest profil pe acest dispozitiv. Rămâne pe acest dispozitiv și nu este trimis niciodată la server.</string>
+    <string name="ce_profile_lock_status_pattern">Acest profil este blocat cu un model</string>
+    <string name="ce_profile_lock_status_off">Acest profil nu este blocat</string>
+    <string name="ce_profile_lock_type">Tipul blocării</string>
+    <string name="ce_profile_lock_type_pin_summary">Între 4 și 6 cifre</string>
+    <string name="ce_profile_lock_type_pattern">Model</string>
+    <string name="ce_profile_lock_ask_on_start">Cere deblocarea la pornire</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Când este dezactivat, blocarea este cerută doar la trecerea la acest profil</string>
+    <string name="ce_profile_pattern_change">Schimbă modelul</string>
+    <string name="ce_profile_pattern_remove">Elimină modelul</string>
+    <string name="ce_profile_pattern_enter">Desenează modelul pentru %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Desenează modelul actual</string>
+    <string name="ce_profile_pattern_choose">Desenează un model care unește cel puțin 4 puncte</string>
+    <string name="ce_profile_pattern_repeat">Desenează din nou noul model</string>
+    <string name="ce_profile_pattern_wrong">Model greșit, încearcă din nou</string>
+    <string name="ce_profile_pattern_mismatch">Modelele nu s-au potrivit. Desenează din nou un model.</string>
+    <string name="ce_profile_pattern_too_short">Unește cel puțin 4 puncte</string>
+    <string name="ce_profile_pattern_forgot">Ai uitat modelul? Elimină acest utilizator din lista de utilizatori și conectează-te din nou cu parola serverului.</string>
+    <string name="ce_profile_pattern_saved">Model setat</string>
+    <string name="ce_profile_pattern_removed">Model eliminat</string>
+    <string name="ce_profile_pattern_grid">Model de deblocare, o grilă de 3 pe 3 puncte</string>
 </resources>

@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">S\'ha esborrat la memòria cau</string>
     <string name="ce_settings_profile_pin">PIN del perfil</string>
     <string name="ce_settings_profile_pin_summary">Bloqueja aquest perfil en aquest dispositiu</string>
+    <string name="ce_settings_profile_lock">Bloqueig del perfil</string>
 </resources>

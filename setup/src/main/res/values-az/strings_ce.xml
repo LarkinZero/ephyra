@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Rəqəmi sil</string>
     <string name="ce_profile_pin_saved">PIN kodu təyin edildi</string>
     <string name="ce_profile_pin_removed">PIN kodu silindi</string>
+    <string name="ce_profile_lock">Profil kilidi</string>
+    <string name="ce_profile_lock_summary">PIN kod və ya naxış başqalarını bu cihazda bu profildən uzaq tutur. O, bu cihazda qalır və heç vaxt serverə göndərilmir.</string>
+    <string name="ce_profile_lock_status_pattern">Bu profil naxışla kilidlənib</string>
+    <string name="ce_profile_lock_status_off">Bu profil kilidli deyil</string>
+    <string name="ce_profile_lock_type">Kilid növü</string>
+    <string name="ce_profile_lock_type_pin_summary">4-6 rəqəm</string>
+    <string name="ce_profile_lock_type_pattern">Naxış</string>
+    <string name="ce_profile_lock_ask_on_start">Başlanğıcda kilidi açmağı soruş</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Söndürüldükdə kilid yalnız bu profilə keçəndə soruşulur</string>
+    <string name="ce_profile_pattern_change">Naxışı dəyiş</string>
+    <string name="ce_profile_pattern_remove">Naxışı sil</string>
+    <string name="ce_profile_pattern_enter">%1$s üçün naxışı çəkin</string>
+    <string name="ce_profile_pattern_enter_current">Cari naxışınızı çəkin</string>
+    <string name="ce_profile_pattern_choose">Ən azı 4 nöqtəni birləşdirən naxış çəkin</string>
+    <string name="ce_profile_pattern_repeat">Yeni naxışı yenidən çəkin</string>
+    <string name="ce_profile_pattern_wrong">Yanlış naxış, yenidən cəhd edin</string>
+    <string name="ce_profile_pattern_mismatch">Naxışlar uyğun gəlmədi. Naxışı yenidən çəkin.</string>
+    <string name="ce_profile_pattern_too_short">Ən azı 4 nöqtəni birləşdirin</string>
+    <string name="ce_profile_pattern_forgot">Naxışı unutmusunuz? Bu istifadəçini istifadəçi siyahısından silin və server parolu ilə yenidən daxil olun.</string>
+    <string name="ce_profile_pattern_saved">Naxış təyin edildi</string>
+    <string name="ce_profile_pattern_removed">Naxış silindi</string>
+    <string name="ce_profile_pattern_grid">Kilid açma naxışı, 3 × 3 nöqtədən ibarət şəbəkə</string>
 </resources>

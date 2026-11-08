@@ -7,7 +7,8 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
 /**
- * CE (#299): hashes a profile PIN with PBKDF2-HMAC-SHA256 and a random per-user salt. The PIN only
+ * CE (#299): hashes a profile PIN (since #330 also an unlock pattern, as [ProfilePattern.serialize]
+ * text) with PBKDF2-HMAC-SHA256 and a random per-user salt. The PIN only
  * keeps someone on the couch out of a profile: anyone with the app's data can try all 10^6 PINs, so
  * the work factor is kept low enough for a slow TV box to check a PIN without a visible wait.
  */
@@ -44,10 +45,14 @@ object ProfilePinHasher {
     }
 
     /** Compares in constant time, so the check does not leak how much of a hash matched. */
-    fun verify(pin: String, salt: String, expectedHash: String): Boolean {
-        if (!isValid(pin)) return false
+    fun verify(pin: String, salt: String, expectedHash: String): Boolean =
+        verify(ProfileLockEntry.Pin(pin), salt, expectedHash)
+
+    /** CE (#330): [entry] of either type; false for one that is not [ProfileLockEntry.isValid]. */
+    fun verify(entry: ProfileLockEntry, salt: String, expectedHash: String): Boolean {
+        if (!entry.isValid) return false
         val expected = runCatching { Base64.getDecoder().decode(expectedHash) }.getOrNull()
-        val actual = runCatching { Base64.getDecoder().decode(hash(pin, salt)) }.getOrNull()
+        val actual = runCatching { Base64.getDecoder().decode(hash(entry.secret, salt)) }.getOrNull()
         return expected != null && actual != null && MessageDigest.isEqual(actual, expected)
     }
 }
