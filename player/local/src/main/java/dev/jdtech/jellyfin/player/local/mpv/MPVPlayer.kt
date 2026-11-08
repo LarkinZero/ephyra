@@ -76,6 +76,12 @@ class MPVPlayer(
     private var currentSurface: Surface? = null
     private var currentFrameRate: Float = 0f
 
+    /**
+     * Set by [release]. After it every [MPVLib] call throws, and the activity's window, and with it
+     * the SurfaceView, is torn down after the view model has released the player (#318).
+     */
+    private var released = false
+
     // Headphones were unplugged: pause rather than carry on over the speaker.
     private val becomingNoisyReceiver =
         object : BroadcastReceiver() {
@@ -361,12 +367,21 @@ class MPVPlayer(
     private var notifiedAvailableCommands: Commands = Commands.EMPTY
 
     // mpv events
+
+    /**
+     * Runs an mpv callback on the main thread, unless the player was released before it got there:
+     * mpv is gone then and every [MPVLib] call throws (#318).
+     */
+    private fun post(block: () -> Unit) {
+        handler.post { if (!released) block() }
+    }
+
     override fun eventProperty(property: String) {
         // Nothing to do...
     }
 
     override fun eventProperty(property: String, value: String) {
-        handler.post {
+        post {
             when (property) {
                 "track-list" -> {
                     val hadVideo = currentTracks.isTypeSelected(C.TRACK_TYPE_VIDEO)
@@ -403,7 +418,7 @@ class MPVPlayer(
     }
 
     override fun eventProperty(property: String, value: Boolean) {
-        handler.post {
+        post {
             when (property) {
                 "eof-reached" -> {
                     if (value && isPlayerReady) {
@@ -456,7 +471,7 @@ class MPVPlayer(
     }
 
     override fun eventProperty(property: String, value: Long) {
-        handler.post {
+        post {
             when (property) {
                 "time-pos" -> currentPositionMs = value * C.MILLIS_PER_SECOND
                 "duration" -> {
@@ -502,7 +517,7 @@ class MPVPlayer(
     }
 
     override fun eventProperty(property: String, value: Double) {
-        handler.post {
+        post {
             when (property) {
                 "speed" -> {
                     playbackParameters = playbackParameters.withSpeed(value.toFloat())
@@ -515,7 +530,7 @@ class MPVPlayer(
     }
 
     override fun event(eventId: Int) {
-        handler.post {
+        post {
             when (eventId) {
                 MpvEvent.MPV_EVENT_START_FILE -> {
                     if (!isPlayerReady) {
@@ -1289,9 +1304,12 @@ class MPVPlayer(
      * player must not be used after calling this method.
      */
     override fun release() {
+        if (released) return
         if (matchRefreshRate) {
             applyFrameRateToSurface(currentSurface, 0f)
         }
+        // Detach while mpv still exists; surfaceDestroyed comes later and is a no-op then.
+        if (currentSurface != null) detachVideoSurface()
         currentSurface = null
         if (handleAudioFocus) {
             AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest)
@@ -1299,7 +1317,17 @@ class MPVPlayer(
         setBecomingNoisyRegistered(false)
         resetInternalState()
         mpvLib.removeObserver(this)
+        // Events mpv posted before removeObserver would otherwise still run, after destroy().
+        handler.removeCallbacksAndMessages(null)
+        listeners.release()
+        released = true
         mpvLib.destroy()
+    }
+
+    private fun detachVideoSurface() {
+        mpvLib.setOptionString("vo", "null")
+        mpvLib.setOptionString("force-window", "no")
+        mpvLib.detachSurface()
     }
 
     override fun getCurrentTracks(): Tracks {
@@ -1529,6 +1557,7 @@ class MPVPlayer(
      * @param surfaceView The surface view.
      */
     override fun setVideoSurfaceView(surfaceView: SurfaceView?) {
+        if (released) return
         surfaceView?.holder?.addCallback(surfaceHolder)
     }
 
@@ -1730,6 +1759,7 @@ class MPVPlayer(
              * @param holder The SurfaceHolder whose surface is being created.
              */
             override fun surfaceCreated(holder: SurfaceHolder) {
+                if (released) return
                 currentSurface = holder.surface
                 if (matchRefreshRate && currentFrameRate > 0f) {
                     applyFrameRateToSurface(holder.surface, currentFrameRate)
@@ -1755,6 +1785,7 @@ class MPVPlayer(
                 width: Int,
                 height: Int,
             ) {
+                if (released) return
                 mpvLib.setPropertyString("android-surface-size", "${width}x$height")
             }
 
@@ -1767,13 +1798,13 @@ class MPVPlayer(
              * @param holder The SurfaceHolder whose surface is being destroyed.
              */
             override fun surfaceDestroyed(holder: SurfaceHolder) {
+                // release() detached the surface already.
+                if (released) return
                 if (matchRefreshRate) {
                     applyFrameRateToSurface(holder.surface, 0f)
                 }
                 currentSurface = null
-                mpvLib.setOptionString("vo", "null")
-                mpvLib.setOptionString("force-window", "no")
-                mpvLib.detachSurface()
+                detachVideoSurface()
             }
         }
 
