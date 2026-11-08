@@ -13,4 +13,12 @@
     <string name="player_ends_at">Bitiş: %1$s</string>
     <string name="player_error_title">Bu video oynatılamıyor</string>
     <string name="player_up_next">Sıradaki</string>
+    <string name="sleep_timer">Uyku zamanlayıcısı</string>
+    <string name="sleep_timer_off">Kapalı</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d dakika</item>
+        <item quantity="other">%d dakika</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Bu bölümün sonu</string>
+    <string name="sleep_timer_pauses_in">%1$s sonra duraklatılır</string>
 </resources>

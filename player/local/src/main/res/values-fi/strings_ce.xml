@@ -13,4 +13,12 @@
     <string name="player_ends_at">Päättyy klo %1$s</string>
     <string name="player_error_title">Tätä videota ei voi toistaa</string>
     <string name="player_up_next">Seuraavaksi</string>
+    <string name="sleep_timer">Uniajastin</string>
+    <string name="sleep_timer_off">Pois</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minuutti</item>
+        <item quantity="other">%d minuuttia</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Tämän jakson loppu</string>
+    <string name="sleep_timer_pauses_in">Keskeytyy %1$s kuluttua</string>
 </resources>

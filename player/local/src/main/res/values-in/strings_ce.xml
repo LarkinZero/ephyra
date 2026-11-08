@@ -13,4 +13,11 @@
     <string name="player_ends_at">Berakhir pukul %1$s</string>
     <string name="player_error_title">Video ini tidak dapat diputar</string>
     <string name="player_up_next">Berikutnya</string>
+    <string name="sleep_timer">Timer tidur</string>
+    <string name="sleep_timer_off">Mati</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d menit</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Akhir episode ini</string>
+    <string name="sleep_timer_pauses_in">Dijeda dalam %1$s</string>
 </resources>

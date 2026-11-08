@@ -13,4 +13,11 @@
     <string name="player_ends_at">%1$s 结束</string>
     <string name="player_error_title">无法播放此视频</string>
     <string name="player_up_next">接下来播放</string>
+    <string name="sleep_timer">睡眠定时器</string>
+    <string name="sleep_timer_off">关闭</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d 分钟</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">本集结束时</string>
+    <string name="sleep_timer_pauses_in">%1$s 后暂停</string>
 </resources>

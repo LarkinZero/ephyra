@@ -88,6 +88,7 @@ fun PlayerScreen(
             is PlayerEvents.PlayerError -> Unit
             // The screen is kept on for as long as the player is shown (see below).
             is PlayerEvents.IsPlayingChanged -> Unit
+            is PlayerEvents.SleepTimerFired -> Unit
         }
     }
 

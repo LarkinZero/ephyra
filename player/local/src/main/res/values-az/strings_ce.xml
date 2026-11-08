@@ -13,4 +13,11 @@
     <string name="player_ends_at">%1$s-da bitir</string>
     <string name="player_error_title">Bu videonu oynatmaq mümkün deyil</string>
     <string name="player_up_next">Növbəti</string>
+    <string name="sleep_timer">Yuxu taymeri</string>
+    <string name="sleep_timer_off">Söndür</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d dəqiqə</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Bu seriyanın sonu</string>
+    <string name="sleep_timer_pauses_in">%1$s sonra fasilə</string>
 </resources>

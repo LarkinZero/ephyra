@@ -13,4 +13,12 @@
     <string name="player_ends_at">Lõpeb kell %1$s</string>
     <string name="player_error_title">Seda videot ei saa esitada</string>
     <string name="player_up_next">Järgmisena</string>
+    <string name="sleep_timer">Unetaimer</string>
+    <string name="sleep_timer_off">Väljas</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minut</item>
+        <item quantity="other">%d minutit</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Selle osa lõpus</string>
+    <string name="sleep_timer_pauses_in">Peatub %1$s pärast</string>
 </resources>

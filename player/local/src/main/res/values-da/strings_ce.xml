@@ -13,4 +13,12 @@
     <string name="player_ends_at">Slutter kl. %1$s</string>
     <string name="player_error_title">Denne video kan ikke afspilles</string>
     <string name="player_up_next">Næste</string>
+    <string name="sleep_timer">Sovetimer</string>
+    <string name="sleep_timer_off">Fra</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minut</item>
+        <item quantity="other">%d minutter</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Slutningen af denne episode</string>
+    <string name="sleep_timer_pauses_in">Sættes på pause om %1$s</string>
 </resources>

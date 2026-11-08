@@ -13,4 +13,12 @@
     <string name="player_ends_at">Eindigt om %1$s</string>
     <string name="player_error_title">Deze video kan niet worden afgespeeld</string>
     <string name="player_up_next">Hierna</string>
+    <string name="sleep_timer">Slaaptimer</string>
+    <string name="sleep_timer_off">Uit</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minuut</item>
+        <item quantity="other">%d minuten</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Einde van deze aflevering</string>
+    <string name="sleep_timer_pauses_in">Pauzeert over %1$s</string>
 </resources>

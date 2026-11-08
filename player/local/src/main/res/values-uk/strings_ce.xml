@@ -13,4 +13,14 @@
     <string name="player_ends_at">Закінчиться о %1$s</string>
     <string name="player_error_title">Не вдається відтворити це відео</string>
     <string name="player_up_next">Далі</string>
+    <string name="sleep_timer">Таймер сну</string>
+    <string name="sleep_timer_off">Вимк.</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d хвилина</item>
+        <item quantity="few">%d хвилини</item>
+        <item quantity="many">%d хвилин</item>
+        <item quantity="other">%d хвилини</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Кінець цієї серії</string>
+    <string name="sleep_timer_pauses_in">Пауза через %1$s</string>
 </resources>

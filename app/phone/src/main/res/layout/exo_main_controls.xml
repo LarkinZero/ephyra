@@ -122,6 +122,34 @@
                     android:layout_width="16dp"
                     android:layout_height="0dp" />
 
+                <!-- CE (#298): the sleep timer, with the time until it pauses while it runs. -->
+                <ImageButton
+                    android:id="@+id/btn_sleep_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@drawable/transparent_circle_background"
+                    android:contentDescription="@string/sleep_timer"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_moon"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/sleep_timer_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFeatureSettings="tnum"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/player_time_text_size"
+                    android:visibility="gone"
+                    tools:text="14:59"
+                    tools:visibility="visible" />
+
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="0dp" />
+
                 <ImageButton
                     android:id="@+id/btn_audio_track"
                     android:layout_width="wrap_content"

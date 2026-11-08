@@ -13,4 +13,13 @@
     <string name="player_ends_at">מסתיים ב-%1$s</string>
     <string name="player_error_title">לא ניתן להפעיל את הסרטון הזה</string>
     <string name="player_up_next">הבא בתור</string>
+    <string name="sleep_timer">טיימר שינה</string>
+    <string name="sleep_timer_off">כבוי</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d דקה</item>
+        <item quantity="two">%d דקות</item>
+        <item quantity="other">%d דקות</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">סוף הפרק הזה</string>
+    <string name="sleep_timer_pauses_in">השהיה בעוד %1$s</string>
 </resources>

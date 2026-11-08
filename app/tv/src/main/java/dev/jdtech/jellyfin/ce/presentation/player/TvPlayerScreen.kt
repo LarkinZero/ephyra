@@ -97,6 +97,8 @@ import dev.jdtech.jellyfin.player.local.presentation.PlayerAction
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
+import dev.jdtech.jellyfin.player.local.presentation.label
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.ui.components.ItemPoster
 import dev.jdtech.jellyfin.ui.components.ProgressBadge
@@ -112,6 +114,7 @@ private enum class PlayerDialog {
     AUDIO,
     SUBTITLES,
     SPEED,
+    SLEEP_TIMER,
     CHAPTERS,
 }
 
@@ -144,8 +147,16 @@ fun TvPlayerScreen(
     val durationMs by remember { derivedStateOf { progress.value.durationMs } }
     val positionMs = remember { { progress.value.positionMs } }
     val queue by viewModel.queue.collectAsStateWithLifecycle()
+    // CE (#298): ticks once a second while a timer runs; only the overlay's label reads the time.
+    val sleepTimer = viewModel.sleepTimerState.collectAsStateWithLifecycle()
+    val sleepTimerActive by remember {
+        derivedStateOf { sleepTimer.value.option != SleepTimerOption.Off }
+    }
+    val sleepTimerRemainingMs = remember { { sleepTimer.value.remainingMs } }
     val player = viewModel.player
     var playbackError by remember { mutableStateOf<PlaybackException?>(null) }
+    var controlsVisible by remember { mutableStateOf(true) }
+    var interactions by remember { mutableIntStateOf(0) }
 
     ObserveAsEvents(viewModel.eventsChannelFlow) { event ->
         when (event) {
@@ -154,6 +165,11 @@ fun TvPlayerScreen(
             // CE (#131): shown as a message with a way out, instead of a black screen.
             is PlayerEvents.PlayerError -> playbackError = event.error
             is PlayerEvents.IsPlayingChanged -> Unit
+            // CE (#298): paused by the sleep timer; the controls come up with focus on Play.
+            is PlayerEvents.SleepTimerFired -> {
+                controlsVisible = true
+                interactions++
+            }
         }
     }
 
@@ -212,8 +228,6 @@ fun TvPlayerScreen(
         }
     }
 
-    var controlsVisible by remember { mutableStateOf(true) }
-    var interactions by remember { mutableIntStateOf(0) }
     var seekIndicator by remember { mutableStateOf<SeekIndicator?>(null) }
     var pendingSeekMs by remember { mutableStateOf<Long?>(null) }
     var dialog by remember { mutableStateOf<PlayerDialog?>(null) }
@@ -499,6 +513,8 @@ fun TvPlayerScreen(
                             }
                         },
                     hasChapters = uiState.currentChapters.isNotEmpty(),
+                    sleepTimerActive = sleepTimerActive,
+                    sleepTimerRemainingMs = sleepTimerRemainingMs,
                     playPauseFocus = playPauseFocus,
                     dialogOpenerFocus = dialogOpenerFocus,
                     callbacks = callbacks,
@@ -580,6 +596,16 @@ fun TvPlayerScreen(
                     onSelect = { viewModel.selectSpeed(SPEEDS[it]) },
                     onDismiss = close,
                 )
+            PlayerDialog.SLEEP_TIMER -> {
+                val choices = viewModel.sleepTimerChoices
+                TvSelectionDialog(
+                    title = stringResource(PlayerR.string.sleep_timer),
+                    options = choices.map { it.label(context) },
+                    selectedIndex = choices.indexOf(sleepTimer.value.option).coerceAtLeast(0),
+                    onSelect = { viewModel.setSleepTimer(choices[it]) },
+                    onDismiss = close,
+                )
+            }
             PlayerDialog.CHAPTERS ->
                 ChapterListDialog(
                     chapters = uiState.currentChapters,
@@ -617,6 +643,8 @@ private fun PlayerControls(
     seekSettings: TvSeekSettings,
     chapterMarkers: List<Float>,
     hasChapters: Boolean,
+    sleepTimerActive: Boolean,
+    sleepTimerRemainingMs: () -> Long?,
     playPauseFocus: FocusRequester,
     dialogOpenerFocus: Map<PlayerDialog, FocusRequester>,
     callbacks: PlayerControlsCallbacks,
@@ -666,6 +694,7 @@ private fun PlayerControls(
                             color = if (pendingSeekMs != null) MaterialTheme.colorScheme.primary else Color.White,
                         )
                         Spacer(modifier = Modifier.weight(1f))
+                        if (sleepTimerActive) SleepTimerText(remainingMs = sleepTimerRemainingMs)
                         if (durationMs > 0) {
                             EndsAtText(remainingMs = remainingMs, playbackSpeed = playbackSpeed)
                             Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
@@ -762,6 +791,13 @@ private fun PlayerControls(
                     onClick = { onOpenDialog(PlayerDialog.SPEED) },
                     onFocus = onInteraction,
                 )
+                ControlButton(
+                    icon = if (sleepTimerActive) CoreR.drawable.ic_moon_star else CoreR.drawable.ic_moon,
+                    contentDescription = stringResource(PlayerR.string.sleep_timer),
+                    focusRequester = dialogOpenerFocus.getValue(PlayerDialog.SLEEP_TIMER),
+                    onClick = { onOpenDialog(PlayerDialog.SLEEP_TIMER) },
+                    onFocus = onInteraction,
+                )
                 if (hasChapters) {
                     ControlButton(
                         icon = CoreR.drawable.ic_list,
@@ -811,6 +847,22 @@ private val ControlsScrim =
 private fun TimeText(timeMs: () -> Long, prefix: String, color: Color) {
     val text by remember(timeMs, prefix) { derivedStateOf { prefix + formatTime(timeMs()) } }
     Text(text = text, style = MaterialTheme.typography.bodyMedium, color = color)
+}
+
+/**
+ * CE (#298): "Pauses in 12:34" while the sleep timer runs. It reads [remainingMs] itself, so only
+ * this label recomposes on the timer's ticks.
+ */
+@Composable
+private fun SleepTimerText(remainingMs: () -> Long?) {
+    val remaining = remainingMs() ?: return
+    Text(
+        // Rounded up, so it reads 0:00 only as it pauses.
+        text = stringResource(PlayerR.string.sleep_timer_pauses_in, formatTime(remaining + 999)),
+        style = MaterialTheme.typography.bodyMedium,
+        color = Color.White.copy(alpha = 0.8f),
+    )
+    Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
 }
 
 /**

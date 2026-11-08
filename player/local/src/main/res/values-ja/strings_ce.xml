@@ -13,4 +13,11 @@
     <string name="player_ends_at">%1$s に終了</string>
     <string name="player_error_title">この動画を再生できません</string>
     <string name="player_up_next">次に再生</string>
+    <string name="sleep_timer">スリープタイマー</string>
+    <string name="sleep_timer_off">オフ</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d分</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">このエピソードの終わり</string>
+    <string name="sleep_timer_pauses_in">%1$s後に一時停止</string>
 </resources>

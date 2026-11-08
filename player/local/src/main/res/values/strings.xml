@@ -35,4 +35,12 @@
     <string name="player_up_next">Up next</string>
     <string name="player_controls_previous">Previous episode</string>
     <string name="player_error_title">Can\'t play this video</string>
+    <string name="sleep_timer">Sleep timer</string>
+    <string name="sleep_timer_off">Off</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">End of this episode</string>
+    <string name="sleep_timer_pauses_in">Pauses in %1$s</string>
 </resources>
