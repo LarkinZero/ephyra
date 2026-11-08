@@ -358,6 +358,7 @@ class MPVPlayer(
      */
     private var startPassedToLoadMs: Long? = null
     private var oldMediaItem: MediaItem? = null
+    private var notifiedAvailableCommands: Commands = Commands.EMPTY
 
     // mpv events
     override fun eventProperty(property: String) {
@@ -447,6 +448,7 @@ class MPVPlayer(
                 "seekable" -> {
                     if (isSeekable != value) {
                         isSeekable = value
+                        notifyAvailableCommandsIfChanged()
                     }
                 }
             }
@@ -471,6 +473,7 @@ class MPVPlayer(
                             TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED,
                         )
                     }
+                    notifyAvailableCommandsIfChanged()
                 }
                 "playlist-current-pos" -> {
                     if (value < 0) {
@@ -492,6 +495,7 @@ class MPVPlayer(
                             listener.onMediaMetadataChanged(mediaMetadata)
                         }
                     }
+                    notifyAvailableCommandsIfChanged()
                 }
             }
         }
@@ -524,6 +528,7 @@ class MPVPlayer(
                     isSeekable = mpvLib.getPropertyBoolean("seekable") == true
                     currentDurationMs =
                         (mpvLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
+                    notifyAvailableCommandsIfChanged()
                 }
                 // Position discontinuities are reported from seekTo() (and the end-of-file
                 // auto-advance), not here: mpv also raises this event for the internal start
@@ -661,7 +666,9 @@ class MPVPlayer(
                     /* elapsedRealtimeEpochOffsetMs = */ C.TIME_UNSET,
                     /* isSeekable = */ isSeekable,
                     /* isDynamic = */ false,
-                    /* liveConfiguration = */ currentMediaItem.liveConfiguration,
+                    // Not the item's liveConfiguration: it is never null (UNSET by default), and a
+                    // non-null one makes the window live, so the media session hid the position.
+                    /* liveConfiguration = */ null,
                     /* defaultPositionUs = */ 0,
                     /* durationUs = */ Util.msToUs(currentDurationMs ?: C.TIME_UNSET),
                     /* firstPeriodIndex = */ windowIndex,
@@ -933,6 +940,20 @@ class MPVPlayer(
             .addIf(COMMAND_SEEK_BACK, isCurrentMediaItemSeekable && !isPlayingAd)
             .addIf(COMMAND_SEEK_FORWARD, isCurrentMediaItemSeekable && !isPlayingAd)
             .build()
+    }
+
+    /**
+     * Sends [Player.Listener.onAvailableCommandsChanged] when [getAvailableCommands] differs from
+     * what was last sent. The media session caches the commands it shows to controllers (the
+     * notification's buttons) and only refreshes them on this event.
+     */
+    private fun notifyAvailableCommandsIfChanged() {
+        val commands = availableCommands
+        if (commands == notifiedAvailableCommands) return
+        notifiedAvailableCommands = commands
+        listeners.sendEvent(EVENT_AVAILABLE_COMMANDS_CHANGED) { listener ->
+            listener.onAvailableCommandsChanged(commands)
+        }
     }
 
     private fun resetInternalState() {
@@ -1364,7 +1385,9 @@ class MPVPlayer(
      * prospective position in milliseconds if the [current timeline][.getCurrentTimeline] is empty.
      */
     override fun getCurrentPosition(): Long {
-        return currentPositionMs ?: C.TIME_UNSET
+        // Before mpv's first time-pos, report the pending start position like ExoPlayer does,
+        // never TIME_UNSET: the media session and the seek-by-offset methods use it as is.
+        return (currentPositionMs ?: initialSeekTo).coerceAtLeast(0L)
     }
 
     /**
@@ -1764,11 +1787,17 @@ class MPVPlayer(
                     COMMAND_PLAY_PAUSE,
                     COMMAND_SET_SPEED_AND_PITCH,
                     COMMAND_GET_CURRENT_MEDIA_ITEM,
+                    // Without it the media session publishes no queue.
+                    COMMAND_GET_TIMELINE,
                     COMMAND_GET_METADATA,
-                    COMMAND_CHANGE_MEDIA_ITEMS,
+                    COMMAND_GET_AUDIO_ATTRIBUTES,
+                    // Not COMMAND_CHANGE_MEDIA_ITEMS: move, replace and remove are TODO() stubs,
+                    // and with the queue published a controller could remove an item. The app
+                    // calls addMediaItems directly, which does not check commands.
                     COMMAND_SET_VIDEO_SURFACE,
                     COMMAND_GET_TRACKS,
                     COMMAND_SET_TRACK_SELECTION_PARAMETERS,
+                    COMMAND_RELEASE,
                 )
                 .build()
 
