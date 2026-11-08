@@ -6,6 +6,7 @@ import dev.jdtech.jellyfin.settings.domain.Constants
 import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
+import okhttp3.OkHttpClient
 import org.jellyfin.sdk.android.androidDevice
 import org.jellyfin.sdk.api.client.HttpClientOptions
 import org.jellyfin.sdk.api.client.extensions.authenticationApi
@@ -23,6 +24,7 @@ import org.jellyfin.sdk.api.client.extensions.userApi
 import org.jellyfin.sdk.api.client.extensions.userDataApi
 import org.jellyfin.sdk.api.client.extensions.userViewApi
 import org.jellyfin.sdk.api.client.extensions.videoApi
+import org.jellyfin.sdk.api.okhttp.OkHttpFactory
 import org.jellyfin.sdk.createJellyfin
 import org.jellyfin.sdk.model.ClientInfo
 import org.jellyfin.sdk.model.DeviceInfo
@@ -40,6 +42,17 @@ class JellyfinApi(
     connectTimeout: Long = Constants.NETWORK_DEFAULT_CONNECT_TIMEOUT,
     socketTimeout: Long = Constants.NETWORK_DEFAULT_SOCKET_TIMEOUT,
 ) {
+    /**
+     * CE (#296): the SDK builds its client from this one with `newBuilder()`, so both share one
+     * connection pool. The player streams media over it ([httpClient]) and so reuses the
+     * connection the API calls before playback left open.
+     */
+    private val okHttpFactory = OkHttpFactory()
+
+    /** The OkHttp client the API's clients are built from. Derive from it with `newBuilder()`. */
+    val httpClient: OkHttpClient
+        get() = okHttpFactory.base
+
     val jellyfin = createJellyfin {
         clientInfo =
             ClientInfo(
@@ -51,6 +64,8 @@ class JellyfinApi(
             )
         context = androidContext
         deviceInfo = buildDeviceInfo(androidContext)
+        apiClientFactory = okHttpFactory
+        socketConnectionFactory = okHttpFactory
     }
     val api =
         jellyfin.createApi(
