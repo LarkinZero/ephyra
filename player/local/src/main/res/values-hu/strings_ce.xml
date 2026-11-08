@@ -13,4 +13,12 @@
     <string name="player_ends_at">Vége: %1$s</string>
     <string name="player_error_title">Ez a videó nem játszható le</string>
     <string name="player_up_next">Következő</string>
+    <string name="sleep_timer">Elalvási időzítő</string>
+    <string name="sleep_timer_off">Ki</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d perc</item>
+        <item quantity="other">%d perc</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Az epizód végén</string>
+    <string name="sleep_timer_pauses_in">Szünet %1$s múlva</string>
 </resources>

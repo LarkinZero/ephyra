@@ -13,4 +13,14 @@
     <string name="player_ends_at">Закончится в %1$s</string>
     <string name="player_error_title">Не удаётся воспроизвести это видео</string>
     <string name="player_up_next">Далее</string>
+    <string name="sleep_timer">Таймер сна</string>
+    <string name="sleep_timer_off">Выкл.</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минуты</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Конец этой серии</string>
+    <string name="sleep_timer_pauses_in">Пауза через %1$s</string>
 </resources>

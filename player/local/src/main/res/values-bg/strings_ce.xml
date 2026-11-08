@@ -13,4 +13,12 @@
     <string name="player_ends_at">Свършва в %1$s</string>
     <string name="player_error_title">Видеоклипът не може да се възпроизведе</string>
     <string name="player_up_next">Следва</string>
+    <string name="sleep_timer">Таймер за сън</string>
+    <string name="sleep_timer_off">Изключен</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="other">%d минути</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Края на този епизод</string>
+    <string name="sleep_timer_pauses_in">Пауза след %1$s</string>
 </resources>

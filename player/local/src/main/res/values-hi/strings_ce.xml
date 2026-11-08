@@ -13,4 +13,12 @@
     <string name="player_ends_at">%1$s पर समाप्त</string>
     <string name="player_error_title">यह वीडियो नहीं चल सकता</string>
     <string name="player_up_next">आगे</string>
+    <string name="sleep_timer">स्लीप टाइमर</string>
+    <string name="sleep_timer_off">बंद</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d मिनट</item>
+        <item quantity="other">%d मिनट</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">इस एपिसोड के अंत में</string>
+    <string name="sleep_timer_pauses_in">%1$s में रुकेगा</string>
 </resources>

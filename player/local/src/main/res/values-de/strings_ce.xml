@@ -13,4 +13,12 @@
     <string name="player_ends_at">Endet um %1$s</string>
     <string name="player_error_title">Dieses Video kann nicht abgespielt werden</string>
     <string name="player_up_next">Als Nächstes</string>
+    <string name="sleep_timer">Sleep-Timer</string>
+    <string name="sleep_timer_off">Aus</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Ende dieser Folge</string>
+    <string name="sleep_timer_pauses_in">Pausiert in %1$s</string>
 </resources>

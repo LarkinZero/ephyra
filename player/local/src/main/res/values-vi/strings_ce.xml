@@ -13,4 +13,11 @@
     <string name="player_ends_at">Kết thúc lúc %1$s</string>
     <string name="player_error_title">Không thể phát video này</string>
     <string name="player_up_next">Tiếp theo</string>
+    <string name="sleep_timer">Hẹn giờ ngủ</string>
+    <string name="sleep_timer_off">Tắt</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d phút</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Hết tập này</string>
+    <string name="sleep_timer_pauses_in">Tạm dừng sau %1$s</string>
 </resources>

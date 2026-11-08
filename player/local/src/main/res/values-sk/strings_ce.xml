@@ -13,4 +13,14 @@
     <string name="player_ends_at">Končí o %1$s</string>
     <string name="player_error_title">Toto video nie je možné prehrať</string>
     <string name="player_up_next">Ďalej</string>
+    <string name="sleep_timer">Časovač vypnutia</string>
+    <string name="sleep_timer_off">Vypnuté</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minúta</item>
+        <item quantity="few">%d minúty</item>
+        <item quantity="many">%d minúty</item>
+        <item quantity="other">%d minút</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Koniec tejto epizódy</string>
+    <string name="sleep_timer_pauses_in">Pozastaví sa o %1$s</string>
 </resources>

@@ -13,4 +13,16 @@
     <string name="player_ends_at">ينتهي في %1$s</string>
     <string name="player_error_title">يتعذّر تشغيل هذا الفيديو</string>
     <string name="player_up_next">التالي</string>
+    <string name="sleep_timer">مؤقت النوم</string>
+    <string name="sleep_timer_off">إيقاف</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="zero">%d دقيقة</item>
+        <item quantity="one">%d دقيقة</item>
+        <item quantity="two">%d دقيقتان</item>
+        <item quantity="few">%d دقائق</item>
+        <item quantity="many">%d دقيقة</item>
+        <item quantity="other">%d دقيقة</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">نهاية هذه الحلقة</string>
+    <string name="sleep_timer_pauses_in">إيقاف مؤقت بعد %1$s</string>
 </resources>

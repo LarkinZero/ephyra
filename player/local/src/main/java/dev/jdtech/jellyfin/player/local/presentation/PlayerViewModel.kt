@@ -3,10 +3,12 @@ package dev.jdtech.jellyfin.player.local.presentation
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.os.SystemClock
 import android.net.Uri
 import android.view.Window
 import dev.jdtech.jellyfin.player.local.domain.DisplayRefreshRateManager
@@ -48,6 +50,8 @@ import dev.jdtech.jellyfin.player.local.domain.PlaylistManager
 import dev.jdtech.jellyfin.player.local.domain.SegmentDecision
 import dev.jdtech.jellyfin.player.local.domain.SegmentTracker
 import dev.jdtech.jellyfin.player.local.domain.SkipTarget
+import dev.jdtech.jellyfin.player.local.domain.SleepTimer
+import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.domain.StoredChoice
 import dev.jdtech.jellyfin.player.local.domain.StillWatchingTracker
 import dev.jdtech.jellyfin.player.local.domain.TrackCandidate
@@ -194,6 +198,30 @@ constructor(
      * doesn't read it. Jump to one with [playQueueItem].
      */
     val queue: StateFlow<List<FindroidItem>> = _queue.asStateFlow()
+
+    /**
+     * CE (#298): the sleep timer, for this player session only. [sleepTimerState] has its setting
+     * and the time until it pauses, updated every second while it runs.
+     */
+    private val sleepTimer = SleepTimer()
+    private var sleepTimerJob: Job? = null
+
+    /** The item the sleep timer stopped at the end of, until playback resumes. */
+    private var sleepTimerEndedItemId: String? = null
+    private val _sleepTimerState = MutableStateFlow(SleepTimerState(SleepTimerOption.Off, null))
+    val sleepTimerState: StateFlow<SleepTimerState> = _sleepTimerState.asStateFlow()
+
+    /** The sleep timer choices, with a one-minute one in debuggable builds for testing. */
+    val sleepTimerChoices: List<SleepTimerOption> =
+        SleepTimerOption.choices(
+            debug = application.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        )
+
+    /**
+     * [remainingMs] is the time until the timer pauses: on the clock for a duration, until the end
+     * of the item (at the current speed) for [SleepTimerOption.EndOfItem], `null` when unknown.
+     */
+    data class SleepTimerState(val option: SleepTimerOption, val remainingMs: Long?)
 
     private var items: MutableList<PlayerItem> = mutableListOf()
 
@@ -640,6 +668,8 @@ constructor(
 
         _uiState.value.currentTrickplay?.loader?.release()
         _uiState.update { it.copy(currentTrickplay = null) }
+        sleepTimerJob?.cancel()
+        sleepTimer.clear()
         playWhenReady = false
         playbackPosition = 0L
         currentMediaItemIndex = 0
@@ -769,6 +799,12 @@ constructor(
                 }
             }
             is SegmentDecision.AutoSkip -> {
+                // CE (#298): an outro skip to the next item is where the item ends for the timer.
+                if (decision.target == SkipTarget.NextItem && sleepTimer.stopsAtEndOfItem) {
+                    _uiState.update { it.copy(currentSegment = null, skipButtonInWindow = false) }
+                    fireSleepTimer()
+                    return@withContext
+                }
                 Timber.tag("SegmentInfo").d("Skipping %s", decision.segment)
                 val target =
                     if (decision.target == SkipTarget.NextItem) {
@@ -809,6 +845,7 @@ constructor(
         // it played. Only releasePlayer clears this: a finished item stays open until the player
         // closes.
         playbackEvents.onPlaying(newId)
+        if (sleepTimer.onItemChanged(mediaItem?.mediaId)) updateSleepTimerState()
 
         viewModelScope.launch {
             try {
@@ -920,6 +957,14 @@ constructor(
             viewModelScope.launch(Dispatchers.Main) {
                 refreshPlayingSnapshot()
 
+                // CE (#298): the sleep timer is set for the end of this item, or already fired.
+                // Stay paused on the last frame with the player open; play goes on from here.
+                if (sleepTimer.stopsAtEndOfItem) {
+                    sleepTimerEndedItemId = player.currentMediaItem?.mediaId
+                    fireSleepTimer()
+                    return@launch
+                }
+
                 // Autoplay off: stop here and close the player instead of advancing. The last item
                 // keeps the normal path below, which ends the playlist (STATE_ENDED →
                 // NavigateBack) and reports the stop on release, so the setting changes nothing
@@ -1026,6 +1071,79 @@ constructor(
         stillWatchingTimeoutJob?.cancel()
         stillWatchingTimeoutJob = null
         _uiState.update { it.copy(showStillWatching = false) }
+    }
+
+    /** CE (#298): set the sleep timer, from now, or turn it off with [SleepTimerOption.Off]. */
+    fun setSleepTimer(option: SleepTimerOption) {
+        markUserInteraction()
+        Timber.d("Sleep timer set to $option")
+        sleepTimer.set(option, SystemClock.elapsedRealtime(), player.currentMediaItem?.mediaId)
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        updateSleepTimerState()
+        if (option == SleepTimerOption.Off) return
+        sleepTimerJob =
+            viewModelScope.launch {
+                while (sleepTimer.option != SleepTimerOption.Off) {
+                    if (sleepTimer.isDue(SystemClock.elapsedRealtime())) {
+                        fireSleepTimer()
+                        break
+                    }
+                    updateSleepTimerState()
+                    delay(SLEEP_TIMER_TICK_MS)
+                }
+            }
+    }
+
+    private fun updateSleepTimerState() {
+        val option = sleepTimer.option
+        val remainingMs =
+            sleepTimer.remainingMs(SystemClock.elapsedRealtime())
+                ?: if (option == SleepTimerOption.EndOfItem) {
+                    val duration = player.duration
+                    if (duration == C.TIME_UNSET || duration <= 0) {
+                        null
+                    } else {
+                        ((duration - player.currentPosition).coerceAtLeast(0L) /
+                                playbackSpeed.coerceAtLeast(0.1f))
+                            .toLong()
+                    }
+                } else {
+                    null
+                }
+        _sleepTimerState.value = SleepTimerState(option, remainingMs)
+    }
+
+    /**
+     * The sleep timer went off: pause, report the position as a pause does, and hold autoplay
+     * until the user resumes. The player stays open on the paused item.
+     */
+    private fun fireSleepTimer() {
+        Timber.d("Sleep timer fired, pausing")
+        sleepTimer.fire()
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        player.pause()
+        updatePlaybackProgress()
+        updateSleepTimerState()
+        eventsChannel.trySend(PlayerEvents.SleepTimerFired)
+    }
+
+    /**
+     * Play was pressed after the sleep timer stopped at the end of [endedItemId]: go on to the next
+     * item, as autoplay would have. ExoPlayer does that by itself when play is pressed at the end
+     * of an item; mpv stays on the last frame. A user who seeked back first just plays on.
+     */
+    private fun continueAfterSleepTimerEnd(endedItemId: String) {
+        sleepTimerEndedItemId = null
+        viewModelScope.launch(Dispatchers.Main) {
+            if (player.currentMediaItem?.mediaId != endedItemId) return@launch
+            val duration = player.duration
+            if (duration == C.TIME_UNSET || duration - player.currentPosition > END_TOLERANCE_MS) {
+                return@launch
+            }
+            if (player.hasNextMediaItem()) autoAdvanceToNextItem()
+        }
     }
 
     /**
@@ -1531,6 +1649,10 @@ constructor(
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
         eventsChannel.trySend(PlayerEvents.IsPlayingChanged(isPlaying))
+        if (isPlaying) {
+            sleepTimer.onResumed()
+            sleepTimerEndedItemId?.let { continueAfterSleepTimerEnd(it) }
+        }
         if (isBackgroundAudioEnabled) sessionStore.onPlayingChanged(isPlaying)
         if (isPlaying && isBackgroundAudioEnabled) startBackgroundProgressReports()
     }
@@ -1581,4 +1703,13 @@ sealed interface PlayerEvents {
     data class IsPlayingChanged(val isPlaying: Boolean) : PlayerEvents
 
     data class PlayerError(val error: PlaybackException) : PlayerEvents
+
+    /** CE (#298): the sleep timer paused playback. */
+    data object SleepTimerFired : PlayerEvents
 }
+
+/** How often a running sleep timer updates [PlayerViewModel.sleepTimerState] and checks its end. */
+private const val SLEEP_TIMER_TICK_MS = 1_000L
+
+/** How close to its end an item counts as ended, for resuming after the sleep timer. */
+private const val END_TOLERANCE_MS = 2_000L

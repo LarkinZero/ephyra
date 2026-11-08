@@ -13,4 +13,14 @@
     <string name="player_ends_at">Koniec o %1$s</string>
     <string name="player_error_title">Nie można odtworzyć tego filmu</string>
     <string name="player_up_next">Następne</string>
+    <string name="sleep_timer">Wyłącznik czasowy</string>
+    <string name="sleep_timer_off">Wyłączony</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minuta</item>
+        <item quantity="few">%d minuty</item>
+        <item quantity="many">%d minut</item>
+        <item quantity="other">%d minuty</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Koniec tego odcinka</string>
+    <string name="sleep_timer_pauses_in">Pauza za %1$s</string>
 </resources>

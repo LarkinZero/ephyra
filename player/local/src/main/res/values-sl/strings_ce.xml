@@ -13,4 +13,14 @@
     <string name="player_ends_at">Konča se ob %1$s</string>
     <string name="player_error_title">Tega videoposnetka ni mogoče predvajati</string>
     <string name="player_up_next">Naslednje</string>
+    <string name="sleep_timer">Časovnik za spanje</string>
+    <string name="sleep_timer_off">Izklopljeno</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="one">%d minuta</item>
+        <item quantity="two">%d minuti</item>
+        <item quantity="few">%d minute</item>
+        <item quantity="other">%d minut</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">Konec te epizode</string>
+    <string name="sleep_timer_pauses_in">Premor čez %1$s</string>
 </resources>

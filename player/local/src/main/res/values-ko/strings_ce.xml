@@ -13,4 +13,11 @@
     <string name="player_ends_at">%1$s에 종료</string>
     <string name="player_error_title">이 동영상을 재생할 수 없습니다</string>
     <string name="player_up_next">다음 항목</string>
+    <string name="sleep_timer">취침 타이머</string>
+    <string name="sleep_timer_off">끄기</string>
+    <plurals name="sleep_timer_minutes">
+        <item quantity="other">%d분</item>
+    </plurals>
+    <string name="sleep_timer_end_of_episode">이 에피소드가 끝날 때</string>
+    <string name="sleep_timer_pauses_in">%1$s 후 일시정지</string>
 </resources>
