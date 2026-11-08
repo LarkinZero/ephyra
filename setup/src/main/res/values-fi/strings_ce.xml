@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Poista numero</string>
     <string name="ce_profile_pin_saved">PIN-koodi asetettu</string>
     <string name="ce_profile_pin_removed">PIN-koodi poistettu</string>
+    <string name="ce_profile_lock">Profiilin lukitus</string>
+    <string name="ce_profile_lock_summary">PIN-koodi tai kuvio pitää muut poissa tästä profiilista tällä laitteella. Se pysyy tällä laitteella eikä sitä koskaan lähetetä palvelimelle.</string>
+    <string name="ce_profile_lock_status_pattern">Tämä profiili on lukittu kuviolla</string>
+    <string name="ce_profile_lock_status_off">Tätä profiilia ei ole lukittu</string>
+    <string name="ce_profile_lock_type">Lukituksen tyyppi</string>
+    <string name="ce_profile_lock_type_pin_summary">4–6 numeroa</string>
+    <string name="ce_profile_lock_type_pattern">Kuvio</string>
+    <string name="ce_profile_lock_ask_on_start">Pyydä avaamaan käynnistettäessä</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Kun tämä on pois päältä, lukitusta kysytään vain vaihdettaessa tähän profiiliin</string>
+    <string name="ce_profile_pattern_change">Vaihda kuvio</string>
+    <string name="ce_profile_pattern_remove">Poista kuvio</string>
+    <string name="ce_profile_pattern_enter">Piirrä käyttäjän %1$s kuvio</string>
+    <string name="ce_profile_pattern_enter_current">Piirrä nykyinen kuviosi</string>
+    <string name="ce_profile_pattern_choose">Piirrä kuvio, joka yhdistää vähintään 4 pistettä</string>
+    <string name="ce_profile_pattern_repeat">Piirrä uusi kuvio uudelleen</string>
+    <string name="ce_profile_pattern_wrong">Väärä kuvio, yritä uudelleen</string>
+    <string name="ce_profile_pattern_mismatch">Kuviot eivät täsmänneet. Piirrä kuvio uudelleen.</string>
+    <string name="ce_profile_pattern_too_short">Yhdistä vähintään 4 pistettä</string>
+    <string name="ce_profile_pattern_forgot">Unohditko kuvion? Poista tämä käyttäjä käyttäjäluettelosta ja kirjaudu uudelleen sisään palvelimen salasanalla.</string>
+    <string name="ce_profile_pattern_saved">Kuvio asetettu</string>
+    <string name="ce_profile_pattern_removed">Kuvio poistettu</string>
+    <string name="ce_profile_pattern_grid">Avauskuvio, 3 × 3 pisteen ruudukko</string>
 </resources>

@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Smazat číslici</string>
     <string name="ce_profile_pin_saved">PIN nastaven</string>
     <string name="ce_profile_pin_removed">PIN odebrán</string>
+    <string name="ce_profile_lock">Zámek profilu</string>
+    <string name="ce_profile_lock_summary">PIN nebo gesto brání ostatním v přístupu k tomuto profilu na tomto zařízení. Zůstává na tomto zařízení a nikdy se neodesílá na server.</string>
+    <string name="ce_profile_lock_status_pattern">Tento profil je zamčený gestem</string>
+    <string name="ce_profile_lock_status_off">Tento profil není zamčený</string>
+    <string name="ce_profile_lock_type">Typ zámku</string>
+    <string name="ce_profile_lock_type_pin_summary">4 až 6 číslic</string>
+    <string name="ce_profile_lock_type_pattern">Gesto</string>
+    <string name="ce_profile_lock_ask_on_start">Vyžadovat odemknutí při spuštění</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Když je vypnuto, zámek se vyžaduje jen při přepnutí na tento profil</string>
+    <string name="ce_profile_pattern_change">Změnit gesto</string>
+    <string name="ce_profile_pattern_remove">Odebrat gesto</string>
+    <string name="ce_profile_pattern_enter">Nakreslete gesto pro %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Nakreslete své současné gesto</string>
+    <string name="ce_profile_pattern_choose">Nakreslete gesto, které spojí alespoň 4 body</string>
+    <string name="ce_profile_pattern_repeat">Nakreslete nové gesto znovu</string>
+    <string name="ce_profile_pattern_wrong">Nesprávné gesto, zkuste to znovu</string>
+    <string name="ce_profile_pattern_mismatch">Gesta se neshodují. Nakreslete gesto znovu.</string>
+    <string name="ce_profile_pattern_too_short">Spojte alespoň 4 body</string>
+    <string name="ce_profile_pattern_forgot">Zapomněli jste gesto? Odeberte tohoto uživatele ze seznamu uživatelů a znovu se přihlaste heslem k serveru.</string>
+    <string name="ce_profile_pattern_saved">Gesto nastaveno</string>
+    <string name="ce_profile_pattern_removed">Gesto odebráno</string>
+    <string name="ce_profile_pattern_grid">Gesto pro odemknutí, mřížka 3 × 3 bodů</string>
 </resources>

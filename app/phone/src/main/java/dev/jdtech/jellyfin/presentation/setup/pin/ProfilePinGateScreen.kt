@@ -31,6 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
+import dev.jdtech.jellyfin.models.ProfileLockType
 import dev.jdtech.jellyfin.presentation.components.UserAvatar
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -45,7 +46,8 @@ import dev.jdtech.jellyfin.setup.presentation.pin.ProfilePinGateViewModel
 
 /**
  * CE (#299): shown instead of Home when the app starts in a profile with a PIN. Back and "Other
- * profile" leave the profile closed and open the user list.
+ * profile" leave the profile closed and open the user list. Since #330 a profile locked with a
+ * pattern gets the pattern grid instead of the PIN field.
  */
 @Composable
 fun ProfilePinGateScreen(viewModel: ProfilePinGateViewModel = hiltViewModel()) {
@@ -108,24 +110,38 @@ private fun PinGateContent(
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
     ) {
+        val pattern = prompt.lockType == ProfileLockType.PATTERN
         UserAvatar(user = user, baseUrl = baseUrl, size = 96.dp, showLock = false)
         Text(
-            text = stringResource(SetupR.string.ce_profile_pin_enter, user.name),
+            text =
+                stringResource(
+                    if (pattern) SetupR.string.ce_profile_pattern_enter
+                    else SetupR.string.ce_profile_pin_enter,
+                    user.name,
+                ),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
-        PinField(
-            prompt = prompt,
-            pin = pin,
-            onSubmit = { onAction(ProfilePinGateAction.OnPinSubmit(it)) },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Button(
-            onClick = { onAction(ProfilePinGateAction.OnPinSubmit(pin.value)) },
-            enabled = ProfilePinHasher.isValid(pin.value),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(SetupR.string.confirm))
+        if (pattern) {
+            PatternGrid(
+                prompt = prompt,
+                onPattern = { onAction(ProfilePinGateAction.OnPatternSubmit(it)) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            PinField(
+                prompt = prompt,
+                pin = pin,
+                onSubmit = { onAction(ProfilePinGateAction.OnPinSubmit(it)) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(
+                onClick = { onAction(ProfilePinGateAction.OnPinSubmit(pin.value)) },
+                enabled = ProfilePinHasher.isValid(pin.value),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(SetupR.string.confirm))
+            }
         }
         OutlinedButton(
             onClick = { onAction(ProfilePinGateAction.OnCancel) },
@@ -134,10 +150,31 @@ private fun PinGateContent(
             Text(stringResource(SetupR.string.ce_profile_pin_other_profile))
         }
         Text(
-            text = stringResource(SetupR.string.ce_profile_pin_forgot),
+            text =
+                stringResource(
+                    if (pattern) SetupR.string.ce_profile_pattern_forgot
+                    else SetupR.string.ce_profile_pin_forgot
+                ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ProfilePatternGateLayoutPreview() {
+    FindroidTheme {
+        ProfilePinGateLayout(
+            state =
+                ProfilePinGateState(
+                    user = dummyUser,
+                    prompt =
+                        PinPrompt(dummyUser.id, dummyUser.name, lockType = ProfileLockType.PATTERN),
+                ),
+            baseUrl = null,
+            onAction = {},
         )
     }
 }

@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">缓存已清除</string>
     <string name="ce_settings_profile_pin">个人资料 PIN 码</string>
     <string name="ce_settings_profile_pin_summary">在此设备上锁定此个人资料</string>
+    <string name="ce_settings_profile_lock">个人资料锁</string>
 </resources>

@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Кеш очищено</string>
     <string name="ce_settings_profile_pin">PIN-код профілю</string>
     <string name="ce_settings_profile_pin_summary">Заблокувати цей профіль на цьому пристрої</string>
+    <string name="ce_settings_profile_lock">Блокування профілю</string>
 </resources>

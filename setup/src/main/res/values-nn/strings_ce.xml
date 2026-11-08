@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Slett siffer</string>
     <string name="ce_profile_pin_saved">PIN-koden er sett</string>
     <string name="ce_profile_pin_removed">PIN-koden er fjerna</string>
+    <string name="ce_profile_lock">Profillås</string>
+    <string name="ce_profile_lock_summary">Ein PIN-kode eller eit mønster held andre ute frå denne profilen på denne eininga. Han blir verande på denne eininga og blir aldri send til tenaren.</string>
+    <string name="ce_profile_lock_status_pattern">Denne profilen er låst med eit mønster</string>
+    <string name="ce_profile_lock_status_off">Denne profilen er ikkje låst</string>
+    <string name="ce_profile_lock_type">Låsetype</string>
+    <string name="ce_profile_lock_type_pin_summary">4 til 6 siffer</string>
+    <string name="ce_profile_lock_type_pattern">Mønster</string>
+    <string name="ce_profile_lock_ask_on_start">Be om opplåsing ved start</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Når dette er av, blir låsen berre spurd om ved byte til denne profilen</string>
+    <string name="ce_profile_pattern_change">Endra mønster</string>
+    <string name="ce_profile_pattern_remove">Fjern mønster</string>
+    <string name="ce_profile_pattern_enter">Teikn mønsteret for %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Teikn det noverande mønsteret ditt</string>
+    <string name="ce_profile_pattern_choose">Teikn eit mønster som koplar saman minst 4 prikkar</string>
+    <string name="ce_profile_pattern_repeat">Teikn det nye mønsteret ein gong til</string>
+    <string name="ce_profile_pattern_wrong">Feil mønster, prøv igjen</string>
+    <string name="ce_profile_pattern_mismatch">Mønstera var ikkje like. Teikn eit mønster på nytt.</string>
+    <string name="ce_profile_pattern_too_short">Kopla saman minst 4 prikkar</string>
+    <string name="ce_profile_pattern_forgot">Har du gløymt mønsteret? Fjern denne brukaren frå brukarlista og logg inn på nytt med passordet til tenaren.</string>
+    <string name="ce_profile_pattern_saved">Mønster sett</string>
+    <string name="ce_profile_pattern_removed">Mønster fjerna</string>
+    <string name="ce_profile_pattern_grid">Opplåsingsmønster, eit rutenett med 3 gonger 3 prikkar</string>
 </resources>

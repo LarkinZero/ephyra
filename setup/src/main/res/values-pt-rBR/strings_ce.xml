@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Apagar dígito</string>
     <string name="ce_profile_pin_saved">PIN definido</string>
     <string name="ce_profile_pin_removed">PIN removido</string>
+    <string name="ce_profile_lock">Bloqueio do perfil</string>
+    <string name="ce_profile_lock_summary">Um PIN ou um padrão impede que outras pessoas entrem neste perfil neste dispositivo. Ele fica neste dispositivo e nunca é enviado ao servidor.</string>
+    <string name="ce_profile_lock_status_pattern">Este perfil está bloqueado com um padrão</string>
+    <string name="ce_profile_lock_status_off">Este perfil não está bloqueado</string>
+    <string name="ce_profile_lock_type">Tipo de bloqueio</string>
+    <string name="ce_profile_lock_type_pin_summary">De 4 a 6 dígitos</string>
+    <string name="ce_profile_lock_type_pattern">Padrão</string>
+    <string name="ce_profile_lock_ask_on_start">Pedir o desbloqueio ao iniciar</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Quando desativado, o bloqueio só é pedido ao trocar para este perfil</string>
+    <string name="ce_profile_pattern_change">Alterar padrão</string>
+    <string name="ce_profile_pattern_remove">Remover padrão</string>
+    <string name="ce_profile_pattern_enter">Desenhe o padrão de %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Desenhe seu padrão atual</string>
+    <string name="ce_profile_pattern_choose">Desenhe um padrão que conecte pelo menos 4 pontos</string>
+    <string name="ce_profile_pattern_repeat">Desenhe o novo padrão de novo</string>
+    <string name="ce_profile_pattern_wrong">Padrão incorreto, tente novamente</string>
+    <string name="ce_profile_pattern_mismatch">Os padrões não coincidem. Desenhe um padrão de novo.</string>
+    <string name="ce_profile_pattern_too_short">Conecte pelo menos 4 pontos</string>
+    <string name="ce_profile_pattern_forgot">Esqueceu o padrão? Remova este usuário da lista de usuários e entre novamente com a senha do servidor.</string>
+    <string name="ce_profile_pattern_saved">Padrão definido</string>
+    <string name="ce_profile_pattern_removed">Padrão removido</string>
+    <string name="ce_profile_pattern_grid">Padrão de desbloqueio, uma grade de 3 por 3 pontos</string>
 </resources>

@@ -96,4 +96,5 @@
     <string name="item_extras">Extra\'s</string>
     <string name="item_included_in">Onderdeel van</string>
     <string name="item_more_like_this">Meer zoals dit</string>
+    <string name="ce_session_revoked">%1$s heeft je afgemeld. Meld je opnieuw aan om verder te gaan.</string>
 </resources>

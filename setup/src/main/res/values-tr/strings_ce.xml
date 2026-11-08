@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Rakamı sil</string>
     <string name="ce_profile_pin_saved">PIN belirlendi</string>
     <string name="ce_profile_pin_removed">PIN kaldırıldı</string>
+    <string name="ce_profile_lock">Profil kilidi</string>
+    <string name="ce_profile_lock_summary">PIN veya desen, bu cihazda başkalarının bu profile girmesini engeller. Bu cihazda kalır ve asla sunucuya gönderilmez.</string>
+    <string name="ce_profile_lock_status_pattern">Bu profil bir desenle kilitli</string>
+    <string name="ce_profile_lock_status_off">Bu profil kilitli değil</string>
+    <string name="ce_profile_lock_type">Kilit türü</string>
+    <string name="ce_profile_lock_type_pin_summary">4 ila 6 rakam</string>
+    <string name="ce_profile_lock_type_pattern">Desen</string>
+    <string name="ce_profile_lock_ask_on_start">Başlangıçta kilidi açmayı iste</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Kapalıyken kilit yalnızca bu profile geçerken sorulur</string>
+    <string name="ce_profile_pattern_change">Deseni değiştir</string>
+    <string name="ce_profile_pattern_remove">Deseni kaldır</string>
+    <string name="ce_profile_pattern_enter">%1$s için deseni çizin</string>
+    <string name="ce_profile_pattern_enter_current">Mevcut deseninizi çizin</string>
+    <string name="ce_profile_pattern_choose">En az 4 noktayı birleştiren bir desen çizin</string>
+    <string name="ce_profile_pattern_repeat">Yeni deseni tekrar çizin</string>
+    <string name="ce_profile_pattern_wrong">Yanlış desen, tekrar deneyin</string>
+    <string name="ce_profile_pattern_mismatch">Desenler eşleşmedi. Tekrar bir desen çizin.</string>
+    <string name="ce_profile_pattern_too_short">En az 4 noktayı birleştirin</string>
+    <string name="ce_profile_pattern_forgot">Deseni mi unuttunuz? Bu kullanıcıyı kullanıcı listesinden kaldırın ve sunucu parolasıyla yeniden oturum açın.</string>
+    <string name="ce_profile_pattern_saved">Desen ayarlandı</string>
+    <string name="ce_profile_pattern_removed">Desen kaldırıldı</string>
+    <string name="ce_profile_pattern_grid">Kilit açma deseni, 3 × 3 noktalık bir ızgara</string>
 </resources>

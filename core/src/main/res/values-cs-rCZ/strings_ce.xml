@@ -99,4 +99,5 @@
     <string name="item_extras">Bonusy</string>
     <string name="item_included_in">Součástí</string>
     <string name="item_more_like_this">Podobné tituly</string>
+    <string name="ce_session_revoked">%1$s vás odhlásil. Pro pokračování se znovu přihlaste.</string>
 </resources>

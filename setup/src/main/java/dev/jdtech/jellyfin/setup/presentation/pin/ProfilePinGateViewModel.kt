@@ -3,8 +3,11 @@ package dev.jdtech.jellyfin.setup.presentation.pin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.models.ProfileLockType
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.models.profileLockType
 import dev.jdtech.jellyfin.profilelock.ProfileLock
+import dev.jdtech.jellyfin.profilelock.ProfileLockEntry
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +19,9 @@ data class ProfilePinGateState(val user: User? = null, val prompt: PinPrompt? = 
 
 sealed interface ProfilePinGateAction {
     data class OnPinSubmit(val pin: String) : ProfilePinGateAction
+
+    /** CE (#330): a pattern drawn on the grid, for a profile locked with one. */
+    data class OnPatternSubmit(val dots: List<Int>) : ProfilePinGateAction
 
     /** Back or "Other profile": leave the profile closed and pick another one. */
     data object OnCancel : ProfilePinGateAction
@@ -38,22 +44,30 @@ constructor(private val repository: SetupRepository, private val profileLock: Pr
     init {
         viewModelScope.launch {
             val user = repository.getCurrentUser() ?: return@launch
-            _state.update { ProfilePinGateState(user = user, prompt = PinPrompt(user.id, user.name)) }
+            val prompt =
+                PinPrompt(
+                    user.id,
+                    user.name,
+                    lockType = user.profileLockType ?: ProfileLockType.PIN,
+                )
+            _state.update { ProfilePinGateState(user = user, prompt = prompt) }
         }
     }
 
     fun onAction(action: ProfilePinGateAction) {
         when (action) {
-            is ProfilePinGateAction.OnPinSubmit -> submit(action.pin)
+            is ProfilePinGateAction.OnPinSubmit -> submit(ProfileLockEntry.Pin(action.pin))
+            is ProfilePinGateAction.OnPatternSubmit ->
+                submit(ProfileLockEntry.Pattern(action.dots))
             is ProfilePinGateAction.OnCancel ->
                 viewModelScope.launch { repository.clearCurrentUser() }
         }
     }
 
-    private fun submit(pin: String) {
+    private fun submit(entry: ProfileLockEntry) {
         val prompt = _state.value.prompt ?: return
         viewModelScope.launch {
-            if (profileLock.verifyPin(prompt.userId, pin)) {
+            if (profileLock.verify(prompt.userId, entry)) {
                 profileLock.unlock(prompt.userId)
             } else {
                 _state.update { it.copy(prompt = prompt.rejected(PinError.WRONG)) }

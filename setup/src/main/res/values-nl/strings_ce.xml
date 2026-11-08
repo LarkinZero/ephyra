@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Cijfer wissen</string>
     <string name="ce_profile_pin_saved">Pincode ingesteld</string>
     <string name="ce_profile_pin_removed">Pincode verwijderd</string>
+    <string name="ce_profile_lock">Profielvergrendeling</string>
+    <string name="ce_profile_lock_summary">Een pincode of patroon houdt anderen uit dit profiel op dit apparaat. Het blijft op dit apparaat en wordt nooit naar de server gestuurd.</string>
+    <string name="ce_profile_lock_status_pattern">Dit profiel is vergrendeld met een patroon</string>
+    <string name="ce_profile_lock_status_off">Dit profiel is niet vergrendeld</string>
+    <string name="ce_profile_lock_type">Soort vergrendeling</string>
+    <string name="ce_profile_lock_type_pin_summary">4 tot 6 cijfers</string>
+    <string name="ce_profile_lock_type_pattern">Patroon</string>
+    <string name="ce_profile_lock_ask_on_start">Vragen om te ontgrendelen bij het starten</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Als dit uit staat, wordt alleen bij het wisselen naar dit profiel om de vergrendeling gevraagd</string>
+    <string name="ce_profile_pattern_change">Patroon wijzigen</string>
+    <string name="ce_profile_pattern_remove">Patroon verwijderen</string>
+    <string name="ce_profile_pattern_enter">Teken het patroon voor %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Teken je huidige patroon</string>
+    <string name="ce_profile_pattern_choose">Teken een patroon dat minstens 4 punten verbindt</string>
+    <string name="ce_profile_pattern_repeat">Teken het nieuwe patroon nog een keer</string>
+    <string name="ce_profile_pattern_wrong">Verkeerd patroon, probeer het opnieuw</string>
+    <string name="ce_profile_pattern_mismatch">De patronen kwamen niet overeen. Teken opnieuw een patroon.</string>
+    <string name="ce_profile_pattern_too_short">Verbind minstens 4 punten</string>
+    <string name="ce_profile_pattern_forgot">Patroon vergeten? Verwijder deze gebruiker uit de gebruikerslijst en log opnieuw in met het serverwachtwoord.</string>
+    <string name="ce_profile_pattern_saved">Patroon ingesteld</string>
+    <string name="ce_profile_pattern_removed">Patroon verwijderd</string>
+    <string name="ce_profile_pattern_grid">Ontgrendelpatroon, een raster van 3 bij 3 punten</string>
 </resources>

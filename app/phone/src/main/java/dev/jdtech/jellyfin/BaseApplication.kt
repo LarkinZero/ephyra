@@ -25,6 +25,7 @@ import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.HiltAndroidApp
+import dev.jdtech.jellyfin.core.session.ServerSessionKeeper
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.core.presentation.downloader.SmartDownloads
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -47,6 +48,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
     @Inject lateinit var appPreferences: AppPreferences
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject lateinit var serverSessionKeeper: ServerSessionKeeper
 
     @Inject lateinit var downloadQueue: DownloadQueue
 
@@ -84,6 +87,9 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
 
         // Smart Downloads reacts to the player reporting a stop, which can happen at any time.
         smartDownloads.start()
+
+        // CE (#334): keep the session list on the server in step with the app.
+        serverSessionKeeper.start()
 
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             // CE (#250): WorkManager is set up here, off the main thread, rather than in onCreate.

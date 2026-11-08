@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Кешът е изчистен</string>
     <string name="ce_settings_profile_pin">ПИН на профила</string>
     <string name="ce_settings_profile_pin_summary">Заключване на този профил на това устройство</string>
+    <string name="ce_settings_profile_lock">Заключване на профила</string>
 </resources>

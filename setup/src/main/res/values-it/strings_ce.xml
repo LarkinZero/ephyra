@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Elimina cifra</string>
     <string name="ce_profile_pin_saved">PIN impostato</string>
     <string name="ce_profile_pin_removed">PIN rimosso</string>
+    <string name="ce_profile_lock">Blocco del profilo</string>
+    <string name="ce_profile_lock_summary">Un PIN o una sequenza tiene gli altri fuori da questo profilo su questo dispositivo. Resta su questo dispositivo e non viene mai inviato al server.</string>
+    <string name="ce_profile_lock_status_pattern">Questo profilo è bloccato con una sequenza</string>
+    <string name="ce_profile_lock_status_off">Questo profilo non è bloccato</string>
+    <string name="ce_profile_lock_type">Tipo di blocco</string>
+    <string name="ce_profile_lock_type_pin_summary">Da 4 a 6 cifre</string>
+    <string name="ce_profile_lock_type_pattern">Sequenza</string>
+    <string name="ce_profile_lock_ask_on_start">Chiedi lo sblocco all\'avvio</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Se disattivato, il blocco viene chiesto solo passando a questo profilo</string>
+    <string name="ce_profile_pattern_change">Cambia sequenza</string>
+    <string name="ce_profile_pattern_remove">Rimuovi sequenza</string>
+    <string name="ce_profile_pattern_enter">Traccia la sequenza di %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Traccia la sequenza attuale</string>
+    <string name="ce_profile_pattern_choose">Traccia una sequenza che colleghi almeno 4 punti</string>
+    <string name="ce_profile_pattern_repeat">Traccia di nuovo la nuova sequenza</string>
+    <string name="ce_profile_pattern_wrong">Sequenza errata, riprova</string>
+    <string name="ce_profile_pattern_mismatch">Le sequenze non corrispondono. Traccia di nuovo una sequenza.</string>
+    <string name="ce_profile_pattern_too_short">Collega almeno 4 punti</string>
+    <string name="ce_profile_pattern_forgot">Hai dimenticato la sequenza? Rimuovi questo utente dall\'elenco utenti e accedi di nuovo con la password del server.</string>
+    <string name="ce_profile_pattern_saved">Sequenza impostata</string>
+    <string name="ce_profile_pattern_removed">Sequenza rimossa</string>
+    <string name="ce_profile_pattern_grid">Sequenza di sblocco, una griglia di 3 per 3 punti</string>
 </resources>

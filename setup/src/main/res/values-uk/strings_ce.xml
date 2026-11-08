@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Видалити цифру</string>
     <string name="ce_profile_pin_saved">PIN-код задано</string>
     <string name="ce_profile_pin_removed">PIN-код видалено</string>
+    <string name="ce_profile_lock">Блокування профілю</string>
+    <string name="ce_profile_lock_summary">PIN-код або графічний ключ не пускає інших у цей профіль на цьому пристрої. Він зберігається лише на цьому пристрої й ніколи не надсилається на сервер.</string>
+    <string name="ce_profile_lock_status_pattern">Цей профіль заблоковано графічним ключем</string>
+    <string name="ce_profile_lock_status_off">Цей профіль не заблоковано</string>
+    <string name="ce_profile_lock_type">Тип блокування</string>
+    <string name="ce_profile_lock_type_pin_summary">Від 4 до 6 цифр</string>
+    <string name="ce_profile_lock_type_pattern">Графічний ключ</string>
+    <string name="ce_profile_lock_ask_on_start">Запитувати розблокування під час запуску</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Якщо вимкнено, розблокування запитується лише під час перемикання на цей профіль</string>
+    <string name="ce_profile_pattern_change">Змінити графічний ключ</string>
+    <string name="ce_profile_pattern_remove">Видалити графічний ключ</string>
+    <string name="ce_profile_pattern_enter">Намалюйте графічний ключ для %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Намалюйте поточний графічний ключ</string>
+    <string name="ce_profile_pattern_choose">Намалюйте ключ, що з\'єднує щонайменше 4 точки</string>
+    <string name="ce_profile_pattern_repeat">Намалюйте новий ключ ще раз</string>
+    <string name="ce_profile_pattern_wrong">Неправильний графічний ключ, спробуйте ще раз</string>
+    <string name="ce_profile_pattern_mismatch">Ключі не збіглися. Намалюйте ключ ще раз.</string>
+    <string name="ce_profile_pattern_too_short">З\'єднайте щонайменше 4 точки</string>
+    <string name="ce_profile_pattern_forgot">Забули графічний ключ? Видаліть цього користувача зі списку користувачів і увійдіть знову з паролем сервера.</string>
+    <string name="ce_profile_pattern_saved">Графічний ключ встановлено</string>
+    <string name="ce_profile_pattern_removed">Графічний ключ видалено</string>
+    <string name="ce_profile_pattern_grid">Графічний ключ, сітка з 3 × 3 точок</string>
 </resources>

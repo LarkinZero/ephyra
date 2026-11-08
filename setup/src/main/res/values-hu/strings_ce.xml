@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Számjegy törlése</string>
     <string name="ce_profile_pin_saved">PIN-kód beállítva</string>
     <string name="ce_profile_pin_removed">PIN-kód eltávolítva</string>
+    <string name="ce_profile_lock">Profilzár</string>
+    <string name="ce_profile_lock_summary">Egy PIN-kód vagy minta távol tartja a többieket ettől a profiltól ezen az eszközön. Ezen az eszközön marad, és soha nem kerül a szerverre.</string>
+    <string name="ce_profile_lock_status_pattern">Ez a profil mintával van zárolva</string>
+    <string name="ce_profile_lock_status_off">Ez a profil nincs zárolva</string>
+    <string name="ce_profile_lock_type">Zár típusa</string>
+    <string name="ce_profile_lock_type_pin_summary">4–6 számjegy</string>
+    <string name="ce_profile_lock_type_pattern">Minta</string>
+    <string name="ce_profile_lock_ask_on_start">Feloldás kérése indításkor</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Kikapcsolva a zárat csak erre a profilra váltáskor kéri</string>
+    <string name="ce_profile_pattern_change">Minta módosítása</string>
+    <string name="ce_profile_pattern_remove">Minta eltávolítása</string>
+    <string name="ce_profile_pattern_enter">Rajzold le %1$s mintáját</string>
+    <string name="ce_profile_pattern_enter_current">Rajzold le a jelenlegi mintádat</string>
+    <string name="ce_profile_pattern_choose">Rajzolj egy mintát, amely legalább 4 pontot köt össze</string>
+    <string name="ce_profile_pattern_repeat">Rajzold le újra az új mintát</string>
+    <string name="ce_profile_pattern_wrong">Hibás minta, próbáld újra</string>
+    <string name="ce_profile_pattern_mismatch">A minták nem egyeztek. Rajzolj újra egy mintát.</string>
+    <string name="ce_profile_pattern_too_short">Köss össze legalább 4 pontot</string>
+    <string name="ce_profile_pattern_forgot">Elfelejtetted a mintát? Távolítsd el ezt a felhasználót a felhasználólistáról, és jelentkezz be újra a szerver jelszavával.</string>
+    <string name="ce_profile_pattern_saved">Minta beállítva</string>
+    <string name="ce_profile_pattern_removed">Minta eltávolítva</string>
+    <string name="ce_profile_pattern_grid">Feloldási minta, 3 × 3 pontból álló rács</string>
 </resources>

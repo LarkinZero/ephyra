@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Vymazať číslicu</string>
     <string name="ce_profile_pin_saved">PIN nastavený</string>
     <string name="ce_profile_pin_removed">PIN odstránený</string>
+    <string name="ce_profile_lock">Zámka profilu</string>
+    <string name="ce_profile_lock_summary">PIN alebo vzor bráni ostatným v prístupe k tomuto profilu v tomto zariadení. Zostáva v tomto zariadení a nikdy sa neodosiela na server.</string>
+    <string name="ce_profile_lock_status_pattern">Tento profil je zamknutý vzorom</string>
+    <string name="ce_profile_lock_status_off">Tento profil nie je zamknutý</string>
+    <string name="ce_profile_lock_type">Typ zámky</string>
+    <string name="ce_profile_lock_type_pin_summary">4 až 6 číslic</string>
+    <string name="ce_profile_lock_type_pattern">Vzor</string>
+    <string name="ce_profile_lock_ask_on_start">Pýtať odomknutie pri spustení</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Keď je vypnuté, zámka sa vyžaduje len pri prepnutí na tento profil</string>
+    <string name="ce_profile_pattern_change">Zmeniť vzor</string>
+    <string name="ce_profile_pattern_remove">Odstrániť vzor</string>
+    <string name="ce_profile_pattern_enter">Nakreslite vzor pre %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Nakreslite svoj aktuálny vzor</string>
+    <string name="ce_profile_pattern_choose">Nakreslite vzor, ktorý spojí aspoň 4 body</string>
+    <string name="ce_profile_pattern_repeat">Nakreslite nový vzor ešte raz</string>
+    <string name="ce_profile_pattern_wrong">Nesprávny vzor, skúste to znova</string>
+    <string name="ce_profile_pattern_mismatch">Vzory sa nezhodujú. Nakreslite vzor znova.</string>
+    <string name="ce_profile_pattern_too_short">Spojte aspoň 4 body</string>
+    <string name="ce_profile_pattern_forgot">Zabudli ste vzor? Odstráňte tohto používateľa zo zoznamu používateľov a znova sa prihláste heslom servera.</string>
+    <string name="ce_profile_pattern_saved">Vzor nastavený</string>
+    <string name="ce_profile_pattern_removed">Vzor odstránený</string>
+    <string name="ce_profile_pattern_grid">Vzor na odomknutie, mriežka 3 × 3 bodov</string>
 </resources>

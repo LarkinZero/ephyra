@@ -96,4 +96,5 @@
     <string name="item_extras">Lisad</string>
     <string name="item_included_in">Kuulub kogusse</string>
     <string name="item_more_like_this">Sarnased</string>
+    <string name="ce_session_revoked">%1$s logis sind välja. Jätkamiseks logi uuesti sisse.</string>
 </resources>

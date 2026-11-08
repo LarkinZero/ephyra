@@ -96,4 +96,5 @@
     <string name="item_extras">תוספות</string>
     <string name="item_included_in">כלול ב</string>
     <string name="item_more_like_this">עוד בסגנון הזה</string>
+    <string name="ce_session_revoked">%1$s ניתק אותך. יש להתחבר שוב כדי להמשיך.</string>
 </resources>

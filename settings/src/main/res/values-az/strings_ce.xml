@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Keş təmizləndi</string>
     <string name="ce_settings_profile_pin">Profil PIN kodu</string>
     <string name="ce_settings_profile_pin_summary">Bu profili bu cihazda kilidlə</string>
+    <string name="ce_settings_profile_lock">Profil kilidi</string>
 </resources>

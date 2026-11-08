@@ -96,4 +96,5 @@
     <string name="item_extras">Extramaterial</string>
     <string name="item_included_in">Ingår i</string>
     <string name="item_more_like_this">Mer som detta</string>
+    <string name="ce_session_revoked">%1$s loggade ut dig. Logga in igen för att fortsätta.</string>
 </resources>

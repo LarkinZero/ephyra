@@ -96,4 +96,5 @@
     <string name="item_extras">Extrák</string>
     <string name="item_included_in">Része ennek</string>
     <string name="item_more_like_this">Hasonlók</string>
+    <string name="ce_session_revoked">%1$s kijelentkeztetett. A folytatáshoz jelentkezz be újra.</string>
 </resources>

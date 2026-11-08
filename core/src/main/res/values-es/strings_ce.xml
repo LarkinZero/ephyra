@@ -96,4 +96,5 @@
     <string name="item_extras">Extras</string>
     <string name="item_included_in">Incluido en</string>
     <string name="item_more_like_this">Más como esto</string>
+    <string name="ce_session_revoked">%1$s ha cerrado tu sesión. Vuelve a iniciar sesión para continuar.</string>
 </resources>

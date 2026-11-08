@@ -28,4 +28,26 @@
     <string name="ce_profile_pin_delete">Usuń cyfrę</string>
     <string name="ce_profile_pin_saved">PIN ustawiony</string>
     <string name="ce_profile_pin_removed">PIN usunięty</string>
+    <string name="ce_profile_lock">Blokada profilu</string>
+    <string name="ce_profile_lock_summary">PIN lub wzór chroni ten profil przed innymi na tym urządzeniu. Pozostaje na tym urządzeniu i nigdy nie jest wysyłany na serwer.</string>
+    <string name="ce_profile_lock_status_pattern">Ten profil jest zablokowany wzorem</string>
+    <string name="ce_profile_lock_status_off">Ten profil nie jest zablokowany</string>
+    <string name="ce_profile_lock_type">Rodzaj blokady</string>
+    <string name="ce_profile_lock_type_pin_summary">Od 4 do 6 cyfr</string>
+    <string name="ce_profile_lock_type_pattern">Wzór</string>
+    <string name="ce_profile_lock_ask_on_start">Pytaj o odblokowanie przy uruchomieniu</string>
+    <string name="ce_profile_lock_ask_on_start_summary">Gdy wyłączone, blokada jest wymagana tylko przy przełączaniu na ten profil</string>
+    <string name="ce_profile_pattern_change">Zmień wzór</string>
+    <string name="ce_profile_pattern_remove">Usuń wzór</string>
+    <string name="ce_profile_pattern_enter">Narysuj wzór dla: %1$s</string>
+    <string name="ce_profile_pattern_enter_current">Narysuj obecny wzór</string>
+    <string name="ce_profile_pattern_choose">Narysuj wzór łączący co najmniej 4 punkty</string>
+    <string name="ce_profile_pattern_repeat">Narysuj nowy wzór jeszcze raz</string>
+    <string name="ce_profile_pattern_wrong">Nieprawidłowy wzór, spróbuj ponownie</string>
+    <string name="ce_profile_pattern_mismatch">Wzory się nie zgadzają. Narysuj wzór ponownie.</string>
+    <string name="ce_profile_pattern_too_short">Połącz co najmniej 4 punkty</string>
+    <string name="ce_profile_pattern_forgot">Nie pamiętasz wzoru? Usuń tego użytkownika z listy użytkowników i zaloguj się ponownie hasłem do serwera.</string>
+    <string name="ce_profile_pattern_saved">Wzór ustawiony</string>
+    <string name="ce_profile_pattern_removed">Wzór usunięty</string>
+    <string name="ce_profile_pattern_grid">Wzór odblokowania, siatka 3 na 3 punkty</string>
 </resources>

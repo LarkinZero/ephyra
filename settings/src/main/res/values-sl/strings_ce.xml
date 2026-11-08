@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Predpomnilnik je počiščen</string>
     <string name="ce_settings_profile_pin">PIN profila</string>
     <string name="ce_settings_profile_pin_summary">Zakleni ta profil v tej napravi</string>
+    <string name="ce_settings_profile_lock">Zaklepanje profila</string>
 </resources>

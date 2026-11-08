@@ -102,4 +102,5 @@
     <string name="item_extras">Dodatki</string>
     <string name="item_included_in">Należy do</string>
     <string name="item_more_like_this">Więcej podobnych</string>
+    <string name="ce_session_revoked">%1$s wylogował cię. Zaloguj się ponownie, aby kontynuować.</string>
 </resources>

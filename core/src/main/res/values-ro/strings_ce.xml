@@ -99,4 +99,5 @@
     <string name="item_extras">Extra</string>
     <string name="item_included_in">Inclus în</string>
     <string name="item_more_like_this">Mai multe asemănătoare</string>
+    <string name="ce_session_revoked">%1$s te-a deconectat. Conectează-te din nou pentru a continua.</string>
 </resources>

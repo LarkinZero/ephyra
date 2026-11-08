@@ -102,4 +102,5 @@
     <string name="item_extras">Дополнительные материалы</string>
     <string name="item_included_in">Входит в</string>
     <string name="item_more_like_this">Похожее</string>
+    <string name="ce_session_revoked">%1$s завершил ваш сеанс. Войдите снова, чтобы продолжить.</string>
 </resources>

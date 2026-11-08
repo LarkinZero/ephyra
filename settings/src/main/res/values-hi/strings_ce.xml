@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">कैश साफ़ किया गया</string>
     <string name="ce_settings_profile_pin">प्रोफ़ाइल PIN</string>
     <string name="ce_settings_profile_pin_summary">इस डिवाइस पर इस प्रोफ़ाइल को लॉक करें</string>
+    <string name="ce_settings_profile_lock">प्रोफ़ाइल लॉक</string>
 </resources>

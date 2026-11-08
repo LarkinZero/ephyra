@@ -15,6 +15,9 @@ import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.discovery.RecommendedServerInfo
@@ -45,7 +48,21 @@ class SetupRepositoryImpl(
     }
 
     override suspend fun deleteServer(serverId: String) {
+        // CE (#334): the saved logins go with the server, so sign them out there too.
+        coroutineScope {
+            database.getUsers(serverId).map { user -> async { endSessionOnServer(user) } }.awaitAll()
+        }
         database.deleteServer(serverId)
+    }
+
+    /**
+     * CE (#334): ends [user]'s session on their server and revokes the token. Removing a login
+     * used to leave both behind: the token stayed valid and the server kept listing the session.
+     */
+    private suspend fun endSessionOnServer(user: User) {
+        val token = user.accessToken ?: return
+        val address = database.getServerWithAddressAndUser(user.serverId)?.address ?: return
+        jellyfinApi.endSession(baseUrl = address.address, accessToken = token)
     }
 
     override suspend fun getIsQuickConnectEnabled(): Boolean =
@@ -290,6 +307,17 @@ class SetupRepositoryImpl(
             Timber.e("You cannot delete the current user")
             return
         }*/
+        val user = database.getUser(userId) ?: return
+        endSessionOnServer(user)
+        // CE (#334): its token no longer works, so it cannot stay the current user.
+        val server = database.getServer(user.serverId)
+        if (server?.currentUserId == userId) {
+            database.clearServerCurrentUser(server.id)
+            if (jellyfinApi.userId == userId) {
+                jellyfinApi.api.update(accessToken = null)
+                jellyfinApi.userId = null
+            }
+        }
         database.deleteUser(userId)
     }
 

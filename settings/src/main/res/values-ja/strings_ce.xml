@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">キャッシュを消去しました</string>
     <string name="ce_settings_profile_pin">プロフィールのPIN</string>
     <string name="ce_settings_profile_pin_summary">このデバイスでこのプロフィールをロック</string>
+    <string name="ce_settings_profile_lock">プロフィールのロック</string>
 </resources>

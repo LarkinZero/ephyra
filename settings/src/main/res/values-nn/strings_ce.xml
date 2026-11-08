@@ -156,4 +156,5 @@
     <string name="settings_cache_cleared">Hurtigminnet er tømt</string>
     <string name="ce_settings_profile_pin">PIN-kode for profilen</string>
     <string name="ce_settings_profile_pin_summary">Lås denne profilen på denne eininga</string>
+    <string name="ce_settings_profile_lock">Profillås</string>
 </resources>
