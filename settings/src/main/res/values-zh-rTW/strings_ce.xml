@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">等寬字體 (Monospace)</string>
     <string name="subtitle_font_sans_serif">無襯線字體 (Sans-serif)</string>
     <string name="subtitle_font_scale">文字大小</string>
+    <string name="subtitle_override_embedded_styles">覆寫內嵌樣式</string>
+    <string name="subtitle_override_embedded_styles_summary">對自帶樣式的字幕（例如 ASS）也套用此樣式。其色彩、字型和大小會被取代，位置維持不變。</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">襯線字體 (Serif)</string>
     <string name="subtitle_foreground_color">文字顏色</string>

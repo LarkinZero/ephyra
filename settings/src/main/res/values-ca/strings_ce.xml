@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monoespaiat</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Mida del text</string>
+    <string name="subtitle_override_embedded_styles">Substitueix els estils incrustats</string>
+    <string name="subtitle_override_embedded_styles_summary">Fes servir aquest estil per als subtítols que porten el seu, com ara ASS. Se\'n substitueixen els colors, les fonts i les mides; les posicions es mantenen.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Color del text</string>

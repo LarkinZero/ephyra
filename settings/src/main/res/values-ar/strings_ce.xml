@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">أحادي المسافة (Monospace)</string>
     <string name="subtitle_font_sans_serif">غير مذيل (Sans-serif)</string>
     <string name="subtitle_font_scale">حجم النص</string>
+    <string name="subtitle_override_embedded_styles">تجاوز الأنماط المضمّنة</string>
+    <string name="subtitle_override_embedded_styles_summary">استخدم هذا النمط للترجمات التي تأتي بنمطها الخاص، مثل ASS. تُستبدل ألوانها وخطوطها وأحجامها؛ وتبقى المواضع.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">مذيل (Serif)</string>
     <string name="subtitle_foreground_color">لون النص</string>

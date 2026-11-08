@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Teksti suurus</string>
+    <string name="subtitle_override_embedded_styles">Asenda manustatud stiilid</string>
+    <string name="subtitle_override_embedded_styles_summary">Kasuta seda stiili ka omaenda stiiliga subtiitritel, näiteks ASS. Nende värvid, fondid ja suurused asendatakse; asukohad jäävad.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Teksti värv</string>

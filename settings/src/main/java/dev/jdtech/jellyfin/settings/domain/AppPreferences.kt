@@ -211,6 +211,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val subtitleFontFamily =
         Preference<String?>("pref_subtitle_font_family", Constants.SubtitleStyle.FONT_DEFAULT)
     val subtitleFontScale = Preference("pref_subtitle_font_scale", 100)
+    // CE (#300): apply the style above to subtitles that bring their own (ASS/SSA), on both
+    // backends. Off by default, so those tracks look the way their authors made them.
+    val subtitleOverrideEmbeddedStyles =
+        Preference("pref_subtitle_override_embedded_styles", false)
 
     // Downloads
     val downloadOverMobileData = Preference("pref_downloads_mobile_data", false)

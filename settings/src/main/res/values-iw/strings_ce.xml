@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">רוחב קבוע (Monospace)</string>
     <string name="subtitle_font_sans_serif">סנס-סריף (Sans-serif)</string>
     <string name="subtitle_font_scale">גודל טקסט</string>
+    <string name="subtitle_override_embedded_styles">דריסת סגנונות מוטמעים</string>
+    <string name="subtitle_override_embedded_styles_summary">שימוש בסגנון הזה גם לכתוביות עם סגנון משלהן, כמו ASS. הצבעים, הגופנים והגדלים שלהן מוחלפים; המיקומים נשמרים.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">סריף (Serif)</string>
     <string name="subtitle_foreground_color">צבע טקסט</string>

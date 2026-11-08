@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">等幅フォント</string>
     <string name="subtitle_font_sans_serif">ゴシック体（サンセリフ）</string>
     <string name="subtitle_font_scale">文字サイズ</string>
+    <string name="subtitle_override_embedded_styles">埋め込みスタイルを上書き</string>
+    <string name="subtitle_override_embedded_styles_summary">ASS など独自のスタイルを持つ字幕にもこのスタイルを使います。色・フォント・サイズは置き換わり、位置はそのままです。</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">明朝体（セリフ）</string>
     <string name="subtitle_foreground_color">文字色</string>

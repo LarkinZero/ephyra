@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Fix szélességű (Monospace)</string>
     <string name="subtitle_font_sans_serif">Talpatlan (Sans-serif)</string>
     <string name="subtitle_font_scale">Szövegméret</string>
+    <string name="subtitle_override_embedded_styles">Beágyazott stílusok felülírása</string>
+    <string name="subtitle_override_embedded_styles_summary">Ez a stílus a saját stílusú feliratokra is, például ASS. Színeik, betűtípusaik és méreteik lecserélődnek; a pozíciók megmaradnak.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Talpas (Serif)</string>
     <string name="subtitle_foreground_color">Szövegszín</string>

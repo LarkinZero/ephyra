@@ -65,6 +65,7 @@ class MPVPlayer(
     audioOutput: String = Constants.MpvAudioOutput.AUDIOTRACK,
     hwDec: String = "mediacodec",
     private val matchRefreshRate: Boolean = false,
+    subtitleOptions: Map<String, String> = emptyMap(),
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
@@ -103,6 +104,7 @@ class MPVPlayer(
         audioOutput = builder.audioOutput,
         hwDec = builder.hwDec,
         matchRefreshRate = builder.matchRefreshRate,
+        subtitleOptions = builder.subtitleOptions,
     )
 
     class Builder(val context: Context) {
@@ -136,6 +138,9 @@ class MPVPlayer(
         var matchRefreshRate: Boolean = false
             private set
 
+        var subtitleOptions: Map<String, String> = emptyMap()
+            private set
+
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
             apply {
                 this.audioAttributes = audioAttributes
@@ -167,6 +172,11 @@ class MPVPlayer(
 
         fun setMatchRefreshRate(matchRefreshRate: Boolean) = apply {
             this.matchRefreshRate = matchRefreshRate
+        }
+
+        /** CE (#300): see [mpvSubtitleOptions]. */
+        fun setSubtitleOptions(subtitleOptions: Map<String, String>) = apply {
+            this.subtitleOptions = subtitleOptions
         }
 
         fun build() = MPVPlayer(this)
@@ -210,6 +220,7 @@ class MPVPlayer(
         // Subs
         mpvLib.setOptionString("sub-scale-with-window", "yes")
         mpvLib.setOptionString("sub-use-margins", "no")
+        subtitleOptions.forEach { (name, value) -> mpvLib.setOptionString(name, value) }
 
         // Language
         // Split on "-" and use last part because media3 does some weird mapping
@@ -1705,6 +1716,11 @@ class MPVPlayer(
                 Timber.w(e, "Failed to set surface frame rate")
             }
         }
+    }
+
+    /** CE (#300): applies [options] from [mpvSubtitleOptions] to the playing subtitles. */
+    fun updateSubtitleOptions(options: Map<String, String>) {
+        options.forEach { (name, value) -> mpvLib.setOptionString(name, value) }
     }
 
     fun updateZoomMode(enabled: Boolean) {

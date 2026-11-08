@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Моноширинний</string>
     <string name="subtitle_font_sans_serif">Без зарубок (Sans-serif)</string>
     <string name="subtitle_font_scale">Розмір тексту</string>
+    <string name="subtitle_override_embedded_styles">Замінювати вбудовані стилі</string>
+    <string name="subtitle_override_embedded_styles_summary">Застосовувати цей стиль до субтитрів із власним стилем, як-от ASS. Їхні кольори, шрифти й розміри замінюються; розташування зберігається.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Із зарубками (Serif)</string>
     <string name="subtitle_foreground_color">Колір тексту</string>

@@ -11,6 +11,7 @@ import dev.jdtech.jellyfin.settings.domain.Constants
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceIntInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +71,11 @@ class SubtitleStyleViewModel @Inject constructor(
                                 Constants.SubtitleStyle.FONT_SCALE_MIN,
                                 Constants.SubtitleStyle.FONT_SCALE_MAX,
                             ),
+                        )
+                    is PreferenceSwitch ->
+                        appPreferences.setValue(
+                            preference.backendPreference,
+                            preference.value,
                         )
                     else -> Unit
                 }
@@ -144,6 +150,16 @@ class SubtitleStyleViewModel @Inject constructor(
                                 backendPreference = appPreferences.subtitleFontScale,
                                 suffixRes = R.string.subtitle_font_scale_suffix,
                                 value = appPreferences.getValue(appPreferences.subtitleFontScale),
+                            ),
+                            PreferenceSwitch(
+                                nameStringResource = R.string.subtitle_override_embedded_styles,
+                                descriptionStringRes =
+                                    R.string.subtitle_override_embedded_styles_summary,
+                                backendPreference = appPreferences.subtitleOverrideEmbeddedStyles,
+                                value =
+                                    appPreferences.getValue(
+                                        appPreferences.subtitleOverrideEmbeddedStyles
+                                    ),
                             ),
                         ),
                 )

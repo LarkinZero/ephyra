@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Taille du texte</string>
+    <string name="subtitle_override_embedded_styles">Remplacer les styles intégrés</string>
+    <string name="subtitle_override_embedded_styles_summary">Utiliser ce style pour les sous-titres qui ont le leur, comme ASS. Leurs couleurs, polices et tailles sont remplacées ; les positions sont conservées.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Couleur du texte</string>
