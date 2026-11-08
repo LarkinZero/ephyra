@@ -194,7 +194,7 @@ class MPVPlayer(
             this.matchRefreshRate = matchRefreshRate
         }
 
-        /** CE (#300): see [mpvSubtitleOptions]. */
+        /** CE (#300, #308): see [mpvSubtitleOptions]. */
         fun setSubtitleOptions(subtitleOptions: Map<String, String>) = apply {
             this.subtitleOptions = subtitleOptions
         }
@@ -1901,7 +1901,7 @@ class MPVPlayer(
         }
     }
 
-    /** CE (#300): applies [options] from [mpvSubtitleOptions] to the playing subtitles. */
+    /** CE (#300, #308): applies [options] from [mpvSubtitleOptions] to the playing subtitles. */
     fun updateSubtitleOptions(options: Map<String, String>) {
         options.forEach { (name, value) -> mpvLib.setOptionString(name, value) }
     }
