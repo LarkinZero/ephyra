@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Ukuran teks</string>
+    <string name="subtitle_override_embedded_styles">Ganti gaya bawaan</string>
+    <string name="subtitle_override_embedded_styles_summary">Gunakan gaya ini untuk subtitle yang membawa gayanya sendiri, seperti ASS. Warna, font, dan ukurannya diganti; posisinya tetap.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Warna teks</string>

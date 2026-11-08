@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Enakomerno razmaknjeno (Monospace)</string>
     <string name="subtitle_font_sans_serif">Brez serifov (Sans-serif)</string>
     <string name="subtitle_font_scale">Velikost besedila</string>
+    <string name="subtitle_override_embedded_styles">Preglasi vdelane sloge</string>
+    <string name="subtitle_override_embedded_styles_summary">Ta slog uporabi tudi za podnapise z lastnim slogom, kot je ASS. Njihove barve, pisave in velikosti se zamenjajo; položaji ostanejo.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">S serifi (Serif)</string>
     <string name="subtitle_foreground_color">Barva besedila</string>

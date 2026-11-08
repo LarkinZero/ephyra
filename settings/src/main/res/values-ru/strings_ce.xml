@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Моноширинный</string>
     <string name="subtitle_font_sans_serif">Без засечек (Sans-serif)</string>
     <string name="subtitle_font_scale">Размер текста</string>
+    <string name="subtitle_override_embedded_styles">Заменять встроенные стили</string>
+    <string name="subtitle_override_embedded_styles_summary">Применять этот стиль к субтитрам со своим стилем, например ASS. Их цвета, шрифты и размеры заменяются; положение сохраняется.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">С засечками (Serif)</string>
     <string name="subtitle_foreground_color">Цвет текста</string>

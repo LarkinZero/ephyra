@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Tekstgrootte</string>
+    <string name="subtitle_override_embedded_styles">Ingebouwde stijlen overschrijven</string>
+    <string name="subtitle_override_embedded_styles_summary">Gebruik deze stijl ook voor ondertitels met een eigen stijl, zoals ASS. Hun kleuren, lettertypen en groottes worden vervangen; posities blijven.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Tekstkleur</string>

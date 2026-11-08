@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Tamanho do texto</string>
+    <string name="subtitle_override_embedded_styles">Substituir estilos incorporados</string>
+    <string name="subtitle_override_embedded_styles_summary">Usar este estilo nas legendas que trazem o seu, como ASS. As cores, os tipos de letra e os tamanhos são substituídos; as posições mantêm-se.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Cor do texto</string>

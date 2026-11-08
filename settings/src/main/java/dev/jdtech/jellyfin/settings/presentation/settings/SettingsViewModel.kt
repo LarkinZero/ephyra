@@ -404,6 +404,17 @@ class SettingsViewModel @Inject constructor(
                                                                                 R.string
                                                                                     .subtitle_font_scale_suffix,
                                                                         ),
+                                                                        PreferenceSwitch(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .subtitle_override_embedded_styles,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .subtitle_override_embedded_styles_summary,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .subtitleOverrideEmbeddedStyles,
+                                                                        ),
                                                                     )
                                                             )
                                                         ),

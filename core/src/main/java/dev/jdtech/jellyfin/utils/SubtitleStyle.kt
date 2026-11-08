@@ -97,12 +97,11 @@ fun SubtitleView.applySubtitleStyle(appPreferences: AppPreferences) {
     setFractionalTextSize(
         SubtitleView.DEFAULT_TEXT_SIZE_FRACTION * appPreferences.subtitleFontScaleFraction(),
     )
-    // Honour user-applied insets only; we deliberately do not call setApplyEmbeddedStyles(false)
-    // because that would also suppress SRT positioning (e.g. {\an1}..{\an9}) emitted by the
-    // SubRip parser. ExoPlayer's SubRip extractor parses those tags and emits Cue positions —
-    // SubtitleView respects the cue's anchored gravity by default.
-    // TODO: expose an "Override embedded styles" toggle so users with ASS/SSA content that
-    //  carries hardcoded colors can override them in favour of their saved style.
+    // CE (#300): the user's style only replaces the colours, fonts and sizes that ASS/SSA tracks
+    // bring when they ask for it. Off by default, see subtitle_override_embedded_styles_summary.
+    val override = appPreferences.getValue(appPreferences.subtitleOverrideEmbeddedStyles)
+    setApplyEmbeddedStyles(!override)
+    setApplyEmbeddedFontSizes(!override)
 }
 
 /**

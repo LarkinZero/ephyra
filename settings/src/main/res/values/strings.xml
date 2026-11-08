@@ -109,6 +109,8 @@
     <string name="subtitle_font_family">Font</string>
     <string name="subtitle_font_scale">Text size</string>
     <string name="subtitle_font_scale_suffix">%</string>
+    <string name="subtitle_override_embedded_styles">Override embedded styles</string>
+    <string name="subtitle_override_embedded_styles_summary">Use this style for subtitles that bring their own, such as ASS. Their colors, fonts and sizes are replaced; positions stay.</string>
     <string name="subtitle_edge_type_none">None</string>
     <string name="subtitle_edge_type_outline">Outline</string>
     <string name="subtitle_edge_type_drop_shadow">Drop shadow</string>

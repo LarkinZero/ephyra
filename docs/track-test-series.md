@@ -2,7 +2,8 @@
 
 Most libraries have few episodes with more than one audio or subtitle track, and almost none with
 untagged tracks. `scripts/make-track-test-series.sh` generates two short series that do, for
-testing track selection in the player, such as the per-series audio and subtitle choice (#115).
+testing track selection in the player, such as the per-series audio and subtitle choice (#115),
+and a third with styled subtitles for the subtitle style settings (#300).
 
 The files are not checked in: they are binary and the script makes them in a few seconds.
 
@@ -37,6 +38,13 @@ tones at different pitches, so check the audio dialog for those.
   E04 has them again.
 - **Other Show** checks that a choice stays within its own series.
 
+**Subtitle Style Test** has one episode with two subtitle tracks:
+
+- **ASS styled**, the default: two cues in magenta bold italic Noto Serif with a green outline, one
+  at the bottom and one moved to the top with `{\an8}`, whose second half is yellow through an inline
+  `{\c}` tag.
+- **SRT an8**: a cue moved to the top with `{\an8}`, then one at the bottom.
+
 ## Checking the per-series choice
 
 1. Play Track Test E01 and pick audio and subtitles by hand.
@@ -44,3 +52,12 @@ tones at different pitches, so check the audio dialog for those.
 3. Turn subtitles off, then start E01 by hand. It should start without subtitles.
 4. Play Other Show. It should show the defaults.
 5. Repeat with mpv (Settings → Player) and with downloaded episodes.
+
+## Checking the subtitle style override
+
+1. Play Subtitle Style Test with Settings → Player → Subtitle style → Override embedded styles off.
+   The ASS track shows in its own colours (ExoPlayer leaves out the font and the inline yellow).
+2. Turn the switch on and play it again. The ASS cues show in the app's style, still one at the top
+   and one at the bottom. On mpv the inline yellow stays.
+3. Pick SRT an8. Its first cue is at the top with the switch on and off.
+4. Repeat with mpv. mpv takes the switch while it plays; ExoPlayer on the next playback.

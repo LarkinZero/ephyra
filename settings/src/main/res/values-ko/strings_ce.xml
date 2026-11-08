@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">고정폭</string>
     <string name="subtitle_font_sans_serif">고딕체 (산세리프)</string>
     <string name="subtitle_font_scale">글자 크기</string>
+    <string name="subtitle_override_embedded_styles">내장 스타일 덮어쓰기</string>
+    <string name="subtitle_override_embedded_styles_summary">ASS처럼 자체 스타일이 있는 자막에도 이 스타일을 사용합니다. 색상, 글꼴, 크기는 바뀌고 위치는 유지됩니다.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">바탕체 (세리프)</string>
     <string name="subtitle_foreground_color">글자 색상</string>

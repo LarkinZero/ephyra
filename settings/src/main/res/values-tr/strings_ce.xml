@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Eşaralıklı (Monospace)</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Metin boyutu</string>
+    <string name="subtitle_override_embedded_styles">Gömülü stilleri geçersiz kıl</string>
+    <string name="subtitle_override_embedded_styles_summary">Bu stili, ASS gibi kendi stiliyle gelen altyazılarda da kullan. Renkleri, yazı tipleri ve boyutları değişir; konumlar korunur.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Metin rengi</string>

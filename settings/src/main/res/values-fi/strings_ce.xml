@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Tekstin koko</string>
+    <string name="subtitle_override_embedded_styles">Ohita upotetut tyylit</string>
+    <string name="subtitle_override_embedded_styles_summary">Käytä tätä tyyliä myös tekstityksille, joilla on oma tyylinsä, kuten ASS. Niiden värit, fontit ja koot korvataan; sijainnit säilyvät.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Tekstin väri</string>

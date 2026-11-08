@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Đơn cách (Monospace)</string>
     <string name="subtitle_font_sans_serif">Không chân (Sans-serif)</string>
     <string name="subtitle_font_scale">Kích cỡ chữ</string>
+    <string name="subtitle_override_embedded_styles">Ghi đè kiểu nhúng</string>
+    <string name="subtitle_override_embedded_styles_summary">Dùng kiểu này cho phụ đề có kiểu riêng, như ASS. Màu, phông chữ và cỡ chữ của chúng được thay thế; vị trí được giữ nguyên.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Có chân (Serif)</string>
     <string name="subtitle_foreground_color">Màu chữ</string>

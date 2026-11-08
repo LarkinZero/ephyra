@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">Monospace</string>
     <string name="subtitle_font_sans_serif">Sans-serif</string>
     <string name="subtitle_font_scale">Mărime text</string>
+    <string name="subtitle_override_embedded_styles">Înlocuiește stilurile încorporate</string>
+    <string name="subtitle_override_embedded_styles_summary">Folosește acest stil pentru subtitrările care au propriul stil, cum ar fi ASS. Culorile, fonturile și dimensiunile lor sunt înlocuite; pozițiile rămân.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Serif</string>
     <string name="subtitle_foreground_color">Culoare text</string>

@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">O stałej szerokości (Monospace)</string>
     <string name="subtitle_font_sans_serif">Bezszeryfowa (Sans-serif)</string>
     <string name="subtitle_font_scale">Rozmiar tekstu</string>
+    <string name="subtitle_override_embedded_styles">Zastąp osadzone style</string>
+    <string name="subtitle_override_embedded_styles_summary">Używaj tego stylu dla napisów z własnym stylem, np. ASS. Ich kolory, czcionki i rozmiary zostaną zastąpione; pozycje pozostaną.</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">Szeryfowa (Serif)</string>
     <string name="subtitle_foreground_color">Kolor tekstu</string>

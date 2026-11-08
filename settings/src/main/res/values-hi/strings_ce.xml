@@ -68,6 +68,8 @@
     <string name="subtitle_font_monospace">मोनोस्पेस (Monospace)</string>
     <string name="subtitle_font_sans_serif">सेंस-सेरिफ़ (Sans-serif)</string>
     <string name="subtitle_font_scale">टेक्स्ट का आकार</string>
+    <string name="subtitle_override_embedded_styles">एम्बेडेड स्टाइल बदलें</string>
+    <string name="subtitle_override_embedded_styles_summary">अपनी स्टाइल वाले सबटाइटल, जैसे ASS, के लिए भी यही स्टाइल इस्तेमाल करें। उनके रंग, फ़ॉन्ट और आकार बदल जाते हैं; स्थिति वही रहती है।</string>
     <string name="subtitle_font_scale_suffix">%</string>
     <string name="subtitle_font_serif">सेरिफ़ (Serif)</string>
     <string name="subtitle_foreground_color">टेक्स्ट का रंग</string>
