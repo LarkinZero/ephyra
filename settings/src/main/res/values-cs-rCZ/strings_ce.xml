@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">PIN profilu</string>
     <string name="ce_settings_profile_pin_summary">Zamknout tento profil na tomto zařízení</string>
     <string name="ce_settings_profile_lock">Zámek profilu</string>
+    <string name="ce_settings_detail_pages">Stránky s podrobnostmi</string>
+    <string name="ce_pref_detail_critic_rating">Hodnocení Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_studios">Studia a televize</string>
+    <string name="ce_pref_detail_air_schedule">Čas vysílání</string>
+    <string name="ce_pref_detail_air_schedule_summary">Dny a čas, kdy se vysílá právě běžící seriál</string>
+    <string name="ce_pref_detail_watch_history">Historie sledování</string>
+    <string name="ce_pref_detail_watch_history_summary">Kolikrát jste to sledovali a kdy naposledy</string>
+    <string name="ce_pref_detail_external_links">Externí odkazy</string>
+    <string name="ce_pref_detail_external_links_summary">Odkazy na IMDb, TMDB a TheTVDB</string>
+    <string name="ce_pref_detail_extras">Bonusy</string>
+    <string name="ce_pref_detail_extras_summary">Upoutávky a speciální materiály uložené na vašem serveru</string>
+    <string name="ce_pref_detail_collections">Kolekce</string>
+    <string name="ce_pref_detail_collections_summary">Kolekce, jejichž součástí film je</string>
+    <string name="ce_pref_detail_similar">Podobné tituly</string>
+    <string name="ce_pref_detail_similar_summary">Podobné tituly z vaší knihovny</string>
 </resources>

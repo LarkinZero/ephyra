@@ -6,7 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
 import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.detailSections
 import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
+import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.mergeDuplicateRoles
@@ -78,7 +80,7 @@ constructor(
                 val writers = if (displayCastAndCrew) getWriters(movie) else emptyList()
                 _state.emit(
                     _state.value.copy(
-                        movie = movie,
+                        movie = movie.shownIn(appPreferences.detailSections()),
                         videoMetadata = videoMetadata,
                         actors = actors,
                         director = director,
@@ -114,7 +116,8 @@ constructor(
                         localTrailerCount = movie.localTrailerCount,
                         specialFeatureCount = movie.specialFeatureCount,
                         collections = true,
-                    ),
+                    )
+                        .shownIn(appPreferences.detailSections()),
             ) { change ->
                 _state.update { it.copy(related = change(it.related)) }
             }

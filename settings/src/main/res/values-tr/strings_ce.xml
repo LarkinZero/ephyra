@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">Profil PIN\'i</string>
     <string name="ce_settings_profile_pin_summary">Bu profili bu cihazda kilitle</string>
     <string name="ce_settings_profile_lock">Profil kilidi</string>
+    <string name="ce_settings_detail_pages">Ayrıntı sayfaları</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes puanı</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_studios">Stüdyolar ve kanallar</string>
+    <string name="ce_pref_detail_air_schedule">Yayın takvimi</string>
+    <string name="ce_pref_detail_air_schedule_summary">Devam eden bir dizinin yayınlandığı günler ve saat</string>
+    <string name="ce_pref_detail_watch_history">İzleme geçmişi</string>
+    <string name="ce_pref_detail_watch_history_summary">Kaç kez izlediğiniz ve en son ne zaman izlediğiniz</string>
+    <string name="ce_pref_detail_external_links">Harici bağlantılar</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb, TMDB ve TheTVDB bağlantıları</string>
+    <string name="ce_pref_detail_extras">Ekstralar</string>
+    <string name="ce_pref_detail_extras_summary">Sunucunuzda depolanan fragmanlar ve özel içerikler</string>
+    <string name="ce_pref_detail_collections">Koleksiyonlar</string>
+    <string name="ce_pref_detail_collections_summary">Bir filmin dahil olduğu koleksiyonlar</string>
+    <string name="ce_pref_detail_similar">Buna benzer</string>
+    <string name="ce_pref_detail_similar_summary">Kitaplığınızdaki benzer yapımlar</string>
 </resources>

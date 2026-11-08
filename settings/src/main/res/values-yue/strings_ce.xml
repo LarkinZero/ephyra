@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">個人檔案 PIN</string>
     <string name="ce_settings_profile_pin_summary">喺呢部裝置鎖住呢個個人檔案</string>
     <string name="ce_settings_profile_lock">個人檔案鎖</string>
+    <string name="ce_settings_detail_pages">詳細資料頁面</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes 評分</string>
+    <string name="ce_pref_detail_tagline">宣傳標語</string>
+    <string name="ce_pref_detail_studios">製作公司同電視網</string>
+    <string name="ce_pref_detail_air_schedule">播放時間表</string>
+    <string name="ce_pref_detail_air_schedule_summary">連載中劇集嘅播出日子同時間</string>
+    <string name="ce_pref_detail_watch_history">觀看紀錄</string>
+    <string name="ce_pref_detail_watch_history_summary">你睇過幾多次，同埋最後一次係幾時</string>
+    <string name="ce_pref_detail_external_links">外部連結</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb、TMDB 同 TheTVDB 嘅連結</string>
+    <string name="ce_pref_detail_extras">花絮</string>
+    <string name="ce_pref_detail_extras_summary">儲存喺你伺服器嘅預告片同特別內容</string>
+    <string name="ce_pref_detail_collections">合集</string>
+    <string name="ce_pref_detail_collections_summary">電影所屬嘅合集</string>
+    <string name="ce_pref_detail_similar">類似內容</string>
+    <string name="ce_pref_detail_similar_summary">你資料庫入面嘅類似作品</string>
 </resources>

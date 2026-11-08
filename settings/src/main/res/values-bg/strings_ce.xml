@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">ПИН на профила</string>
     <string name="ce_settings_profile_pin_summary">Заключване на този профил на това устройство</string>
     <string name="ce_settings_profile_lock">Заключване на профила</string>
+    <string name="ce_settings_detail_pages">Страници с подробности</string>
+    <string name="ce_pref_detail_critic_rating">Оценка в Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Слоган</string>
+    <string name="ce_pref_detail_studios">Студиа и телевизии</string>
+    <string name="ce_pref_detail_air_schedule">График на излъчване</string>
+    <string name="ce_pref_detail_air_schedule_summary">Дните и часът, в които се излъчва текущ сериал</string>
+    <string name="ce_pref_detail_watch_history">История на гледане</string>
+    <string name="ce_pref_detail_watch_history_summary">Колко пъти сте го гледали и кога за последно</string>
+    <string name="ce_pref_detail_external_links">Външни връзки</string>
+    <string name="ce_pref_detail_external_links_summary">Връзки към IMDb, TMDB и TheTVDB</string>
+    <string name="ce_pref_detail_extras">Допълнения</string>
+    <string name="ce_pref_detail_extras_summary">Трейлъри и специални материали, съхранени на вашия сървър</string>
+    <string name="ce_pref_detail_collections">Колекции</string>
+    <string name="ce_pref_detail_collections_summary">Колекциите, към които принадлежи филмът</string>
+    <string name="ce_pref_detail_similar">Още подобни</string>
+    <string name="ce_pref_detail_similar_summary">Подобни заглавия от вашата библиотека</string>
 </resources>

@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">PIN-код профиля</string>
     <string name="ce_settings_profile_pin_summary">Заблокировать этот профиль на этом устройстве</string>
     <string name="ce_settings_profile_lock">Блокировка профиля</string>
+    <string name="ce_settings_detail_pages">Страницы сведений</string>
+    <string name="ce_pref_detail_critic_rating">Рейтинг Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Слоган</string>
+    <string name="ce_pref_detail_studios">Студии и телеканалы</string>
+    <string name="ce_pref_detail_air_schedule">Расписание выхода</string>
+    <string name="ce_pref_detail_air_schedule_summary">Дни и время выхода новых серий идущего сериала</string>
+    <string name="ce_pref_detail_watch_history">История просмотров</string>
+    <string name="ce_pref_detail_watch_history_summary">Сколько раз вы смотрели и когда в последний раз</string>
+    <string name="ce_pref_detail_external_links">Внешние ссылки</string>
+    <string name="ce_pref_detail_external_links_summary">Ссылки на IMDb, TMDB и TheTVDB</string>
+    <string name="ce_pref_detail_extras">Дополнительные материалы</string>
+    <string name="ce_pref_detail_extras_summary">Трейлеры и бонусные материалы на вашем сервере</string>
+    <string name="ce_pref_detail_collections">Коллекции</string>
+    <string name="ce_pref_detail_collections_summary">Коллекции, в которые входит фильм</string>
+    <string name="ce_pref_detail_similar">Похожее</string>
+    <string name="ce_pref_detail_similar_summary">Похожие произведения из вашей медиатеки</string>
 </resources>

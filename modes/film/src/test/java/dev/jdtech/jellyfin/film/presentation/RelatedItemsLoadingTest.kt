@@ -42,6 +42,8 @@ class RelatedItemsLoadingTest {
     private val calls = mutableListOf<String>()
     private val extraArgs = mutableListOf<Pair<Boolean, Boolean>>()
     private val failing = mutableSetOf<String>()
+    /** Boolean preferences the user turned off; every other preference has its default. */
+    private val switchedOff = mutableSetOf<String>()
 
     private val extra = movie(UUID.randomUUID(), "Behind the scenes")
     private val similar = movie(UUID.randomUUID(), "Similar")
@@ -148,6 +150,38 @@ class RelatedItemsLoadingTest {
         assertTrue(related.collections.isEmpty())
         assertTrue("getItemCollections" !in calls)
         assertEquals(listOf(false to true), extraArgs)
+    }
+
+    @Test
+    fun `rows switched off in the settings are never requested`() = runBlocking {
+        switchedOff += listOf("pref_detail_extras", "pref_detail_similar")
+        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
+        viewModel.loadMovie(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.movie != null } }
+
+        viewModel.loadRelated(itemId)
+        val related =
+            withTimeout(5_000) { viewModel.state.first { it.related.collections.isNotEmpty() } }
+                .related
+
+        assertEquals(listOf("getMovie", "getItemCollections"), calls)
+        assertTrue(related.extras.isEmpty() && related.similar.isEmpty())
+    }
+
+    @Test
+    fun `metadata switched off in the settings is cleared before the page gets it`() = runBlocking {
+        switchedOff += listOf("pref_detail_tagline", "pref_detail_watch_history")
+        val viewModel =
+            movieViewModel(
+                movie(itemId, "Movie")
+                    .copy(tagline = "In space…", criticRating = 98f, playCount = 3)
+            )
+        viewModel.loadMovie(itemId)
+        val movie = withTimeout(5_000) { viewModel.state.first { it.movie != null } }.movie!!
+
+        assertNull(movie.tagline)
+        assertEquals(0, movie.playCount)
+        assertEquals(98f, movie.criticRating)
     }
 
     private fun movieViewModel(movie: FindroidMovie) =
@@ -274,7 +308,7 @@ class RelatedItemsLoadingTest {
                 arrayOf(SharedPreferences::class.java),
             ) { _, method, args ->
                 when (method.name) {
-                    "getBoolean",
+                    "getBoolean" -> if (args!![0] in switchedOff) false else args[1]
                     "getString",
                     "getInt",
                     "getLong",

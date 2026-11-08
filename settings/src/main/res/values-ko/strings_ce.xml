@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">프로필 PIN</string>
     <string name="ce_settings_profile_pin_summary">이 기기에서 이 프로필 잠그기</string>
     <string name="ce_settings_profile_lock">프로필 잠금</string>
+    <string name="ce_settings_detail_pages">상세 페이지</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes 점수</string>
+    <string name="ce_pref_detail_tagline">태그라인</string>
+    <string name="ce_pref_detail_studios">스튜디오 및 방송사</string>
+    <string name="ce_pref_detail_air_schedule">방영 일정</string>
+    <string name="ce_pref_detail_air_schedule_summary">방영 중인 시리즈가 방영되는 요일과 시간</string>
+    <string name="ce_pref_detail_watch_history">시청 기록</string>
+    <string name="ce_pref_detail_watch_history_summary">시청한 횟수와 마지막으로 시청한 시점</string>
+    <string name="ce_pref_detail_external_links">외부 링크</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb, TMDB, TheTVDB 링크</string>
+    <string name="ce_pref_detail_extras">부가 영상</string>
+    <string name="ce_pref_detail_extras_summary">서버에 저장된 예고편과 특별 영상</string>
+    <string name="ce_pref_detail_collections">컬렉션</string>
+    <string name="ce_pref_detail_collections_summary">영화가 속한 컬렉션</string>
+    <string name="ce_pref_detail_similar">비슷한 콘텐츠</string>
+    <string name="ce_pref_detail_similar_summary">라이브러리의 비슷한 타이틀</string>
 </resources>

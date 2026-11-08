@@ -7,7 +7,9 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.detailSections
 import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
+import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidShow
@@ -141,7 +143,7 @@ constructor(
                     val localCounts = localCountsAsync.await()
                     _state.emit(
                         _state.value.copy(
-                            show = show,
+                            show = show.shownIn(appPreferences.detailSections()),
                             nextUp = nextUp,
                             seasons = seasons,
                             actors = castAndCrew.actors,
@@ -225,7 +227,8 @@ constructor(
                         localTrailerCount = show.localTrailerCount,
                         specialFeatureCount = show.specialFeatureCount,
                         collections = false,
-                    ),
+                    )
+                        .shownIn(appPreferences.detailSections()),
             ) { change ->
                 _state.update { it.copy(related = change(it.related)) }
             }

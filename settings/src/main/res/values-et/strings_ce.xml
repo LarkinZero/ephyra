@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">Profiili PIN-kood</string>
     <string name="ce_settings_profile_pin_summary">Lukusta see profiil selles seadmes</string>
     <string name="ce_settings_profile_lock">Profiili lukk</string>
+    <string name="ce_settings_detail_pages">Üksikasjade lehed</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoesi hinne</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_studios">Stuudiod ja telekanalid</string>
+    <string name="ce_pref_detail_air_schedule">Eetriaeg</string>
+    <string name="ce_pref_detail_air_schedule_summary">Päevad ja kellaaeg, millal käimasolev sari eetris on</string>
+    <string name="ce_pref_detail_watch_history">Vaatamisajalugu</string>
+    <string name="ce_pref_detail_watch_history_summary">Mitu korda oled seda vaadanud ja millal viimati</string>
+    <string name="ce_pref_detail_external_links">Välised lingid</string>
+    <string name="ce_pref_detail_external_links_summary">Lingid IMDb-le, TMDB-le ja TheTVDB-le</string>
+    <string name="ce_pref_detail_extras">Lisad</string>
+    <string name="ce_pref_detail_extras_summary">Sinu serverisse salvestatud treilerid ja eriosad</string>
+    <string name="ce_pref_detail_collections">Kogumikud</string>
+    <string name="ce_pref_detail_collections_summary">Kogumikud, mille osa film on</string>
+    <string name="ce_pref_detail_similar">Sarnased</string>
+    <string name="ce_pref_detail_similar_summary">Sarnased pealkirjad sinu kogust</string>
 </resources>

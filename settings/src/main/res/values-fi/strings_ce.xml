@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">Profiilin PIN-koodi</string>
     <string name="ce_settings_profile_pin_summary">Lukitse tämä profiili tällä laitteella</string>
     <string name="ce_settings_profile_lock">Profiilin lukitus</string>
+    <string name="ce_settings_detail_pages">Tietosivut</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes -arvosana</string>
+    <string name="ce_pref_detail_tagline">Tunnuslause</string>
+    <string name="ce_pref_detail_studios">Studiot ja kanavat</string>
+    <string name="ce_pref_detail_air_schedule">Lähetysaikataulu</string>
+    <string name="ce_pref_detail_air_schedule_summary">Päivät ja kellonaika, jolloin käynnissä oleva sarja esitetään</string>
+    <string name="ce_pref_detail_watch_history">Katseluhistoria</string>
+    <string name="ce_pref_detail_watch_history_summary">Kuinka monta kertaa olet katsonut tämän ja milloin viimeksi</string>
+    <string name="ce_pref_detail_external_links">Ulkoiset linkit</string>
+    <string name="ce_pref_detail_external_links_summary">Linkit IMDb:hen, TMDB:hen ja TheTVDB:hen</string>
+    <string name="ce_pref_detail_extras">Lisämateriaalit</string>
+    <string name="ce_pref_detail_extras_summary">Palvelimellasi olevat trailerit ja erikoissisällöt</string>
+    <string name="ce_pref_detail_collections">Kokoelmat</string>
+    <string name="ce_pref_detail_collections_summary">Kokoelmat, joihin elokuva kuuluu</string>
+    <string name="ce_pref_detail_similar">Samankaltaisia</string>
+    <string name="ce_pref_detail_similar_summary">Samankaltaisia nimikkeitä kirjastostasi</string>
 </resources>

@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">प्रोफ़ाइल PIN</string>
     <string name="ce_settings_profile_pin_summary">इस डिवाइस पर इस प्रोफ़ाइल को लॉक करें</string>
     <string name="ce_settings_profile_lock">प्रोफ़ाइल लॉक</string>
+    <string name="ce_settings_detail_pages">विवरण पृष्ठ</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes स्कोर</string>
+    <string name="ce_pref_detail_tagline">टैगलाइन</string>
+    <string name="ce_pref_detail_studios">स्टूडियो और नेटवर्क</string>
+    <string name="ce_pref_detail_air_schedule">प्रसारण समय-सारणी</string>
+    <string name="ce_pref_detail_air_schedule_summary">चालू शो किन दिनों और किस समय प्रसारित होता है</string>
+    <string name="ce_pref_detail_watch_history">देखने का इतिहास</string>
+    <string name="ce_pref_detail_watch_history_summary">आपने इसे कितनी बार देखा और आखिरी बार कब</string>
+    <string name="ce_pref_detail_external_links">बाहरी लिंक</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb, TMDB और TheTVDB के लिंक</string>
+    <string name="ce_pref_detail_extras">अतिरिक्त</string>
+    <string name="ce_pref_detail_extras_summary">आपके सर्वर पर संग्रहीत ट्रेलर और विशेष सामग्री</string>
+    <string name="ce_pref_detail_collections">संग्रह</string>
+    <string name="ce_pref_detail_collections_summary">वे संग्रह जिनका कोई फ़िल्म हिस्सा है</string>
+    <string name="ce_pref_detail_similar">ऐसे और</string>
+    <string name="ce_pref_detail_similar_summary">आपकी लाइब्रेरी से मिलते-जुलते शीर्षक</string>
 </resources>

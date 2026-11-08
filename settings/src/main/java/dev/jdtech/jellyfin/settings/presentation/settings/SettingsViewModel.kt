@@ -273,6 +273,79 @@ class SettingsViewModel @Inject constructor(
                                                 ),
                                             )
                                     ),
+                                    // CE (#332): what the detail pages show.
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.ce_settings_detail_pages,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_critic_rating,
+                                                    backendPreference =
+                                                        appPreferences.detailCriticRating,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_tagline,
+                                                    backendPreference =
+                                                        appPreferences.detailTagline,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_studios,
+                                                    backendPreference =
+                                                        appPreferences.detailStudios,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_air_schedule,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_air_schedule_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailAirSchedule,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_watch_history,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_watch_history_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailWatchHistory,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_external_links,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_external_links_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailExternalLinks,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_extras,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_extras_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailExtras,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_collections,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_collections_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailCollections,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_detail_similar,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_detail_similar_summary,
+                                                    backendPreference =
+                                                        appPreferences.detailSimilar,
+                                                ),
+                                            ),
+                                    ),
                                 ),
                         )
                     )

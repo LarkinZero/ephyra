@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">Code PIN du profil</string>
     <string name="ce_settings_profile_pin_summary">Verrouiller ce profil sur cet appareil</string>
     <string name="ce_settings_profile_lock">Verrouillage du profil</string>
+    <string name="ce_settings_detail_pages">Pages de détails</string>
+    <string name="ce_pref_detail_critic_rating">Note Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_studios">Studios et chaînes</string>
+    <string name="ce_pref_detail_air_schedule">Horaires de diffusion</string>
+    <string name="ce_pref_detail_air_schedule_summary">Les jours et l\'heure de diffusion d\'une série en cours</string>
+    <string name="ce_pref_detail_watch_history">Historique de visionnage</string>
+    <string name="ce_pref_detail_watch_history_summary">Combien de fois vous l\'avez regardé et la dernière fois</string>
+    <string name="ce_pref_detail_external_links">Liens externes</string>
+    <string name="ce_pref_detail_external_links_summary">Liens vers IMDb, TMDB et TheTVDB</string>
+    <string name="ce_pref_detail_extras">Bonus</string>
+    <string name="ce_pref_detail_extras_summary">Bandes-annonces et contenus spéciaux stockés sur votre serveur</string>
+    <string name="ce_pref_detail_collections">Collections</string>
+    <string name="ce_pref_detail_collections_summary">Les collections dont fait partie un film</string>
+    <string name="ce_pref_detail_similar">Dans le même genre</string>
+    <string name="ce_pref_detail_similar_summary">Titres similaires de votre bibliothèque</string>
 </resources>

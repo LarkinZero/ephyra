@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">PIN del perfil</string>
     <string name="ce_settings_profile_pin_summary">Bloqueja aquest perfil en aquest dispositiu</string>
     <string name="ce_settings_profile_lock">Bloqueig del perfil</string>
+    <string name="ce_settings_detail_pages">Pàgines de detalls</string>
+    <string name="ce_pref_detail_critic_rating">Puntuació de Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Eslògan</string>
+    <string name="ce_pref_detail_studios">Estudis i cadenes</string>
+    <string name="ce_pref_detail_air_schedule">Horari d\'emissió</string>
+    <string name="ce_pref_detail_air_schedule_summary">Els dies i l\'hora en què s\'emet una sèrie en emissió</string>
+    <string name="ce_pref_detail_watch_history">Historial de reproducció</string>
+    <string name="ce_pref_detail_watch_history_summary">Quantes vegades l\'has vist i quan va ser l\'última</string>
+    <string name="ce_pref_detail_external_links">Enllaços externs</string>
+    <string name="ce_pref_detail_external_links_summary">Enllaços a IMDb, TMDB i TheTVDB</string>
+    <string name="ce_pref_detail_extras">Extres</string>
+    <string name="ce_pref_detail_extras_summary">Tràilers i contingut especial desats al teu servidor</string>
+    <string name="ce_pref_detail_collections">Col·leccions</string>
+    <string name="ce_pref_detail_collections_summary">Les col·leccions de les quals forma part una pel·lícula</string>
+    <string name="ce_pref_detail_similar">Més com aquest</string>
+    <string name="ce_pref_detail_similar_summary">Títols similars de la teva biblioteca</string>
 </resources>

@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">رمز PIN للملف الشخصي</string>
     <string name="ce_settings_profile_pin_summary">اقفل هذا الملف الشخصي على هذا الجهاز</string>
     <string name="ce_settings_profile_lock">قفل الملف الشخصي</string>
+    <string name="ce_settings_detail_pages">صفحات التفاصيل</string>
+    <string name="ce_pref_detail_critic_rating">تقييم Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">الشعار الترويجي</string>
+    <string name="ce_pref_detail_studios">الاستوديوهات والشبكات</string>
+    <string name="ce_pref_detail_air_schedule">جدول البث</string>
+    <string name="ce_pref_detail_air_schedule_summary">أيام وموعد عرض المسلسل الجاري</string>
+    <string name="ce_pref_detail_watch_history">سجل المشاهدة</string>
+    <string name="ce_pref_detail_watch_history_summary">عدد مرات مشاهدته ومتى شاهدته آخر مرة</string>
+    <string name="ce_pref_detail_external_links">روابط خارجية</string>
+    <string name="ce_pref_detail_external_links_summary">روابط إلى IMDb وTMDB وTheTVDB</string>
+    <string name="ce_pref_detail_extras">إضافات</string>
+    <string name="ce_pref_detail_extras_summary">العروض الدعائية والمحتويات الخاصة المخزنة على خادمك</string>
+    <string name="ce_pref_detail_collections">المجموعات</string>
+    <string name="ce_pref_detail_collections_summary">المجموعات التي ينتمي إليها الفيلم</string>
+    <string name="ce_pref_detail_similar">المزيد من هذا القبيل</string>
+    <string name="ce_pref_detail_similar_summary">عناوين مشابهة من مكتبتك</string>
 </resources>

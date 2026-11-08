@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">个人资料 PIN 码</string>
     <string name="ce_settings_profile_pin_summary">在此设备上锁定此个人资料</string>
     <string name="ce_settings_profile_lock">个人资料锁</string>
+    <string name="ce_settings_detail_pages">详情页</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes 评分</string>
+    <string name="ce_pref_detail_tagline">宣传语</string>
+    <string name="ce_pref_detail_studios">制片公司和电视网</string>
+    <string name="ce_pref_detail_air_schedule">播出时间表</string>
+    <string name="ce_pref_detail_air_schedule_summary">连载剧集的播出日期和时间</string>
+    <string name="ce_pref_detail_watch_history">观看记录</string>
+    <string name="ce_pref_detail_watch_history_summary">你观看过的次数以及最近一次观看的时间</string>
+    <string name="ce_pref_detail_external_links">外部链接</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb、TMDB 和 TheTVDB 的链接</string>
+    <string name="ce_pref_detail_extras">花絮</string>
+    <string name="ce_pref_detail_extras_summary">存储在你服务器上的预告片和特别内容</string>
+    <string name="ce_pref_detail_collections">合集</string>
+    <string name="ce_pref_detail_collections_summary">电影所属的合集</string>
+    <string name="ce_pref_detail_similar">更多类似内容</string>
+    <string name="ce_pref_detail_similar_summary">媒体库中的类似作品</string>
 </resources>

@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">קוד PIN לפרופיל</string>
     <string name="ce_settings_profile_pin_summary">נעילת הפרופיל הזה במכשיר הזה</string>
     <string name="ce_settings_profile_lock">נעילת פרופיל</string>
+    <string name="ce_settings_detail_pages">דפי פרטים</string>
+    <string name="ce_pref_detail_critic_rating">ציון Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">סלוגן</string>
+    <string name="ce_pref_detail_studios">אולפנים ורשתות</string>
+    <string name="ce_pref_detail_air_schedule">לוח שידורים</string>
+    <string name="ce_pref_detail_air_schedule_summary">הימים והשעה שבהם משודרת סדרה פעילה</string>
+    <string name="ce_pref_detail_watch_history">היסטוריית צפייה</string>
+    <string name="ce_pref_detail_watch_history_summary">כמה פעמים צפית בכך ומתי בפעם האחרונה</string>
+    <string name="ce_pref_detail_external_links">קישורים חיצוניים</string>
+    <string name="ce_pref_detail_external_links_summary">קישורים אל IMDb, TMDB ו-TheTVDB</string>
+    <string name="ce_pref_detail_extras">תוספות</string>
+    <string name="ce_pref_detail_extras_summary">טריילרים ותכנים מיוחדים שמאוחסנים בשרת שלך</string>
+    <string name="ce_pref_detail_collections">אוספים</string>
+    <string name="ce_pref_detail_collections_summary">האוספים שסרט הוא חלק מהם</string>
+    <string name="ce_pref_detail_similar">עוד בסגנון הזה</string>
+    <string name="ce_pref_detail_similar_summary">כותרים דומים מהספרייה שלך</string>
 </resources>

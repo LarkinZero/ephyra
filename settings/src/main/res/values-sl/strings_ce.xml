@@ -157,4 +157,20 @@
     <string name="ce_settings_profile_pin">PIN profila</string>
     <string name="ce_settings_profile_pin_summary">Zakleni ta profil v tej napravi</string>
     <string name="ce_settings_profile_lock">Zaklepanje profila</string>
+    <string name="ce_settings_detail_pages">Strani s podrobnostmi</string>
+    <string name="ce_pref_detail_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_studios">Studii in televizijske mreže</string>
+    <string name="ce_pref_detail_air_schedule">Urnik predvajanja</string>
+    <string name="ce_pref_detail_air_schedule_summary">Dnevi in ura, ko se predvaja serija, ki je še v teku</string>
+    <string name="ce_pref_detail_watch_history">Zgodovina ogledov</string>
+    <string name="ce_pref_detail_watch_history_summary">Število ogledov in čas zadnjega ogleda</string>
+    <string name="ce_pref_detail_external_links">Zunanje povezave</string>
+    <string name="ce_pref_detail_external_links_summary">Povezave do IMDb, TMDB in TheTVDB</string>
+    <string name="ce_pref_detail_extras">Dodatki</string>
+    <string name="ce_pref_detail_extras_summary">Napovedniki in posebne vsebine, shranjeni v vašem strežniku</string>
+    <string name="ce_pref_detail_collections">Zbirke</string>
+    <string name="ce_pref_detail_collections_summary">Zbirke, katerih del je film</string>
+    <string name="ce_pref_detail_similar">Več podobnih</string>
+    <string name="ce_pref_detail_similar_summary">Podobni naslovi iz vaše knjižnice</string>
 </resources>
