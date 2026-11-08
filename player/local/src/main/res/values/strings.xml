@@ -43,4 +43,10 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">End of this episode</string>
     <string name="sleep_timer_pauses_in">Pauses in %1$s</string>
+    <!-- CE (#272): the "Up next" card at the end of an episode. -->
+    <string name="player_up_next_play_now">Play now</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Starts in %d second</item>
+        <item quantity="other">Starts in %d seconds</item>
+    </plurals>
 </resources>

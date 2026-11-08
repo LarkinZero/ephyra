@@ -25,4 +25,13 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">نهاية هذه الحلقة</string>
     <string name="sleep_timer_pauses_in">إيقاف مؤقت بعد %1$s</string>
+    <string name="player_up_next_play_now">شغّل الآن</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="zero">يبدأ بعد %d ثانية</item>
+        <item quantity="one">يبدأ بعد %d ثانية</item>
+        <item quantity="two">يبدأ بعد %d ثانية</item>
+        <item quantity="few">يبدأ بعد %d ثوانٍ</item>
+        <item quantity="many">يبدأ بعد %d ثانية</item>
+        <item quantity="other">يبدأ بعد %d ثانية</item>
+    </plurals>
 </resources>

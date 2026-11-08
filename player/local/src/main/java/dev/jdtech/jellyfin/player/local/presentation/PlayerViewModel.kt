@@ -59,6 +59,8 @@ import dev.jdtech.jellyfin.player.local.domain.TrickplayLoader
 import dev.jdtech.jellyfin.player.local.domain.TrickplayRegionLoader
 import dev.jdtech.jellyfin.player.local.domain.TrickplayTiles
 import dev.jdtech.jellyfin.player.local.domain.TV_TRICKPLAY_WIDTH_DP
+import dev.jdtech.jellyfin.player.local.domain.UpNextCountdown
+import dev.jdtech.jellyfin.player.local.domain.UpNextDecision
 import dev.jdtech.jellyfin.player.local.domain.autoPlayNextFollowsServer
 import dev.jdtech.jellyfin.player.local.domain.buildMediaSourceFactory
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
@@ -225,6 +227,29 @@ constructor(
      * of the item (at the current speed) for [SleepTimerOption.EndOfItem], `null` when unknown.
      */
     data class SleepTimerState(val option: SleepTimerOption, val remainingMs: Long?)
+
+    /**
+     * CE (#272): the "Up next" card at the end of an episode, `null` while it is hidden. Updated
+     * every [UP_NEXT_TICK_MS] by [updateUpNext]; the card's buttons call [playUpNextNow] and
+     * [cancelUpNext].
+     */
+    private val upNextCountdown = UpNextCountdown()
+    private val _upNext = MutableStateFlow<UpNextState?>(null)
+    val upNext: StateFlow<UpNextState?> = _upNext.asStateFlow()
+
+    /**
+     * The next item, for the "Up next" card. [secondsLeft] and [fractionLeft] (1 to 0) are the
+     * countdown to it; both are null when autoplay is off, as nothing starts by itself then.
+     */
+    data class UpNextState(
+        val itemId: UUID,
+        val title: String,
+        /** `S01E02`, or null for an item without season and episode numbers. */
+        val episodeLabel: String?,
+        val imageUri: Uri?,
+        val secondsLeft: Int?,
+        val fractionLeft: Float?,
+    )
 
     private var items: MutableList<PlayerItem> = mutableListOf()
 
@@ -489,6 +514,15 @@ constructor(
             )
             PlaybackService.mediaSession = mediaSession
             application.startService(Intent(application, PlaybackService::class.java))
+        }
+
+        // CE (#272): the "Up next" card, on both backends and in the background too, so its
+        // countdown ends the same way whether or not a screen shows it.
+        viewModelScope.launch {
+            while (true) {
+                updateUpNext()
+                delay(UP_NEXT_TICK_MS)
+            }
         }
     }
 
@@ -830,6 +864,19 @@ constructor(
                     fireSleepTimer()
                     return@withContext
                 }
+                // CE (#272): an outro skip to the next item hands over to the "Up next" countdown,
+                // or ends the item if the card was cancelled.
+                if (decision.target == SkipTarget.NextItem) {
+                    updateUpNext()
+                    if (_upNext.value?.secondsLeft != null) {
+                        _uiState.update { it.copy(currentSegment = null, skipButtonInWindow = false) }
+                        return@withContext
+                    }
+                    if (upNextCountdown.isCancelled(player.currentMediaItem?.mediaId)) {
+                        skipTo(SkipTarget.EndItem)
+                        return@withContext
+                    }
+                }
                 Timber.tag("SegmentInfo").d("Skipping %s", decision.segment)
                 val target =
                     if (decision.target == SkipTarget.NextItem) {
@@ -990,6 +1037,15 @@ constructor(
                     return@launch
                 }
 
+                // CE (#272): "Cancel" on the "Up next" card: stop here, as with autoplay off.
+                if (
+                    player.hasNextMediaItem() &&
+                        upNextCountdown.isCancelled(player.currentMediaItem?.mediaId)
+                ) {
+                    endItemWithoutAdvancing()
+                    return@launch
+                }
+
                 // Autoplay off: stop here and close the player instead of advancing. The last item
                 // keeps the normal path below, which ends the playlist (STATE_ENDED →
                 // NavigateBack) and reports the stop on release, so the setting changes nothing
@@ -1006,25 +1062,111 @@ constructor(
                     }
                 }
 
-                // "Are you still watching?" — only intercept if there's another item to advance
-                // to. If this was the last item, fall through to the normal seek+play (which
-                // becomes a no-op for seek and the player will hit STATE_ENDED → NavigateBack).
-                if (
-                    player.hasNextMediaItem() &&
-                        stillWatchingTracker.onAutoAdvance(nowMs = System.currentTimeMillis())
-                ) {
-                    // The player stays paused on the finished item, so no transition happens
-                    // yet. Report the stop now so the server knows the item finished, and clear
-                    // the snapshot so the transition after the prompt (confirm, or the user
-                    // pressing play or next after dismissing it) does not report it again.
-                    playing?.let { reportStopped(it) }
-                    playing = null
-                    showStillWatchingPrompt()
-                    return@launch
-                }
-                autoAdvanceToNextItem()
+                advanceOrAskStillWatching()
             }
         }
+    }
+
+    /**
+     * The automatic move to the next item, at the end of an item or when the "Up next" countdown
+     * runs out during an outro (#272): advance, or ask "Are you still watching?" first.
+     */
+    private fun advanceOrAskStillWatching() {
+        // "Are you still watching?" — only intercept if there's another item to advance
+        // to. If this was the last item, fall through to the normal seek+play (which
+        // becomes a no-op for seek and the player will hit STATE_ENDED → NavigateBack).
+        if (
+            player.hasNextMediaItem() &&
+                stillWatchingTracker.onAutoAdvance(nowMs = System.currentTimeMillis())
+        ) {
+            // Paused on the finished item (or, after the "Up next" countdown, in its outro), so no
+            // transition happens yet. Report the stop now so the server knows the item finished,
+            // and clear the snapshot so the transition after the prompt (confirm, or the user
+            // pressing play or next after dismissing it) does not report it again.
+            player.pause()
+            refreshPlayingSnapshot()
+            playing?.let { reportStopped(it) }
+            playing = null
+            showStillWatchingPrompt()
+            return
+        }
+        autoAdvanceToNextItem()
+    }
+
+    /**
+     * CE (#272): show, count down or hide the "Up next" card for the current position. Only for an
+     * episode with a next item, and never when the end of the item belongs to the sleep timer or to
+     * the still-watching prompt (which wins over the countdown).
+     */
+    private suspend fun updateUpNext() {
+        val mediaId = player.currentMediaItem?.mediaId
+        val current = currentPlayerItem()
+        val next = current?.let { items.getOrNull(items.indexOf(it) + 1) }
+        val duration = player.duration.takeIf { it != C.TIME_UNSET } ?: 0L
+        // Normally resolved long ago; this only waits if the server is slow to answer.
+        val autoPlay = autoPlayNext.await()
+        val eligible =
+            current != null &&
+                (current.seriesId != null || current.indexNumber != null) &&
+                next != null &&
+                player.hasNextMediaItem() &&
+                player.playbackState != Player.STATE_IDLE &&
+                player.playbackState != Player.STATE_ENDED &&
+                !sleepTimer.stopsAtEndOfItem &&
+                !_uiState.value.showStillWatching &&
+                !(autoPlay &&
+                    stillWatchingTracker.wouldPromptOnAutoAdvance(System.currentTimeMillis()))
+        val decision =
+            upNextCountdown.update(
+                itemId = mediaId,
+                positionMs = player.currentPosition,
+                durationMs = duration,
+                outroStartMs = segmentTracker.closingOutroStartMs(duration, hasNextItem = true),
+                eligible = eligible,
+                autoPlay = autoPlay,
+                speed = playbackSpeed,
+            )
+        when (decision) {
+            UpNextDecision.Hidden -> _upNext.value = null
+            is UpNextDecision.Show ->
+                if (next != null) {
+                    _upNext.value =
+                        UpNextState(
+                            itemId = next.itemId,
+                            title = next.name,
+                            episodeLabel = episodeLabel(next),
+                            imageUri = next.artworkUri?.let { resolveArtworkUri(it) },
+                            secondsLeft = decision.secondsLeft,
+                            fractionLeft = decision.fractionLeft,
+                        )
+                }
+            UpNextDecision.Advance -> {
+                Timber.d("Up next countdown ended, advancing")
+                _upNext.value = null
+                advanceOrAskStillWatching()
+            }
+        }
+    }
+
+    /** CE (#272): "Play now" on the "Up next" card. */
+    fun playUpNextNow() {
+        markUserInteraction()
+        _upNext.value = null
+        if (!player.hasNextMediaItem()) return
+        // Exact position for the stop report onMediaItemTransition sends for this item.
+        refreshPlayingSnapshot()
+        player.seekToNextMediaItem()
+        player.play()
+    }
+
+    /**
+     * CE (#272): "Cancel" on the "Up next" card. The item plays to its end and the player stops
+     * there, as with autoplay off; the next item plays as usual.
+     */
+    fun cancelUpNext() {
+        markUserInteraction()
+        upNextCountdown.cancel(player.currentMediaItem?.mediaId)
+        _upNext.value = null
     }
 
     /**
@@ -1769,6 +1911,17 @@ sealed interface PlayerEvents {
 
 /** How often a running sleep timer updates [PlayerViewModel.sleepTimerState] and checks its end. */
 private const val SLEEP_TIMER_TICK_MS = 1_000L
+
+/** How often [PlayerViewModel.upNext] is updated. */
+private const val UP_NEXT_TICK_MS = 500L
+
+/** `S01E02` (VISION §4), `S01E02-E03` for a double episode, or null without numbers. */
+internal fun episodeLabel(item: PlayerItem): String? {
+    val season = item.parentIndexNumber ?: return null
+    val episode = item.indexNumber ?: return null
+    val end = item.indexNumberEnd?.let { "-E%02d".format(it) }.orEmpty()
+    return "S%02dE%02d%s".format(season, episode, end)
+}
 
 /** How close to its end an item counts as ended, for resuming after the sleep timer. */
 private const val END_TOLERANCE_MS = 2_000L

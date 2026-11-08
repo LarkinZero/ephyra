@@ -23,4 +23,11 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Конец этой серии</string>
     <string name="sleep_timer_pauses_in">Пауза через %1$s</string>
+    <string name="player_up_next_play_now">Смотреть сейчас</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Начнётся через %d секунду</item>
+        <item quantity="few">Начнётся через %d секунды</item>
+        <item quantity="many">Начнётся через %d секунд</item>
+        <item quantity="other">Начнётся через %d секунды</item>
+    </plurals>
 </resources>

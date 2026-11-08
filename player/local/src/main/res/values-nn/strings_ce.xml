@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Slutten av denne episoden</string>
     <string name="sleep_timer_pauses_in">Pausar om %1$s</string>
+    <string name="player_up_next_play_now">Spel no</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Startar om %d sekund</item>
+        <item quantity="other">Startar om %d sekund</item>
+    </plurals>
 </resources>

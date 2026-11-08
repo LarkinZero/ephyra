@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Az epizód végén</string>
     <string name="sleep_timer_pauses_in">Szünet %1$s múlva</string>
+    <string name="player_up_next_play_now">Lejátszás most</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">%d másodperc múlva indul</item>
+        <item quantity="other">%d másodperc múlva indul</item>
+    </plurals>
 </resources>

@@ -20,4 +20,8 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Akhir episode ini</string>
     <string name="sleep_timer_pauses_in">Dijeda dalam %1$s</string>
+    <string name="player_up_next_play_now">Putar sekarang</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="other">Dimulai dalam %d detik</item>
+    </plurals>
 </resources>

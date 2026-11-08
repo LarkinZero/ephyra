@@ -195,6 +195,16 @@
         android:src="@drawable/transparent_circle"
         tools:ignore="ContentDescription" />
 
+    <!-- CE (#272): the "Up next" card at the end of an episode, above the controls' bar. Only
+         its own size takes touches. -->
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/up_next_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="56dp" />
+
     <!-- CE (R10): the episode sheet, over everything else while it is open. -->
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/episode_sheet"

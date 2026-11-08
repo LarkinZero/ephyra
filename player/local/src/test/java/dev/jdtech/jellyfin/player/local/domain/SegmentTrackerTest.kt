@@ -223,4 +223,20 @@ class SegmentTrackerTest {
             SegmentTracker.autoSkipTarget(SkipTarget.SeekTo(150_000L), autoPlayNext = false),
         )
     }
+
+    // --- closing outro (#272) ------------------------------------------------------------------
+
+    @Test
+    fun `closing outro start is the outro that runs to the end`() {
+        val t = tracker(actions = mapOf(OUTRO to IGNORE))
+        assertEquals(1_310_000L, t.closingOutroStartMs(duration, hasNextItem = true))
+        assertNull(t.closingOutroStartMs(duration, hasNextItem = false))
+    }
+
+    @Test
+    fun `an outro that ends early does not close the item`() {
+        val early = FindroidSegment(OUTRO, startTicks = 1_200_000L, endTicks = 1_300_000L)
+        val t = tracker(segments = listOf(early))
+        assertNull(t.closingOutroStartMs(duration, hasNextItem = true))
+    }
 }

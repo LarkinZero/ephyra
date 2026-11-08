@@ -147,6 +147,8 @@ fun TvPlayerScreen(
     val durationMs by remember { derivedStateOf { progress.value.durationMs } }
     val positionMs = remember { { progress.value.positionMs } }
     val queue by viewModel.queue.collectAsStateWithLifecycle()
+    // CE (#272): the "Up next" card at the end of an episode.
+    val upNext by viewModel.upNext.collectAsStateWithLifecycle()
     // CE (#298): ticks once a second while a timer runs; only the overlay's label reads the time.
     val sleepTimer = viewModel.sleepTimerState.collectAsStateWithLifecycle()
     val sleepTimerActive by remember {
@@ -237,12 +239,17 @@ fun TvPlayerScreen(
     val playPauseFocus = remember { FocusRequester() }
     val queueFocus = remember { FocusRequester() }
     val dialogOpenerFocus = remember { PlayerDialog.entries.associateWith { FocusRequester() } }
+    val upNextFocus = remember { FocusRequester() }
 
     // CE (#271): the skip button shows on its own, with focus, in its first seconds in a segment,
     // and above the overlay whenever the overlay is shown, as on phone.
     val segment = uiState.currentSegment
-    val skipButtonShown = segment != null && uiState.skipButtonInWindow && !controlsVisible
+    // The "Up next" card (#272) takes its place: it has its own Play now.
+    val upNextShown = upNext != null
+    val skipButtonShown =
+        segment != null && uiState.skipButtonInWindow && !controlsVisible && !upNextShown
     val currentSkipButtonShown by rememberUpdatedState(skipButtonShown)
+    val currentUpNextShown by rememberUpdatedState(upNextShown)
 
     // Hide the controls after a few seconds without a key, unless paused or a dialog is open.
     LaunchedEffect(controlsVisible, interactions, isPlaying, dialog, pendingSeekMs) {
@@ -259,12 +266,14 @@ fun TvPlayerScreen(
     }
     // Focus follows the controls: the play button when they show, the screen (or the skip
     // button) when they hide, so the key handler always gets the keys.
-    LaunchedEffect(controlsVisible, skipButtonShown) {
+    LaunchedEffect(controlsVisible, skipButtonShown, upNextShown) {
         if (controlsVisible) {
             focusWhenReady(playPauseFocus)
         } else {
             queueOpen = false
-            if (!skipButtonShown) focusWhenReady(rootFocus)
+            // CE (#272): the "Up next" card takes focus without opening the overlay.
+            if (upNextShown) focusWhenReady(upNextFocus)
+            else if (!skipButtonShown) focusWhenReady(rootFocus)
         }
     }
     // The queue opens with Down from the buttons, with focus on the next episode.
@@ -284,6 +293,9 @@ fun TvPlayerScreen(
 
             override val skipButtonShown: Boolean
                 get() = currentSkipButtonShown
+
+            override val upNextShown: Boolean
+                get() = currentUpNextShown
 
             override val positionMs: Long
                 get() = player.currentPosition.coerceAtLeast(0L)
@@ -343,6 +355,8 @@ fun TvPlayerScreen(
             override fun openSubtitleDialog() {
                 dialog = PlayerDialog.SUBTITLES
             }
+
+            override fun cancelUpNext() = viewModel.cancelUpNext()
         }
     }
     val keyHandler = remember { TvPlayerKeyHandler(controls, { seekSettings }) }
@@ -455,6 +469,24 @@ fun TvPlayerScreen(
             LaunchedEffect(segment) { focusWhenReady(skipFocus) }
         }
 
+        // CE (#272): with the overlay hidden, the "Up next" card sits bottom right with focus.
+        upNext?.let { state ->
+            if (!controlsVisible) {
+                Box(
+                    modifier =
+                        Modifier.fillMaxSize().padding(MaterialTheme.spacings.large).zIndex(1f),
+                    contentAlignment = Alignment.BottomEnd,
+                ) {
+                    TvUpNextCard(
+                        state = state,
+                        playNowFocus = upNextFocus,
+                        onPlayNow = viewModel::playUpNextNow,
+                        onCancel = viewModel::cancelUpNext,
+                    )
+                }
+            }
+        }
+
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(),
@@ -471,9 +503,28 @@ fun TvPlayerScreen(
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             Column(horizontalAlignment = Alignment.End) {
+                // CE (#272): with the overlay shown the "Up next" card sits above it, reachable
+                // with Up; focus stays on Play/Pause.
+                upNext?.let { state ->
+                    TvUpNextCard(
+                        state = state,
+                        playNowFocus = upNextFocus,
+                        onPlayNow = viewModel::playUpNextNow,
+                        onCancel = {
+                            viewModel.cancelUpNext()
+                            playPauseFocus.requestFocus()
+                        },
+                        modifier =
+                            Modifier.padding(
+                                    end = MaterialTheme.spacings.default * 2,
+                                    bottom = MaterialTheme.spacings.medium,
+                                )
+                                .onFocusChanged { if (it.hasFocus) interactions++ },
+                    )
+                }
                 // With the overlay shown the button sits above it, reachable with Up from the seek
                 // bar; focus stays on Play/Pause.
-                if (segment != null) {
+                if (segment != null && !upNextShown) {
                     SkipButton(
                         stringRes = uiState.currentSkipButtonStringRes,
                         onClick = {

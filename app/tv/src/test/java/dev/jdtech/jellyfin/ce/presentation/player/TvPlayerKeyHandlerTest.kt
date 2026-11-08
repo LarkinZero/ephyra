@@ -22,11 +22,17 @@ class TvPlayerKeyHandlerTest {
     private class FakeControls : TvPlayerControls {
         override var controlsVisible = false
         override var skipButtonShown = false
+        override var upNextShown = false
         override var positionMs = 600_000L
         override var durationMs = 1_500_000L
         val calls = mutableListOf<String>()
         val seeks = mutableListOf<Long>()
         var indicator: Long? = null
+
+        override fun cancelUpNext() {
+            upNextShown = false
+            calls += "cancelUpNext"
+        }
 
         override fun showControls() {
             controlsVisible = true
@@ -157,6 +163,36 @@ class TvPlayerKeyHandlerTest {
         controls.skipButtonShown = true
         assertFalse(handler.onKeyEvent(KEYCODE_DPAD_CENTER, ACTION_DOWN, 0))
         assertFalse(controls.controlsVisible)
+    }
+
+    @Test
+    fun theUpNextCardTakesOkAndLeftRight() {
+        controls.upNextShown = true
+        assertFalse(handler.onKeyEvent(KEYCODE_DPAD_CENTER, ACTION_DOWN, 0))
+        assertFalse(handler.onKeyEvent(KEYCODE_DPAD_LEFT, ACTION_DOWN, 0))
+        assertFalse(handler.onKeyEvent(KEYCODE_DPAD_RIGHT, ACTION_DOWN, 0))
+        assertFalse(controls.controlsVisible)
+        assertTrue(controls.seeks.isEmpty())
+    }
+
+    @Test
+    fun backCancelsTheUpNextCard() {
+        controls.upNextShown = true
+        assertTrue(handler.onKeyEvent(KEYCODE_BACK, ACTION_DOWN, 0))
+        assertTrue(handler.onKeyEvent(KEYCODE_BACK, ACTION_UP, 0))
+        assertEquals(listOf("cancelUpNext"), controls.calls)
+        // Once it is gone, Back is left to the screen again.
+        assertFalse(handler.onKeyEvent(KEYCODE_BACK, ACTION_DOWN, 0))
+    }
+
+    @Test
+    fun backHidesTheControlsBeforeCancellingTheUpNextCard() {
+        controls.upNextShown = true
+        controls.controlsVisible = true
+        assertTrue(handler.onKeyEvent(KEYCODE_BACK, ACTION_DOWN, 0))
+        assertTrue(handler.onKeyEvent(KEYCODE_BACK, ACTION_UP, 0))
+        assertEquals(listOf("hide"), controls.calls)
+        assertTrue(controls.upNextShown)
     }
 
     @Test

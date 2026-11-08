@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Einde van deze aflevering</string>
     <string name="sleep_timer_pauses_in">Pauzeert over %1$s</string>
+    <string name="player_up_next_play_now">Nu afspelen</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Begint over %d seconde</item>
+        <item quantity="other">Begint over %d seconden</item>
+    </plurals>
 </resources>

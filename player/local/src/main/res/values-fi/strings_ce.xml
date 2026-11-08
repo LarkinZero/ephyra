@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Tämän jakson loppu</string>
     <string name="sleep_timer_pauses_in">Keskeytyy %1$s kuluttua</string>
+    <string name="player_up_next_play_now">Toista nyt</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Alkaa %d sekunnin kuluttua</item>
+        <item quantity="other">Alkaa %d sekunnin kuluttua</item>
+    </plurals>
 </resources>

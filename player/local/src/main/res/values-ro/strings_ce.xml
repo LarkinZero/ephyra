@@ -22,4 +22,10 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Sfârșitul acestui episod</string>
     <string name="sleep_timer_pauses_in">Se întrerupe în %1$s</string>
+    <string name="player_up_next_play_now">Redă acum</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Începe în %d secundă</item>
+        <item quantity="few">Începe în %d secunde</item>
+        <item quantity="other">Începe în %d de secunde</item>
+    </plurals>
 </resources>

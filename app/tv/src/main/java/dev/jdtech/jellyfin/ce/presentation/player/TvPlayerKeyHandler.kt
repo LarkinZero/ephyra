@@ -12,6 +12,8 @@ import android.view.KeyEvent
  * - Controls shown: D-pad keys go to the focused element (the seek bar handles its own). Back hides
  *   the controls before the player is left.
  * - Media keys work in both cases.
+ * - CE (#272): while the "Up next" card shows with the controls hidden, its buttons have focus:
+ *   Left/Right move between them and OK presses one. Back cancels the card instead of leaving.
  *
  * A hold is applied as one seek when the key is released; the indicator shows the target while the
  * key is held, so the player isn't asked to seek twenty times a second.
@@ -35,12 +37,22 @@ class TvPlayerKeyHandler(
 
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // Consumed on the up event, so the screen's own Back handler doesn't also fire.
-            return controls.controlsVisible
+            return controls.controlsVisible || controls.upNextShown
         }
 
         if (controls.controlsVisible) {
             controls.onUserInteraction()
             return false
+        }
+
+        if (controls.upNextShown) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_LEFT,
+                KeyEvent.KEYCODE_DPAD_RIGHT,
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_NUMPAD_ENTER -> return false
+            }
         }
 
         return when (keyCode) {
@@ -81,6 +93,10 @@ class TvPlayerKeyHandler(
         }
         if (keyCode == KeyEvent.KEYCODE_BACK && controls.controlsVisible) {
             controls.hideControls()
+            return true
+        }
+        if (keyCode == KeyEvent.KEYCODE_BACK && controls.upNextShown) {
+            controls.cancelUpNext()
             return true
         }
         return mediaKeyAction(keyCode) != null
@@ -170,6 +186,8 @@ data class TvSeekSettings(val backMs: Long, val forwardMs: Long, val okPauses: B
 interface TvPlayerControls {
     val controlsVisible: Boolean
     val skipButtonShown: Boolean
+    /** CE (#272): the "Up next" card shows, with focus while the controls are hidden. */
+    val upNextShown: Boolean
     val positionMs: Long
     val durationMs: Long
 
@@ -200,4 +218,7 @@ interface TvPlayerControls {
     fun openAudioDialog()
 
     fun openSubtitleDialog()
+
+    /** CE (#272): Back on the "Up next" card. */
+    fun cancelUpNext()
 }

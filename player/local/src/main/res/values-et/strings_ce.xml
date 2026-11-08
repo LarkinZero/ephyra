@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Selle osa lõpus</string>
     <string name="sleep_timer_pauses_in">Peatub %1$s pärast</string>
+    <string name="player_up_next_play_now">Esita kohe</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Algab %d sekundi pärast</item>
+        <item quantity="other">Algab %d sekundi pärast</item>
+    </plurals>
 </resources>

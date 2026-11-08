@@ -22,4 +22,10 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Fin de cet épisode</string>
     <string name="sleep_timer_pauses_in">Pause dans %1$s</string>
+    <string name="player_up_next_play_now">Lire maintenant</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Commence dans %d seconde</item>
+        <item quantity="many">Commence dans %d secondes</item>
+        <item quantity="other">Commence dans %d secondes</item>
+    </plurals>
 </resources>
