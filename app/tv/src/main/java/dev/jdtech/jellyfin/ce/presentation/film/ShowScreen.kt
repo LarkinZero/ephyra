@@ -270,7 +270,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                 }
                                 TvCriticRating(show.criticRating)
                             }
-                            show.airSchedule(locale)?.let { schedule ->
+                            show.airSchedule(locale, stringResource(CoreR.string.item_airs_daily))?.let { schedule ->
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
                                 Text(
                                     text = stringResource(CoreR.string.item_airs, schedule),

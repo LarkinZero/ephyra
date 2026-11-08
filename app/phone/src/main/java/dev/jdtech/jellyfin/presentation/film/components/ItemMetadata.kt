@@ -106,7 +106,7 @@ fun WatchHistoryText(playCount: Int, lastPlayedDate: LocalDateTime?) {
 /** "Airs Thursday 21:00", only while the show is still running. */
 @Composable
 fun AirScheduleText(show: FindroidShow) {
-    val schedule = show.airSchedule(currentLocale()) ?: return
+    val schedule = show.airSchedule(currentLocale(), stringResource(CoreR.string.item_airs_daily)) ?: return
     val text = stringResource(CoreR.string.item_airs, schedule)
     Text(
         text = text,

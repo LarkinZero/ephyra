@@ -85,6 +85,7 @@
     <string name="item_studios">Stüdyolar</string>
     <string name="item_networks">Kanallar</string>
     <string name="item_airs">Yayın: %1$s</string>
+    <string name="item_airs_daily">her gün</string>
     <string name="item_watch_count">%1$d× izlendi</string>
     <string name="item_watch_count_last">%1$d× izlendi · son kez %2$s</string>
     <string name="item_open_on">%1$s sitesinde aç</string>

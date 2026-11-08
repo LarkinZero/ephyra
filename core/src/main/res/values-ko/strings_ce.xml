@@ -85,6 +85,7 @@
     <string name="item_studios">스튜디오</string>
     <string name="item_networks">방송사</string>
     <string name="item_airs">방영: %1$s</string>
+    <string name="item_airs_daily">매일</string>
     <string name="item_watch_count">%1$d× 시청함</string>
     <string name="item_watch_count_last">%1$d× 시청함 · 마지막 시청 %2$s</string>
     <string name="item_open_on">%1$s에서 열기</string>

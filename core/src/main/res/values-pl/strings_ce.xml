@@ -94,6 +94,7 @@
     <string name="item_studios">Studia</string>
     <string name="item_networks">Stacje</string>
     <string name="item_airs">Emisja: %1$s</string>
+    <string name="item_airs_daily">codziennie</string>
     <string name="item_watch_count">Obejrzano %1$d×</string>
     <string name="item_watch_count_last">Obejrzano %1$d× · ostatnio %2$s</string>
     <string name="item_open_on">Otwórz w %1$s</string>

@@ -88,6 +88,7 @@
     <string name="item_studios">Studio\'s</string>
     <string name="item_networks">Zenders</string>
     <string name="item_airs">Wordt uitgezonden %1$s</string>
+    <string name="item_airs_daily">dagelijks</string>
     <string name="item_watch_count">%1$d× bekeken</string>
     <string name="item_watch_count_last">%1$d× bekeken · laatst op %2$s</string>
     <string name="item_open_on">Openen op %1$s</string>

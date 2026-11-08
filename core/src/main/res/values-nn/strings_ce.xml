@@ -88,6 +88,7 @@
     <string name="item_studios">Studio</string>
     <string name="item_networks">Kanalar</string>
     <string name="item_airs">Vert sendt %1$s</string>
+    <string name="item_airs_daily">dagleg</string>
     <string name="item_watch_count">Sett %1$d×</string>
     <string name="item_watch_count_last">Sett %1$d× · sist %2$s</string>
     <string name="item_open_on">Opne på %1$s</string>

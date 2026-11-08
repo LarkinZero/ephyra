@@ -88,6 +88,7 @@
     <string name="item_studios">Studios</string>
     <string name="item_networks">Chaînes</string>
     <string name="item_airs">Diffusion : %1$s</string>
+    <string name="item_airs_daily">tous les jours</string>
     <string name="item_watch_count">Vu %1$d×</string>
     <string name="item_watch_count_last">Vu %1$d× · dernière fois le %2$s</string>
     <string name="item_open_on">Ouvrir sur %1$s</string>

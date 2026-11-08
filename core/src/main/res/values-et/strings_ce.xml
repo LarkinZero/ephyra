@@ -88,6 +88,7 @@
     <string name="item_studios">Stuudiod</string>
     <string name="item_networks">Kanalid</string>
     <string name="item_airs">Eetris %1$s</string>
+    <string name="item_airs_daily">iga päev</string>
     <string name="item_watch_count">Vaadatud %1$d×</string>
     <string name="item_watch_count_last">Vaadatud %1$d× · viimati %2$s</string>
     <string name="item_open_on">Ava saidil %1$s</string>

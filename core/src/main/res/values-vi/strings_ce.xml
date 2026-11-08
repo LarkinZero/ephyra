@@ -85,6 +85,7 @@
     <string name="item_studios">Hãng phim</string>
     <string name="item_networks">Đài phát sóng</string>
     <string name="item_airs">Phát sóng %1$s</string>
+    <string name="item_airs_daily">hằng ngày</string>
     <string name="item_watch_count">Đã xem %1$d×</string>
     <string name="item_watch_count_last">Đã xem %1$d× · lần cuối vào %2$s</string>
     <string name="item_open_on">Mở trên %1$s</string>

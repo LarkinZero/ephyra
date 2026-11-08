@@ -88,6 +88,7 @@
     <string name="item_studios">Студиа</string>
     <string name="item_networks">Телевизии</string>
     <string name="item_airs">Излъчва се %1$s</string>
+    <string name="item_airs_daily">всеки ден</string>
     <string name="item_watch_count">Гледано %1$d×</string>
     <string name="item_watch_count_last">Гледано %1$d× · последно на %2$s</string>
     <string name="item_open_on">Отвори в %1$s</string>

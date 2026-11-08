@@ -85,6 +85,7 @@
     <string name="item_studios">スタジオ</string>
     <string name="item_networks">放送局</string>
     <string name="item_airs">放送：%1$s</string>
+    <string name="item_airs_daily">毎日</string>
     <string name="item_watch_count">%1$d× 視聴済み</string>
     <string name="item_watch_count_last">%1$d× 視聴済み · 最終視聴 %2$s</string>
     <string name="item_open_on">%1$s で開く</string>

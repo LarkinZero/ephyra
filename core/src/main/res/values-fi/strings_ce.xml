@@ -88,6 +88,7 @@
     <string name="item_studios">Studiot</string>
     <string name="item_networks">Kanavat</string>
     <string name="item_airs">Esitetään %1$s</string>
+    <string name="item_airs_daily">päivittäin</string>
     <string name="item_watch_count">Katsottu %1$d×</string>
     <string name="item_watch_count_last">Katsottu %1$d× · viimeksi %2$s</string>
     <string name="item_open_on">Avaa palvelussa %1$s</string>

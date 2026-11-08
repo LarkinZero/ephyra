@@ -91,6 +91,7 @@
     <string name="item_studios">Štúdiá</string>
     <string name="item_networks">Stanice</string>
     <string name="item_airs">Vysiela sa %1$s</string>
+    <string name="item_airs_daily">denne</string>
     <string name="item_watch_count">Pozreté %1$d×</string>
     <string name="item_watch_count_last">Pozreté %1$d× · naposledy %2$s</string>
     <string name="item_open_on">Otvoriť na %1$s</string>

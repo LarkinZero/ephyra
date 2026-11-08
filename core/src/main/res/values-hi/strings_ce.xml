@@ -88,6 +88,7 @@
     <string name="item_studios">स्टूडियो</string>
     <string name="item_networks">नेटवर्क</string>
     <string name="item_airs">प्रसारण: %1$s</string>
+    <string name="item_airs_daily">रोज़ाना</string>
     <string name="item_watch_count">%1$d× देखा गया</string>
     <string name="item_watch_count_last">%1$d× देखा गया · पिछली बार %2$s</string>
     <string name="item_open_on">%1$s पर खोलें</string>

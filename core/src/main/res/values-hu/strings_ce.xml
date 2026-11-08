@@ -88,6 +88,7 @@
     <string name="item_studios">Stúdiók</string>
     <string name="item_networks">Csatornák</string>
     <string name="item_airs">Adásban: %1$s</string>
+    <string name="item_airs_daily">naponta</string>
     <string name="item_watch_count">Megtekintve %1$d×</string>
     <string name="item_watch_count_last">Megtekintve %1$d× · legutóbb %2$s</string>
     <string name="item_open_on">Megnyitás itt: %1$s</string>

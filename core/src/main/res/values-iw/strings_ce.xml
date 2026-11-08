@@ -88,6 +88,7 @@
     <string name="item_studios">אולפנים</string>
     <string name="item_networks">רשתות</string>
     <string name="item_airs">משודר %1$s</string>
+    <string name="item_airs_daily">מדי יום</string>
     <string name="item_watch_count">נצפה %1$d×</string>
     <string name="item_watch_count_last">נצפה %1$d× · לאחרונה ב-%2$s</string>
     <string name="item_open_on">פתיחה ב-%1$s</string>

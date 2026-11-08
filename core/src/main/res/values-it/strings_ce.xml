@@ -88,6 +88,7 @@
     <string name="item_studios">Studi</string>
     <string name="item_networks">Reti</string>
     <string name="item_airs">In onda %1$s</string>
+    <string name="item_airs_daily">ogni giorno</string>
     <string name="item_watch_count">Visto %1$d×</string>
     <string name="item_watch_count_last">Visto %1$d× · l\'ultima volta il %2$s</string>
     <string name="item_open_on">Apri su %1$s</string>

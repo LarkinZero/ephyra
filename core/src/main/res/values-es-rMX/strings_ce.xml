@@ -88,6 +88,7 @@
     <string name="item_studios">Estudios</string>
     <string name="item_networks">Cadenas</string>
     <string name="item_airs">Se transmite %1$s</string>
+    <string name="item_airs_daily">diario</string>
     <string name="item_watch_count">Visto %1$d×</string>
     <string name="item_watch_count_last">Visto %1$d× · la última vez el %2$s</string>
     <string name="item_open_on">Abrir en %1$s</string>

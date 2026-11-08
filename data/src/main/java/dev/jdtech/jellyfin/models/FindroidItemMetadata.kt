@@ -85,14 +85,17 @@ fun List<JellyfinDayOfWeek>?.toDaysOfWeek(): List<DayOfWeek> =
     orEmpty().mapNotNull { day -> DayOfWeek.entries.firstOrNull { it.name == day.name } }.distinct()
 
 /**
- * The days and time a running show airs, such as "Thursday 21:00" or "Mon, Thu 21:00", Monday
- * first; null when the show has ended or the server has no schedule.
+ * The days and time a running show airs, such as "Thursday 21:00", "Mon, Thu 21:00" or, when it
+ * airs every day, "[daily] 21:00"; Monday first. Null when the show has ended or the server has no
+ * schedule.
  */
-fun FindroidShow.airSchedule(locale: Locale): String? {
+fun FindroidShow.airSchedule(locale: Locale, daily: String): String? {
     if (!status.equals("Continuing", ignoreCase = true)) return null
     val days = airDays.sorted()
     val style = if (days.size == 1) TextStyle.FULL else TextStyle.SHORT
-    val dayText = days.joinToString { it.getDisplayName(style, locale) }
+    val dayText =
+        if (days.size == DayOfWeek.entries.size) daily
+        else days.joinToString { it.getDisplayName(style, locale) }
     return listOfNotNull(dayText.ifEmpty { null }, airTime).joinToString(" ").ifEmpty { null }
 }
 

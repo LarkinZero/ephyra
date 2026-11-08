@@ -94,6 +94,7 @@
     <string name="item_studios">Studii</string>
     <string name="item_networks">Postaje</string>
     <string name="item_airs">Na sporedu %1$s</string>
+    <string name="item_airs_daily">vsak dan</string>
     <string name="item_watch_count">Ogledano %1$d×</string>
     <string name="item_watch_count_last">Ogledano %1$d× · nazadnje %2$s</string>
     <string name="item_open_on">Odpri na %1$s</string>

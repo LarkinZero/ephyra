@@ -94,6 +94,7 @@
     <string name="item_studios">Студії</string>
     <string name="item_networks">Телеканали</string>
     <string name="item_airs">Виходить %1$s</string>
+    <string name="item_airs_daily">щодня</string>
     <string name="item_watch_count">Переглянуто %1$d×</string>
     <string name="item_watch_count_last">Переглянуто %1$d× · востаннє %2$s</string>
     <string name="item_open_on">Відкрити на %1$s</string>

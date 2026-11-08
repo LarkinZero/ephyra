@@ -85,6 +85,7 @@
     <string name="item_studios">製片公司</string>
     <string name="item_networks">電視網</string>
     <string name="item_airs">播出時間：%1$s</string>
+    <string name="item_airs_daily">每天</string>
     <string name="item_watch_count">已觀看 %1$d×</string>
     <string name="item_watch_count_last">已觀看 %1$d× · 上次於 %2$s</string>
     <string name="item_open_on">在 %1$s 開啟</string>

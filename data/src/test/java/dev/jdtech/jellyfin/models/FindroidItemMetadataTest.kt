@@ -119,7 +119,7 @@ class FindroidItemMetadataTest {
         assertEquals(listOf(DayOfWeek.THURSDAY), show.airDays)
         assertEquals("21:00", show.airTime)
         assertEquals(88f, show.criticRating)
-        assertEquals("Thursday 21:00", show.airSchedule(Locale.ENGLISH))
+        assertEquals("Thursday 21:00", show.airSchedule(Locale.ENGLISH, "daily"))
     }
 
     @Test
@@ -192,15 +192,19 @@ class FindroidItemMetadataTest {
                 .toFindroidShow(repository)
                 .copy(status = status, airDays = days, airTime = time)
 
-        assertNull(show("Ended", listOf(DayOfWeek.MONDAY), "20:00").airSchedule(Locale.ENGLISH))
-        assertNull(show("Continuing", emptyList(), null).airSchedule(Locale.ENGLISH))
+        assertNull(show("Ended", listOf(DayOfWeek.MONDAY), "20:00").airSchedule(Locale.ENGLISH, "daily"))
+        assertNull(show("Continuing", emptyList(), null).airSchedule(Locale.ENGLISH, "daily"))
         assertEquals(
             "Mon, Thu 20:00",
             show("Continuing", listOf(DayOfWeek.THURSDAY, DayOfWeek.MONDAY), "20:00")
-                .airSchedule(Locale.ENGLISH),
+                .airSchedule(Locale.ENGLISH, "daily"),
         )
-        assertEquals("Friday", show("Continuing", listOf(DayOfWeek.FRIDAY), null).airSchedule(Locale.ENGLISH))
-        assertEquals("9:00 PM", show("Continuing", emptyList(), "9:00 PM").airSchedule(Locale.ENGLISH))
+        assertEquals("Friday", show("Continuing", listOf(DayOfWeek.FRIDAY), null).airSchedule(Locale.ENGLISH, "daily"))
+        assertEquals("9:00 PM", show("Continuing", emptyList(), "9:00 PM").airSchedule(Locale.ENGLISH, "daily"))
+        assertEquals(
+            "daily 08:00",
+            show("Continuing", DayOfWeek.entries.reversed(), "08:00").airSchedule(Locale.ENGLISH, "daily"),
+        )
     }
 
     private fun userData(playCount: Int) =

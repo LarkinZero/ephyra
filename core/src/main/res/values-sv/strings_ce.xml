@@ -88,6 +88,7 @@
     <string name="item_studios">Studior</string>
     <string name="item_networks">Kanaler</string>
     <string name="item_airs">Sänds %1$s</string>
+    <string name="item_airs_daily">dagligen</string>
     <string name="item_watch_count">Sedd %1$d×</string>
     <string name="item_watch_count_last">Sedd %1$d× · senast %2$s</string>
     <string name="item_open_on">Öppna på %1$s</string>

@@ -91,6 +91,7 @@
     <string name="item_studios">Studiouri</string>
     <string name="item_networks">Rețele</string>
     <string name="item_airs">Se difuzează %1$s</string>
+    <string name="item_airs_daily">zilnic</string>
     <string name="item_watch_count">Vizionat de %1$d×</string>
     <string name="item_watch_count_last">Vizionat de %1$d× · ultima dată pe %2$s</string>
     <string name="item_open_on">Deschide pe %1$s</string>

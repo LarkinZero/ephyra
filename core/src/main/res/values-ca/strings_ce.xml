@@ -88,6 +88,7 @@
     <string name="item_studios">Estudis</string>
     <string name="item_networks">Cadenes</string>
     <string name="item_airs">S\'emet %1$s</string>
+    <string name="item_airs_daily">cada dia</string>
     <string name="item_watch_count">Vist %1$d×</string>
     <string name="item_watch_count_last">Vist %1$d× · l\'última vegada el %2$s</string>
     <string name="item_open_on">Obre a %1$s</string>
