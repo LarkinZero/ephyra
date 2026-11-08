@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – היום</string>
     <string name="shuffle">ערבב</string>
     <string name="favorites_empty_body">בחר בסמל הלב בכל סרט, סדרה או פרק כדי להוסיף אותו למועדפים שלך.</string>
+    <string name="ce_session_revoked">%1$s ניתק אותך. יש להתחבר שוב כדי להמשיך.</string>
 </resources>

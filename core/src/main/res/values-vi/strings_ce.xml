@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – nay</string>
     <string name="shuffle">Xáo trộn</string>
     <string name="favorites_empty_body">Chọn biểu tượng trái tim trên bất kỳ phim, chương trình hoặc tập phim nào để thêm vào mục yêu thích.</string>
+    <string name="ce_session_revoked">%1$s đã đăng xuất bạn. Hãy đăng nhập lại để tiếp tục.</string>
 </resources>

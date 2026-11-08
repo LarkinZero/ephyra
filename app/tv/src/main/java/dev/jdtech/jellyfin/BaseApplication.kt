@@ -17,6 +17,7 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import dagger.hilt.android.HiltAndroidApp
+import dev.jdtech.jellyfin.core.session.ServerSessionKeeper
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextSync
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.JellyfinImageSizeInterceptor
@@ -30,6 +31,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
     @Inject lateinit var appPreferences: AppPreferences
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject lateinit var serverSessionKeeper: ServerSessionKeeper
 
     @Inject lateinit var watchNextSync: WatchNextSync
 
@@ -51,6 +54,9 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
 
         // CE (#138): Continue Watching and Next Up on the launcher's Watch Next row.
         watchNextSync.start()
+
+        // CE (#334): keep the session list on the server in step with the app.
+        serverSessionKeeper.start()
     }
 
     @OptIn(ExperimentalCoilApi::class, ExperimentalTime::class)

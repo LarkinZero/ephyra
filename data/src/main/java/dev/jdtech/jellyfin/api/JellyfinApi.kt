@@ -5,8 +5,19 @@ import dev.jdtech.jellyfin.data.BuildConfig
 import dev.jdtech.jellyfin.settings.domain.Constants
 import java.util.UUID
 import kotlin.time.DurationUnit
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toDuration
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import org.jellyfin.sdk.android.androidDevice
 import org.jellyfin.sdk.api.client.HttpClientOptions
 import org.jellyfin.sdk.api.client.extensions.authenticationApi
@@ -28,6 +39,7 @@ import org.jellyfin.sdk.api.okhttp.OkHttpFactory
 import org.jellyfin.sdk.createJellyfin
 import org.jellyfin.sdk.model.ClientInfo
 import org.jellyfin.sdk.model.DeviceInfo
+import timber.log.Timber
 
 /**
  * Jellyfin API class using org.jellyfin.sdk:jellyfin-core
@@ -47,7 +59,21 @@ class JellyfinApi(
      * connection pool. The player streams media over it ([httpClient]) and so reuses the
      * connection the API calls before playback left open.
      */
-    private val okHttpFactory = OkHttpFactory()
+    private val okHttpFactory =
+        OkHttpFactory(base = OkHttpClient.Builder().addInterceptor(::detectRevokedToken).build())
+
+    private val _unauthorized =
+        MutableSharedFlow<String>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
+
+    /**
+     * CE (#334): tokens the server answered 401 to while they were the client's current token, so
+     * possibly revoked on the server (signed out from the dashboard, the device deleted). The
+     * session keeper checks and signs out.
+     */
+    val unauthorized: SharedFlow<String> = _unauthorized.asSharedFlow()
 
     /** The OkHttp client the API's clients are built from. Derive from it with `newBuilder()`. */
     val httpClient: OkHttpClient
@@ -77,6 +103,48 @@ class JellyfinApi(
                 )
         )
     var userId: UUID? = null
+
+    private fun detectRevokedToken(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val response = chain.proceed(request)
+        if (response.code != 401) return response
+        val token = api.accessToken ?: return response
+        val sentToken =
+            request.header("Authorization")?.contains(token) == true ||
+                request.url.queryParameter("api_key") == token ||
+                request.url.queryParameter("ApiKey") == token
+        if (sentToken) _unauthorized.tryEmit(token)
+        return response
+    }
+
+    /**
+     * CE (#334): signs [accessToken] out on the server (`POST /Sessions/Logout`), which ends its
+     * session and revokes the token. Only for a token the app is throwing away: a removed user or
+     * server. Best-effort: false when the server could not be reached in time.
+     */
+    suspend fun endSession(baseUrl: String, accessToken: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val client =
+                jellyfin.createApi(
+                    baseUrl = baseUrl,
+                    accessToken = accessToken,
+                    httpClientOptions =
+                        HttpClientOptions(
+                            requestTimeout = END_SESSION_TIMEOUT,
+                            connectTimeout = END_SESSION_TIMEOUT,
+                            socketTimeout = END_SESSION_TIMEOUT,
+                        ),
+                )
+            try {
+                withTimeoutOrNull(END_SESSION_TIMEOUT) { client.sessionApi.reportSessionEnded() } !=
+                    null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Could not end the session on the server")
+                false
+            }
+        }
 
     val brandingApi = api.brandingApi
     val authenticationApi = api.authenticationApi
@@ -109,6 +177,8 @@ class JellyfinApi(
     }
 
     companion object {
+        private val END_SESSION_TIMEOUT = 5.seconds
+
         @Volatile private var INSTANCE: JellyfinApi? = null
 
         fun getInstance(

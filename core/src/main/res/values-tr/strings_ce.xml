@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – günümüz</string>
     <string name="shuffle">Karışık</string>
     <string name="favorites_empty_body">Favorilerinize eklemek için herhangi bir film, dizi veya bölümdeki kalp simgesini seçin.</string>
+    <string name="ce_session_revoked">%1$s oturumunuzu kapattı. Devam etmek için yeniden oturum açın.</string>
 </resources>

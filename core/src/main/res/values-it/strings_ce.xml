@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – oggi</string>
     <string name="shuffle">Casuale</string>
     <string name="favorites_empty_body">Seleziona l\'icona a forma di cuore su qualsiasi film, serie o episodio per aggiungerlo ai preferiti.</string>
+    <string name="ce_session_revoked">%1$s ti ha disconnesso. Accedi di nuovo per continuare.</string>
 </resources>

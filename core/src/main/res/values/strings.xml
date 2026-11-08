@@ -188,6 +188,8 @@
     <string name="downloads_channel_name">Downloads</string>
     <string name="downloads_channel_description">Ongoing download activity</string>
     <string name="download_failures_channel_name">Download failures</string>
+    <!-- CE (#334): the server revoked the login. %1$s is the server name. -->
+    <string name="ce_session_revoked">%1$s signed you out. Sign in again to continue.</string>
     <plurals name="downloads_in_progress_title">
         <item quantity="one">Downloading %d item</item>
         <item quantity="other">Downloading %d items</item>

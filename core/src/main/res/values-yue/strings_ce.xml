@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – 至今</string>
     <string name="shuffle">隨機播放</string>
     <string name="favorites_empty_body">喺任何電影、劇集或單集揀心形圖示，即可加入常用。</string>
+    <string name="ce_session_revoked">%1$s 已將你登出。請重新登入以繼續。</string>
 </resources>

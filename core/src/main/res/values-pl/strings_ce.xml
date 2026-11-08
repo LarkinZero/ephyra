@@ -89,4 +89,5 @@
     <string name="year_range_continuing">%1$d – obecnie</string>
     <string name="shuffle">Losowo</string>
     <string name="favorites_empty_body">Wybierz ikonę serca na dowolnym filmie, serialu lub odcinku, aby dodać go do ulubionych.</string>
+    <string name="ce_session_revoked">%1$s wylogował cię. Zaloguj się ponownie, aby kontynuować.</string>
 </resources>
