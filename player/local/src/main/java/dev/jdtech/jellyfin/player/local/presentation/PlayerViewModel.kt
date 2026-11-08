@@ -386,7 +386,9 @@ constructor(
                     .setVideoChangeFrameRateStrategy(videoChangeFrameRateStrategy)
                     .setAudioAttributes(audioAttributes, true)
                     .setHandleAudioBecomingNoisy(true)
-                    .setMediaSourceFactory(buildMediaSourceFactory(application))
+                    .setMediaSourceFactory(
+                        buildMediaSourceFactory(application, jellyfinApi.httpClient)
+                    )
                     .setTrackSelector(trackSelector)
                     .setSeekBackIncrementMs(
                         appPreferences.getValue(appPreferences.playerSeekBackInc)
