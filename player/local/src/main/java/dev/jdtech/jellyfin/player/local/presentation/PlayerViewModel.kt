@@ -1298,10 +1298,14 @@ constructor(
 
             val currentIndex = player.currentMediaItemIndex
             val position = player.currentPosition
+            val playWhenReady = player.playWhenReady
             items = rebuilt.toMutableList()
             appliedTrackPreferenceItemId = null
             player.setMediaItems(rebuilt.map { it.toMediaItem() }, currentIndex, position)
             player.prepare()
+            // Keep playing (or paused) as before, whatever the player does with the flag on a new
+            // playlist: mpv used to clear it, so the button showed Play while it played (#305).
+            player.playWhenReady = playWhenReady
         }
     }
 

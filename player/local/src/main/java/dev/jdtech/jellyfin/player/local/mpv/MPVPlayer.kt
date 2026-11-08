@@ -262,9 +262,9 @@ class MPVPlayer(
                 Property("paused-for-cache", MpvFormat.MPV_FORMAT_FLAG),
                 Property("eof-reached", MpvFormat.MPV_FORMAT_FLAG),
                 Property("seekable", MpvFormat.MPV_FORMAT_FLAG),
-                Property("time-pos", MpvFormat.MPV_FORMAT_INT64),
-                Property("duration", MpvFormat.MPV_FORMAT_INT64),
-                Property("demuxer-cache-time", MpvFormat.MPV_FORMAT_INT64),
+                Property("time-pos", MpvFormat.MPV_FORMAT_DOUBLE),
+                Property("duration", MpvFormat.MPV_FORMAT_DOUBLE),
+                Property("demuxer-cache-time", MpvFormat.MPV_FORMAT_DOUBLE),
                 Property("speed", MpvFormat.MPV_FORMAT_DOUBLE),
                 Property("playlist-count", MpvFormat.MPV_FORMAT_INT64),
                 Property("playlist-current-pos", MpvFormat.MPV_FORMAT_INT64),
@@ -357,6 +357,8 @@ class MPVPlayer(
 
     @Player.State private var playbackState: Int = STATE_IDLE
     private var currentPlayWhenReady: Boolean = false
+    @Player.PlaybackSuppressionReason
+    private var suppressionReason: Int = PLAYBACK_SUPPRESSION_REASON_NONE
 
     @Player.RepeatMode private val repeatMode: Int = REPEAT_MODE_OFF
     private var currentTracks: Tracks = Tracks.EMPTY
@@ -475,7 +477,8 @@ class MPVPlayer(
                                     PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM,
                                 playbackState = STATE_ENDED,
                             )
-                            resetInternalState()
+                            // No reset: like ExoPlayer the player stays ENDED until a seek or a
+                            // new prepare, and a seek must still reach mpv.
                         }
                     }
                 }
@@ -501,14 +504,6 @@ class MPVPlayer(
     override fun eventProperty(property: String, value: Long) {
         post {
             when (property) {
-                "time-pos" -> currentPositionMs = value * C.MILLIS_PER_SECOND
-                "duration" -> {
-                    val newDuration = value * C.MILLIS_PER_SECOND
-                    if (currentDurationMs != newDuration) {
-                        currentDurationMs = newDuration
-                    }
-                }
-                "demuxer-cache-time" -> currentCacheDurationMs = value * C.MILLIS_PER_SECOND
                 "playlist-count" -> {
                     listeners.sendEvent(EVENT_TIMELINE_CHANGED) { listener ->
                         listener.onTimelineChanged(
@@ -547,6 +542,11 @@ class MPVPlayer(
     override fun eventProperty(property: String, value: Double) {
         post {
             when (property) {
+                // Doubles, not INT64: mpv rounds an INT64 observation to whole seconds.
+                "time-pos" -> currentPositionMs = (value * C.MILLIS_PER_SECOND).toLong()
+                "duration" -> currentDurationMs = (value * C.MILLIS_PER_SECOND).toLong()
+                "demuxer-cache-time" ->
+                    currentCacheDurationMs = (value * C.MILLIS_PER_SECOND).toLong()
                 "speed" -> {
                     playbackParameters = playbackParameters.withSpeed(value.toFloat())
                     listeners.sendEvent(EVENT_PLAYBACK_PARAMETERS_CHANGED) { listener ->
@@ -597,10 +597,13 @@ class MPVPlayer(
                                 // A seek to 0 is redundant unless mpv was opened elsewhere.
                                 applyInitialSeek(skipZero = passed == null)
                             }
-                        if (playWhenReady) {
-                            Timber.d("Starting playback...")
-                            mpvLib.setPropertyBoolean("pause", false)
-                        }
+                        // Until now setPlayWhenReady only recorded the flag, and mpv kept the pause
+                        // state of the previous file (or none), so apply it both ways.
+                        val play =
+                            playWhenReady &&
+                                playbackSuppressionReason == PLAYBACK_SUPPRESSION_REASON_NONE
+                        if (play) Timber.d("Starting playback...")
+                        mpvLib.setPropertyBoolean("pause", !play)
                         for (videoListener in videoListeners) {
                             videoListener.onRenderedFirstFrame()
                         }
@@ -686,8 +689,11 @@ class MPVPlayer(
             playerStateChanged = true
         }
         if (playerStateChanged) {
+            // The deprecated combined callback, as ExoPlayer sends it. This used to be a second
+            // onPlaybackStateChanged, so every state change arrived twice (ENDED too).
             listeners.queueEvent(C.INDEX_UNSET) { listener ->
-                listener.onPlaybackStateChanged(playbackState)
+                @Suppress("DEPRECATION")
+                listener.onPlayerStateChanged(playWhenReady, playbackState)
             }
         }
         if (wasPlaying != isPlaying) {
@@ -817,19 +823,27 @@ class MPVPlayer(
      *   [AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK].
      */
     override fun onAudioFocusChange(focusChange: Int) {
+        if (released) return
         when (focusChange) {
-            AudioManager.AUDIOFOCUS_LOSS,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                val oldAudioFocusCallback = audioFocusCallback
-                val wasPlaying = isPlaying
+            // As ExoPlayer: a permanent loss pauses for good, a transient one keeps playWhenReady
+            // and suppresses playback until the focus comes back. Gain used to unpause mpv while
+            // playWhenReady stayed false, so the player said paused while audio played (#305).
+            AudioManager.AUDIOFOCUS_LOSS -> {
                 mpvLib.setPropertyBoolean("pause", true)
+                setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
                 setPlayerStateAndNotifyIfChanged(
                     playWhenReady = false,
                     playWhenReadyChangeReason = PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS,
                 )
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                val oldAudioFocusCallback = audioFocusCallback
+                mpvLib.setPropertyBoolean("pause", true)
+                setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_TRANSIENT_AUDIO_FOCUS_LOSS)
                 audioFocusCallback = {
                     oldAudioFocusCallback()
-                    if (wasPlaying) mpvLib.setPropertyBoolean("pause", false)
+                    setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
+                    if (playWhenReady && isPlayerReady) mpvLib.setPropertyBoolean("pause", false)
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
@@ -1069,11 +1083,14 @@ class MPVPlayer(
         }
     }
 
+    /**
+     * Forgets what belongs to the previous file. Not the playback state or playWhenReady: callers
+     * change those through [setPlayerStateAndNotifyIfChanged], so listeners hear about it. Clearing
+     * them here silently left playWhenReady false after every prepare (#305).
+     */
     private fun resetInternalState() {
         isPlayerReady = false
         isSeekable = false
-        playbackState = STATE_IDLE
-        currentPlayWhenReady = false
         currentPositionMs = null
         currentDurationMs = null
         currentCacheDurationMs = null
@@ -1125,7 +1142,22 @@ class MPVPlayer(
      * @see Player.Listener.onPlaybackSuppressionReasonChanged
      */
     override fun getPlaybackSuppressionReason(): Int {
-        return PLAYBACK_SUPPRESSION_REASON_NONE
+        return suppressionReason
+    }
+
+    private fun setPlaybackSuppressionReason(@Player.PlaybackSuppressionReason reason: Int) {
+        if (reason == suppressionReason) return
+        val wasPlaying = isPlaying
+        suppressionReason = reason
+        listeners.queueEvent(EVENT_PLAYBACK_SUPPRESSION_REASON_CHANGED) { listener ->
+            listener.onPlaybackSuppressionReasonChanged(reason)
+        }
+        if (wasPlaying != isPlaying) {
+            listeners.queueEvent(EVENT_IS_PLAYING_CHANGED) { listener ->
+                listener.onIsPlayingChanged(isPlaying)
+            }
+        }
+        listeners.flushEvents()
     }
 
     /**
@@ -1162,6 +1194,7 @@ class MPVPlayer(
                     if (res != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                         mpvLib.setPropertyBoolean("pause", true)
                     } else {
+                        setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
                         mpvLib.setPropertyBoolean("pause", false)
                     }
                 } else {
@@ -1424,6 +1457,8 @@ class MPVPlayer(
         }
         setBecomingNoisyRegistered(false)
         resetInternalState()
+        playbackState = STATE_IDLE
+        currentPlayWhenReady = false
         mpvLib.removeObserver(this)
         mpvLib.removeLogObserver(logObserver)
         // Events mpv posted before removeObserver would otherwise still run, after destroy().
