@@ -91,7 +91,7 @@ fun ItemHeader(
     var backdropUri =
         when (item) {
             is FindroidEpisode -> item.images.primary
-            is FindroidSeason -> item.images.showBackdrop
+            is FindroidSeason -> item.images.showBackdrop ?: item.images.backdrop
             else -> item.images.backdrop
         }
 

@@ -294,7 +294,7 @@ class HomeCache @Inject constructor(@ApplicationContext context: Context) {
     private fun JSONArray.strings(): List<String> = List(length()) { getString(it) }
 
     private companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val OVERVIEW_MAX = 400
     }
 }
