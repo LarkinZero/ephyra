@@ -48,20 +48,27 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .appendQueryParameter("tag", tag)
             .build()
     }
-    val showBackdrop = seriesPrimaryImageTag?.let { tag ->
-        baseUrl
-            .buildUpon()
-            .appendEncodedPath("items/$seriesId/Images/${ImageType.BACKDROP}/0")
-            .appendQueryParameter("tag", tag)
-            .build()
-    }
-    val showLogo = seriesPrimaryImageTag?.let { tag ->
-        baseUrl
-            .buildUpon()
-            .appendEncodedPath("items/$seriesId/Images/${ImageType.LOGO}")
-            .appendQueryParameter("tag", tag)
-            .build()
-    }
+    // The series' own backdrop and logo. The parent item id names the owner of the image (the
+    // series unless the server inherited it from further up). No tag means the series has none,
+    // so these stay null and callers fall back to the episode or season image.
+    val showBackdrop =
+        parentBackdropImageTags?.firstOrNull()?.let { tag ->
+            baseUrl
+                .buildUpon()
+                .appendEncodedPath(
+                    "items/${parentBackdropItemId ?: seriesId}/Images/${ImageType.BACKDROP}/0"
+                )
+                .appendQueryParameter("tag", tag)
+                .build()
+        }
+    val showLogo =
+        parentLogoImageTag?.let { tag ->
+            baseUrl
+                .buildUpon()
+                .appendEncodedPath("items/${parentLogoItemId ?: seriesId}/Images/${ImageType.LOGO}")
+                .appendQueryParameter("tag", tag)
+                .build()
+        }
 
     return FindroidImages(
         primary = primary,

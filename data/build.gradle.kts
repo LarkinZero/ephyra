@@ -27,6 +27,9 @@ android {
     }
 
     buildFeatures { buildConfig = true }
+
+    // CE-owned: the image mapper tests need android.net.Uri, which Robolectric provides on the JVM.
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 room3 { schemaDirectory("$projectDir/schemas") }
@@ -41,4 +44,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }
