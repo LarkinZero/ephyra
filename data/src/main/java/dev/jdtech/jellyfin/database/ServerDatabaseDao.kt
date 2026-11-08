@@ -244,6 +244,9 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM seasons WHERE id = :id")
     suspend fun getSeason(id: UUID): FindroidSeasonDto
 
+    @Query("SELECT * FROM seasons WHERE id = :id")
+    suspend fun getSeasonOrNull(id: UUID): FindroidSeasonDto?
+
     @Query("SELECT * FROM seasons WHERE seriesId = :seriesId ORDER BY indexNumber ASC")
     suspend fun getSeasonsByShowId(seriesId: UUID): List<FindroidSeasonDto>
 
