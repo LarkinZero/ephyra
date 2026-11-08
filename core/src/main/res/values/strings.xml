@@ -192,4 +192,16 @@
         <item quantity="one">Downloading %d item</item>
         <item quantity="other">Downloading %d items</item>
     </plurals>
+    <!-- CE (#332): metadata the server already sends, on the detail pages -->
+    <string name="item_critic_rating">Rotten Tomatoes score</string>
+    <string name="item_studios">Studios</string>
+    <string name="item_networks">Networks</string>
+    <string name="item_airs">Airs %1$s</string>
+    <string name="item_watch_count">Watched %1$d×</string>
+    <string name="item_watch_count_last">Watched %1$d× · last on %2$s</string>
+    <string name="item_open_on">Open on %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extras</string>
+    <string name="item_included_in">Included in</string>
+    <string name="item_more_like_this">More like this</string>
 </resources>

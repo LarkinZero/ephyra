@@ -83,4 +83,16 @@
     <string name="year_range_continuing">%1$d – nykyhetki</string>
     <string name="shuffle">Sekoita</string>
     <string name="favorites_empty_body">Lisää elokuva, sarja tai jakso suosikkeihisi valitsemalla sydänkuvake.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes -pisteet</string>
+    <string name="item_studios">Studiot</string>
+    <string name="item_networks">Kanavat</string>
+    <string name="item_airs">Esitetään %1$s</string>
+    <string name="item_watch_count">Katsottu %1$d×</string>
+    <string name="item_watch_count_last">Katsottu %1$d× · viimeksi %2$s</string>
+    <string name="item_open_on">Avaa palvelussa %1$s</string>
+    <string name="item_trailer_number">Traileri %1$d</string>
+    <string name="item_extras">Lisämateriaalit</string>
+    <string name="item_included_in">Sisältyy kokoelmaan</string>
+    <string name="item_more_like_this">Samankaltaisia</string>
 </resources>

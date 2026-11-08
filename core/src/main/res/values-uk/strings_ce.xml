@@ -89,4 +89,16 @@
     <string name="year_range_continuing">%1$d – тепер</string>
     <string name="shuffle">Перемішати</string>
     <string name="favorites_empty_body">Виберіть значок серця на будь-якому фільмі, серіалі чи епізоді, щоб додати його до вибраного.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Рейтинг Rotten Tomatoes</string>
+    <string name="item_studios">Студії</string>
+    <string name="item_networks">Телеканали</string>
+    <string name="item_airs">Виходить %1$s</string>
+    <string name="item_watch_count">Переглянуто %1$d×</string>
+    <string name="item_watch_count_last">Переглянуто %1$d× · востаннє %2$s</string>
+    <string name="item_open_on">Відкрити на %1$s</string>
+    <string name="item_trailer_number">Трейлер %1$d</string>
+    <string name="item_extras">Додаткові матеріали</string>
+    <string name="item_included_in">Входить до</string>
+    <string name="item_more_like_this">Схоже</string>
 </resources>

@@ -83,4 +83,16 @@
     <string name="year_range_continuing">%1$d – nu</string>
     <string name="shuffle">Blanda</string>
     <string name="favorites_empty_body">Välj hjärtikonen på en film, serie eller ett avsnitt för att lägga till som favorit.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes-betyg</string>
+    <string name="item_studios">Studior</string>
+    <string name="item_networks">Kanaler</string>
+    <string name="item_airs">Sänds %1$s</string>
+    <string name="item_watch_count">Sedd %1$d×</string>
+    <string name="item_watch_count_last">Sedd %1$d× · senast %2$s</string>
+    <string name="item_open_on">Öppna på %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extramaterial</string>
+    <string name="item_included_in">Ingår i</string>
+    <string name="item_more_like_this">Mer som detta</string>
 </resources>

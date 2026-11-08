@@ -179,11 +179,11 @@ fun HeroSubtitle(text: String, style: TextStyle = MaterialTheme.typography.bodyM
 }
 
 /**
- * The metadata line: plain texts (year, runtime, rating…) followed by the community rating star,
- * built the same way as on the compact screens.
+ * The metadata line: plain texts (year, runtime, rating…) followed by the community rating star
+ * and (CE, #332) the critic score, built the same way as on the compact screens.
  */
 @Composable
-fun HeroMetadataLine(texts: List<String>, communityRating: Float?) {
+fun HeroMetadataLine(texts: List<String>, communityRating: Float?, criticRating: Float? = null) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
@@ -211,6 +211,7 @@ fun HeroMetadataLine(texts: List<String>, communityRating: Float?) {
                 Text(text = ratingText, style = MaterialTheme.typography.bodyMedium)
             }
         }
+        CriticRating(criticRating)
     }
 }
 

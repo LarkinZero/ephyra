@@ -71,6 +71,8 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.ui.components.ItemCard
+import dev.jdtech.jellyfin.models.airSchedule
+import dev.jdtech.jellyfin.utils.AfterFirstFrame
 import dev.jdtech.jellyfin.utils.getShowDateString
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -85,6 +87,7 @@ fun ShowScreen(
     navigateToItem: (item: FindroidItem) -> Unit,
     navigateToPlayer: (itemId: UUID, shuffle: Boolean) -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToExtra: (extraId: UUID) -> Unit = {},
     viewModel: ShowViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -97,6 +100,9 @@ fun ShowScreen(
         viewModel.loadThemeSong(showId)
     }
     val themeMusic = rememberThemeMusic(state.themeSongUrl)
+
+    // CE (#332): the rows below the page only once the show is on screen.
+    AfterFirstFrame(state.show?.id) { id -> viewModel.loadRelated(id) }
 
     ShowScreenLayout(
         state = state,
@@ -117,6 +123,10 @@ fun ShowScreen(
                     } catch (e: IllegalArgumentException) {
                         Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
+                }
+                is ShowAction.PlayExtra -> {
+                    themeMusic.onPlaybackStarted()
+                    navigateToExtra(action.extraId)
                 }
                 is ShowAction.NavigateToItem -> navigateToItem(action.item)
                 is ShowAction.NavigateToPerson -> navigateToPerson(action.personId)
@@ -148,6 +158,27 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.show?.let { show ->
+            val relatedRows =
+                remember(state.related) {
+                    listOf(
+                            RelatedRow(
+                                ROW_EXTRAS,
+                                CoreR.string.item_extras,
+                                Direction.HORIZONTAL,
+                                state.related.extras,
+                            ),
+                            RelatedRow(
+                                ROW_SIMILAR,
+                                CoreR.string.item_more_like_this,
+                                Direction.VERTICAL,
+                                state.related.similar,
+                            ),
+                        )
+                        .filter { it.items.isNotEmpty() }
+                }
+            // The list holds the header, the seasons and the cast when there are any, then these.
+            val firstRelatedIndex =
+                1 + (if (state.seasons.isNotEmpty()) 1 else 0) + (if (state.actors.isNotEmpty()) 1 else 0)
             var size by remember { mutableStateOf(Size.Zero) }
             Box(
                 modifier =
@@ -237,8 +268,18 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                         )
                                     }
                                 }
+                                TvCriticRating(show.criticRating)
+                            }
+                            show.airSchedule(locale)?.let { schedule ->
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                                Text(
+                                    text = stringResource(CoreR.string.item_airs, schedule),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.White.copy(alpha = .7f),
+                                )
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+                            TvTagline(show.tagline)
                             Text(
                                 text = show.overview,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -400,6 +441,12 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                         )
                                     }
                                 }
+                                if (show.studios.isNotEmpty()) {
+                                    TvLabeledValue(
+                                        label = stringResource(CoreR.string.item_networks),
+                                        value = show.studios.joinToString(),
+                                    )
+                                }
                             }
                             if (state.seasons.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
@@ -489,16 +536,53 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                             }
                         }
                     }
+
+                    // CE (#332): loaded after the page is shown, below everything else.
+                    relatedRows.forEach { related ->
+                        item(key = related.row) {
+                            TvItemsRow(
+                                title = stringResource(related.title),
+                                items = related.items,
+                                direction = related.direction,
+                                focusPosition = focusPosition,
+                                row = related.row,
+                                onFocused = {
+                                    relatedRows.relatedLazyIndex(related.row, firstRelatedIndex)?.let {
+                                        scrollToRow(it)
+                                    }
+                                },
+                                onClick = { item ->
+                                    onAction(
+                                        if (related.row == ROW_EXTRAS) ShowAction.PlayExtra(item.id)
+                                        else ShowAction.NavigateToItem(item)
+                                    )
+                                },
+                            )
+                        }
+                    }
                 }
             }
 
             RestoreFocus(
                 position = focusPosition,
                 ready =
-                    state.seasons.isNotEmpty() ||
-                        state.actors.isNotEmpty() ||
-                        focusPosition.row == ROW_BUTTONS,
+                    when (focusPosition.row) {
+                        ROW_EXTRAS,
+                        ROW_SIMILAR -> relatedRows.any { it.row == focusPosition.row }
+                        else ->
+                            state.seasons.isNotEmpty() ||
+                                state.actors.isNotEmpty() ||
+                                focusPosition.row == ROW_BUTTONS
+                    },
             ) { position ->
+                relatedRows.relatedLazyIndex(position.row, firstRelatedIndex)?.let { index ->
+                    relatedRows.forEach { related ->
+                        position.resolve(related.row, related.items.size) { i ->
+                            related.items[i].id.toString()
+                        }
+                    }
+                    listState.scrollToItem(index)
+                }
                 if (position.row == ROW_SEASONS) {
                     position.resolve(ROW_SEASONS, state.seasons.size) { i ->
                         state.seasons[i].id.toString()
@@ -518,6 +602,8 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
 private const val ROW_BUTTONS = 0
 private const val ROW_SEASONS = 1
 private const val ROW_CAST = 2
+private const val ROW_EXTRAS = 3
+private const val ROW_SIMILAR = 4
 
 @Preview(device = "id:tv_1080p")
 @Composable

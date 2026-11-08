@@ -86,4 +86,16 @@
     <string name="year_range_continuing">%1$d – súčasnosť</string>
     <string name="shuffle">Náhodne</string>
     <string name="favorites_empty_body">Vyberte ikonu srdca na ktoromkoľvek filme, seriáli alebo epizóde a pridajte ich medzi obľúbené.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Hodnotenie Rotten Tomatoes</string>
+    <string name="item_studios">Štúdiá</string>
+    <string name="item_networks">Stanice</string>
+    <string name="item_airs">Vysiela sa %1$s</string>
+    <string name="item_watch_count">Pozreté %1$d×</string>
+    <string name="item_watch_count_last">Pozreté %1$d× · naposledy %2$s</string>
+    <string name="item_open_on">Otvoriť na %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Bonusy</string>
+    <string name="item_included_in">Súčasťou</string>
+    <string name="item_more_like_this">Podobné tituly</string>
 </resources>

@@ -48,9 +48,16 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowEvent
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
+import dev.jdtech.jellyfin.utils.AfterFirstFrame
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.AirScheduleText
+import dev.jdtech.jellyfin.presentation.film.components.CriticRating
+import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
+import dev.jdtech.jellyfin.presentation.film.components.ItemsRow
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
@@ -66,6 +73,7 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
@@ -92,6 +100,9 @@ fun ShowScreen(
     ReloadOnResume(shouldReload = { viewModel.shouldReload(showId, downloadsOnly, stopEventFollows = true) }) {
         viewModel.loadShow(showId = showId, downloadsOnly = downloadsOnly)
     }
+
+    // CE (#332): the rows below the page only once the show is on screen.
+    AfterFirstFrame(state.show?.id) { id -> viewModel.loadRelated(id) }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -140,6 +151,8 @@ fun ShowScreen(
                         Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
+                is ShowAction.PlayExtra -> playExtra(context, action.extraId)
+                is ShowAction.OpenExternalLink -> openExternalLink(context, uriHandler, action.url)
                 is ShowAction.OnBackClick -> navigateBack()
                 is ShowAction.OnHomeClick -> navigateHome()
                 is ShowAction.NavigateToItem -> navigateToItem(action.item)
@@ -260,7 +273,9 @@ private fun ShowScreenLayout(
                                 )
                             }
                         }
+                        CriticRating(show.criticRating)
                     }
+                    AirScheduleText(show)
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     ItemButtonsBar(
                         item = show,
@@ -299,13 +314,20 @@ private fun ShowScreenLayout(
                             },
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    show.tagline?.let { tagline ->
+                        TaglineText(tagline)
+                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    }
                     OverviewText(text = show.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     InfoText(
                         genres = show.genres,
                         director = state.director,
                         writers = state.writers,
+                        studios = show.studios,
+                        studiosAreNetworks = true,
                     )
+                    ShowLinks(show, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     state.nextUp?.let { nextUp ->
                         Text(
@@ -372,7 +394,13 @@ private fun ShowScreenLayout(
                         },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
+                ShowRelatedRows(
+                    state = state,
+                    onAction = onAction,
+                    contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                )
                 Spacer(Modifier.height(paddingBottom))
             }
         } ?: run {
@@ -412,6 +440,37 @@ private fun ShowScreenLayout(
             )
         }
     }
+}
+
+/** CE (#332): the show's outside links, below the info text. */
+@Composable
+internal fun ShowLinks(show: FindroidShow, onAction: (ShowAction) -> Unit) {
+    if (show.externalLinks.isEmpty() || LocalOfflineMode.current) return
+    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+    ExternalLinksRow(show.externalLinks) { url -> onAction(ShowAction.OpenExternalLink(url)) }
+}
+
+/** CE (#332): extras and "More like this", loaded after the page. */
+@Composable
+internal fun ShowRelatedRows(
+    state: ShowState,
+    onAction: (ShowAction) -> Unit,
+    contentPadding: PaddingValues,
+) {
+    ItemsRow(
+        title = stringResource(CoreR.string.item_extras),
+        items = state.related.extras,
+        direction = Direction.HORIZONTAL,
+        onItemClick = { onAction(ShowAction.PlayExtra(it.id)) },
+        contentPadding = contentPadding,
+    )
+    ItemsRow(
+        title = stringResource(CoreR.string.item_more_like_this),
+        items = state.related.similar,
+        direction = Direction.VERTICAL,
+        onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
+        contentPadding = contentPadding,
+    )
 }
 
 @PreviewScreenSizes

@@ -65,7 +65,10 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
 import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
+import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.getVersions
+import dev.jdtech.jellyfin.ui.components.Direction
+import dev.jdtech.jellyfin.utils.AfterFirstFrame
 import dev.jdtech.jellyfin.presentation.film.components.VersionDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -83,6 +86,7 @@ fun MovieScreen(
     movieId: UUID,
     navigateToPlayer: (itemId: UUID, mediaSourceId: String?) -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToItem: (item: FindroidItem) -> Unit = {},
     viewModel: MovieViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -93,6 +97,9 @@ fun MovieScreen(
     LaunchedEffect(movieId) {
         if (viewModel.shouldReload(movieId)) viewModel.loadMovie(movieId = movieId)
     }
+
+    // CE (#332): the rows below the page only once the movie is on screen.
+    AfterFirstFrame(state.movie?.id) { id -> viewModel.loadRelated(id) }
 
     MovieScreenLayout(
         state = state,
@@ -111,6 +118,8 @@ fun MovieScreen(
                 is MovieAction.NavigateToPerson -> {
                     navigateToPerson(action.personId)
                 }
+                is MovieAction.PlayExtra -> navigateToPlayer(action.extraId, null)
+                is MovieAction.NavigateToItem -> navigateToItem(action.item)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -138,6 +147,35 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
             val versions = remember(movie.sources) { movie.getVersions() }
+            val relatedRows =
+                remember(state.related) {
+                    listOf(
+                            RelatedRow(
+                                ROW_EXTRAS,
+                                CoreR.string.item_extras,
+                                Direction.HORIZONTAL,
+                                state.related.extras,
+                            ),
+                            RelatedRow(
+                                ROW_COLLECTIONS,
+                                CoreR.string.item_included_in,
+                                Direction.VERTICAL,
+                                state.related.collections,
+                            ),
+                            RelatedRow(
+                                ROW_SIMILAR,
+                                CoreR.string.item_more_like_this,
+                                Direction.VERTICAL,
+                                state.related.similar,
+                            ),
+                        )
+                        .filter { it.items.isNotEmpty() }
+                }
+            // The list holds the header, the cast row when there is a cast, then the related rows.
+            val firstRelatedIndex = if (state.actors.isNotEmpty()) 2 else 1
+            val lazyIndexOf: (Int) -> Int = { row ->
+                relatedRows.relatedLazyIndex(row, firstRelatedIndex) ?: row
+            }
             var size by remember { mutableStateOf(Size.Zero) }
             Box(
                 modifier =
@@ -229,8 +267,17 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                         )
                                     }
                                 }
+                                TvCriticRating(movie.criticRating)
+                                if (movie.is3D) {
+                                    Text(text = "3D", style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                            if (movie.playCount > 0) {
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                                TvWatchHistory(movie.playCount, movie.lastPlayedDate)
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+                            TvTagline(movie.tagline)
                             Text(
                                 text = movie.overview,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -403,6 +450,12 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                         )
                                     }
                                 }
+                                if (movie.studios.isNotEmpty()) {
+                                    TvLabeledValue(
+                                        label = stringResource(CoreR.string.item_studios),
+                                        value = movie.studios.joinToString(),
+                                    )
+                                }
                             }
                             if (state.actors.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
@@ -446,17 +499,47 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                             }
                         }
                     }
+
+                    // CE (#332): loaded after the page is shown, below everything else.
+                    relatedRows.forEach { related ->
+                        item(key = related.row) {
+                            TvItemsRow(
+                                title = stringResource(related.title),
+                                items = related.items,
+                                direction = related.direction,
+                                focusPosition = focusPosition,
+                                row = related.row,
+                                onFocused = { scrollToRow(lazyIndexOf(related.row)) },
+                                onClick = { item ->
+                                    onAction(
+                                        if (related.row == ROW_EXTRAS) MovieAction.PlayExtra(item.id)
+                                        else MovieAction.NavigateToItem(item)
+                                    )
+                                },
+                            )
+                        }
+                    }
                 }
             }
 
             RestoreFocus(
                 position = focusPosition,
-                ready = state.actors.isNotEmpty() || focusPosition.row == ROW_BUTTONS,
+                ready =
+                    when (focusPosition.row) {
+                        ROW_BUTTONS -> true
+                        ROW_CAST -> state.actors.isNotEmpty()
+                        else -> relatedRows.any { it.row == focusPosition.row }
+                    },
             ) { position ->
                 position.resolve(ROW_CAST, state.actors.size) { i ->
                     state.actors[i].id.toString()
                 }
-                listState.scrollToItem(position.row)
+                relatedRows.forEach { related ->
+                    position.resolve(related.row, related.items.size) { i ->
+                        related.items[i].id.toString()
+                    }
+                }
+                listState.scrollToItem(lazyIndexOf(position.row))
             }
 
             if (versionDialogOpen) {
@@ -475,6 +558,9 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
 
 private const val ROW_BUTTONS = 0
 private const val ROW_CAST = 1
+private const val ROW_EXTRAS = 2
+private const val ROW_COLLECTIONS = 3
+private const val ROW_SIMILAR = 4
 
 @Preview(device = "id:tv_1080p")
 @Composable

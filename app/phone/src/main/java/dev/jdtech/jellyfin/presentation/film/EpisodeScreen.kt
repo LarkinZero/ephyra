@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,7 +52,10 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
+import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
@@ -86,6 +90,7 @@ fun EpisodeScreen(
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val isOfflineMode = LocalOfflineMode.current
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -151,6 +156,7 @@ fun EpisodeScreen(
                     intent.putExtra("mediaSourceId", action.mediaSourceId)
                     context.startActivity(intent)
                 }
+                is EpisodeAction.OpenExternalLink -> openExternalLink(context, uriHandler, action.url)
                 is EpisodeAction.OnBackClick -> navigateBack()
                 is EpisodeAction.OnHomeClick -> navigateHome()
                 is EpisodeAction.NavigateToPerson -> navigateToPerson(action.personId)
@@ -318,6 +324,7 @@ private fun EpisodeScreenLayout(
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
                     OverviewText(text = episode.overview)
+                    EpisodeWatchAndLinks(episode, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
                 if (state.actors.isNotEmpty()) {
@@ -379,6 +386,21 @@ private fun EpisodeScreenLayout(
                 },
                 onDismiss = { downloadQualityDialogOpen = false },
             )
+        }
+    }
+}
+
+/** CE (#332): the watch history and the outside links, right below the overview. */
+@Composable
+internal fun EpisodeWatchAndLinks(episode: FindroidEpisode, onAction: (EpisodeAction) -> Unit) {
+    if (episode.playCount > 0) {
+        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+        WatchHistoryText(playCount = episode.playCount, lastPlayedDate = episode.lastPlayedDate)
+    }
+    if (episode.externalLinks.isNotEmpty() && !LocalOfflineMode.current) {
+        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+        ExternalLinksRow(episode.externalLinks) { url ->
+            onAction(EpisodeAction.OpenExternalLink(url))
         }
     }
 }

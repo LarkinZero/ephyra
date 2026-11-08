@@ -83,4 +83,16 @@
     <string name="year_range_continuing">%1$d – heden</string>
     <string name="shuffle">Shuffle</string>
     <string name="favorites_empty_body">Kies het hartje bij een film, serie of aflevering om favorieten toe te voegen.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes-score</string>
+    <string name="item_studios">Studio\'s</string>
+    <string name="item_networks">Zenders</string>
+    <string name="item_airs">Wordt uitgezonden %1$s</string>
+    <string name="item_watch_count">%1$d× bekeken</string>
+    <string name="item_watch_count_last">%1$d× bekeken · laatst op %2$s</string>
+    <string name="item_open_on">Openen op %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extra\'s</string>
+    <string name="item_included_in">Onderdeel van</string>
+    <string name="item_more_like_this">Meer zoals dit</string>
 </resources>

@@ -89,4 +89,16 @@
     <string name="year_range_continuing">%1$d – наст. время</string>
     <string name="shuffle">Перемешать</string>
     <string name="favorites_empty_body">Выберите значок сердца у любого фильма, сериала или эпизода, чтобы добавить его в избранное.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Рейтинг Rotten Tomatoes</string>
+    <string name="item_studios">Студии</string>
+    <string name="item_networks">Телеканалы</string>
+    <string name="item_airs">Выходит %1$s</string>
+    <string name="item_watch_count">Просмотрено %1$d×</string>
+    <string name="item_watch_count_last">Просмотрено %1$d× · последний раз %2$s</string>
+    <string name="item_open_on">Открыть на %1$s</string>
+    <string name="item_trailer_number">Трейлер %1$d</string>
+    <string name="item_extras">Дополнительные материалы</string>
+    <string name="item_included_in">Входит в</string>
+    <string name="item_more_like_this">Похожее</string>
 </resources>

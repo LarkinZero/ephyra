@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.film.presentation.RelatedItems
+import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidShow
@@ -57,6 +60,8 @@ constructor(
     private var downloadsOnly: Boolean = false
     private val reloadPolicy = ReloadPolicy(dataChanges)
     private var loadJob: Job? = null
+    private var relatedJob: Job? = null
+    private var relatedFor: UUID? = null
 
     /** Whether coming back to the page needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(
@@ -77,6 +82,11 @@ constructor(
     fun loadShow(showId: UUID, downloadsOnly: Boolean = this.downloadsOnly) {
         this.showId = showId
         this.downloadsOnly = downloadsOnly
+        if (relatedFor != null && relatedFor != showId) {
+            relatedJob?.cancel()
+            relatedFor = null
+            _state.update { it.copy(related = RelatedItems()) }
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             val token = reloadPolicy.begin()
@@ -195,6 +205,31 @@ constructor(
             Timber.e(e, "Failed to load the show's download counts")
             null
         }
+
+    /**
+     * CE (#332): the extras and "More like this" rows, each from its own request. The page calls
+     * this once it has drawn the show, so these requests never delay it; they are made once per
+     * show. Not on the downloads-only page, and offline the repository has none.
+     */
+    fun loadRelated(showId: UUID) {
+        val show = _state.value.show?.takeIf { it.id == showId } ?: return
+        if (downloadsOnly || relatedFor == showId) return
+        relatedFor = showId
+        relatedJob?.cancel()
+        relatedJob =
+            viewModelScope.launchRelatedItems(
+                repository = repository,
+                itemId = showId,
+                request =
+                    RelatedItemsRequest.forItem(
+                        localTrailerCount = show.localTrailerCount,
+                        specialFeatureCount = show.specialFeatureCount,
+                        collections = false,
+                    ),
+            ) { change ->
+                _state.update { it.copy(related = change(it.related)) }
+            }
+    }
 
     /**
      * CE (#141): look up the series' theme song for the TV show page, only when theme music is

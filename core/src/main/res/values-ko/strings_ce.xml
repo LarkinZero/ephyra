@@ -80,4 +80,16 @@
     <string name="year_range_continuing">%1$d – 현재</string>
     <string name="shuffle">셔플</string>
     <string name="favorites_empty_body">영화, 시리즈 또는 에피소드에서 하트 아이콘을 선택하여 즐겨찾기에 추가하세요.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes 점수</string>
+    <string name="item_studios">스튜디오</string>
+    <string name="item_networks">방송사</string>
+    <string name="item_airs">방영: %1$s</string>
+    <string name="item_watch_count">%1$d× 시청함</string>
+    <string name="item_watch_count_last">%1$d× 시청함 · 마지막 시청 %2$s</string>
+    <string name="item_open_on">%1$s에서 열기</string>
+    <string name="item_trailer_number">예고편 %1$d</string>
+    <string name="item_extras">부가 영상</string>
+    <string name="item_included_in">포함된 컬렉션</string>
+    <string name="item_more_like_this">비슷한 콘텐츠</string>
 </resources>

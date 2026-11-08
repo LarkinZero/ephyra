@@ -80,4 +80,16 @@
     <string name="year_range_continuing">%1$d – günümüz</string>
     <string name="shuffle">Karışık</string>
     <string name="favorites_empty_body">Favorilerinize eklemek için herhangi bir film, dizi veya bölümdeki kalp simgesini seçin.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes puanı</string>
+    <string name="item_studios">Stüdyolar</string>
+    <string name="item_networks">Kanallar</string>
+    <string name="item_airs">Yayın: %1$s</string>
+    <string name="item_watch_count">%1$d× izlendi</string>
+    <string name="item_watch_count_last">%1$d× izlendi · son kez %2$s</string>
+    <string name="item_open_on">%1$s sitesinde aç</string>
+    <string name="item_trailer_number">Fragman %1$d</string>
+    <string name="item_extras">Ekstralar</string>
+    <string name="item_included_in">Dahil olduğu</string>
+    <string name="item_more_like_this">Buna benzer</string>
 </resources>

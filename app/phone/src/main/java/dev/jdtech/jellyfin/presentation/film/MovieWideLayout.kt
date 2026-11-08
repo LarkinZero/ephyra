@@ -40,6 +40,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemHeroHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -98,10 +99,11 @@ fun MovieWideLayout(
                                 movie.officialRating,
                             ),
                         communityRating = movie.communityRating,
+                        criticRating = movie.criticRating,
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        HeroChips { VideoMetadataBar(videoMetadata) }
+                        HeroChips { VideoMetadataBar(videoMetadata, is3D = movie.is3D) }
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -145,13 +147,19 @@ fun MovieWideLayout(
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
+                    movie.tagline?.let { tagline ->
+                        TaglineText(tagline)
+                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    }
                     OverviewText(text = movie.overview, maxCollapsedLines = 4)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     InfoText(
                         genres = movie.genres,
                         director = state.director,
                         writers = state.writers,
+                        studios = movie.studios,
                     )
+                    MovieWatchAndLinks(movie, onAction)
                 }
                 Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 if (state.actors.isNotEmpty()) {
@@ -162,7 +170,9 @@ fun MovieWideLayout(
                         },
                         contentPadding = rowPadding,
                     )
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
+                MovieRelatedRows(state = state, onAction = onAction, contentPadding = rowPadding)
                 Spacer(Modifier.height(safePadding.bottom + margin))
             }
         }

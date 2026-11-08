@@ -80,4 +80,16 @@
     <string name="year_range_continuing">%1$d – sekarang</string>
     <string name="shuffle">Acak</string>
     <string name="favorites_empty_body">Pilih ikon hati pada film, acara, atau episode apa pun untuk menambahkannya ke favorit.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Skor Rotten Tomatoes</string>
+    <string name="item_studios">Studio</string>
+    <string name="item_networks">Jaringan</string>
+    <string name="item_airs">Tayang %1$s</string>
+    <string name="item_watch_count">Ditonton %1$d×</string>
+    <string name="item_watch_count_last">Ditonton %1$d× · terakhir pada %2$s</string>
+    <string name="item_open_on">Buka di %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Ekstra</string>
+    <string name="item_included_in">Termasuk dalam</string>
+    <string name="item_more_like_this">Lainnya yang serupa</string>
 </resources>

@@ -80,4 +80,16 @@
     <string name="year_range_continuing">%1$d – 現在</string>
     <string name="shuffle">シャッフル</string>
     <string name="favorites_empty_body">映画、番組、またはエピソードのハートアイコンを選択して、お気に入りに追加します。</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes スコア</string>
+    <string name="item_studios">スタジオ</string>
+    <string name="item_networks">放送局</string>
+    <string name="item_airs">放送：%1$s</string>
+    <string name="item_watch_count">%1$d× 視聴済み</string>
+    <string name="item_watch_count_last">%1$d× 視聴済み · 最終視聴 %2$s</string>
+    <string name="item_open_on">%1$s で開く</string>
+    <string name="item_trailer_number">予告編 %1$d</string>
+    <string name="item_extras">特典映像</string>
+    <string name="item_included_in">収録コレクション</string>
+    <string name="item_more_like_this">似た作品</string>
 </resources>

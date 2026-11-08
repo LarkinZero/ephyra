@@ -83,4 +83,16 @@
     <string name="year_range_continuing">%1$d – napjainkig</string>
     <string name="shuffle">Véletlenszerű</string>
     <string name="favorites_empty_body">Válaszd a szív ikont bármely filmnél, sorozatnál vagy epizódnál a kedvencekhez adáshoz.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes-pontszám</string>
+    <string name="item_studios">Stúdiók</string>
+    <string name="item_networks">Csatornák</string>
+    <string name="item_airs">Adásban: %1$s</string>
+    <string name="item_watch_count">Megtekintve %1$d×</string>
+    <string name="item_watch_count_last">Megtekintve %1$d× · legutóbb %2$s</string>
+    <string name="item_open_on">Megnyitás itt: %1$s</string>
+    <string name="item_trailer_number">Előzetes %1$d</string>
+    <string name="item_extras">Extrák</string>
+    <string name="item_included_in">Része ennek</string>
+    <string name="item_more_like_this">Hasonlók</string>
 </resources>

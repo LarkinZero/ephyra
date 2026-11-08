@@ -89,4 +89,16 @@
     <string name="year_range_continuing">%1$d – obecnie</string>
     <string name="shuffle">Losowo</string>
     <string name="favorites_empty_body">Wybierz ikonę serca na dowolnym filmie, serialu lub odcinku, aby dodać go do ulubionych.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="item_studios">Studia</string>
+    <string name="item_networks">Stacje</string>
+    <string name="item_airs">Emisja: %1$s</string>
+    <string name="item_watch_count">Obejrzano %1$d×</string>
+    <string name="item_watch_count_last">Obejrzano %1$d× · ostatnio %2$s</string>
+    <string name="item_open_on">Otwórz w %1$s</string>
+    <string name="item_trailer_number">Zwiastun %1$d</string>
+    <string name="item_extras">Dodatki</string>
+    <string name="item_included_in">Należy do</string>
+    <string name="item_more_like_this">Więcej podobnych</string>
 </resources>

@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
+import dev.jdtech.jellyfin.film.presentation.RelatedItems
+import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.mergeDuplicateRoles
@@ -41,6 +44,8 @@ constructor(
     private lateinit var movieId: UUID
     private val reloadPolicy = ReloadPolicy(dataChanges)
     private var loadJob: Job? = null
+    private var relatedJob: Job? = null
+    private var relatedFor: UUID? = null
 
     /** Whether coming back to the screen needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(movieId: UUID, stopEventFollows: Boolean = false): Boolean =
@@ -50,6 +55,11 @@ constructor(
 
     fun loadMovie(movieId: UUID) {
         this.movieId = movieId
+        if (relatedFor != null && relatedFor != movieId) {
+            relatedJob?.cancel()
+            relatedFor = null
+            _state.update { it.copy(related = RelatedItems()) }
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             val token = reloadPolicy.begin()
@@ -83,6 +93,31 @@ constructor(
                 _state.emit(_state.value.copy(error = e))
             }
         }
+    }
+
+    /**
+     * CE (#332): the extras, collections and "More like this" rows, each from its own request. The
+     * page calls this once it has drawn the movie, so these requests never delay it; they are made
+     * once per movie, not again on every return to the page. Offline the repository has none.
+     */
+    fun loadRelated(movieId: UUID) {
+        val movie = _state.value.movie?.takeIf { it.id == movieId } ?: return
+        if (relatedFor == movieId) return
+        relatedFor = movieId
+        relatedJob?.cancel()
+        relatedJob =
+            viewModelScope.launchRelatedItems(
+                repository = repository,
+                itemId = movieId,
+                request =
+                    RelatedItemsRequest.forItem(
+                        localTrailerCount = movie.localTrailerCount,
+                        specialFeatureCount = movie.specialFeatureCount,
+                        collections = true,
+                    ),
+            ) { change ->
+                _state.update { it.copy(related = change(it.related)) }
+            }
     }
 
     private suspend fun getActors(item: FindroidMovie): List<FindroidItemPerson> {

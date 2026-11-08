@@ -83,4 +83,16 @@
     <string name="year_range_continuing">%1$d – oggi</string>
     <string name="shuffle">Casuale</string>
     <string name="favorites_empty_body">Seleziona l\'icona a forma di cuore su qualsiasi film, serie o episodio per aggiungerlo ai preferiti.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Punteggio Rotten Tomatoes</string>
+    <string name="item_studios">Studi</string>
+    <string name="item_networks">Reti</string>
+    <string name="item_airs">In onda %1$s</string>
+    <string name="item_watch_count">Visto %1$d×</string>
+    <string name="item_watch_count_last">Visto %1$d× · l\'ultima volta il %2$s</string>
+    <string name="item_open_on">Apri su %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Contenuti extra</string>
+    <string name="item_included_in">Incluso in</string>
+    <string name="item_more_like_this">Altri simili</string>
 </resources>
