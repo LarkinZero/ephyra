@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Final de este episodio</string>
     <string name="sleep_timer_pauses_in">Se pausará en %1$s</string>
+    <string name="player_up_next_play_now">Reproducir ahora</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Empieza en %d segundo</item>
+        <item quantity="other">Empieza en %d segundos</item>
+    </plurals>
 </resources>

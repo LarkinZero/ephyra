@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">इस एपिसोड के अंत में</string>
     <string name="sleep_timer_pauses_in">%1$s में रुकेगा</string>
+    <string name="player_up_next_play_now">अभी चलाएँ</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">%d सेकंड में शुरू होगा</item>
+        <item quantity="other">%d सेकंड में शुरू होगा</item>
+    </plurals>
 </resources>

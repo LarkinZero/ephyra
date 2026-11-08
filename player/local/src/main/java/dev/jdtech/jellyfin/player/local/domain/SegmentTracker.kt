@@ -115,6 +115,15 @@ class SegmentTracker(
         return if (closesItem) SkipTarget.NextItem else SkipTarget.SeekTo(segment.endTicks)
     }
 
+    /**
+     * CE (#272): where the outro that closes the item starts (one whose skip goes to the next
+     * item, see [skipTarget]), whatever its action is set to. Null when there is none.
+     */
+    fun closingOutroStartMs(durationMs: Long, hasNextItem: Boolean): Long? =
+        segments
+            .filter { skipTarget(it, durationMs, hasNextItem) == SkipTarget.NextItem }
+            .minOfOrNull { it.startTicks }
+
     companion object {
         /** A segment stops counting this long before its end. */
         const val END_MARGIN_MS = 100L

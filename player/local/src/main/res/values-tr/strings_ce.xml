@@ -21,4 +21,9 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Bu bölümün sonu</string>
     <string name="sleep_timer_pauses_in">%1$s sonra duraklatılır</string>
+    <string name="player_up_next_play_now">Şimdi oynat</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">%d saniye içinde başlıyor</item>
+        <item quantity="other">%d saniye içinde başlıyor</item>
+    </plurals>
 </resources>

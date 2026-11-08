@@ -23,4 +23,11 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Konec te epizode</string>
     <string name="sleep_timer_pauses_in">Premor čez %1$s</string>
+    <string name="player_up_next_play_now">Predvajaj zdaj</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Začne se čez %d sekundo</item>
+        <item quantity="two">Začne se čez %d sekundi</item>
+        <item quantity="few">Začne se čez %d sekunde</item>
+        <item quantity="other">Začne se čez %d sekund</item>
+    </plurals>
 </resources>

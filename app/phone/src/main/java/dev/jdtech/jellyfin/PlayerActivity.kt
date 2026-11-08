@@ -35,6 +35,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -62,6 +63,7 @@ import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
+import dev.jdtech.jellyfin.presentation.player.PlayerUpNextCard
 import dev.jdtech.jellyfin.presentation.player.QualitySelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SleepTimerDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
@@ -285,6 +287,16 @@ class PlayerActivity : BasePlayerActivity() {
     private lateinit var episodesButton: ImageButton
     private lateinit var episodesSpace: Space
 
+    /**
+     * CE (#272): the "Up next" card may show: not in picture-in-picture, where it would cover the
+     * small window, nor with the controls locked, where its buttons would get round the lock.
+     */
+    private val upNextCardAllowed = mutableStateOf(true)
+
+    private fun updateUpNextCardAllowed() {
+        upNextCardAllowed.value = !isInPictureInPictureMode && !isControlsLocked
+    }
+
     /** The controls' hide timeout, paused (0) while the sheet is open. */
     private var controlsHideTimeoutMs = 0
 
@@ -388,6 +400,8 @@ class PlayerActivity : BasePlayerActivity() {
         skipSegmentButton.isVisible =
             segment != null &&
                 !isInPictureInPictureMode &&
+                // CE (#272): the "Up next" card has its own Play now.
+                viewModel.upNext.value == null &&
                 (uiState.skipButtonInWindow || binding.playerView.isControllerFullyVisible)
     }
 
@@ -481,6 +495,20 @@ class PlayerActivity : BasePlayerActivity() {
         episodesSpace = binding.playerView.findViewById(R.id.space_episodes)
         controlsHideTimeoutMs = binding.playerView.controllerShowTimeoutMs
         onBackPressedDispatcher.addCallback(this, episodeSheetBackCallback)
+
+        // CE (#272): the "Up next" card, over the video whether or not the controls show.
+        updateUpNextCardAllowed()
+        binding.upNextCard.setContent {
+            FindroidTheme(darkTheme = true) {
+                val upNext by viewModel.upNext.collectAsStateWithLifecycle()
+                PlayerUpNextCard(
+                    state = upNext,
+                    visible = upNextCardAllowed.value,
+                    onPlayNow = viewModel::playUpNextNow,
+                    onCancel = viewModel::cancelUpNext,
+                )
+            }
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -616,6 +644,11 @@ class PlayerActivity : BasePlayerActivity() {
                     }
                 }
 
+                // CE (#272): the skip button gives way to the "Up next" card.
+                launch {
+                    viewModel.upNext.collect { updateSkipSegmentButton(viewModel.uiState.value) }
+                }
+
                 // CE (#298): the sleep timer button shows when it runs and how long is left.
                 launch {
                     val activeTint =
@@ -713,6 +746,7 @@ class PlayerActivity : BasePlayerActivity() {
             lockedLayout.visibility = View.VISIBLE
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
             isControlsLocked = true
+            updateUpNextCardAllowed()
         }
 
         unlockButton.setOnClickListener {
@@ -720,6 +754,7 @@ class PlayerActivity : BasePlayerActivity() {
             lockedLayout.visibility = View.GONE
             requestedOrientation = playerOrientation
             isControlsLocked = false
+            updateUpNextCardAllowed()
         }
 
         // CE (R8): the L key presses whichever of the two is showing.
@@ -1135,6 +1170,7 @@ class PlayerActivity : BasePlayerActivity() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.isInPictureInPictureMode = isInPictureInPictureMode
+        updateUpNextCardAllowed()
         applyTabletopLayout()
         updateEpisodesButton()
         when (isInPictureInPictureMode) {

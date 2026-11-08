@@ -20,4 +20,8 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Bu seriyanın sonu</string>
     <string name="sleep_timer_pauses_in">%1$s sonra fasilə</string>
+    <string name="player_up_next_play_now">İndi oynat</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="other">%d saniyəyə başlayır</item>
+    </plurals>
 </resources>

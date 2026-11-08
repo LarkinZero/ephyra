@@ -23,4 +23,11 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Konec této epizody</string>
     <string name="sleep_timer_pauses_in">Pozastaví se za %1$s</string>
+    <string name="player_up_next_play_now">Přehrát hned</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">Začne za %d sekundu</item>
+        <item quantity="few">Začne za %d sekundy</item>
+        <item quantity="many">Začne za %d sekundy</item>
+        <item quantity="other">Začne za %d sekund</item>
+    </plurals>
 </resources>

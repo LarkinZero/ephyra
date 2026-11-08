@@ -22,4 +22,10 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">סוף הפרק הזה</string>
     <string name="sleep_timer_pauses_in">השהיה בעוד %1$s</string>
+    <string name="player_up_next_play_now">הפעלה עכשיו</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="one">מתחיל בעוד %d שנייה</item>
+        <item quantity="two">מתחיל בעוד %d שניות</item>
+        <item quantity="other">מתחיל בעוד %d שניות</item>
+    </plurals>
 </resources>

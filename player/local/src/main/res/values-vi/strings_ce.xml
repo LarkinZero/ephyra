@@ -20,4 +20,8 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">Hết tập này</string>
     <string name="sleep_timer_pauses_in">Tạm dừng sau %1$s</string>
+    <string name="player_up_next_play_now">Phát ngay</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="other">Bắt đầu sau %d giây</item>
+    </plurals>
 </resources>

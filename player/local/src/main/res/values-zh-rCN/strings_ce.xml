@@ -20,4 +20,8 @@
     </plurals>
     <string name="sleep_timer_end_of_episode">本集结束时</string>
     <string name="sleep_timer_pauses_in">%1$s 后暂停</string>
+    <string name="player_up_next_play_now">立即播放</string>
+    <plurals name="player_up_next_starts_in">
+        <item quantity="other">%d 秒后开始</item>
+    </plurals>
 </resources>

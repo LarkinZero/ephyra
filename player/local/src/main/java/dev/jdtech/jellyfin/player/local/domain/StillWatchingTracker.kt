@@ -41,6 +41,16 @@ class StillWatchingTracker(
         return shouldPrompt(nowMs)
     }
 
+    /**
+     * CE (#272): what [onAutoAdvance] would return now, without counting the advance. The "Up
+     * next" card stays away when the prompt is going to take the end of the item.
+     */
+    fun wouldPromptOnAutoAdvance(nowMs: Long): Boolean {
+        val autoAdvanceTripped =
+            autoAdvanceThreshold != OFF && autoAdvanceCount + 1 >= autoAdvanceThreshold
+        return autoAdvanceTripped || shouldPrompt(nowMs)
+    }
+
     /** True if either threshold has been crossed. */
     fun shouldPrompt(nowMs: Long): Boolean {
         val autoAdvanceTripped =

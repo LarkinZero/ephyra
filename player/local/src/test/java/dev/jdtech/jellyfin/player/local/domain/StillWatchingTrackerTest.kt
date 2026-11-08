@@ -112,6 +112,25 @@ class StillWatchingTrackerTest {
         assertFalse(tracker.shouldPrompt(nowMs = 200_000L))
     }
 
+    @Test
+    fun `wouldPromptOnAutoAdvance looks ahead without counting`() {
+        val tracker = StillWatchingTracker(autoAdvanceThreshold = 2, inactivityThresholdMs = OFF)
+        tracker.reset(nowMs = 0L)
+        assertFalse(tracker.wouldPromptOnAutoAdvance(nowMs = 0L))
+        assertFalse(tracker.onAutoAdvance(nowMs = 0L))
+        assertTrue(tracker.wouldPromptOnAutoAdvance(nowMs = 0L))
+        assertTrue(tracker.wouldPromptOnAutoAdvance(nowMs = 0L))
+        assertEquals(1, tracker.currentAutoAdvanceCount)
+    }
+
+    @Test
+    fun `wouldPromptOnAutoAdvance follows inactivity`() {
+        val tracker = StillWatchingTracker(autoAdvanceThreshold = 0, inactivityThresholdMs = 60_000L)
+        tracker.reset(nowMs = 0L)
+        assertFalse(tracker.wouldPromptOnAutoAdvance(nowMs = 59_999L))
+        assertTrue(tracker.wouldPromptOnAutoAdvance(nowMs = 60_000L))
+    }
+
     private companion object {
         private const val OFF: Long = StillWatchingTracker.OFF_MS
     }
