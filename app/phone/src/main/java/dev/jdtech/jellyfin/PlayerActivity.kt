@@ -29,6 +29,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Space
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.core.MutableTransitionState
@@ -52,6 +53,7 @@ import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
+import dev.jdtech.jellyfin.player.local.R as PlayerR
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
@@ -590,7 +592,14 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             is PlayerEvents.PlayerError -> {
-                                // Error is already logged in PlayerViewModel
+                                // Logged in PlayerViewModel. Without this the player sat there
+                                // without a word after a stream failed to open (#306).
+                                Toast.makeText(
+                                        this@PlayerActivity,
+                                        PlayerR.string.player_error_title,
+                                        Toast.LENGTH_LONG,
+                                    )
+                                    .show()
                             }
                         }
                     }

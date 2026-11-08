@@ -95,6 +95,20 @@ class MPVPlayer(
             }
         }
 
+    /**
+     * mpv's END_FILE carries a reason, but the JNI layer only passes the event id. A file that
+     * fails to open logs an error first and never reaches FILE_LOADED, so that is the signal.
+     * Log messages come from the same mpv event loop as the events, so posting keeps their order.
+     */
+    private val logObserver =
+        object : MPVLib.LogObserver {
+            override fun logMessage(prefix: String, level: Int, text: String) {
+                if (level <= MPVLib.MpvLogLevel.MPV_LOG_LEVEL_ERROR) {
+                    post { lastLoadError = "$prefix: ${text.trim()}" }
+                }
+            }
+        }
+
     private constructor(
         builder: Builder
     ) : this(
@@ -239,6 +253,7 @@ class MPVPlayer(
         mpvLib.init()
 
         mpvLib.addObserver(this)
+        mpvLib.addLogObserver(logObserver)
 
         // Observe properties
         data class Property(val name: String, val format: Int)
@@ -365,6 +380,19 @@ class MPVPlayer(
     private var startPassedToLoadMs: Long? = null
     private var oldMediaItem: MediaItem? = null
     private var notifiedAvailableCommands: Commands = Commands.EMPTY
+    private var playerError: PlaybackException? = null
+
+    /** Whether mpv got as far as FILE_LOADED for the file it started last. */
+    private var fileLoaded = false
+
+    /**
+     * Set when this player replaces, removes or stops mpv's current file, so the END_FILE that
+     * follows is not taken for a failure. Cleared when mpv starts the next file.
+     */
+    private var endFileExpected = false
+
+    /** The last error mpv logged since it started the current file. */
+    private var lastLoadError: String? = null
 
     // mpv events
 
@@ -533,6 +561,9 @@ class MPVPlayer(
         post {
             when (eventId) {
                 MpvEvent.MPV_EVENT_START_FILE -> {
+                    fileLoaded = false
+                    endFileExpected = false
+                    lastLoadError = null
                     if (!isPlayerReady) {
                         for (command in initialCommands) {
                             mpvLib.command(command)
@@ -540,6 +571,7 @@ class MPVPlayer(
                     }
                 }
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
+                    fileLoaded = true
                     isSeekable = mpvLib.getPropertyBoolean("seekable") == true
                     currentDurationMs =
                         (mpvLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
@@ -581,9 +613,38 @@ class MPVPlayer(
                         setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
                     }
                 }
+                MpvEvent.MPV_EVENT_END_FILE -> {
+                    val error = lastLoadError
+                    lastLoadError = null
+                    if (!fileLoaded && !endFileExpected && error != null) onLoadError(error)
+                }
                 else -> Unit
             }
         }
+    }
+
+    /**
+     * mpv could not open the current file. Reported like ExoPlayer does: the error, then IDLE, with
+     * playWhenReady kept. mpv moves on to the next playlist entry by itself after a failure, so it
+     * is stopped here; prepare() loads the playlist again.
+     */
+    private fun onLoadError(message: String) {
+        Timber.e("mpv could not open the file: $message")
+        val errorCode =
+            if (message.contains("recognize file format")) {
+                PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
+            } else {
+                PlaybackException.ERROR_CODE_IO_UNSPECIFIED
+            }
+        val error = PlaybackException(message, null, errorCode)
+        playerError = error
+        endFileExpected = true
+        mpvLib.command(arrayOf("stop", "keep-playlist"))
+        listeners.queueEvent(EVENT_PLAYER_ERROR) { listener ->
+            listener.onPlayerErrorChanged(error)
+            listener.onPlayerError(error)
+        }
+        setPlayerStateAndNotifyIfChanged(playbackState = STATE_IDLE)
     }
 
     /** The broadcast only matters while playing, so it is only received then. */
@@ -824,9 +885,11 @@ class MPVPlayer(
      *   [.getCurrentWindowIndex] and [.getCurrentPosition].
      */
     override fun setMediaItems(mediaItems: MutableList<MediaItem>, resetPosition: Boolean) {
+        endFileExpected = true
         mpvLib.command(arrayOf("playlist-clear"))
         mpvLib.command(arrayOf("playlist-remove", "current"))
-        internalMediaItems = mediaItems
+        // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
+        internalMediaItems = mediaItems.toMutableList()
     }
 
     /**
@@ -847,9 +910,11 @@ class MPVPlayer(
         startWindowIndex: Int,
         startPositionMs: Long,
     ) {
+        endFileExpected = true
         mpvLib.command(arrayOf("playlist-clear"))
         mpvLib.command(arrayOf("playlist-remove", "current"))
-        internalMediaItems = mediaItems
+        // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
+        internalMediaItems = mediaItems.toMutableList()
         // The old playlist is gone, so the tracked index no longer refers to
         // anything. prepare() loads the new index 0 with "replace", making 0
         // the effective playing position; without this reset a stale index
@@ -868,16 +933,22 @@ class MPVPlayer(
      * @param mediaItems The [MediaItems][MediaItem] to add.
      */
     override fun addMediaItems(index: Int, mediaItems: MutableList<MediaItem>) {
-        internalMediaItems.addAll(index, mediaItems)
+        // BasePlayer.addMediaItem(item) passes Int.MAX_VALUE for "at the end".
+        val insertAt = index.coerceIn(0, internalMediaItems.size)
+        internalMediaItems.addAll(insertAt, mediaItems)
         mediaItems.forEachIndexed { offset, mediaItem ->
             mpvLib.command(
                 arrayOf(
                     "loadfile",
                     "${mediaItem.localConfiguration?.uri}",
                     "insert-at",
-                    (index + offset).toString(),
+                    (insertAt + offset).toString(),
                 )
             )
+        }
+        // mpv's playlist-current-pos follows, but the index is needed right away by callers.
+        if (insertAt <= currentMediaItemIndex && internalMediaItems.size > mediaItems.size) {
+            currentMediaItemIndex += mediaItems.size
         }
     }
 
@@ -891,7 +962,8 @@ class MPVPlayer(
      *   to the end of the playlist.
      */
     override fun moveMediaItems(fromIndex: Int, toIndex: Int, newIndex: Int) {
-        TODO("Not yet implemented")
+        // Not supported. COMMAND_CHANGE_MEDIA_ITEMS is not advertised, so no controller calls it.
+        Timber.w("MPVPlayer does not support moveMediaItems")
     }
 
     override fun replaceMediaItems(
@@ -899,7 +971,8 @@ class MPVPlayer(
         toIndex: Int,
         mediaItems: MutableList<MediaItem>,
     ) {
-        TODO("Not yet implemented")
+        // Not supported, as moveMediaItems.
+        Timber.w("MPVPlayer does not support replaceMediaItems")
     }
 
     /**
@@ -910,7 +983,32 @@ class MPVPlayer(
      *   than the size of the playlist, media items to the end of the playlist are removed.
      */
     override fun removeMediaItems(fromIndex: Int, toIndex: Int) {
-        TODO("Not yet implemented")
+        // clearMediaItems() passes Int.MAX_VALUE.
+        val end = toIndex.coerceAtMost(internalMediaItems.size)
+        if (fromIndex < 0 || fromIndex >= end) return
+        val removesCurrent = currentMediaItemIndex in fromIndex until end
+        if (removesCurrent) endFileExpected = true
+        // From the end, so the indexes of the entries still to remove don't move.
+        for (index in end - 1 downTo fromIndex) {
+            mpvLib.command(arrayOf("playlist-remove", "$index"))
+        }
+        internalMediaItems.subList(fromIndex, end).clear()
+        when {
+            internalMediaItems.isEmpty() -> {
+                currentMediaItemIndex = 0
+                setPlayerStateAndNotifyIfChanged(playbackState = STATE_ENDED)
+            }
+            // mpv plays the entry after the removed one, or stops after the last one.
+            removesCurrent -> {
+                currentMediaItemIndex = fromIndex.coerceAtMost(internalMediaItems.size - 1)
+                if (fromIndex < internalMediaItems.size) {
+                    setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
+                } else {
+                    setPlayerStateAndNotifyIfChanged(playbackState = STATE_ENDED)
+                }
+            }
+            currentMediaItemIndex >= end -> currentMediaItemIndex -= end - fromIndex
+        }
     }
 
     /**
@@ -986,6 +1084,13 @@ class MPVPlayer(
 
     /** Prepares the player. */
     override fun prepare() {
+        if (playerError != null) {
+            playerError = null
+            listeners.sendEvent(EVENT_PLAYER_ERROR) { listener ->
+                listener.onPlayerErrorChanged(null)
+            }
+        }
+        endFileExpected = true
         startPassedToLoadMs = null
         internalMediaItems.forEachIndexed { index, mediaItem ->
             val uri = "${mediaItem.localConfiguration?.uri}"
@@ -1034,7 +1139,7 @@ class MPVPlayer(
      * @see Player.Listener.onPlayerError
      */
     override fun getPlayerError(): PlaybackException? {
-        return null
+        return playerError
     }
 
     /**
@@ -1114,7 +1219,8 @@ class MPVPlayer(
      * @param shuffleModeEnabled Whether shuffling is enabled.
      */
     override fun setShuffleModeEnabled(shuffleModeEnabled: Boolean) {
-        TODO("Not yet implemented")
+        // Not supported; COMMAND_SET_SHUFFLE_MODE is not advertised.
+        Timber.w("MPVPlayer does not support shuffle")
     }
 
     /**
@@ -1252,6 +1358,7 @@ class MPVPlayer(
             // duplicate
             // external subtitle entries.
             if (currentMediaItemIndex != index) {
+                endFileExpected = true
                 mpvLib.command(arrayOf("playlist-play-index", "$index"))
             }
             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
@@ -1296,6 +1403,7 @@ class MPVPlayer(
     }
 
     override fun stop() {
+        endFileExpected = true
         mpvLib.command(arrayOf("stop", "keep-playlist"))
     }
 
@@ -1317,6 +1425,7 @@ class MPVPlayer(
         setBecomingNoisyRegistered(false)
         resetInternalState()
         mpvLib.removeObserver(this)
+        mpvLib.removeLogObserver(logObserver)
         // Events mpv posted before removeObserver would otherwise still run, after destroy().
         handler.removeCallbacksAndMessages(null)
         listeners.release()
@@ -1379,7 +1488,8 @@ class MPVPlayer(
     }
 
     override fun setPlaylistMetadata(mediaMetadata: MediaMetadata) {
-        TODO("Not yet implemented")
+        // Not supported; COMMAND_SET_PLAYLIST_METADATA is not advertised.
+        Timber.w("MPVPlayer does not support playlist metadata")
     }
 
     /**
@@ -1484,7 +1594,8 @@ class MPVPlayer(
      * @param audioVolume Linear output gain to apply to all audio channels.
      */
     override fun setVolume(audioVolume: Float) {
-        TODO("Not yet implemented")
+        // Not supported; COMMAND_SET_VOLUME is not advertised.
+        Timber.w("MPVPlayer does not support setVolume")
     }
 
     /**
@@ -1501,7 +1612,8 @@ class MPVPlayer(
      * player.
      */
     override fun clearVideoSurface() {
-        TODO("Not yet implemented")
+        // Only SurfaceView and SurfaceHolder are supported, see setVideoSurfaceHolder.
+        Timber.w("MPVPlayer does not support clearVideoSurface")
     }
 
     /**
@@ -1511,7 +1623,8 @@ class MPVPlayer(
      * @param surface The surface to clear.
      */
     override fun clearVideoSurface(surface: Surface?) {
-        TODO("Not yet implemented")
+        // Only SurfaceView and SurfaceHolder are supported, see setVideoSurfaceHolder.
+        Timber.w("MPVPlayer does not support clearVideoSurface")
     }
 
     /**
@@ -1527,7 +1640,8 @@ class MPVPlayer(
      * @param surface The [Surface].
      */
     override fun setVideoSurface(surface: Surface?) {
-        TODO("Not yet implemented")
+        // Only SurfaceView and SurfaceHolder are supported, see setVideoSurfaceHolder.
+        Timber.w("MPVPlayer does not support setVideoSurface, no video will show")
     }
 
     /**
@@ -1537,7 +1651,8 @@ class MPVPlayer(
      * @param surfaceHolder The surface holder.
      */
     override fun setVideoSurfaceHolder(surfaceHolder: SurfaceHolder?) {
-        TODO("Not yet implemented")
+        if (released) return
+        surfaceHolder?.addCallback(this.surfaceHolder)
     }
 
     /**
@@ -1547,7 +1662,7 @@ class MPVPlayer(
      * @param surfaceHolder The surface holder to clear.
      */
     override fun clearVideoSurfaceHolder(surfaceHolder: SurfaceHolder?) {
-        TODO("Not yet implemented")
+        surfaceHolder?.removeCallback(this.surfaceHolder)
     }
 
     /**
@@ -1578,7 +1693,10 @@ class MPVPlayer(
      * @param textureView The texture view.
      */
     override fun setVideoTextureView(textureView: TextureView?) {
-        TODO("Not yet implemented")
+        // Not supported. COMMAND_SET_VIDEO_SURFACE stays advertised because PlayerView only
+        // calls setVideoSurfaceView with it, so a PlayerView with surface_type="texture_view"
+        // gets no video instead of a crash.
+        Timber.w("MPVPlayer does not support TextureView, no video will show")
     }
 
     /**
@@ -1588,7 +1706,7 @@ class MPVPlayer(
      * @param textureView The texture view to clear.
      */
     override fun clearVideoTextureView(textureView: TextureView?) {
-        TODO("Not yet implemented")
+        // Not supported, see setVideoTextureView.
     }
 
     /**
@@ -1714,7 +1832,8 @@ class MPVPlayer(
     }
 
     override fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) {
-        TODO("Not yet implemented")
+        // Not supported; the attributes are fixed by the builder.
+        Timber.w("MPVPlayer does not support setAudioAttributes")
     }
 
     private fun applyFrameRateToSurface(surface: Surface?, frameRate: Float) {
@@ -1822,8 +1941,7 @@ class MPVPlayer(
                     COMMAND_GET_TIMELINE,
                     COMMAND_GET_METADATA,
                     COMMAND_GET_AUDIO_ATTRIBUTES,
-                    // Not COMMAND_CHANGE_MEDIA_ITEMS: move, replace and remove are TODO() stubs,
-                    // and with the queue published a controller could remove an item. The app
+                    // Not COMMAND_CHANGE_MEDIA_ITEMS: move and replace are not supported. The app
                     // calls addMediaItems directly, which does not check commands.
                     COMMAND_SET_VIDEO_SURFACE,
                     COMMAND_GET_TRACKS,
