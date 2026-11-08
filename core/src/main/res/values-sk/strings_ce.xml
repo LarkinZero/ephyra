@@ -86,4 +86,5 @@
     <string name="year_range_continuing">%1$d – súčasnosť</string>
     <string name="shuffle">Náhodne</string>
     <string name="favorites_empty_body">Vyberte ikonu srdca na ktoromkoľvek filme, seriáli alebo epizóde a pridajte ich medzi obľúbené.</string>
+    <string name="ce_session_revoked">%1$s vás odhlásil. Ak chcete pokračovať, znova sa prihláste.</string>
 </resources>

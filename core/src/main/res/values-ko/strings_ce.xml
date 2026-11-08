@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – 현재</string>
     <string name="shuffle">셔플</string>
     <string name="favorites_empty_body">영화, 시리즈 또는 에피소드에서 하트 아이콘을 선택하여 즐겨찾기에 추가하세요.</string>
+    <string name="ce_session_revoked">%1$s에서 로그아웃되었습니다. 계속하려면 다시 로그인하세요.</string>
 </resources>

@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – actualitat</string>
     <string name="shuffle">Aleatori</string>
     <string name="favorites_empty_body">Seleccioneu la icona del cor a qualsevol pel·lícula, sèrie o episodi per afegir-lo als preferits.</string>
+    <string name="ce_session_revoked">%1$s ha tancat la teva sessió. Torna a iniciar la sessió per continuar.</string>
 </resources>

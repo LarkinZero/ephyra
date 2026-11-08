@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – heden</string>
     <string name="shuffle">Shuffle</string>
     <string name="favorites_empty_body">Kies het hartje bij een film, serie of aflevering om favorieten toe te voegen.</string>
+    <string name="ce_session_revoked">%1$s heeft je afgemeld. Meld je opnieuw aan om verder te gaan.</string>
 </resources>

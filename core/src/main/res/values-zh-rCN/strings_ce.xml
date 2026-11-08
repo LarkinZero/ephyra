@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – 至今</string>
     <string name="shuffle">随机播放</string>
     <string name="favorites_empty_body">在任何电影、剧集或单集上选择心形图标以将其添加到收藏夹。</string>
+    <string name="ce_session_revoked">%1$s 已将你退出登录。请重新登录以继续。</string>
 </resources>

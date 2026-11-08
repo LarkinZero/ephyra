@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – अब तक</string>
     <string name="shuffle">फेरबदल</string>
     <string name="favorites_empty_body">अपनी पसंदीदा सूची में जोड़ने के लिए किसी भी फ़िल्म, शो या एपिसोड पर दिल के निशान को चुनें।</string>
+    <string name="ce_session_revoked">%1$s ने आपको साइन आउट कर दिया। जारी रखने के लिए फिर से साइन इन करें।</string>
 </resources>

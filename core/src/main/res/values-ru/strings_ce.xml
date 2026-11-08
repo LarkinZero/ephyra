@@ -89,4 +89,5 @@
     <string name="year_range_continuing">%1$d – наст. время</string>
     <string name="shuffle">Перемешать</string>
     <string name="favorites_empty_body">Выберите значок сердца у любого фильма, сериала или эпизода, чтобы добавить его в избранное.</string>
+    <string name="ce_session_revoked">%1$s завершил ваш сеанс. Войдите снова, чтобы продолжить.</string>
 </resources>

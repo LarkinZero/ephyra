@@ -80,4 +80,5 @@
     <string name="year_range_continuing">%1$d – sekarang</string>
     <string name="shuffle">Acak</string>
     <string name="favorites_empty_body">Pilih ikon hati pada film, acara, atau episode apa pun untuk menambahkannya ke favorit.</string>
+    <string name="ce_session_revoked">%1$s mengeluarkan Anda. Masuk lagi untuk melanjutkan.</string>
 </resources>

@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – presente</string>
     <string name="shuffle">Aleatorio</string>
     <string name="favorites_empty_body">Selecciona el icono de corazón en cualquier película, serie o episodio para agregarlo a tus favoritos.</string>
+    <string name="ce_session_revoked">%1$s cerró tu sesión. Vuelve a iniciar sesión para continuar.</string>
 </resources>

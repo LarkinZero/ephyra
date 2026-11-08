@@ -83,4 +83,5 @@
     <string name="year_range_continuing">%1$d – heute</string>
     <string name="shuffle">Zufallswiedergabe</string>
     <string name="favorites_empty_body">Wähle das Herzsymbol bei einem Film, einer Serie oder Folge, um sie zu deinen Favoriten hinzuzufügen.</string>
+    <string name="ce_session_revoked">%1$s hat dich abgemeldet. Melde dich erneut an, um fortzufahren.</string>
 </resources>
