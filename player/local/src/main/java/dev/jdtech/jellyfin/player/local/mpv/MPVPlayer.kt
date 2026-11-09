@@ -428,20 +428,12 @@ class MPVPlayer(
                     val hadVideo = currentTracks.isTypeSelected(C.TRACK_TYPE_VIDEO)
                     val newTracks = getTracks(value)
                     currentTracks = newTracks
-                    if (matchRefreshRate) {
-                        for (group in newTracks.groups) {
-                            if (group.type == C.TRACK_TYPE_VIDEO) {
-                                for (i in 0 until group.length) {
-                                    val format = group.getTrackFormat(i)
-                                    val fps = format.frameRate
-                                    if (fps > 0f && !fps.isNaN()) {
-                                        currentFrameRate = fps
-                                        applyFrameRateToSurface(currentSurface, fps)
-                                        break
-                                    }
-                                }
-                            }
-                        }
+                    // The selected video track's frame rate, not the last video group's:
+                    // mpv also lists attached pictures as 1fps video tracks.
+                    val fps = selectedVideoFrameRate(newTracks)
+                    if (fps != null) {
+                        currentFrameRate = fps
+                        applyFrameRateToSurface(currentSurface, fps)
                     }
                     listeners.sendEvent(EVENT_TRACKS_CHANGED) { listener ->
                         listener.onTracksChanged(currentTracks)
@@ -1457,9 +1449,7 @@ class MPVPlayer(
      */
     override fun release() {
         if (released) return
-        if (matchRefreshRate) {
-            applyFrameRateToSurface(currentSurface, 0f)
-        }
+        applyFrameRateToSurface(currentSurface, 0f)
         // Detach while mpv still exists; surfaceDestroyed comes later and is a no-op then.
         if (currentSurface != null) detachVideoSurface()
         currentSurface = null
@@ -1882,18 +1872,30 @@ class MPVPlayer(
         Timber.w("MPVPlayer does not support setAudioAttributes")
     }
 
+
+    /**
+     * Hints the surface with the video frame rate so the OS can pick a matching display rate,
+     * as ExoPlayer does by default (fixed source: an exact match or a multiple, so the OS does
+     * not settle on a rate like 20Hz for 23.976fps). Seamless switches only (a 120Hz phone panel
+     * dropping to 48Hz for 24fps, #338) unless the TV "match refresh rate" setting is on, which
+     * also allows a visible mode switch.
+     */
     private fun applyFrameRateToSurface(surface: Surface?, frameRate: Float) {
-        if (!matchRefreshRate || surface == null || !surface.isValid) return
+        if (surface == null || !surface.isValid) return
+        Timber.d("Surface frame rate hint: ${frameRate}fps (force=$matchRefreshRate)")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val strategy =
+                        if (matchRefreshRate) Surface.CHANGE_FRAME_RATE_ALWAYS
+                        else Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
                     surface.setFrameRate(
                         frameRate,
-                        Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
-                        Surface.CHANGE_FRAME_RATE_ALWAYS,
+                        Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                        strategy,
                     )
                 } else {
-                    surface.setFrameRate(frameRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT)
+                    surface.setFrameRate(frameRate, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Failed to set surface frame rate")
@@ -1931,7 +1933,7 @@ class MPVPlayer(
             override fun surfaceCreated(holder: SurfaceHolder) {
                 if (released) return
                 currentSurface = holder.surface
-                if (matchRefreshRate && currentFrameRate > 0f) {
+                if (currentFrameRate > 0f) {
                     applyFrameRateToSurface(holder.surface, currentFrameRate)
                 }
                 mpvLib.attachSurface(holder.surface)
@@ -1970,9 +1972,7 @@ class MPVPlayer(
             override fun surfaceDestroyed(holder: SurfaceHolder) {
                 // release() detached the surface already.
                 if (released) return
-                if (matchRefreshRate) {
-                    applyFrameRateToSurface(holder.surface, 0f)
-                }
+                applyFrameRateToSurface(holder.surface, 0f)
                 currentSurface = null
                 detachVideoSurface()
             }

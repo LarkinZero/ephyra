@@ -434,16 +434,13 @@ constructor(
                             DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
                         )
                         .setMediaCodecSelector(audioDecoderFallback)
-                val matchRefreshRate =
-                    appPreferences.getValue(appPreferences.playerTvMatchRefreshRate)
-                val videoChangeFrameRateStrategy =
-                    if (matchRefreshRate) {
-                        C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS
-                    } else {
-                        C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF
-                    }
+                // Keep ExoPlayer's default frame rate strategy (ONLY_IF_SEAMLESS): it hints
+                // the surface with the video frame rate so the OS can drop a 120Hz phone
+                // panel to a multiple of 24fps, as upstream does. Forcing it OFF when the
+                // TV-only "match refresh rate" setting is unset left phones at their
+                // maximum rate for the whole playback (#338). The TV setting only drives
+                // the non-seamless mode switch in DisplayRefreshRateManager.
                 ExoPlayer.Builder(application, renderersFactory)
-                    .setVideoChangeFrameRateStrategy(videoChangeFrameRateStrategy)
                     .setAudioAttributes(audioAttributes, true)
                     .setHandleAudioBecomingNoisy(true)
                     .setMediaSourceFactory(
