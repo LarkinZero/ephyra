@@ -78,18 +78,20 @@ The core of the design. Today's page is one column under a header; it stays that
 ┌──────────────────────────────────────────────────────────────┐
 │ ← ⌂                      backdrop (full width)               │  height: see below
 │                                                              │
-│          ┌────────┐  Title                            (chips)│
-│          │ poster │  2016 · 97 mins · NR · ★ 7.2             │  ← bottom third of the hero,
-│          │        │  ▶ Play   ⟲  ✓  ♡  ⤓                     │     over the scrim
-│          └────────┘  Overview, 4 lines, "more"…               │
+│          ┌────────┐                                          │
+├──────────│ poster │──────────────────────────────────────────┤  ← backdrop fades into the page
+│          │        │  Title                            (chips)│
+│          └────────┘  2016 · 97 mins · NR · ★ 7.2             │  ← below the backdrop, on the
+│                      ▶ Play   ⟲  ✓  ♡  ⤓                     │     page background
+│                      Overview, 4 lines, "more"…               │
 │                      Genres · Director · Writers             │
 ├──────────────────────────────────────────────────────────────┤
 │ Next Up (show) / Seasons (show) / Cast & crew / Similar      │  rows, full width
 └──────────────────────────────────────────────────────────────┘
 ```
 
-- **Hero height**: `max(320 dp, min(width × 9/16, window height × 0.55))` at medium and expanded; compact keeps 288 dp. The backdrop is `ContentScale.Crop` with the focal point at the top centre (faces are usually in the upper half), and a `scrimOverArt` gradient from the bottom **and** from the left edge (0 → 60 %) so white text reads over any art (VISION §3.4: text on artwork is white).
-- **Header row** sits in the bottom part of the hero, `Layout.margin` from the left edge: poster (`posterInHeader` wide, 2:3; for an episode a 16:9 still instead, 1.6 × that width) then a column capped at `textMaxWidth`: title (`headlineLarge` at expanded, `headlineMedium` at medium), original title, metadata line, chips, `ItemButtonsBar` (already compact at 600 dp+), overview collapsed to 4 lines with "more", then genres / director / writers. The column is the stop-gap 720 dp column, moved into the hero.
+- **Hero height**: `max(320 dp, min(width × 9/16, window height × 0.45))` at medium and expanded; compact keeps 288 dp. The backdrop is `ContentScale.Crop` with the focal point at the top centre (faces are usually in the upper half), the top `scrimOverArt` for the status bar, and a fade into the page background over its bottom half.
+- **Header row** sits below the backdrop, `Layout.margin` from the left edge: poster (`posterInHeader` wide, 2:3; for an episode a 16:9 still instead, 1.6 × that width) hanging half its height over the backdrop's bottom edge, then a column capped at `textMaxWidth` that starts under the backdrop: title (`headlineLarge` at expanded, `headlineMedium` at medium), original title, metadata line, chips, `ItemButtonsBar` (already compact at 600 dp+), overview collapsed to 4 lines with "more", then genres / director / writers. The text is in the theme's colours, never over the artwork (#339: text over the backdrop was hard to read, and a long column left the page under the hero empty).
 - **Rows below** (`NextUp`, seasons, cast, and later "similar"/"more like this" when the ViewModel exposes it) span the width with `Layout.margin`, card sizes from §2. Next Up on the show page becomes a row item at `cardHorizontal` width, not a lone 420 dp card (T5).
 - **Phone landscape** (medium width, compact height, 412 dp tall): the hero would eat the screen. Rule 2 applies: compact height uses the compact layout. The helper exposes `isCompactHeight` for exactly this.
 - **Episode**: same layout; the "still" replaces the poster; "Season 1 · Episode 2" is the overline; the show's logo is not used (it competes with the title).
