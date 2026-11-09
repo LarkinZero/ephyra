@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN-kode for profilen</string>
     <string name="ce_settings_profile_pin_summary">Lås denne profilen på denne eininga</string>
     <string name="ce_settings_profile_lock">Profillås</string>
+    <string name="ce_settings_detail_pages">Detaljsider</string>
+    <string name="ce_settings_detail_pages_summary">Vel kva sidene for filmar, seriar og episodar viser</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes-skår</string>
+    <string name="ce_pref_detail_critic_rating_summary">Kritikarvurderinga, når tenaren din har ho</string>
+    <string name="ce_pref_detail_tagline">Slagord</string>
+    <string name="ce_pref_detail_tagline_summary">Den korte linja over skildringa</string>
+    <string name="ce_pref_detail_studios">Studio og nettverk</string>
+    <string name="ce_pref_detail_studios_summary">Studioa bak ein film, kanalane bak ein serie</string>
+    <string name="ce_pref_detail_air_schedule">Sendeplan</string>
+    <string name="ce_pref_detail_air_schedule_summary">Dagane og klokkeslettet ei pågåande serie blir sendt</string>
+    <string name="ce_pref_detail_watch_history">Visingshistorikk</string>
+    <string name="ce_pref_detail_watch_history_summary">Kor mange gonger du har sett det, og når sist</string>
+    <string name="ce_pref_detail_external_links">Eksterne lenkjer</string>
+    <string name="ce_pref_detail_external_links_summary">Lenkjer til IMDb, TMDB og TheTVDB</string>
+    <string name="ce_pref_detail_extras">Ekstramateriale</string>
+    <string name="ce_pref_detail_extras_summary">Trailarar og spesialinnhald lagra på tenaren din</string>
+    <string name="ce_pref_detail_collections">Samlingar</string>
+    <string name="ce_pref_detail_collections_summary">Samlingane ein film er ein del av</string>
+    <string name="ce_pref_detail_similar">Meir som dette</string>
+    <string name="ce_pref_detail_similar_summary">Liknande titlar frå biblioteket ditt</string>
 </resources>

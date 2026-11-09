@@ -52,6 +52,23 @@ class DisplayRefreshRateManager(
         applyMatchingDisplayMode(frameRate)
     }
 
+    /**
+     * "60.0Hz of [60.0, 90.0]": the display's current mode and the rates it supports, for the
+     * playback log. On Android 11+ the current rate also reflects a seamless switch the OS made
+     * for the surface's frame rate hint, so a 120Hz phone playing 24fps should read 48.0 or 24.0
+     * here a few seconds in (#338).
+     */
+    fun describeDisplay(): String? {
+        val window = attachedWindow?.get() ?: return null
+        val display =
+            window.decorView.display
+                ?: (window.context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)
+                    ?.getDisplay(Display.DEFAULT_DISPLAY)
+                ?: return null
+        val supported = display.supportedModes?.map { it.refreshRate }.orEmpty().distinct().sorted()
+        return "${display.refreshRate}Hz of $supported"
+    }
+
     fun reset() {
         val window = attachedWindow?.get() ?: return
         val attrs = window.attributes

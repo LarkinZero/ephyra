@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN profil</string>
     <string name="ce_settings_profile_pin_summary">Kunci profil ini di perangkat ini</string>
     <string name="ce_settings_profile_lock">Kunci profil</string>
+    <string name="ce_settings_detail_pages">Halaman detail</string>
+    <string name="ce_settings_detail_pages_summary">Pilih apa yang ditampilkan halaman film, serial, dan episode</string>
+    <string name="ce_pref_detail_critic_rating">Skor Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Skor dari kritikus, jika server Anda memilikinya</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Baris singkat di atas ringkasan</string>
+    <string name="ce_pref_detail_studios">Studio dan jaringan televisi</string>
+    <string name="ce_pref_detail_studios_summary">Studio pembuat film, jaringan penayang serial</string>
+    <string name="ce_pref_detail_air_schedule">Jadwal tayang</string>
+    <string name="ce_pref_detail_air_schedule_summary">Hari dan jam tayang serial yang sedang berjalan</string>
+    <string name="ce_pref_detail_watch_history">Riwayat tontonan</string>
+    <string name="ce_pref_detail_watch_history_summary">Berapa kali Anda menontonnya dan kapan terakhir kali</string>
+    <string name="ce_pref_detail_external_links">Tautan eksternal</string>
+    <string name="ce_pref_detail_external_links_summary">Tautan ke IMDb, TMDB, dan TheTVDB</string>
+    <string name="ce_pref_detail_extras">Ekstra</string>
+    <string name="ce_pref_detail_extras_summary">Trailer dan fitur khusus yang tersimpan di server Anda</string>
+    <string name="ce_pref_detail_collections">Koleksi</string>
+    <string name="ce_pref_detail_collections_summary">Koleksi yang memuat film ini</string>
+    <string name="ce_pref_detail_similar">Lainnya yang serupa</string>
+    <string name="ce_pref_detail_similar_summary">Judul serupa dari pustaka Anda</string>
 </resources>

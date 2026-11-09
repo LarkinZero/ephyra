@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.film.presentation.show
 
+import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -22,5 +23,7 @@ data class ShowState(
     val hasDownloads: Boolean = false,
     // CE (#141): the TV show page's theme song, null when off or the server has none.
     val themeSongUrl: String? = null,
+    // CE (#332): loaded after the page is shown, see ShowViewModel.loadRelated.
+    val related: RelatedItems = RelatedItems(),
     val error: Exception? = null,
 )

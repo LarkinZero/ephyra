@@ -3,10 +3,13 @@ package dev.jdtech.jellyfin.presentation.film.components
 import android.os.Environment
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -36,6 +39,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.FindroidSourceType
+import dev.jdtech.jellyfin.models.FindroidTrailer
 import dev.jdtech.jellyfin.models.getVersions
 import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -68,16 +72,24 @@ fun ItemButtonsBar(
     val isOfflineMode = LocalOfflineMode.current
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
-    val trailerUri =
-        when (item) {
-            is FindroidMovie -> {
-                item.trailer
-            }
-            is FindroidShow -> {
-                item.trailer
-            }
-            else -> null
+    // CE (#332): every remote trailer; a menu picks one when there are several.
+    val trailers =
+        remember(item) {
+            val all =
+                when (item) {
+                    is FindroidMovie -> item.trailers
+                    is FindroidShow -> item.trailers
+                    else -> emptyList()
+                }
+            val first =
+                when (item) {
+                    is FindroidMovie -> item.trailer
+                    is FindroidShow -> item.trailer
+                    else -> null
+                }
+            all.ifEmpty { listOfNotNull(first?.let { FindroidTrailer(name = null, url = it) }) }
         }
+    var trailerMenuOpen by remember { mutableStateOf(false) }
 
     var cancelDownloadDialogOpen by remember { mutableStateOf(false) }
     var deleteDownloadDialogOpen by remember { mutableStateOf(false) }
@@ -141,12 +153,42 @@ fun ItemButtonsBar(
                         }
                     }
                 }
-                trailerUri?.takeIf { !isOfflineMode }?.let { uri ->
-                    FilledTonalIconButton(onClick = { onTrailerClick(uri) }) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_film),
-                            contentDescription = stringResource(CoreR.string.trailer_button_description),
-                        )
+                if (trailers.isNotEmpty() && !isOfflineMode) {
+                    Box {
+                        FilledTonalIconButton(
+                            onClick = {
+                                if (trailers.size == 1) onTrailerClick(trailers.first().url)
+                                else trailerMenuOpen = true
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_film),
+                                contentDescription = stringResource(CoreR.string.trailer_button_description),
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = trailerMenuOpen,
+                            onDismissRequest = { trailerMenuOpen = false },
+                        ) {
+                            trailers.forEachIndexed { index, trailer ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text =
+                                                trailer.name
+                                                    ?: stringResource(
+                                                        CoreR.string.item_trailer_number,
+                                                        index + 1,
+                                                    )
+                                        )
+                                    },
+                                    onClick = {
+                                        trailerMenuOpen = false
+                                        onTrailerClick(trailer.url)
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
                 FilledTonalIconButton(onClick = onMarkAsPlayedClick) {

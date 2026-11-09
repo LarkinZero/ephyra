@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – aujourd\'hui</string>
     <string name="shuffle">Aléatoire</string>
     <string name="favorites_empty_body">Sélectionnez l\'icône de cœur sur un film, une série ou un épisode pour l\'ajouter à vos favoris.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Score Rotten Tomatoes</string>
+    <string name="item_studios">Studios</string>
+    <string name="item_networks">Chaînes</string>
+    <string name="item_airs">Diffusion : %1$s</string>
+    <string name="item_airs_daily">tous les jours</string>
+    <string name="item_watch_count">Vu %1$d×</string>
+    <string name="item_watch_count_last">Vu %1$d× · dernière fois le %2$s</string>
+    <string name="item_open_on">Ouvrir sur %1$s</string>
+    <string name="item_trailer_number">Bande-annonce %1$d</string>
+    <string name="item_extras">Bonus</string>
+    <string name="item_included_in">Inclus dans</string>
+    <string name="item_more_like_this">Dans le même genre</string>
     <string name="ce_session_revoked">%1$s vous a déconnecté. Reconnectez-vous pour continuer.</string>
 </resources>

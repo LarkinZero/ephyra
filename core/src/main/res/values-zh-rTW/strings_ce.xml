@@ -80,5 +80,18 @@
     <string name="year_range_continuing">%1$d – 至今</string>
     <string name="shuffle">隨機播放</string>
     <string name="favorites_empty_body">在任何電影、劇集或單集上選取愛心圖示以加入最愛。</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">爛番茄評分</string>
+    <string name="item_studios">製片公司</string>
+    <string name="item_networks">電視網</string>
+    <string name="item_airs">播出時間：%1$s</string>
+    <string name="item_airs_daily">每天</string>
+    <string name="item_watch_count">已觀看 %1$d×</string>
+    <string name="item_watch_count_last">已觀看 %1$d× · 上次於 %2$s</string>
+    <string name="item_open_on">在 %1$s 開啟</string>
+    <string name="item_trailer_number">預告片 %1$d</string>
+    <string name="item_extras">花絮</string>
+    <string name="item_included_in">收錄於</string>
+    <string name="item_more_like_this">更多類似內容</string>
     <string name="ce_session_revoked">%1$s 已將你登出。請重新登入以繼續。</string>
 </resources>

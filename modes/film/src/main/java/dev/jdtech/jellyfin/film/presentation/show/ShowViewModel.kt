@@ -5,6 +5,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.film.presentation.RelatedItems
+import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.keeping
+import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
+import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidShow
@@ -57,6 +63,9 @@ constructor(
     private var downloadsOnly: Boolean = false
     private val reloadPolicy = ReloadPolicy(dataChanges)
     private var loadJob: Job? = null
+    private var relatedJob: Job? = null
+    private var relatedFor: UUID? = null
+    private var relatedRequest: RelatedItemsRequest? = null
 
     /** Whether coming back to the page needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(
@@ -77,6 +86,11 @@ constructor(
     fun loadShow(showId: UUID, downloadsOnly: Boolean = this.downloadsOnly) {
         this.showId = showId
         this.downloadsOnly = downloadsOnly
+        if (relatedFor != null && relatedFor != showId) {
+            relatedJob?.cancel()
+            relatedFor = null
+            _state.update { it.copy(related = RelatedItems()) }
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             val token = reloadPolicy.begin()
@@ -131,7 +145,7 @@ constructor(
                     val localCounts = localCountsAsync.await()
                     _state.emit(
                         _state.value.copy(
-                            show = show,
+                            show = show.shownIn(appPreferences.detailSections()),
                             nextUp = nextUp,
                             seasons = seasons,
                             actors = castAndCrew.actors,
@@ -143,6 +157,8 @@ constructor(
                                 } ?: _state.value.hasDownloads,
                         )
                     )
+                    // A reload of a page that has its rows: a switch may have changed since.
+                    if (relatedFor == showId) loadRelated(showId)
 
                     if (localCounts == null) return@coroutineScope
                     // Offline, the stored episodes are all there is.
@@ -195,6 +211,37 @@ constructor(
             Timber.e(e, "Failed to load the show's download counts")
             null
         }
+
+    /**
+     * CE (#332): the extras and "More like this" rows, each from its own request. The page calls
+     * this once it has drawn the show, so these requests never delay it; they are made once per
+     * show. Not on the downloads-only page, and offline the repository has none.
+     */
+    fun loadRelated(showId: UUID) {
+        val show = _state.value.show?.takeIf { it.id == showId } ?: return
+        if (downloadsOnly) return
+        val request =
+            RelatedItemsRequest.forItem(
+                    localTrailerCount = show.localTrailerCount,
+                    specialFeatureCount = show.specialFeatureCount,
+                    collections = false,
+                )
+                .shownIn(appPreferences.detailSections())
+        if (relatedFor == showId && relatedRequest == request) return
+        relatedFor = showId
+        relatedRequest = request
+        relatedJob?.cancel()
+        // A row whose switch was turned off since the last load goes away.
+        _state.update { it.copy(related = it.related.keeping(request)) }
+        relatedJob =
+            viewModelScope.launchRelatedItems(
+                repository = repository,
+                itemId = showId,
+                request = request,
+            ) { change ->
+                _state.update { it.copy(related = change(it.related)) }
+            }
+    }
 
     /**
      * CE (#141): look up the series' theme song for the TV show page, only when theme music is

@@ -27,4 +27,10 @@ sealed interface ShowAction {
     data class NavigateToItem(val item: FindroidItem) : ShowAction
 
     data class NavigateToPerson(val personId: UUID) : ShowAction
+
+    /** CE (#332): plays a local trailer or special feature in the app's player. */
+    data class PlayExtra(val extraId: UUID) : ShowAction
+
+    /** CE (#332): opens the show on IMDb, TMDB, TVDB and the like. */
+    data class OpenExternalLink(val url: String) : ShowAction
 }

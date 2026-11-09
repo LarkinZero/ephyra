@@ -60,6 +60,14 @@ These are stop-gaps. They make the pages readable; the design in [4-design.md](4
 
 ![](screenshots/show-hero-landscape.jpg) ![](screenshots/episode-hero-landscape.jpg)
 
+**#339.** The screenshots above show R3 as it shipped, with the text drawn over the backdrop. That was hard to read over bright art and left the page under a long column empty, so the hero is now a backdrop band, `window height × 0.45` at most, with the poster hanging half its height over the bottom edge and the text below it in the theme's colours. Landscape gets a 360 dp backdrop on this emulator, and the Play button and cast row stay on the first screen in both orientations.
+
+The four layouts we compared before picking this one (C), in the light theme on the same pages:
+
+![](screenshots/hero-339-compare-show.jpg)
+
+![](screenshots/hero-339-compare-episode.jpg)
+
 **R5 (season list-detail).** At expanded width (and not at compact height) the Season page is a list-detail, as in [4-design.md](4-design.md) §7: the season header and a compact episode list (still, title, `E2 · 38 mins`, watched tick, download state, no overview) on the left, 40 % of the window between 360 and 480 dp, and the selected episode's hero page on the right, without its own back and home buttons. Tapping an episode changes the right pane and does not navigate; the selected row is drawn in `secondaryContainer`. The season opens on its first unwatched episode. Play, watched, favourite and download in the right pane act on that episode, and the list follows (a watched tick appears as soon as it is marked). An episode opened on its own at expanded width (Home's Next Up and Continue Watching, search, Downloads) lands in the same list-detail with that episode selected. Rotating to portrait gives the single-column page; rotating back keeps the selection. Season also gets the light status-bar icons R2 gave the other item pages (T12), on every width. Verified on the 1280×800 dp tablet AVD in both orientations and on a 411 dp phone window, where Season and Episode are unchanged apart from those icons.
 
 ![](screenshots/season-list-detail-landscape.jpg) ![](screenshots/season-list-detail-selected.jpg)

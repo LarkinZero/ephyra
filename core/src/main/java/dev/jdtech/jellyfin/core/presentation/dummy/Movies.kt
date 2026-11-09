@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.core.presentation.dummy
 
+import dev.jdtech.jellyfin.models.FindroidExternalLink
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -59,6 +60,15 @@ val dummyMovie =
         productionYear = 2019,
         endDate = null,
         trailer = "https://www.youtube.com/watch?v=puKWa8hrvA8",
+        tagline = "An angel falls. A warrior rises.",
+        criticRating = 61f,
+        studios = listOf("20th Century Fox", "Lightstorm Entertainment"),
+        externalLinks =
+            listOf(
+                FindroidExternalLink("IMDb", "https://www.imdb.com/title/tt0437086"),
+                FindroidExternalLink("TheMovieDb", "https://www.themoviedb.org/movie/399579"),
+            ),
+        playCount = 2,
         images = FindroidImages(),
         chapters = emptyList(),
         trickplayInfo = null,

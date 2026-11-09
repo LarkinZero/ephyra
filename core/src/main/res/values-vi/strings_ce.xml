@@ -80,5 +80,18 @@
     <string name="year_range_continuing">%1$d – nay</string>
     <string name="shuffle">Xáo trộn</string>
     <string name="favorites_empty_body">Chọn biểu tượng trái tim trên bất kỳ phim, chương trình hoặc tập phim nào để thêm vào mục yêu thích.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Điểm Rotten Tomatoes</string>
+    <string name="item_studios">Hãng phim</string>
+    <string name="item_networks">Đài phát sóng</string>
+    <string name="item_airs">Phát sóng %1$s</string>
+    <string name="item_airs_daily">hằng ngày</string>
+    <string name="item_watch_count">Đã xem %1$d×</string>
+    <string name="item_watch_count_last">Đã xem %1$d× · lần cuối vào %2$s</string>
+    <string name="item_open_on">Mở trên %1$s</string>
+    <string name="item_trailer_number">Đoạn giới thiệu %1$d</string>
+    <string name="item_extras">Nội dung bổ sung</string>
+    <string name="item_included_in">Thuộc bộ sưu tập</string>
+    <string name="item_more_like_this">Nội dung tương tự</string>
     <string name="ce_session_revoked">%1$s đã đăng xuất bạn. Hãy đăng nhập lại để tiếp tục.</string>
 </resources>

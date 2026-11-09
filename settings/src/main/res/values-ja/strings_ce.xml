@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">プロフィールのPIN</string>
     <string name="ce_settings_profile_pin_summary">このデバイスでこのプロフィールをロック</string>
     <string name="ce_settings_profile_lock">プロフィールのロック</string>
+    <string name="ce_settings_detail_pages">詳細ページ</string>
+    <string name="ce_settings_detail_pages_summary">映画、番組、エピソードのページに表示する項目を選択</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoesのスコア</string>
+    <string name="ce_pref_detail_critic_rating_summary">批評家のスコア（サーバーにある場合）</string>
+    <string name="ce_pref_detail_tagline">キャッチコピー</string>
+    <string name="ce_pref_detail_tagline_summary">あらすじの上の短い一文</string>
+    <string name="ce_pref_detail_studios">スタジオとネットワーク</string>
+    <string name="ce_pref_detail_studios_summary">映画の制作スタジオ、番組の放送局</string>
+    <string name="ce_pref_detail_air_schedule">放送スケジュール</string>
+    <string name="ce_pref_detail_air_schedule_summary">放送中の番組が放送される曜日と時間</string>
+    <string name="ce_pref_detail_watch_history">視聴履歴</string>
+    <string name="ce_pref_detail_watch_history_summary">視聴した回数と最後に視聴した日時</string>
+    <string name="ce_pref_detail_external_links">外部リンク</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb、TMDB、TheTVDBへのリンク</string>
+    <string name="ce_pref_detail_extras">特典映像</string>
+    <string name="ce_pref_detail_extras_summary">サーバーに保存されている予告編と特典コンテンツ</string>
+    <string name="ce_pref_detail_collections">コレクション</string>
+    <string name="ce_pref_detail_collections_summary">映画が含まれているコレクション</string>
+    <string name="ce_pref_detail_similar">似た作品</string>
+    <string name="ce_pref_detail_similar_summary">ライブラリ内の似たタイトル</string>
 </resources>

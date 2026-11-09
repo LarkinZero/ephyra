@@ -17,6 +17,9 @@ fun InfoText(
     genres: List<String>,
     director: FindroidItemPerson?,
     writers: List<FindroidItemPerson>,
+    // CE (#332): the studios of a movie, or the networks of a show.
+    studios: List<String> = emptyList(),
+    studiosAreNetworks: Boolean = false,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
         if (genres.isNotEmpty()) {
@@ -39,6 +42,18 @@ fun InfoText(
             Text(
                 text = "${stringResource(CoreR.string.writers)}: $writersText",
                 modifier = Modifier.copyOnLongClick(writersText),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        if (studios.isNotEmpty()) {
+            val studiosText = studios.joinToString()
+            val label =
+                stringResource(
+                    if (studiosAreNetworks) CoreR.string.item_networks else CoreR.string.item_studios
+                )
+            Text(
+                text = "$label: $studiosText",
+                modifier = Modifier.copyOnLongClick(studiosText),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }

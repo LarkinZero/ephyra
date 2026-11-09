@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">個人檔案 PIN 碼</string>
     <string name="ce_settings_profile_pin_summary">在此裝置上鎖定此個人檔案</string>
     <string name="ce_settings_profile_lock">個人檔案鎖</string>
+    <string name="ce_settings_detail_pages">詳細資料頁面</string>
+    <string name="ce_settings_detail_pages_summary">選擇電影、節目和集數頁面顯示的內容</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes 評分</string>
+    <string name="ce_pref_detail_critic_rating_summary">影評人評分（伺服器提供時）</string>
+    <string name="ce_pref_detail_tagline">宣傳標語</string>
+    <string name="ce_pref_detail_tagline_summary">簡介上方的短句</string>
+    <string name="ce_pref_detail_studios">製片公司與電視網</string>
+    <string name="ce_pref_detail_studios_summary">電影的製片公司、節目的播出頻道</string>
+    <string name="ce_pref_detail_air_schedule">播出時間表</string>
+    <string name="ce_pref_detail_air_schedule_summary">連載中影集的播出日期與時間</string>
+    <string name="ce_pref_detail_watch_history">觀看紀錄</string>
+    <string name="ce_pref_detail_watch_history_summary">你觀看的次數與最近一次觀看的時間</string>
+    <string name="ce_pref_detail_external_links">外部連結</string>
+    <string name="ce_pref_detail_external_links_summary">IMDb、TMDB 與 TheTVDB 的連結</string>
+    <string name="ce_pref_detail_extras">花絮</string>
+    <string name="ce_pref_detail_extras_summary">儲存在你伺服器上的預告片與特別內容</string>
+    <string name="ce_pref_detail_collections">合集</string>
+    <string name="ce_pref_detail_collections_summary">電影所屬的合集</string>
+    <string name="ce_pref_detail_similar">更多類似內容</string>
+    <string name="ce_pref_detail_similar_summary">媒體庫中的類似作品</string>
 </resources>

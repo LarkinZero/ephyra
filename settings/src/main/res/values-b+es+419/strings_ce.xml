@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN del perfil</string>
     <string name="ce_settings_profile_pin_summary">Bloquear este perfil en este dispositivo</string>
     <string name="ce_settings_profile_lock">Bloqueo del perfil</string>
+    <string name="ce_settings_detail_pages">Páginas de detalles</string>
+    <string name="ce_settings_detail_pages_summary">Elige qué muestran las páginas de películas, series y episodios</string>
+    <string name="ce_pref_detail_critic_rating">Puntuación de Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">La puntuación de la crítica, cuando tu servidor la tiene</string>
+    <string name="ce_pref_detail_tagline">Eslogan</string>
+    <string name="ce_pref_detail_tagline_summary">La frase corta sobre la sinopsis</string>
+    <string name="ce_pref_detail_studios">Estudios y cadenas</string>
+    <string name="ce_pref_detail_studios_summary">Los estudios de una película, las cadenas de una serie</string>
+    <string name="ce_pref_detail_air_schedule">Horario de emisión</string>
+    <string name="ce_pref_detail_air_schedule_summary">Los días y la hora en que se emite una serie en curso</string>
+    <string name="ce_pref_detail_watch_history">Historial de reproducción</string>
+    <string name="ce_pref_detail_watch_history_summary">Cuántas veces lo viste y cuándo fue la última vez</string>
+    <string name="ce_pref_detail_external_links">Enlaces externos</string>
+    <string name="ce_pref_detail_external_links_summary">Enlaces a IMDb, TMDB y TheTVDB</string>
+    <string name="ce_pref_detail_extras">Extras</string>
+    <string name="ce_pref_detail_extras_summary">Tráileres y contenido especial guardados en tu servidor</string>
+    <string name="ce_pref_detail_collections">Colecciones</string>
+    <string name="ce_pref_detail_collections_summary">Las colecciones a las que pertenece una película</string>
+    <string name="ce_pref_detail_similar">Más como esto</string>
+    <string name="ce_pref_detail_similar_summary">Títulos similares de tu biblioteca</string>
 </resources>

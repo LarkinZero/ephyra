@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">Profil PIN-kódja</string>
     <string name="ce_settings_profile_pin_summary">A profil zárolása ezen az eszközön</string>
     <string name="ce_settings_profile_lock">Profilzár</string>
+    <string name="ce_settings_detail_pages">Részletező oldalak</string>
+    <string name="ce_settings_detail_pages_summary">Válaszd ki, mit mutassanak a filmek, sorozatok és epizódok oldalai</string>
+    <string name="ce_pref_detail_critic_rating">Rotten Tomatoes-értékelés</string>
+    <string name="ce_pref_detail_critic_rating_summary">A kritikusok pontszáma, ha a szervereden megvan</string>
+    <string name="ce_pref_detail_tagline">Szlogen</string>
+    <string name="ce_pref_detail_tagline_summary">A rövid sor az ismertető felett</string>
+    <string name="ce_pref_detail_studios">Stúdiók és csatornák</string>
+    <string name="ce_pref_detail_studios_summary">A film stúdiói, a sorozat csatornái</string>
+    <string name="ce_pref_detail_air_schedule">Sugárzási rend</string>
+    <string name="ce_pref_detail_air_schedule_summary">A napok és az időpont, amikor egy futó sorozatot adnak</string>
+    <string name="ce_pref_detail_watch_history">Megtekintési előzmények</string>
+    <string name="ce_pref_detail_watch_history_summary">Hányszor nézted meg, és mikor utoljára</string>
+    <string name="ce_pref_detail_external_links">Külső hivatkozások</string>
+    <string name="ce_pref_detail_external_links_summary">Hivatkozások az IMDb, a TMDB és a TheTVDB oldalaira</string>
+    <string name="ce_pref_detail_extras">Extrák</string>
+    <string name="ce_pref_detail_extras_summary">A szerveredre mentett előzetesek és különleges tartalmak</string>
+    <string name="ce_pref_detail_collections">Gyűjtemények</string>
+    <string name="ce_pref_detail_collections_summary">Azok a gyűjtemények, amelyeknek a film része</string>
+    <string name="ce_pref_detail_similar">Hasonlók</string>
+    <string name="ce_pref_detail_similar_summary">Hasonló címek a könyvtáradból</string>
 </resources>

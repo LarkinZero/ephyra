@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – praegu</string>
     <string name="shuffle">Juhuslik</string>
     <string name="favorites_empty_body">Vali filmi, sarja või osa juures südameikoon, et lisada see lemmikutesse.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoesi hinne</string>
+    <string name="item_studios">Stuudiod</string>
+    <string name="item_networks">Kanalid</string>
+    <string name="item_airs">Eetris %1$s</string>
+    <string name="item_airs_daily">iga päev</string>
+    <string name="item_watch_count">Vaadatud %1$d×</string>
+    <string name="item_watch_count_last">Vaadatud %1$d× · viimati %2$s</string>
+    <string name="item_open_on">Ava saidil %1$s</string>
+    <string name="item_trailer_number">Treiler %1$d</string>
+    <string name="item_extras">Lisad</string>
+    <string name="item_included_in">Kuulub kogusse</string>
+    <string name="item_more_like_this">Sarnased</string>
     <string name="ce_session_revoked">%1$s logis sind välja. Jätkamiseks logi uuesti sisse.</string>
 </resources>

@@ -46,7 +46,15 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
 import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
+import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.CriticRating
+import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
+import dev.jdtech.jellyfin.presentation.film.components.ItemsRow
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
+import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
@@ -64,6 +72,7 @@ import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
+import dev.jdtech.jellyfin.utils.AfterFirstFrame
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import java.util.UUID
@@ -75,6 +84,7 @@ fun MovieScreen(
     navigateBack: () -> Unit,
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToItem: (item: FindroidItem) -> Unit = {},
     viewModel: MovieViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
@@ -91,6 +101,9 @@ fun MovieScreen(
     }
 
     LaunchedEffect(state.movie) { state.movie?.let { movie -> downloaderViewModel.update(movie) } }
+
+    // CE (#332): the rows below the page only once the movie is on screen.
+    AfterFirstFrame(state.movie?.id) { id -> viewModel.loadRelated(id) }
 
     ObserveAsEvents(downloaderViewModel.events) { event ->
         when (event) {
@@ -132,6 +145,9 @@ fun MovieScreen(
                         Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
+                is MovieAction.PlayExtra -> playExtra(context, action.extraId)
+                is MovieAction.OpenExternalLink -> openExternalLink(context, uriHandler, action.url)
+                is MovieAction.NavigateToItem -> navigateToItem(action.item)
                 is MovieAction.OnBackClick -> navigateBack()
                 is MovieAction.OnHomeClick -> navigateHome()
                 is MovieAction.NavigateToPerson -> navigateToPerson(action.personId)
@@ -248,10 +264,11 @@ private fun MovieScreenLayout(
                                 )
                             }
                         }
+                        CriticRating(movie.criticRating)
                     }
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        VideoMetadataBar(videoMetadata)
+                        VideoMetadataBar(videoMetadata, is3D = movie.is3D)
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -295,13 +312,19 @@ private fun MovieScreenLayout(
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
+                    movie.tagline?.let { tagline ->
+                        TaglineText(tagline)
+                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    }
                     OverviewText(text = movie.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     InfoText(
                         genres = movie.genres,
                         director = state.director,
                         writers = state.writers,
+                        studios = movie.studios,
                     )
+                    MovieWatchAndLinks(movie, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
                 if (state.actors.isNotEmpty()) {
@@ -312,7 +335,13 @@ private fun MovieScreenLayout(
                         },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
+                MovieRelatedRows(
+                    state = state,
+                    onAction = onAction,
+                    contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                )
                 Spacer(Modifier.height(paddingBottom))
             }
         } ?: run {
@@ -343,6 +372,49 @@ private fun MovieScreenLayout(
             )
         }
     }
+}
+
+/** CE (#332): the watch history and the outside links, right below the info text. */
+@Composable
+internal fun MovieWatchAndLinks(movie: FindroidMovie, onAction: (MovieAction) -> Unit) {
+    if (movie.playCount > 0) {
+        Spacer(Modifier.height(MaterialTheme.spacings.small))
+        WatchHistoryText(playCount = movie.playCount, lastPlayedDate = movie.lastPlayedDate)
+    }
+    if (movie.externalLinks.isNotEmpty() && !LocalOfflineMode.current) {
+        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+        ExternalLinksRow(movie.externalLinks) { url -> onAction(MovieAction.OpenExternalLink(url)) }
+    }
+}
+
+/** CE (#332): extras, the collections it is in and "More like this", loaded after the page. */
+@Composable
+internal fun MovieRelatedRows(
+    state: MovieState,
+    onAction: (MovieAction) -> Unit,
+    contentPadding: PaddingValues,
+) {
+    ItemsRow(
+        title = stringResource(CoreR.string.item_extras),
+        items = state.related.extras,
+        direction = Direction.HORIZONTAL,
+        onItemClick = { onAction(MovieAction.PlayExtra(it.id)) },
+        contentPadding = contentPadding,
+    )
+    ItemsRow(
+        title = stringResource(CoreR.string.item_included_in),
+        items = state.related.collections,
+        direction = Direction.VERTICAL,
+        onItemClick = { onAction(MovieAction.NavigateToItem(it)) },
+        contentPadding = contentPadding,
+    )
+    ItemsRow(
+        title = stringResource(CoreR.string.item_more_like_this),
+        items = state.related.similar,
+        direction = Direction.VERTICAL,
+        onItemClick = { onAction(MovieAction.NavigateToItem(it)) },
+        contentPadding = contentPadding,
+    )
 }
 
 @PreviewScreenSizes

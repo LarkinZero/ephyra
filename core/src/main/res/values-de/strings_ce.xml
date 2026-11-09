@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – heute</string>
     <string name="shuffle">Zufallswiedergabe</string>
     <string name="favorites_empty_body">Wähle das Herzsymbol bei einem Film, einer Serie oder Folge, um sie zu deinen Favoriten hinzuzufügen.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten-Tomatoes-Wertung</string>
+    <string name="item_studios">Studios</string>
+    <string name="item_networks">Sender</string>
+    <string name="item_airs">Läuft %1$s</string>
+    <string name="item_airs_daily">täglich</string>
+    <string name="item_watch_count">%1$d× gesehen</string>
+    <string name="item_watch_count_last">%1$d× gesehen · zuletzt am %2$s</string>
+    <string name="item_open_on">Auf %1$s öffnen</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extras</string>
+    <string name="item_included_in">Enthalten in</string>
+    <string name="item_more_like_this">Mehr wie dieses</string>
     <string name="ce_session_revoked">%1$s hat dich abgemeldet. Melde dich erneut an, um fortzufahren.</string>
 </resources>

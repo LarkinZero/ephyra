@@ -4,6 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
+import dev.jdtech.jellyfin.film.presentation.RelatedItems
+import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
+import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.keeping
+import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
+import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.mergeDuplicateRoles
@@ -41,6 +47,9 @@ constructor(
     private lateinit var movieId: UUID
     private val reloadPolicy = ReloadPolicy(dataChanges)
     private var loadJob: Job? = null
+    private var relatedJob: Job? = null
+    private var relatedFor: UUID? = null
+    private var relatedRequest: RelatedItemsRequest? = null
 
     /** Whether coming back to the screen needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(movieId: UUID, stopEventFollows: Boolean = false): Boolean =
@@ -50,6 +59,11 @@ constructor(
 
     fun loadMovie(movieId: UUID) {
         this.movieId = movieId
+        if (relatedFor != null && relatedFor != movieId) {
+            relatedJob?.cancel()
+            relatedFor = null
+            _state.update { it.copy(related = RelatedItems()) }
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             val token = reloadPolicy.begin()
@@ -68,7 +82,7 @@ constructor(
                 val writers = if (displayCastAndCrew) getWriters(movie) else emptyList()
                 _state.emit(
                     _state.value.copy(
-                        movie = movie,
+                        movie = movie.shownIn(appPreferences.detailSections()),
                         videoMetadata = videoMetadata,
                         actors = actors,
                         director = director,
@@ -76,6 +90,8 @@ constructor(
                         displayExtraInfo = displayExtraInfo,
                     )
                 )
+                // A reload of a page that has its rows: a switch may have changed since.
+                if (relatedFor == movieId) loadRelated(movieId)
                 reloadPolicy.complete(token)
             } catch (e: CancellationException) {
                 throw e
@@ -83,6 +99,36 @@ constructor(
                 _state.emit(_state.value.copy(error = e))
             }
         }
+    }
+
+    /**
+     * CE (#332): the extras, collections and "More like this" rows, each from its own request. The
+     * page calls this once it has drawn the movie, so these requests never delay it; they are made
+     * once per movie, not again on every return to the page. Offline the repository has none.
+     */
+    fun loadRelated(movieId: UUID) {
+        val movie = _state.value.movie?.takeIf { it.id == movieId } ?: return
+        val request =
+            RelatedItemsRequest.forItem(
+                    localTrailerCount = movie.localTrailerCount,
+                    specialFeatureCount = movie.specialFeatureCount,
+                    collections = true,
+                )
+                .shownIn(appPreferences.detailSections())
+        if (relatedFor == movieId && relatedRequest == request) return
+        relatedFor = movieId
+        relatedRequest = request
+        relatedJob?.cancel()
+        // A row whose switch was turned off since the last load goes away.
+        _state.update { it.copy(related = it.related.keeping(request)) }
+        relatedJob =
+            viewModelScope.launchRelatedItems(
+                repository = repository,
+                itemId = movieId,
+                request = request,
+            ) { change ->
+                _state.update { it.copy(related = change(it.related)) }
+            }
     }
 
     private suspend fun getActors(item: FindroidMovie): List<FindroidItemPerson> {

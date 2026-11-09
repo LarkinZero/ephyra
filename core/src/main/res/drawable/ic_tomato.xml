@@ -1,0 +1,21 @@
+<!-- CE (#332): critic (Rotten Tomatoes) score, drawn in the stroke style of the Lucide icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M20,14a8,7.5 0,1 1,-16 0a8,7.5 0,1 1,16 0z"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="@android:color/white"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M12,6.5v-4M8,4.5l4,2l4,-2"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="@android:color/white"
+      android:strokeLineCap="round"/>
+</vector>

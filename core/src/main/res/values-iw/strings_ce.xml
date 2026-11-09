@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – היום</string>
     <string name="shuffle">ערבב</string>
     <string name="favorites_empty_body">בחר בסמל הלב בכל סרט, סדרה או פרק כדי להוסיף אותו למועדפים שלך.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">ציון Rotten Tomatoes</string>
+    <string name="item_studios">אולפנים</string>
+    <string name="item_networks">רשתות</string>
+    <string name="item_airs">משודר %1$s</string>
+    <string name="item_airs_daily">מדי יום</string>
+    <string name="item_watch_count">נצפה %1$d×</string>
+    <string name="item_watch_count_last">נצפה %1$d× · לאחרונה ב-%2$s</string>
+    <string name="item_open_on">פתיחה ב-%1$s</string>
+    <string name="item_trailer_number">טריילר %1$d</string>
+    <string name="item_extras">תוספות</string>
+    <string name="item_included_in">כלול ב</string>
+    <string name="item_more_like_this">עוד בסגנון הזה</string>
     <string name="ce_session_revoked">%1$s ניתק אותך. יש להתחבר שוב כדי להמשיך.</string>
 </resources>

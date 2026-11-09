@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – nu</string>
     <string name="shuffle">Bland</string>
     <string name="favorites_empty_body">Vælg hjerteikonet på en film, serie eller episode for at føje den til dine favoritter.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes-score</string>
+    <string name="item_studios">Studier</string>
+    <string name="item_networks">Kanaler</string>
+    <string name="item_airs">Sendes %1$s</string>
+    <string name="item_airs_daily">dagligt</string>
+    <string name="item_watch_count">Set %1$d×</string>
+    <string name="item_watch_count_last">Set %1$d× · senest %2$s</string>
+    <string name="item_open_on">Åbn på %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Ekstramateriale</string>
+    <string name="item_included_in">Indgår i</string>
+    <string name="item_more_like_this">Mere som dette</string>
     <string name="ce_session_revoked">%1$s har logget dig ud. Log ind igen for at fortsætte.</string>
 </resources>

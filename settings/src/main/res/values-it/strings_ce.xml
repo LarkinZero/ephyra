@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN del profilo</string>
     <string name="ce_settings_profile_pin_summary">Blocca questo profilo su questo dispositivo</string>
     <string name="ce_settings_profile_lock">Blocco del profilo</string>
+    <string name="ce_settings_detail_pages">Pagine di dettaglio</string>
+    <string name="ce_settings_detail_pages_summary">Scegli cosa mostrano le pagine di film, serie ed episodi</string>
+    <string name="ce_pref_detail_critic_rating">Punteggio Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Il punteggio della critica, quando il tuo server lo ha</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">La breve frase sopra la trama</string>
+    <string name="ce_pref_detail_studios">Studi ed emittenti</string>
+    <string name="ce_pref_detail_studios_summary">Gli studi di un film, le reti di una serie</string>
+    <string name="ce_pref_detail_air_schedule">Programmazione</string>
+    <string name="ce_pref_detail_air_schedule_summary">I giorni e l\'orario in cui va in onda una serie in corso</string>
+    <string name="ce_pref_detail_watch_history">Cronologia di visione</string>
+    <string name="ce_pref_detail_watch_history_summary">Quante volte l\'hai guardato e quando l\'ultima volta</string>
+    <string name="ce_pref_detail_external_links">Link esterni</string>
+    <string name="ce_pref_detail_external_links_summary">Link a IMDb, TMDB e TheTVDB</string>
+    <string name="ce_pref_detail_extras">Contenuti extra</string>
+    <string name="ce_pref_detail_extras_summary">Trailer e contenuti speciali memorizzati sul tuo server</string>
+    <string name="ce_pref_detail_collections">Raccolte</string>
+    <string name="ce_pref_detail_collections_summary">Le raccolte di cui fa parte un film</string>
+    <string name="ce_pref_detail_similar">Altri simili</string>
+    <string name="ce_pref_detail_similar_summary">Titoli simili della tua libreria</string>
 </resources>

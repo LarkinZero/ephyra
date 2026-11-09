@@ -37,6 +37,8 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.AirScheduleText
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
@@ -113,7 +115,9 @@ fun ShowWideLayout(
                                 show.officialRating,
                             ),
                         communityRating = show.communityRating,
+                        criticRating = show.criticRating,
                     )
+                    AirScheduleText(show)
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     ItemButtonsBar(
                         item = show,
@@ -152,13 +156,20 @@ fun ShowWideLayout(
                             },
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    show.tagline?.let { tagline ->
+                        TaglineText(tagline)
+                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    }
                     OverviewText(text = show.overview, maxCollapsedLines = 4)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     InfoText(
                         genres = show.genres,
                         director = state.director,
                         writers = state.writers,
+                        studios = show.studios,
+                        studiosAreNetworks = true,
                     )
+                    ShowLinks(show, onAction)
                 }
                 Spacer(Modifier.height(MaterialTheme.spacings.medium))
 
@@ -210,7 +221,9 @@ fun ShowWideLayout(
                         },
                         contentPadding = rowPadding,
                     )
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
+                ShowRelatedRows(state = state, onAction = onAction, contentPadding = rowPadding)
                 Spacer(Modifier.height(safePadding.bottom + margin))
             }
         }

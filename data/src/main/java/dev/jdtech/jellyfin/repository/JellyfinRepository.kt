@@ -189,6 +189,31 @@ interface JellyfinRepository {
      */
     suspend fun getThemeSongUrl(itemId: UUID): String? = null
 
+    /**
+     * CE (#332): up to [limit] items like [itemId], for "More like this". The detail pages load it
+     * after they are shown. Offline there is nothing to compare with, so the default is empty.
+     */
+    suspend fun getSimilarItems(itemId: UUID, limit: Int = SIMILAR_ITEMS_LIMIT): List<FindroidItem> =
+        emptyList()
+
+    /**
+     * CE (#332): the extras of [itemId] — its local trailers, then its special features (behind the
+     * scenes, deleted scenes, featurettes…) — as movies the player can play. Each kind is one
+     * request, made only when asked for. Online only; the default is empty.
+     */
+    suspend fun getExtras(
+        itemId: UUID,
+        localTrailers: Boolean,
+        specialFeatures: Boolean,
+    ): List<FindroidMovie> = emptyList()
+
+    /**
+     * CE (#332): the collections (box sets) that contain [itemId], as jellyfin-web's "Included in"
+     * finds them (`/Items/{id}/Collections`, Jellyfin 12 and later). Online only; the default is
+     * empty.
+     */
+    suspend fun getItemCollections(itemId: UUID): List<FindroidItem> = emptyList()
+
     suspend fun postCapabilities()
 
     suspend fun postPlaybackStart(itemId: UUID)
@@ -215,6 +240,9 @@ interface JellyfinRepository {
 
     fun getUserId(): UUID
 }
+
+/** CE (#332): how many items a "More like this" row shows. */
+const val SIMILAR_ITEMS_LIMIT = 12
 
 /** One page of items. [totalRecordCount] is null unless the caller asked for it. */
 data class ItemsPage(val items: List<FindroidItem>, val totalRecordCount: Int? = null)

@@ -41,6 +41,16 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val tvThemeMusic = Preference("pref_tv_theme_music", false)
     val displayExtraInfo = Preference("pref_display_extra_info", false)
     val displayCastAndCrew = Preference("pref_display_cast_and_crew", true)
+    // CE (#332): which of the server's metadata the detail pages show.
+    val detailCriticRating = Preference("pref_detail_critic_rating", true)
+    val detailTagline = Preference("pref_detail_tagline", true)
+    val detailStudios = Preference("pref_detail_studios", true)
+    val detailAirSchedule = Preference("pref_detail_air_schedule", true)
+    val detailWatchHistory = Preference("pref_detail_watch_history", true)
+    val detailExternalLinks = Preference("pref_detail_external_links", true)
+    val detailExtras = Preference("pref_detail_extras", true)
+    val detailCollections = Preference("pref_detail_collections", true)
+    val detailSimilar = Preference("pref_detail_similar", true)
     // CE (#188): show the Favorites tab in the bottom navigation bar.
     val showFavoritesTab = Preference("pref_show_favorites_tab", true)
     // CE (#245): open on the user list when the server has more than one saved user.

@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN-код профілю</string>
     <string name="ce_settings_profile_pin_summary">Заблокувати цей профіль на цьому пристрої</string>
     <string name="ce_settings_profile_lock">Блокування профілю</string>
+    <string name="ce_settings_detail_pages">Сторінки відомостей</string>
+    <string name="ce_settings_detail_pages_summary">Виберіть, що показують сторінки фільмів, серіалів і серій</string>
+    <string name="ce_pref_detail_critic_rating">Рейтинг Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Оцінка критиків, якщо вона є на вашому сервері</string>
+    <string name="ce_pref_detail_tagline">Слоган</string>
+    <string name="ce_pref_detail_tagline_summary">Короткий рядок над описом</string>
+    <string name="ce_pref_detail_studios">Студії та телеканали</string>
+    <string name="ce_pref_detail_studios_summary">Студії фільму, телемережі серіалу</string>
+    <string name="ce_pref_detail_air_schedule">Розклад виходу</string>
+    <string name="ce_pref_detail_air_schedule_summary">Дні та час виходу серіалу, що триває</string>
+    <string name="ce_pref_detail_watch_history">Історія переглядів</string>
+    <string name="ce_pref_detail_watch_history_summary">Скільки разів ви дивилися і коли востаннє</string>
+    <string name="ce_pref_detail_external_links">Зовнішні посилання</string>
+    <string name="ce_pref_detail_external_links_summary">Посилання на IMDb, TMDB і TheTVDB</string>
+    <string name="ce_pref_detail_extras">Додаткові матеріали</string>
+    <string name="ce_pref_detail_extras_summary">Трейлери та спеціальні матеріали на вашому сервері</string>
+    <string name="ce_pref_detail_collections">Колекції</string>
+    <string name="ce_pref_detail_collections_summary">Колекції, до яких входить фільм</string>
+    <string name="ce_pref_detail_similar">Схоже</string>
+    <string name="ce_pref_detail_similar_summary">Схожі назви з вашої бібліотеки</string>
 </resources>

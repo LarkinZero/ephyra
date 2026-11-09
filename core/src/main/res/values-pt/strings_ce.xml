@@ -83,5 +83,18 @@
     <string name="year_range_continuing">%1$d – presente</string>
     <string name="shuffle">Aleatório</string>
     <string name="favorites_empty_body">Selecione o ícone de coração em qualquer filme, série ou episódio para o adicionar aos favoritos.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Pontuação do Rotten Tomatoes</string>
+    <string name="item_studios">Estúdios</string>
+    <string name="item_networks">Canais</string>
+    <string name="item_airs">Emitido %1$s</string>
+    <string name="item_airs_daily">diariamente</string>
+    <string name="item_watch_count">Visto %1$d×</string>
+    <string name="item_watch_count_last">Visto %1$d× · a última vez a %2$s</string>
+    <string name="item_open_on">Abrir em %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extras</string>
+    <string name="item_included_in">Incluído em</string>
+    <string name="item_more_like_this">Mais como este</string>
     <string name="ce_session_revoked">%1$s terminou a sua sessão. Inicie sessão novamente para continuar.</string>
 </resources>

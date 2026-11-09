@@ -32,7 +32,11 @@ import dev.jdtech.jellyfin.ce.presentation.settings.about.LicensesScreen
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextItemType
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextLink
 import dev.jdtech.jellyfin.models.CollectionType
+import dev.jdtech.jellyfin.models.FindroidBoxSet
+import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidSeason
+import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
@@ -182,6 +186,17 @@ private fun episodePlayerAction(
             startFromBeginning = startFromBeginning,
         )
     )
+}
+
+/** CE (#332): the page of a movie, show or collection picked from a row on a detail page. */
+private fun navigateToDetail(navigate: (NavKey) -> Unit, item: FindroidItem) {
+    when (item) {
+        is FindroidMovie -> navigate(MovieRoute(item.id.toString()))
+        is FindroidShow -> navigate(ShowRoute(item.id.toString()))
+        is FindroidBoxSet ->
+            navigate(CollectionRoute(collectionId = item.id.toString(), collectionName = item.name))
+        else -> Unit
+    }
 }
 
 /** The item page and the player, resuming, for a Watch Next program (#138). */
@@ -357,6 +372,8 @@ private fun EntryProviderScope<NavKey>.tvEntries(
                 resumedAction { personId ->
                     navigate(PersonRoute(personId = personId.toString()))
                 },
+            // CE (#332): a collection the movie is in, or one of "More like this".
+            navigateToItem = resumedAction { item -> navigateToDetail(navigate, item) },
         )
     }
     entry<ShowRoute> { key ->
@@ -372,8 +389,18 @@ private fun EntryProviderScope<NavKey>.tvEntries(
                                     seriesId = item.seriesId.toString(),
                                 )
                             )
-                        else -> Unit
+                        else -> navigateToDetail(navigate, item)
                     }
+                },
+            // CE (#332): an extra plays as a single video, the way a movie does.
+            navigateToExtra =
+                resumedAction { extraId ->
+                    navigate(
+                        PlayerRoute(
+                            itemId = extraId.toString(),
+                            itemKind = BaseItemKind.MOVIE.serialName,
+                        )
+                    )
                 },
             navigateToPlayer =
                 resumedAction { itemId, shuffle ->
