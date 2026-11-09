@@ -101,11 +101,13 @@ filter stops the entry from switching to stable right after a release.
 - Dolby Vision direct play where the device supports it, transcoding where it doesn't. Dolby Vision
   downloads can be converted to a device-compatible copy.
 - Platform decoder first (Atmos), ffmpeg if a decoder fails.
-- PGS, VobSub and DVB subtitles without transcoding. Subtitle colour, outline, font and size.
+- PGS, VobSub and DVB subtitles without transcoding. Subtitle colour, outline, font and size, on
+  ExoPlayer and mpv, with a switch to override a track's own styling.
 - Version picker before playing, quality switch during playback.
 - Audio and subtitle choice remembered per series and per user, on ExoPlayer, mpv and downloads.
 - Plays on into the next season. Chapter list. Skip, ask or ignore per media segment type.
   "Still watching?" prompt after a run of autoplayed episodes.
+- "Up next" card with a countdown at the end of an episode. Sleep timer.
 - Background audio with lock screen controls (opt-in, Settings → Player → Background playback).
 
 **Library**
@@ -113,11 +115,15 @@ filter stops the entry from switching to stable right after a release.
 - Favorites tab.
 - Home rows you choose and reorder (Settings → Interface → Home rows).
 - Hide-watched filter, kept across libraries.
-- Offline mode switches on by itself without a connection.
+- Offline mode switches on by itself without a connection. Downloads open even when the server
+  doesn't answer.
 - Error screens with Retry, and real empty states.
 - Long-press to copy text on detail screens. Option to hide cast and crew.
 - HDR10+ and Dolby Atmos badges on movie and episode pages.
-- Profiles: user faces, default avatars and one-tap switching between users.
+- Movie and show pages with the critic score, tagline, studios, every trailer, extras,
+  collections and "More like this", each with a switch (Settings → Interface → Detail pages).
+- Profiles: user faces, default avatars and one-tap switching between users. A profile can be
+  locked with a PIN, or a pattern on the phone, kept on the device.
 
 **Look**
 
@@ -194,6 +200,7 @@ Same login and server as the phone app, same releases (the `-tv-` APKs). Built f
 - Refresh rate switching to match the video.
 - Continue Watching and Next Up in the Android TV home screen's Watch Next row.
 - Screensaver with your library's artwork. Optional theme music on show pages.
+- Sleep timer, "Up next" card and profile PIN, as on the phone.
 - Collections, trailers and settings all reachable with the remote. Phone-only settings are hidden.
 
 Background and roadmap: [docs/tv-research/](docs/tv-research/).

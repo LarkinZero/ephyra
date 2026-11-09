@@ -13,6 +13,59 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.3.0] — 2026-11-09
+
+Profiles can be locked, the player learns a few manners, and item pages show much more of what
+your server knows. A profile can now sit behind a PIN, or a pattern on the phone, that never
+leaves the device. The player gets a sleep timer and an "Up next" card with a countdown at the
+end of an episode. Movie and show pages add the critic score, tagline, studios, every trailer,
+extras, collections and "More like this", each with a switch if you'd rather not see it. mpv gets
+a round of fixes and now follows your subtitle style, and something you downloaded opens even
+when the server doesn't answer.
+
+### Added
+- Profile lock: an optional 4 to 6 digit PIN per profile, asked when switching to the profile and
+  when the app starts in it. It is stored on the device only (#299).
+- Profile lock with a pattern on the phone, as an alternative to the PIN (#330).
+- Sleep timer on phone and TV: 15 to 90 minutes, or until the end of the episode (#298).
+- "Up next" card with a countdown in the last seconds of an episode, or from the start of the
+  outro, on phone and TV (#272).
+- Movie and show pages show what Jellyfin already sends: the Rotten Tomatoes score, tagline,
+  studios or networks, every trailer, the air schedule of a running show, the watch count and
+  last played date, a 3D badge, extras, collections and "More like this"; links to IMDb, TMDB,
+  TVDB and Trakt on the phone (#332).
+- Subtitle style: an "Override embedded styles" switch that applies your style to tracks that
+  bring their own, such as ASS (#300).
+- mpv follows the subtitle style settings: colour, outline, background, font and size (#308).
+
+### Changed
+- Settings → Interface → Detail pages: one page with a switch for each part of a movie or show
+  page. "Display cast and crew" and "Display Extra Info" moved there (#332).
+- Downloaded movies and episodes open and play from the local copy when the server fails or
+  takes more than three seconds to answer (#281).
+- Playback starts a little sooner: media streams over the connection the app already has open,
+  and the saved audio and subtitle choice is applied with the first track selection instead of
+  after it (#296).
+
+### Fixed
+- Phones switch the display to the video's frame rate again, so 24 fps video no longer plays at
+  the panel's maximum refresh rate (#338).
+- Tablet: the title and text of a movie, show or episode page sit under the backdrop instead of
+  over it, where bright artwork made them hard to read (#339).
+- The app's session disappears from the server's dashboard when the app closes or a login is
+  removed, instead of staying listed until the server restarts (#336).
+- The PIN prompt stays usable with the keyboard up, and Change PIN on TV no longer keeps the old
+  PIN (#329).
+- Show backdrops and logos are requested with the series' own image tags, so a series without a
+  logo no longer causes a failed request (#319).
+- A show that airs every day reads "Airs daily" (#332).
+- mpv: play and pause survive loading and item changes (#305); a file mpv cannot open reports an
+  error instead of buffering forever (#306); lock screen and Bluetooth controls get the position
+  and the queue (#304); no more crash when backing out of the player (#318).
+
+### Maintenance
+- Dependencies: Material 3 adaptive 1.3.0 (#337).
+
 ## [v2.2.0] — 2026-11-08
 
 Ephyra gets its own look, a real tablet layout and a lot more speed. The app now wears the
@@ -648,6 +701,7 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.3.0]: https://github.com/midasvo/ephyra/releases/tag/v2.3.0
 [v2.2.0]: https://github.com/midasvo/ephyra/releases/tag/v2.2.0
 [v2.1.0]: https://github.com/midasvo/ephyra/releases/tag/v2.1.0
 [v2.0.0]: https://github.com/midasvo/ephyra/releases/tag/v2.0.0
