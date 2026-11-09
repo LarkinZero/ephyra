@@ -2,6 +2,8 @@
 
 Research for [issue #284](https://github.com/midasvo/ephyra/issues/284): how healthy is the mpv backend? Research only. It ends in these documents and in follow-up issues, not in code.
 
+**Status:** done, apart from the device rows in [#309](https://github.com/midasvo/ephyra/issues/309). The documents describe the code at the commit named below and are not kept up to date. The part to keep using is [`docs/mpv-checklist.md`](../mpv-checklist.md).
+
 | File | Phase | Status |
 |---|---|---|
 | [0-plan.md](0-plan.md) | Copy of the plan in the issue | done |

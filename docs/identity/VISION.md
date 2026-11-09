@@ -7,8 +7,8 @@ the way of the artwork.
 This document is the agreed direction. It is written so that someone with no taste of their own
 can apply it consistently. Where it says "must", a code review can quote it.
 
-Parent issue: midasvo/ephyra#210. Mood board with the three candidate directions and the chosen one:
-https://claude.ai/artifact/Unf8mfmL674Ybb2EFj963F
+Parent issue: midasvo/ephyra#210. Mood board with the three candidate directions and the chosen one
+(a private page, ask the maintainer for access): https://claude.ai/artifact/Unf8mfmL674Ybb2EFj963F
 
 ## 1. Principles
 
@@ -270,19 +270,19 @@ artwork in upstream files) is left alone: it is already what §3.4 asks for.
 
 ## 10. Open questions
 
+The identity shipped in v2.2.0. These were not settled by then:
+
 1. **Status and navigation bars on phone.** Transparent over `surface` (edge-to-edge) is the
    assumption. Confirm on a device with a three-button nav bar that `#070B16` doesn't look like a
    dead strip.
 2. **Light theme glow.** §6 disables it. If the seek thumb looks dead in light theme, consider a
    2 dp `primaryContainer` ring instead.
-3. **Empty-state specks.** Allowed by §9 but not designed. Decide whether `EmptyState` gets a
-   small speck field or stays plain.
-4. **README and store screenshots** need retaking once the theme lands; the feature graphic and
-   icon are already on-brand.
-5. **Welcome screen** (`WelcomeScreen.kt`, CE-owned) is the one place where a larger brand moment
-   is acceptable: the mark with its glow on `surface`. Not specced here.
-6. **TV `darkSchemeTv`** lacks `outline*` and `surfaceContainer*` roles; the TV screens use the
+3. **TV `darkSchemeTv`** lacks `outline*` and `surfaceContainer*` roles; the TV screens use the
    phone `MaterialTheme` for those. Check nothing on TV still reads the old `#001721` gradient.
-7. **Jellyfin's own purple-blue.** The secondary (`#A3B0FF`) sits close to Jellyfin's brand
+4. **Jellyfin's own purple-blue.** The secondary (`#A3B0FF`) sits close to Jellyfin's brand
    gradient. It is rarely visible (nav indicator, count badges); if it ever reads as "Jellyfin",
    shift it toward the cyan.
+
+Settled since: empty states and the TV screensaver have a speck field and the welcome screen has
+the swimming jellyfish (#227, #235); the README, website and store screenshots were retaken with
+the theme (#311, #315).
