@@ -10,6 +10,7 @@ Same item, both backends, and write down what differed. A shared failure is not 
 - [ ] **From 0.** Play an episode from its page. Same checks.
 - [ ] **Seek.** Seek bar, the 5 s and 15 s buttons, a double tap. Position lands where it was dropped, the spinner goes away, no second seek on the way back.
 - [ ] **Media session.** `adb shell dumpsys media_session` while playing: state `PLAYING`, a position, the right title.
+- [ ] **Display refresh rate.** While playing a 24fps item, `adb shell dumpsys SurfaceFlinger | grep -A1 'SurfaceView\[nl.midasvo'`: the player's SurfaceView line must end in a vote such as `23.98 Hz ExactOrMultiple OnlySeamless`, on both backends. An empty "Frame Rate (Explicit)" column means no hint was sent and a 120Hz phone stays at 120Hz for the whole playback (#338). The log line `Video 23.976fps, display ...Hz of [...]` shows what the display settled on five seconds in. `PlayerInvariantsTest` pins the code side of this.
 - [ ] **Back out.** During loading and while playing. No crash in `adb logcat -b events | grep am_crash`, a `reportStopped` with the right position.
 
 ### When the PR touches the playlist, segments or the end of an item
