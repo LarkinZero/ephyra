@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.models
 
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import java.time.DayOfWeek
 import java.util.UUID
 import org.jellyfin.sdk.model.DateTime
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -29,6 +30,20 @@ data class FindroidShow(
     val productionYear: Int?,
     val endDate: DateTime?,
     val trailer: String?,
+    // CE (#332): what the item response already carries. Not stored offline, so empty there.
+    /** Every remote trailer; [trailer] is the first. */
+    val trailers: List<FindroidTrailer> = emptyList(),
+    val tagline: String? = null,
+    /** The Rotten Tomatoes score (0–100) from the server's OMDb provider. */
+    val criticRating: Float? = null,
+    /** The networks that air the show. */
+    val studios: List<String> = emptyList(),
+    val externalLinks: List<FindroidExternalLink> = emptyList(),
+    val airDays: List<DayOfWeek> = emptyList(),
+    /** As the server has it, such as "21:00" or "9:00 PM". */
+    val airTime: String? = null,
+    val localTrailerCount: Int = 0,
+    val specialFeatureCount: Int? = null,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter> = emptyList(),
 ) : FindroidItem
@@ -55,6 +70,15 @@ fun BaseItemDto.toFindroidShow(jellyfinRepository: JellyfinRepository): Findroid
         productionYear = productionYear,
         endDate = endDate,
         trailer = remoteTrailers?.getOrNull(0)?.url,
+        trailers = remoteTrailers.toFindroidTrailers(),
+        tagline = taglines.firstTagline(),
+        criticRating = criticRating,
+        studios = studioNames(),
+        externalLinks = toExternalLinks(),
+        airDays = airDays.toDaysOfWeek(),
+        airTime = airTime?.takeIf { it.isNotBlank() }?.trim(),
+        localTrailerCount = localTrailerCount ?: 0,
+        specialFeatureCount = specialFeatureCount,
         images = toFindroidImages(jellyfinRepository),
     )
 }

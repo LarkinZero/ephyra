@@ -95,5 +95,18 @@
     <string name="year_range_continuing">%1$d – حتى الآن</string>
     <string name="shuffle">خلط</string>
     <string name="favorites_empty_body">حدد رمز القلب في أي فيلم أو مسلسل أو حلقة لإضافتها إلى مفضلتك.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">تقييم Rotten Tomatoes</string>
+    <string name="item_studios">الاستوديوهات</string>
+    <string name="item_networks">الشبكات</string>
+    <string name="item_airs">يُعرض %1$s</string>
+    <string name="item_airs_daily">يوميًا</string>
+    <string name="item_watch_count">شوهد %1$d×</string>
+    <string name="item_watch_count_last">شوهد %1$d× · آخر مرة في %2$s</string>
+    <string name="item_open_on">فتح في %1$s</string>
+    <string name="item_trailer_number">المقطع الدعائي %1$d</string>
+    <string name="item_extras">إضافات</string>
+    <string name="item_included_in">مضمَّن في</string>
+    <string name="item_more_like_this">المزيد من هذا القبيل</string>
     <string name="ce_session_revoked">سجّل %1$s خروجك. سجّل الدخول مرة أخرى للمتابعة.</string>
 </resources>

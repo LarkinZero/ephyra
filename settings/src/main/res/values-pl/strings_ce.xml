@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN profilu</string>
     <string name="ce_settings_profile_pin_summary">Zablokuj ten profil na tym urządzeniu</string>
     <string name="ce_settings_profile_lock">Blokada profilu</string>
+    <string name="ce_settings_detail_pages">Strony szczegółów</string>
+    <string name="ce_settings_detail_pages_summary">Wybierz, co pokazują strony filmów, seriali i odcinków</string>
+    <string name="ce_pref_detail_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Ocena krytyków, jeśli serwer ją ma</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Krótka linijka nad opisem</string>
+    <string name="ce_pref_detail_studios">Studia i stacje</string>
+    <string name="ce_pref_detail_studios_summary">Studia filmu, stacje emitujące serial</string>
+    <string name="ce_pref_detail_air_schedule">Harmonogram emisji</string>
+    <string name="ce_pref_detail_air_schedule_summary">Dni i godzina, w których emitowany jest trwający serial</string>
+    <string name="ce_pref_detail_watch_history">Historia oglądania</string>
+    <string name="ce_pref_detail_watch_history_summary">Liczba odtworzeń i data ostatniego obejrzenia</string>
+    <string name="ce_pref_detail_external_links">Linki zewnętrzne</string>
+    <string name="ce_pref_detail_external_links_summary">Linki do IMDb, TMDB i TheTVDB</string>
+    <string name="ce_pref_detail_extras">Dodatki</string>
+    <string name="ce_pref_detail_extras_summary">Zwiastuny i materiały dodatkowe zapisane na Twoim serwerze</string>
+    <string name="ce_pref_detail_collections">Kolekcje</string>
+    <string name="ce_pref_detail_collections_summary">Kolekcje, do których należy film</string>
+    <string name="ce_pref_detail_similar">Więcej podobnych</string>
+    <string name="ce_pref_detail_similar_summary">Podobne tytuły z Twojej biblioteki</string>
 </resources>

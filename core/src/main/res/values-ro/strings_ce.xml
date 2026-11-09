@@ -86,5 +86,18 @@
     <string name="year_range_continuing">%1$d – prezent</string>
     <string name="shuffle">Amestecare</string>
     <string name="favorites_empty_body">Selectează pictograma inimă de pe orice film, serial sau episod pentru a-l adăuga la favorite.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Scor Rotten Tomatoes</string>
+    <string name="item_studios">Studiouri</string>
+    <string name="item_networks">Rețele</string>
+    <string name="item_airs">Se difuzează %1$s</string>
+    <string name="item_airs_daily">zilnic</string>
+    <string name="item_watch_count">Vizionat de %1$d×</string>
+    <string name="item_watch_count_last">Vizionat de %1$d× · ultima dată pe %2$s</string>
+    <string name="item_open_on">Deschide pe %1$s</string>
+    <string name="item_trailer_number">Trailer %1$d</string>
+    <string name="item_extras">Extra</string>
+    <string name="item_included_in">Inclus în</string>
+    <string name="item_more_like_this">Mai multe asemănătoare</string>
     <string name="ce_session_revoked">%1$s te-a deconectat. Conectează-te din nou pentru a continua.</string>
 </resources>

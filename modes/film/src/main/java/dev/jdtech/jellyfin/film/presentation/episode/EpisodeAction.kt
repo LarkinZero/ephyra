@@ -25,4 +25,7 @@ sealed interface EpisodeAction {
     data class NavigateToPerson(val personId: UUID) : EpisodeAction
 
     data class NavigateToSeason(val seasonId: UUID, val seriesId: UUID) : EpisodeAction
+
+    /** CE (#332): opens the episode on IMDb and the like. */
+    data class OpenExternalLink(val url: String) : EpisodeAction
 }

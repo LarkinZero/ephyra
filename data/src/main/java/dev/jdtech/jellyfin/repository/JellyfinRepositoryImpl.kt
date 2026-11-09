@@ -656,6 +656,46 @@ class JellyfinRepositoryImpl(
             }
         }
 
+    override suspend fun getSimilarItems(itemId: UUID, limit: Int): List<FindroidItem> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.libraryApi
+                .getSimilarItems(itemId, userId = currentUserId, limit = limit)
+                .content
+                .items
+                .filter { it.id != itemId }
+                .toFindroidItems()
+        }
+
+    override suspend fun getExtras(
+        itemId: UUID,
+        localTrailers: Boolean,
+        specialFeatures: Boolean,
+    ): List<FindroidMovie> =
+        withContext(Dispatchers.IO) {
+            val trailersAsync = async {
+                if (localTrailers) {
+                    jellyfinApi.libraryApi.getLocalTrailers(itemId, currentUserId).content
+                } else emptyList()
+            }
+            val featuresAsync = async {
+                if (specialFeatures) {
+                    jellyfinApi.libraryApi.getSpecialFeatures(itemId, currentUserId).content
+                } else emptyList()
+            }
+            (trailersAsync.await() + featuresAsync.await())
+                .distinctBy { it.id }
+                .map { it.toFindroidMovie(this@JellyfinRepositoryImpl, emptyMap()) }
+        }
+
+    override suspend fun getItemCollections(itemId: UUID): List<FindroidItem> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.libraryApi
+                .getItemCollections(itemId, userId = currentUserId)
+                .content
+                .items
+                .toFindroidItems()
+        }
+
     override suspend fun postCapabilities() {
         Timber.d("Sending capabilities")
         withContext(Dispatchers.IO) {

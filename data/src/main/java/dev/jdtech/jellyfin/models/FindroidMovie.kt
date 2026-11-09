@@ -31,6 +31,20 @@ data class FindroidMovie(
     override val unplayedItemCount: Int? = null,
     /** When the server last saw this movie played; null if never, or when read offline. */
     val lastPlayedDate: LocalDateTime? = null,
+    // CE (#332): what the item response already carries. Not stored offline, so empty there.
+    /** Every remote trailer; [trailer] is the first. */
+    val trailers: List<FindroidTrailer> = emptyList(),
+    val tagline: String? = null,
+    /** The Rotten Tomatoes score (0–100) from the server's OMDb provider. */
+    val criticRating: Float? = null,
+    val studios: List<String> = emptyList(),
+    val externalLinks: List<FindroidExternalLink> = emptyList(),
+    /** How often the server saw this movie played to the end. */
+    val playCount: Int = 0,
+    val is3D: Boolean = false,
+    val localTrailerCount: Int = 0,
+    /** Null when the server didn't say, which is no reason not to ask for the extras. */
+    val specialFeatureCount: Int? = null,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter>,
     override val trickplayInfo: Map<String, FindroidTrickplayInfo>?,
@@ -75,6 +89,15 @@ suspend fun BaseItemDto.toFindroidMovie(
         endDate = endDate,
         trailer = remoteTrailers?.getOrNull(0)?.url,
         lastPlayedDate = userData?.lastPlayedDate,
+        trailers = remoteTrailers.toFindroidTrailers(),
+        tagline = taglines.firstTagline(),
+        criticRating = criticRating,
+        studios = studioNames(),
+        externalLinks = toExternalLinks(),
+        playCount = userData?.playCount ?: 0,
+        is3D = video3dFormat != null,
+        localTrailerCount = localTrailerCount ?: 0,
+        specialFeatureCount = specialFeatureCount,
         images = toFindroidImages(jellyfinRepository),
         chapters = toFindroidChapters(),
         trickplayInfo =

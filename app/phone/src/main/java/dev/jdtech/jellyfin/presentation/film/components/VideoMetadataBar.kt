@@ -29,7 +29,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable
-fun VideoMetadataBar(videoMetadata: VideoMetadata) {
+fun VideoMetadataBar(videoMetadata: VideoMetadata, is3D: Boolean = false) {
     // CE: wraps instead of overflowing, now that HDR10+ and spatial audio add badges.
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
@@ -70,6 +70,8 @@ fun VideoMetadataBar(videoMetadata: VideoMetadata) {
             VideoMetadataBarItem(text = this.raw, icon = icon)
         }
         videoMetadata.audioChannels.firstOrNull()?.apply { VideoMetadataBarItem(text = this.raw) }
+        // CE (#332): the item's video3DFormat, whatever the layout (side by side, MVC…).
+        if (is3D) VideoMetadataBarItem(text = "3D")
     }
 }
 

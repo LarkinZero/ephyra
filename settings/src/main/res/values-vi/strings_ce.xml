@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">Mã PIN hồ sơ</string>
     <string name="ce_settings_profile_pin_summary">Khóa hồ sơ này trên thiết bị này</string>
     <string name="ce_settings_profile_lock">Khóa hồ sơ</string>
+    <string name="ce_settings_detail_pages">Trang chi tiết</string>
+    <string name="ce_settings_detail_pages_summary">Chọn nội dung hiển thị trên trang phim, chương trình và tập</string>
+    <string name="ce_pref_detail_critic_rating">Điểm Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Điểm của giới phê bình, khi máy chủ của bạn có</string>
+    <string name="ce_pref_detail_tagline">Khẩu hiệu</string>
+    <string name="ce_pref_detail_tagline_summary">Dòng ngắn phía trên phần tóm tắt</string>
+    <string name="ce_pref_detail_studios">Hãng phim và đài truyền hình</string>
+    <string name="ce_pref_detail_studios_summary">Hãng phim của một bộ phim, kênh phát sóng của một chương trình</string>
+    <string name="ce_pref_detail_air_schedule">Lịch phát sóng</string>
+    <string name="ce_pref_detail_air_schedule_summary">Các ngày và giờ phát sóng của một chương trình đang chiếu</string>
+    <string name="ce_pref_detail_watch_history">Lịch sử xem</string>
+    <string name="ce_pref_detail_watch_history_summary">Số lần bạn đã xem và lần xem gần nhất</string>
+    <string name="ce_pref_detail_external_links">Liên kết ngoài</string>
+    <string name="ce_pref_detail_external_links_summary">Liên kết đến IMDb, TMDB và TheTVDB</string>
+    <string name="ce_pref_detail_extras">Nội dung bổ sung</string>
+    <string name="ce_pref_detail_extras_summary">Đoạn giới thiệu và nội dung đặc biệt lưu trên máy chủ của bạn</string>
+    <string name="ce_pref_detail_collections">Bộ sưu tập</string>
+    <string name="ce_pref_detail_collections_summary">Các bộ sưu tập mà phim thuộc về</string>
+    <string name="ce_pref_detail_similar">Nội dung tương tự</string>
+    <string name="ce_pref_detail_similar_summary">Các tựa tương tự trong thư viện của bạn</string>
 </resources>

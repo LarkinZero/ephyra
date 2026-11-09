@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
+import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.mergeDuplicateRoles
@@ -66,7 +68,7 @@ constructor(
                 val actors = if (displayCastAndCrew) getActors(episode) else emptyList()
                 _state.emit(
                     _state.value.copy(
-                        episode = episode,
+                        episode = episode.shownIn(appPreferences.detailSections()),
                         videoMetadata = videoMetadata,
                         actors = actors,
                         displayExtraInfo = displayExtraInfo,

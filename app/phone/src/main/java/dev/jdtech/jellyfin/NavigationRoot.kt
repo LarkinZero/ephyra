@@ -554,6 +554,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             movieId = UUID.fromString(key.movieId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateHome = dropUnlessResumed { navigator.navigateHome() },
+            navigateToItem = resumedAction { item -> navigateToItem(navigator, item) },
             navigateToPerson =
                 resumedAction { personId ->
                     navigator.navigate(PersonRoute(personId = personId.toString()))

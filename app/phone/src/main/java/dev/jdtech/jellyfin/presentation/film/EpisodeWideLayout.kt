@@ -210,6 +210,7 @@ fun EpisodeWideContent(
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
                     OverviewText(text = episode.overview, maxCollapsedLines = 4)
+                    EpisodeWatchAndLinks(episode, onAction)
                 }
                 Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 if (state.actors.isNotEmpty()) {

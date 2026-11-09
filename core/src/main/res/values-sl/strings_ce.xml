@@ -89,5 +89,18 @@
     <string name="year_range_continuing">%1$d – danes</string>
     <string name="shuffle">Naključno</string>
     <string name="favorites_empty_body">Izberite ikono srca pri katerem koli filmu, seriji ali epizodi, da ga dodate med priljubljene.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="item_studios">Studii</string>
+    <string name="item_networks">Postaje</string>
+    <string name="item_airs">Na sporedu %1$s</string>
+    <string name="item_airs_daily">vsak dan</string>
+    <string name="item_watch_count">Ogledano %1$d×</string>
+    <string name="item_watch_count_last">Ogledano %1$d× · nazadnje %2$s</string>
+    <string name="item_open_on">Odpri na %1$s</string>
+    <string name="item_trailer_number">Napovednik %1$d</string>
+    <string name="item_extras">Dodatki</string>
+    <string name="item_included_in">Vključeno v</string>
+    <string name="item_more_like_this">Več podobnih</string>
     <string name="ce_session_revoked">%1$s vas je odjavil. Za nadaljevanje se znova prijavite.</string>
 </resources>

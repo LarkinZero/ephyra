@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">Profil-PIN</string>
     <string name="ce_settings_profile_pin_summary">Dieses Profil auf diesem Gerät sperren</string>
     <string name="ce_settings_profile_lock">Profilsperre</string>
+    <string name="ce_settings_detail_pages">Detailseiten</string>
+    <string name="ce_settings_detail_pages_summary">Wähle, was die Seiten von Filmen, Serien und Folgen zeigen</string>
+    <string name="ce_pref_detail_critic_rating">Bewertung von Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Die Kritikerwertung, wenn dein Server sie hat</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Die kurze Zeile über der Beschreibung</string>
+    <string name="ce_pref_detail_studios">Studios und Sender</string>
+    <string name="ce_pref_detail_studios_summary">Die Studios eines Films, die Sender einer Serie</string>
+    <string name="ce_pref_detail_air_schedule">Sendezeit</string>
+    <string name="ce_pref_detail_air_schedule_summary">Die Tage und die Uhrzeit, zu denen eine laufende Serie ausgestrahlt wird</string>
+    <string name="ce_pref_detail_watch_history">Wiedergabeverlauf</string>
+    <string name="ce_pref_detail_watch_history_summary">Wie oft du es gesehen hast und wann zuletzt</string>
+    <string name="ce_pref_detail_external_links">Externe Links</string>
+    <string name="ce_pref_detail_external_links_summary">Links zu IMDb, TMDB und TheTVDB</string>
+    <string name="ce_pref_detail_extras">Extras</string>
+    <string name="ce_pref_detail_extras_summary">Trailer und Bonusmaterial auf deinem Server</string>
+    <string name="ce_pref_detail_collections">Sammlungen</string>
+    <string name="ce_pref_detail_collections_summary">Die Sammlungen, zu denen ein Film gehört</string>
+    <string name="ce_pref_detail_similar">Mehr wie dieses</string>
+    <string name="ce_pref_detail_similar_summary">Ähnliche Titel aus deiner Mediathek</string>
 </resources>

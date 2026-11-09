@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.utils
 import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -16,6 +17,19 @@ fun <T> ObserveAsEvents(flow: Flow<T>, onEvent: (T) -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(flow, lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect(onEvent) }
+    }
+}
+
+/**
+ * CE (#332): runs [block] once per non-null [key], after the frame that first shows it, so work
+ * that only fills rows further down the page never competes with drawing the page itself.
+ */
+@Composable
+fun <K : Any> AfterFirstFrame(key: K?, block: (K) -> Unit) {
+    LaunchedEffect(key) {
+        if (key == null) return@LaunchedEffect
+        withFrameNanos {}
+        block(key)
     }
 }
 

@@ -80,5 +80,18 @@
     <string name="year_range_continuing">%1$d – indiyədək</string>
     <string name="shuffle">Qarışıq</string>
     <string name="favorites_empty_body">Sevimlilərinizə əlavə etmək üçün istənilən film, serial və ya epizodda ürək işarəsini seçin.</string>
+    <!-- CE (#332) -->
+    <string name="item_critic_rating">Rotten Tomatoes balı</string>
+    <string name="item_studios">Studiyalar</string>
+    <string name="item_networks">Şəbəkələr</string>
+    <string name="item_airs">Yayım: %1$s</string>
+    <string name="item_airs_daily">hər gün</string>
+    <string name="item_watch_count">%1$d× baxılıb</string>
+    <string name="item_watch_count_last">%1$d× baxılıb · sonuncu %2$s</string>
+    <string name="item_open_on">%1$s saytında aç</string>
+    <string name="item_trailer_number">Treyler %1$d</string>
+    <string name="item_extras">Əlavələr</string>
+    <string name="item_included_in">Daxil olduğu</string>
+    <string name="item_more_like_this">Buna bənzər</string>
     <string name="ce_session_revoked">%1$s sizi hesabdan çıxardı. Davam etmək üçün yenidən daxil olun.</string>
 </resources>

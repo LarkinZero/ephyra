@@ -157,4 +157,24 @@
     <string name="ce_settings_profile_pin">PIN-ul profilului</string>
     <string name="ce_settings_profile_pin_summary">Blochează acest profil pe acest dispozitiv</string>
     <string name="ce_settings_profile_lock">Blocarea profilului</string>
+    <string name="ce_settings_detail_pages">Pagini de detalii</string>
+    <string name="ce_settings_detail_pages_summary">Alege ce afișează paginile filmelor, serialelor și episoadelor</string>
+    <string name="ce_pref_detail_critic_rating">Scor Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Scorul criticilor, când serverul tău îl are</string>
+    <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Rândul scurt de deasupra descrierii</string>
+    <string name="ce_pref_detail_studios">Studiouri și rețele</string>
+    <string name="ce_pref_detail_studios_summary">Studiourile unui film, rețelele unui serial</string>
+    <string name="ce_pref_detail_air_schedule">Program de difuzare</string>
+    <string name="ce_pref_detail_air_schedule_summary">Zilele și ora la care se difuzează un serial în desfășurare</string>
+    <string name="ce_pref_detail_watch_history">Istoric de vizionare</string>
+    <string name="ce_pref_detail_watch_history_summary">De câte ori l-ai vizionat și când ultima dată</string>
+    <string name="ce_pref_detail_external_links">Linkuri externe</string>
+    <string name="ce_pref_detail_external_links_summary">Linkuri către IMDb, TMDB și TheTVDB</string>
+    <string name="ce_pref_detail_extras">Extra</string>
+    <string name="ce_pref_detail_extras_summary">Trailere și materiale speciale stocate pe serverul tău</string>
+    <string name="ce_pref_detail_collections">Colecții</string>
+    <string name="ce_pref_detail_collections_summary">Colecțiile din care face parte un film</string>
+    <string name="ce_pref_detail_similar">Mai multe asemănătoare</string>
+    <string name="ce_pref_detail_similar_summary">Titluri similare din biblioteca ta</string>
 </resources>
