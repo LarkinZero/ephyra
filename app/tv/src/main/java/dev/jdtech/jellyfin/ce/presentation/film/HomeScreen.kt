@@ -427,6 +427,7 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
                 color = Color.White.copy(alpha = .8f),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(HERO_OVERVIEW_WIDTH),
             )
         }
     }
@@ -499,8 +500,9 @@ private fun HeroTitle(item: FindroidItem, images: HeroImages) {
     val logo = remember(item, images) { images.logo(item) }
     var logoFailed by remember(logo) { mutableStateOf(logo == null) }
     if (logoFailed) {
-        // A title that doesn't fit on one line at the hero size shrinks until it fits on two,
-        // within the height a logo gets, before it is cut off. The line height follows the size.
+        // A title that doesn't fit on one line at the hero size shrinks until it does, or until it
+        // fits on two lines within the height a logo gets, whichever leaves it larger. Only then
+        // is it cut off. The line height follows the size.
         val style = MaterialTheme.typography.displayMedium
         BasicText(
             text = title,
@@ -548,7 +550,10 @@ private suspend fun LazyListState.scrollIntoView(index: Int) {
 
 private val HERO_HEIGHT = 200.dp
 private val ROW_TITLE_HEIGHT = 36.dp
-private const val HERO_TEXT_WIDTH = .55f
+// The title and the info line may run on over the faded left part of the backdrop; the overview is
+// a block of text and stays clear of the picture.
+private const val HERO_TEXT_WIDTH = .75f
+private const val HERO_OVERVIEW_WIDTH = .73f
 private val HERO_TITLE_MIN_SIZE = 28.sp
 private val HERO_TITLE_LINE_HEIGHT = 1.05.em
 private const val HERO_DELAY_MS = 300L
