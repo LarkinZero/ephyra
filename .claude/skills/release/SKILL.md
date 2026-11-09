@@ -68,9 +68,14 @@ On a branch `release/v$next`:
     update.
 - Add `[v$next]: https://github.com/midasvo/ephyra/releases/tag/v$next` at the top of the
   link list at the bottom, or the heading renders as plain bracketed text.
+- Write the store changelog to `fastlane/metadata/android/en-US/changelogs/$code.txt` and the
+  same text to `$((code + 1)).txt` (the TV build). F-Droid shows it as "what's new" and reads it
+  from the tagged commit, so it can't be added after the tag. Plain text, at most 500
+  characters: one sentence on what the release brings, then a few `- ` lines for the changes
+  users will notice.
 
 ```bash
-git add buildSrc/src/main/kotlin/EphyraVersion.kt CHANGELOG.md
+git add buildSrc/src/main/kotlin/EphyraVersion.kt CHANGELOG.md fastlane/metadata/android/en-US/changelogs
 git commit -m "chore(release): v$next"
 git push -u origin HEAD
 gh pr create --repo midasvo/ephyra --title "chore(release): v$next" --body "<the changelog section>"
@@ -105,10 +110,16 @@ Check that the release has eight APKs (`ephyra-v$next-libre-<abi>.apk` and
 `gh run rerun <run id> --failed`. If the code has to change, fix it on `main` and release the
 next patch version; the tag stays where it is.
 
-### 5. Report
+### 5. F-Droid
 
-Tell the user the version, a link to the release, the APK count, and anything that needs a
-follow-up (store listings, a known issue).
+Once the APKs are on the release, point the F-Droid inclusion merge request at it with the
+`fdroid-update` skill (`python3 .claude/skills/fdroid-update/scripts/update-mr.py`). Its
+pipeline takes a while; don't wait for it, report its link.
+
+### 6. Report
+
+Tell the user the version, a link to the release, the APK count, the state of the F-Droid merge
+request, and anything that needs a follow-up (store listings, a known issue).
 
 ## Hard rules
 
