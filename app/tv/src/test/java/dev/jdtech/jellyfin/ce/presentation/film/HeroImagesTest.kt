@@ -120,6 +120,47 @@ class HeroImagesTest {
     }
 
     @Test
+    fun `an episode without a show backdrop falls back to its season, then its own picture`() {
+        val server = "https://demo.example/jf"
+        val episode =
+            dummyEpisode.copy(
+                images =
+                    FindroidImages(
+                        primary = Uri.parse("$server/items/${dummyEpisode.id}/Images/Primary?tag=p")
+                    )
+            )
+        assertEquals(
+            listOf(
+                "$server/items/${dummyEpisode.seasonId}/Images/Backdrop/0?fillWidth=1920&quality=90",
+                "$server/items/${dummyEpisode.id}/Images/Primary?tag=p&fillWidth=1920&quality=90",
+            ),
+            heroBackdropUrls(episode, 1344),
+        )
+        // The screensaver only takes a backdrop the server said is there.
+        assertNull(heroBackdropUrl(episode, 1344))
+    }
+
+    @Test
+    fun `an episode's show backdrop comes first`() {
+        val episode =
+            dummyEpisode.copy(
+                images = FindroidImages(showBackdrop = Uri.parse("$base/Backdrop/0?tag=show"))
+            )
+        assertEquals(
+            listOf("$base/Backdrop/0?tag=show&fillWidth=1920&quality=90"),
+            heroBackdropUrls(episode, 1344),
+        )
+    }
+
+    @Test
+    fun `a movie has only its own backdrop`() {
+        assertEquals(
+            listOf("$base/Backdrop/0?tag=b&fillWidth=1920&quality=90"),
+            heroBackdropUrls(movie, 1344),
+        )
+    }
+
+    @Test
     fun `an item without artwork has no requests`() {
         val bare = dummyMovie.copy(images = FindroidImages())
         assertNull(images.backdrop(bare))

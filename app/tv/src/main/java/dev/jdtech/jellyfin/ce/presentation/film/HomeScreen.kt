@@ -27,6 +27,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -438,8 +439,10 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
 private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
     val previous = remember { PreviousImage() }
     val crossfadeMillis = backdropCrossfadeMillis()
+    // Counts the candidates that turned out to be missing, so the next one is asked for.
+    var missing by remember(item) { mutableIntStateOf(0) }
     val request =
-        remember(item, images, crossfadeMillis) {
+        remember(item, images, crossfadeMillis, missing) {
             images
                 .backdrop(item)
                 ?.newBuilder()
@@ -458,6 +461,9 @@ private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
             contentDescription = null,
             contentScale = ContentScale.Crop,
             onSuccess = { previous.key = it.result.memoryCacheKey },
+            // Only when the failure moved the hero on to another candidate: any other error would
+            // ask for the same image again, for ever.
+            onError = { if (images.backdrop(item)?.data != request.data) missing++ },
             modifier =
                 Modifier.fillMaxWidth(HERO_BACKDROP_WIDTH)
                     .aspectRatio(16f / 9f)
