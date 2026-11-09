@@ -443,7 +443,8 @@ private fun inputValue(value: Long, prefixRes: Int?, suffixRes: Int?): String =
         .ifEmpty { stringResource(CoreR.string.not_set) }
 
 private const val LIST_WEIGHT = .5f
-private val NUMBER_STEPS = listOf(-10L, -1L, 1L, 10L)
+// +1 first: OK on the row lands there, and it is never disabled.
+private val NUMBER_STEPS = listOf(1L, -1L, 10L, -10L)
 private val GroupShape = RoundedCornerShape(12.dp)
 private val ROW_MIN_HEIGHT = 56.dp
 private val ROW_PADDING_HORIZONTAL = 16.dp
