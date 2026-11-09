@@ -1,0 +1,7 @@
+Lock a profile, a sleep timer, and item pages that show more of what your server knows.
+
+- Profiles: an optional PIN, or a pattern on the phone, kept on the device.
+- Player: sleep timer and an Up next card with a countdown.
+- Movie and show pages: critic score, tagline, studios, trailers, extras and More like this.
+- mpv follows your subtitle style and gets several fixes.
+- Downloads open when the server doesn't answer.
