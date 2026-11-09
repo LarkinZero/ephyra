@@ -52,6 +52,8 @@ The follow-up issues, in the order from [4-decisions.md](4-decisions.md). All ha
 |---|---|
 | [#167](https://github.com/midasvo/ephyra/issues/167) | ✅ README with an Android TV section and a cleaner phone screenshot layout (done in #168) |
 
-## Still open in #121
+## Left out of #121
+
+#121 was closed without this check; it never became an issue of its own.
 
 - The final check on the Xiaomi box: frame times and memory while scrolling a large library, and Dolby Vision playback. It waits until the box is free. The results can change priorities, for example if the box turns out to stutter on the current Home.

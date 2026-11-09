@@ -2,6 +2,8 @@
 
 Research into making the phone app (`app/phone`) a first-class tablet client, next to phone and Android TV. Written 2026-11-07 from `main` at `ab64c3b9`.
 
+**Status:** built. All twelve roadmap items shipped in v2.2.0. Files 1 and 2 describe the app before that work. [4-design.md](4-design.md) is still the reference for how a screen should behave at each width, and [6-test-matrix.md](6-test-matrix.md) for how to test it.
+
 | Document | Contents |
 |---|---|
 | [1-inventory.md](1-inventory.md) | What the code does with window size today: every breakpoint, cap and fixed size, plus the phone/TV screen matrix |

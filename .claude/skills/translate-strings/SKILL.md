@@ -12,6 +12,15 @@ Upstream's translations come from Weblate into `values-<lang>/strings.xml`.
 To avoid merge conflicts during upstream syncs, all CE-only translations live in:
 `<module>/src/main/res/values-<lang>/strings_ce.xml`.
 
+Six modules have them: `core`, `data`, `modes/film`, `player/local`, `settings` and `setup`.
+
+## Steps
+
+1. Add or edit the English string in the module's default `src/main/res/values/strings.xml`.
+2. Add or update the translation in that module's `values-<lang>/strings_ce.xml`, for all 36
+   languages.
+3. Run the check under Verification.
+
 ## 36 Supported Languages
 
 The 36 target languages are:
@@ -33,6 +42,13 @@ To verify that all CE-only strings are present and have valid placeholders/quant
 
 ```bash
 python3 .claude/skills/translate-strings/scripts/check-translations.py
+```
+
+The script calls a string CE-only when it isn't in `upstream/main`, so it needs that ref:
+
+```bash
+git remote add upstream https://github.com/jarnedemeulemeester/findroid.git   # once
+git fetch upstream main --no-tags
 ```
 
 This script exits with code 0 if all 36 languages are complete and valid, or non-zero with error details.

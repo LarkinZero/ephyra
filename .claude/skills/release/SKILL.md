@@ -16,10 +16,11 @@ from Findroid; that happens beforehand, in its own PR (see the `upstream-sync` s
 ## Background
 
 - **Repo:** `origin` = `midasvo/ephyra`. The app is **Ephyra** (formerly Findroid CE).
-- **Version:** `NAME` in `buildSrc/src/main/kotlin/EphyraVersion.kt` is the one source. The
-  versionCode follows from it (`major * 1_000_000 + minor * 10_000 + patch * 100`, the TV release
-  `+ 1`), so minor and patch must stay below 100. Upstream's `Versions.APP_NAME` / `APP_CODE`
-  are not used; ignore them.
+- **Version:** `buildSrc/src/main/kotlin/EphyraVersion.kt` holds three literals that change
+  together: `NAME`, `CODE` (`major * 1_000_000 + minor * 10_000 + patch * 100`) and `TV_CODE`
+  (`CODE + 1`). The build fails when they disagree, and minor and patch must stay below 100.
+  `CODE` is a literal because F-Droid's update check reads it with a regex. Upstream's
+  `Versions.APP_NAME` / `APP_CODE` are not used; ignore them.
 - **Tags:** releases are `vX.Y.Z` and trigger `.github/workflows/release.yml`, which builds the
   signed APKs and attaches them to the release. Betas are `v<next patch>-beta.<run>` and come
   from `beta.yml` on every push to `main`. Tags below `v2` (`v0.x`, `v1.x`) are Findroid's and
@@ -35,9 +36,12 @@ from Findroid; that happens beforehand, in its own PR (see the `upstream-sync` s
 
 ```bash
 git fetch origin
-git switch main && git reset --hard origin/main
+git switch --detach origin/main
 gh run list --repo midasvo/ephyra --branch main --limit 3   # main must be green
 ```
+
+Work from `origin/main`, not the local `main` branch: in a worktree `git switch main` fails,
+because `main` is checked out in the main checkout.
 
 ### 2. Pick the version
 
@@ -45,17 +49,19 @@ gh run list --repo midasvo/ephyra --branch main --limit 3   # main must be green
 next=$(.claude/skills/release/scripts/next-version.sh)   # prints the reason on stderr
 last=$(git tag -l 'v*' --sort=-v:refname | grep -E '^v([2-9]|[1-9][0-9]+)\.[0-9]+\.[0-9]+$' | head -1)
 git log --no-merges --format='- %s' "${last:-v1.2.0-ce.6}"..HEAD
+IFS=. read -r major minor patch <<< "$next"
+code=$((major * 1000000 + minor * 10000 + patch * 100))
 ```
 
 Show the user the proposed version, the reason and the commits, and ask them to confirm. The
 script can't see what a commit means for users: a `fix` that resets a setting is still
 breaking, and a `feat` that only touches CI is a patch.
 
-### 3. Release PR: version and changelog
+### 3. Release PR: version, changelog and listings
 
-On a branch `release/v$next`:
+On a branch `release/v$next` (`git switch -c "release/v$next"`):
 
-- Set `NAME = "$next"`, `CODE = $code`, and `TV_CODE = $((code + 1))` in `EphyraVersion.kt` (the first release, 2.0.0, already has it). F-Droid's update check parses `CODE` from here.
+- Set `NAME = "$next"`, `CODE = $code` and `TV_CODE = $((code + 1))` in `EphyraVersion.kt`.
 - In `CHANGELOG.md`, turn `## [Unreleased]` into `## [v$next] — <YYYY-MM-DD>`, or add that
   section at the top if there is no Unreleased one. Keep what was already written there and
   add the rest from the commits:
@@ -68,9 +74,17 @@ On a branch `release/v$next`:
     update.
 - Add `[v$next]: https://github.com/midasvo/ephyra/releases/tag/v$next` at the top of the
   link list at the bottom, or the heading renders as plain bracketed text.
+- Write the store changelog, the "What's new" text of the listing, in
+  `fastlane/metadata/android/en-US/changelogs/`: `$code.txt` for the phone and
+  `$((code + 1)).txt` for TV. Plain text, no markdown, at most 500 characters: one sentence on
+  the release, then three or four `- ` lines. The TV file is the same text without the
+  lines that don't apply to TV. Follow the existing `2010000.txt` / `2010001.txt`.
+- Bring the feature lists up to date with what this release adds: "What Ephyra adds to
+  Findroid", "Tablet" and "Android TV" in `README.md`, and the same sections in
+  `site/index.html`. Only list what a user would pick the app for; fixes stay in the changelog.
 
 ```bash
-git add buildSrc/src/main/kotlin/EphyraVersion.kt CHANGELOG.md
+git add buildSrc/src/main/kotlin/EphyraVersion.kt CHANGELOG.md fastlane/metadata README.md site
 git commit -m "chore(release): v$next"
 git push -u origin HEAD
 gh pr create --repo midasvo/ephyra --title "chore(release): v$next" --body "<the changelog section>"
@@ -91,8 +105,9 @@ release): on its own GitHub compares with Findroid's `v1.0.2`, inherited with th
 every PR since the fork.
 
 ```bash
-git fetch origin && git switch main && git reset --hard origin/main
-git tag -a "v$next" -m "Ephyra v$next"
+git fetch origin
+git log -1 --format=%s origin/main   # must be the merge of the release PR
+git tag -a "v$next" -m "Ephyra v$next" origin/main
 git push origin "v$next"
 gh release create "v$next" --repo midasvo/ephyra --verify-tag \
   --title "Ephyra v$next" --notes-file <file with the CHANGELOG.md section> \
@@ -108,7 +123,7 @@ next patch version; the tag stays where it is.
 ### 5. Report
 
 Tell the user the version, a link to the release, the APK count, and anything that needs a
-follow-up (store listings, a known issue).
+follow-up (the Play upload in `docs/play-store.md`, a known issue).
 
 ## Hard rules
 

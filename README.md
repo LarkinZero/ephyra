@@ -116,6 +116,14 @@ filter stops the entry from switching to stable right after a release.
 - Offline mode switches on by itself without a connection.
 - Error screens with Retry, and real empty states.
 - Long-press to copy text on detail screens. Option to hide cast and crew.
+- HDR10+ and Dolby Atmos badges on movie and episode pages.
+- Profiles: user faces, default avatars and one-tap switching between users.
+
+**Look**
+
+- Its own identity: deep navy, cyan for what is playing, downloading or focused, violet for what
+  is yours (favorites, watched, ratings), the Outfit typeface and pill buttons.
+- Material You dynamic colours are an option (off by default).
 
 **Tablet**: the same app, laid out for the width, [below](#tablet).
 
@@ -153,6 +161,8 @@ split-screen half and a desktop window each get what fits:
   mouse support.
 - Foldables: in tabletop posture the video sits above the fold and the controls below it.
 - Downloads in two columns, settings and forms at a readable width.
+
+Design and test sizes: [docs/tablet/](docs/tablet/).
 
 ## Android TV
 
@@ -193,9 +203,8 @@ Background and roadmap: [docs/tv-research/](docs/tv-research/).
 [Open an issue](https://github.com/midasvo/ephyra/issues). For playback problems, attach the device
 profile from About → Export device profile.
 
-Pull requests are welcome. Start with [CLAUDE.md](CLAUDE.md) for the module layout,
-[docs/identity/VISION.md](docs/identity/VISION.md) for the visual identity and
-[docs/upstream-sync.md](docs/upstream-sync.md) for how Findroid's changes come in.
+Pull requests are welcome: [CONTRIBUTING.md](CONTRIBUTING.md) has the build, the checks and the
+conventions, and [docs/](docs/README.md) the design documents.
 
 ```bash
 ./gradlew :app:phone:assembleLibreDebug

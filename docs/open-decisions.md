@@ -2,7 +2,11 @@
 
 Design questions raised by the 2026-07-23 codebase audit that were deliberately **not** fixed,
 because each one changes visible behaviour and the intended behaviour is a product call rather
-than a bug. Everything else the audit found shipped in `v1.1.0-ce.1`.
+than a bug. Everything else the audit found shipped in `v1.1.0-ce.1`, when the app was still
+called Findroid CE.
+
+All three were checked against `main` on 2026-11-09 and are still as described. None has an issue
+yet; when one is decided, open an issue for the work and remove it here.
 
 ## data-02 — `OnConflictStrategy.IGNORE` on the download inserts
 
