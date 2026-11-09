@@ -100,6 +100,9 @@ import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemKind
 import timber.log.Timber
 
+/** How long the OS gets to follow the surface frame rate hint before the second log line. */
+private const val DISPLAY_RATE_LOG_DELAY_MS = 5_000L
+
 @HiltViewModel
 class PlayerViewModel
 @Inject
@@ -263,6 +266,7 @@ constructor(
     private var trackPreferences: Pair<UUID, Deferred<List<SeriesTrackPreferenceDto>>>? = null
 
     private val displayRefreshRateManager = DisplayRefreshRateManager(appPreferences)
+    private var loggedDisplayFrameRate: Float? = null
     private val trackSelector = DefaultTrackSelector(application)
     private val audioDecoderFallback =
         AudioDecoderFallback(
@@ -895,6 +899,7 @@ constructor(
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
         displayRefreshRateManager.onMediaItemTransition()
+        loggedDisplayFrameRate = null
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
 
         // Every item change goes through here, whatever caused it, so this is where the item being
@@ -1356,6 +1361,25 @@ constructor(
         val format = extractVideoFormat(tracks)
         val frameRate = format?.frameRate?.takeIf { it > 0f && !it.isNaN() } ?: return
         displayRefreshRateManager.onVideoFrameRateDetected(frameRate)
+        logDisplayRefreshRate(frameRate)
+    }
+
+    /**
+     * Logs the video frame rate against the display's refresh rate, now and once the OS has had
+     * time to follow the surface's frame rate hint. Device tests grep this line (see
+     * `docs/mpv-checklist.md`): a 120Hz phone that still reads 120Hz five seconds into a 24fps
+     * video is #338 again.
+     */
+    private fun logDisplayRefreshRate(frameRate: Float) {
+        if (frameRate == loggedDisplayFrameRate) return
+        val before = displayRefreshRateManager.describeDisplay() ?: return
+        loggedDisplayFrameRate = frameRate
+        Timber.i("Video ${frameRate}fps, display $before")
+        viewModelScope.launch {
+            delay(DISPLAY_RATE_LOG_DELAY_MS)
+            val after = displayRefreshRateManager.describeDisplay() ?: return@launch
+            Timber.i("Video ${frameRate}fps, display $after after ${DISPLAY_RATE_LOG_DELAY_MS / 1000}s")
+        }
     }
 
     private fun extractVideoFormat(tracks: Tracks): Format? {
