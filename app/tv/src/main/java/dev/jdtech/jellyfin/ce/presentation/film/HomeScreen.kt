@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -47,8 +49,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
@@ -494,11 +499,21 @@ private fun HeroTitle(item: FindroidItem, images: HeroImages) {
     val logo = remember(item, images) { images.logo(item) }
     var logoFailed by remember(logo) { mutableStateOf(logo == null) }
     if (logoFailed) {
-        Text(
+        // A title that doesn't fit on one line at the hero size shrinks until it fits on two,
+        // within the height a logo gets, before it is cut off. The line height follows the size.
+        val style = MaterialTheme.typography.displayMedium
+        BasicText(
             text = title,
-            style = MaterialTheme.typography.displayMedium,
-            maxLines = 1,
+            style = style.copy(color = LocalContentColor.current, lineHeight = HERO_TITLE_LINE_HEIGHT),
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            autoSize =
+                TextAutoSize.StepBased(
+                    minFontSize = HERO_TITLE_MIN_SIZE,
+                    maxFontSize = style.fontSize,
+                    stepSize = 2.sp,
+                ),
+            modifier = Modifier.heightIn(max = HERO_LOGO_MAX_HEIGHT),
         )
     } else {
         AsyncImage(
@@ -534,6 +549,8 @@ private suspend fun LazyListState.scrollIntoView(index: Int) {
 private val HERO_HEIGHT = 200.dp
 private val ROW_TITLE_HEIGHT = 36.dp
 private const val HERO_TEXT_WIDTH = .55f
+private val HERO_TITLE_MIN_SIZE = 28.sp
+private val HERO_TITLE_LINE_HEIGHT = 1.05.em
 private const val HERO_DELAY_MS = 300L
 private const val PREFETCH_DELAY_MS = 150L
 private const val PREFETCH_NEIGHBOURS = 3
