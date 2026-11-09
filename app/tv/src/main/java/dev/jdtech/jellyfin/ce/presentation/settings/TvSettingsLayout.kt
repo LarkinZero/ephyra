@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Button
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ClickableSurfaceScale
 import androidx.tv.material3.Icon
@@ -222,7 +223,7 @@ private fun TvSettingsPreference(
             TvSettingsRow(preference, selectedOptions(preference), iconSlot, modifier) {
                 toDetails()
             }
-        // Number inputs have no TV editor yet (#127): they show their value.
+        // A number is changed with the steps in the details pane, like the options of a select.
         is PreferenceIntInput ->
             TvSettingsRow(
                 preference = preference,
@@ -230,14 +231,18 @@ private fun TvSettingsPreference(
                     inputValue(preference.value.toLong(), preference.prefixRes, preference.suffixRes),
                 iconSlot = iconSlot,
                 modifier = modifier,
-            ) {}
+            ) {
+                toDetails()
+            }
         is PreferenceLongInput ->
             TvSettingsRow(
                 preference = preference,
                 summary = inputValue(preference.value, preference.prefixRes, preference.suffixRes),
                 iconSlot = iconSlot,
                 modifier = modifier,
-            ) {}
+            ) {
+                toDetails()
+            }
         is PreferencePermission ->
             SettingsPermissionCard(preference = preference, modifier = modifier)
     }
@@ -330,6 +335,22 @@ private fun TvSettingsDetails(preference: Preference?, onAction: (SettingsAction
                 modifier = bottom.fillMaxSize(),
                 onUpdate = { onAction(SettingsAction.OnUpdate(preference.copy(value = it))) },
             )
+        is PreferenceIntInput ->
+            TvSettingsNumber(
+                preference = preference,
+                value = preference.value.toLong(),
+                text = inputValue(preference.value.toLong(), preference.prefixRes, preference.suffixRes),
+                onChange = {
+                    onAction(SettingsAction.OnUpdate(preference.copy(value = it.toInt())))
+                },
+            )
+        is PreferenceLongInput ->
+            TvSettingsNumber(
+                preference = preference,
+                value = preference.value,
+                text = inputValue(preference.value, preference.prefixRes, preference.suffixRes),
+                onChange = { onAction(SettingsAction.OnUpdate(preference.copy(value = it))) },
+            )
         else -> {
             val description = preference.descriptionStringRes ?: return
             Column(modifier = Modifier.padding(top = ROW_PADDING_VERTICAL)) {
@@ -343,6 +364,48 @@ private fun TvSettingsDetails(preference: Preference?, onAction: (SettingsAction
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * A number setting in the details pane: its value between steps down and up. There is no keyboard
+ * on a remote worth typing a number with, and these settings are small counts of episodes, minutes
+ * or seconds.
+ */
+@Composable
+private fun TvSettingsNumber(
+    preference: Preference,
+    value: Long,
+    text: String,
+    onChange: (Long) -> Unit,
+) {
+    val current = value.coerceAtLeast(0)
+    Column(modifier = Modifier.padding(top = ROW_PADDING_VERTICAL)) {
+        Text(
+            text = stringResource(preference.nameStringResource),
+            style = MaterialTheme.typography.headlineSmall,
+        )
+        preference.descriptionStringRes?.let {
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
+            Text(
+                text = stringResource(it),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+        Text(text = text, style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+        Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
+            NUMBER_STEPS.forEach { step ->
+                Button(
+                    onClick = { onChange((current + step).coerceAtLeast(0)) },
+                    enabled = preference.enabled && current + step >= 0,
+                ) {
+                    Text(text = if (step > 0) "+$step" else "−${-step}")
+                }
             }
         }
     }
@@ -380,6 +443,7 @@ private fun inputValue(value: Long, prefixRes: Int?, suffixRes: Int?): String =
         .ifEmpty { stringResource(CoreR.string.not_set) }
 
 private const val LIST_WEIGHT = .5f
+private val NUMBER_STEPS = listOf(-10L, -1L, 1L, 10L)
 private val GroupShape = RoundedCornerShape(12.dp)
 private val ROW_MIN_HEIGHT = 56.dp
 private val ROW_PADDING_HORIZONTAL = 16.dp
