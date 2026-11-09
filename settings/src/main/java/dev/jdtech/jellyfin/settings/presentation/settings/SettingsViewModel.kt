@@ -849,6 +849,14 @@ class SettingsViewModel @Inject constructor(
                                         nameStringResource = R.string.pref_player_still_watching,
                                         preferences =
                                             listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_still_watching,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_still_watching_summary,
+                                                    backendPreference =
+                                                        appPreferences.stillWatchingEnabled,
+                                                ),
                                                 PreferenceIntInput(
                                                     nameStringResource =
                                                         R.string
@@ -856,6 +864,8 @@ class SettingsViewModel @Inject constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_still_watching_after_episodes_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.stillWatchingEnabled),
                                                     backendPreference =
                                                         appPreferences.stillWatchingAfterEpisodes,
                                                     suffixRes = R.string.episodes,
@@ -867,6 +877,8 @@ class SettingsViewModel @Inject constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_still_watching_after_minutes_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.stillWatchingEnabled),
                                                     backendPreference =
                                                         appPreferences.stillWatchingAfterMinutes,
                                                     suffixRes = R.string.minutes,
@@ -878,6 +890,8 @@ class SettingsViewModel @Inject constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_still_watching_prompt_timeout_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.stillWatchingEnabled),
                                                     backendPreference =
                                                         appPreferences
                                                             .stillWatchingPromptTimeoutSeconds,

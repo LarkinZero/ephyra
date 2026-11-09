@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Özetler</string>
     <string name="pref_player_next_episode">Sonraki bölüm</string>
     <string name="pref_player_still_watching">\"Hâlâ izliyor musunuz?\" uyarısı</string>
+    <string name="pref_player_still_watching_summary">Otomatik oynatılan birkaç bölümden veya uzun süre işlem yapılmamasından sonra hâlâ izleyip izlemediğinizi sorar</string>
     <string name="pref_player_still_watching_after_episodes">Uyarıdan önce otomatik oynatılan bölüm sayısı</string>
     <string name="pref_player_still_watching_after_episodes_summary">Art arda bu kadar bölüm otomatik oynatıldıktan sonra onay göster. Devre dışı bırakmak için 0 yapın.</string>
     <string name="pref_player_still_watching_after_minutes">Uyarıdan önce işlem yapılmayan dakika</string>

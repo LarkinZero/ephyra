@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Rezumat</string>
     <string name="pref_player_next_episode">Episodul următor</string>
     <string name="pref_player_still_watching">Mesaj de confirmare \"Încă vizionezi?\"</string>
+    <string name="pref_player_still_watching_summary">Întreabă dacă încă vizionezi după mai multe episoade redate automat sau după mult timp fără activitate</string>
     <string name="pref_player_still_watching_after_episodes">Episoade redate automat înainte de confirmare</string>
     <string name="pref_player_still_watching_after_episodes_summary">Afișează o confirmare după ce atâtea episoade consecutive s-au redat automat. Setează la 0 pentru a dezactiva.</string>
     <string name="pref_player_still_watching_after_minutes">Minute de inactivitate înainte de confirmare</string>

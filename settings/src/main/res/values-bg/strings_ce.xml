@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Резюмета</string>
     <string name="pref_player_next_episode">Следващ епизод</string>
     <string name="pref_player_still_watching">Запитване \"Все още ли гледате?\"</string>
+    <string name="pref_player_still_watching_summary">Пита дали все още гледате след няколко автоматично пуснати епизода или дълго време без действие</string>
     <string name="pref_player_still_watching_after_episodes">Автоматично изгледани епизоди преди запитване</string>
     <string name="pref_player_still_watching_after_episodes_summary">Показване на потвърждение след толкова последователно изгледани епизоди. Задайте 0 за изключване.</string>
     <string name="pref_player_still_watching_after_minutes">Минути бездействие преди запитване</string>

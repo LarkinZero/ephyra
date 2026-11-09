@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Xülasələr</string>
     <string name="pref_player_next_episode">Növbəti seriya</string>
     <string name="pref_player_still_watching">\"Hələ də baxırsınız?\" sorğusu</string>
+    <string name="pref_player_still_watching_summary">Bir neçə bölüm avtomatik oynadıldıqdan və ya uzun müddət heç bir əməliyyat olmadıqdan sonra hələ də baxıb-baxmadığınızı soruşur</string>
     <string name="pref_player_still_watching_after_episodes">Sorğudan əvvəl avtomatik oxudulan seriya sayı</string>
     <string name="pref_player_still_watching_after_episodes_summary">Ardıcıl bu qədər seriya avtomatik oxudulduqdan sonra təsdiq tələb edin. Deaktiv etmək üçün 0 təyin edin.</string>
     <string name="pref_player_still_watching_after_minutes">Sorğudan əvvəl hərəkətsizlik dəqiqəsi</string>

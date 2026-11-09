@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">지난 줄거리</string>
     <string name="pref_player_next_episode">다음 에피소드</string>
     <string name="pref_player_still_watching">시청 확인 메시지</string>
+    <string name="pref_player_still_watching_summary">여러 에피소드가 자동 재생된 후 또는 오랫동안 입력이 없을 때 계속 시청 중인지 묻습니다</string>
     <string name="pref_player_still_watching_after_episodes">확인 메시지 표시 전 자동 재생 에피소드 수</string>
     <string name="pref_player_still_watching_after_episodes_summary">이 수만큼 에피소드가 연속으로 자동 재생된 후 확인 메시지를 표시합니다. 비활성화하려면 0으로 설정하세요.</string>
     <string name="pref_player_still_watching_after_minutes">확인 메시지 표시 전 미활동 시간 (분)</string>

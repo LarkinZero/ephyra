@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Riassunti</string>
     <string name="pref_player_next_episode">Prossimo episodio</string>
     <string name="pref_player_still_watching">Richiesta \"Stai ancora guardando?\"</string>
+    <string name="pref_player_still_watching_summary">Chiede se stai ancora guardando dopo diversi episodi riprodotti automaticamente o molto tempo senza interazione</string>
     <string name="pref_player_still_watching_after_episodes">Episodi riprodotti automaticamente prima della richiesta</string>
     <string name="pref_player_still_watching_after_episodes_summary">Mostra una conferma dopo che questo numero di episodi consecutivi è stato riprodotto automaticamente. Imposta su 0 per disattivare.</string>
     <string name="pref_player_still_watching_after_minutes">Minuti di inattività prima della richiesta</string>

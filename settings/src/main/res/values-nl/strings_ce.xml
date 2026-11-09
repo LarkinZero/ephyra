@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Samenvattingen</string>
     <string name="pref_player_next_episode">Volgende aflevering</string>
     <string name="pref_player_still_watching">Prompt \"Kijk je nog?\"</string>
+    <string name="pref_player_still_watching_summary">Vraagt of je nog kijkt na een reeks automatisch afgespeelde afleveringen of een lange tijd zonder invoer</string>
     <string name="pref_player_still_watching_after_episodes">Automatisch afgespeelde afleveringen voor prompt</string>
     <string name="pref_player_still_watching_after_episodes_summary">Toon een bevestiging nadat zoveel afleveringen achter elkaar automatisch zijn afgespeeld. Stel in op 0 om uit te schakelen.</string>
     <string name="pref_player_still_watching_after_minutes">Inactiviteitsminuten voor prompt</string>

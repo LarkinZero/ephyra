@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">תקצירי פרקים קודמים</string>
     <string name="pref_player_next_episode">הפרק הבא</string>
     <string name="pref_player_still_watching">שאל אם המשתמש עדיין צופה</string>
+    <string name="pref_player_still_watching_summary">שואל אם עדיין צופים לאחר כמה פרקים שהופעלו אוטומטית או זמן רב ללא פעילות</string>
     <string name="pref_player_still_watching_after_episodes">מספר פרקים בניגון אוטומטי לפני הצגת שאלה</string>
     <string name="pref_player_still_watching_after_episodes_summary">הצג אישור לאחר שמספר כזה של פרקים מתנגן ברצף באופן אוטומטי. הגדר ל-0 כדי להשבית.</string>
     <string name="pref_player_still_watching_after_minutes">דקות ללא פעילות לפני הצגת שאלה</string>

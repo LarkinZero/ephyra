@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Resums</string>
     <string name="pref_player_next_episode">Següent episodi</string>
     <string name="pref_player_still_watching">Sol·licitud \"Encara ho estàs mirant?\"</string>
+    <string name="pref_player_still_watching_summary">Pregunta si encara ho estàs mirant després de diversos episodis reproduïts automàticament o de molta estona sense activitat</string>
     <string name="pref_player_still_watching_after_episodes">Episodis reproduïts automàticament abans de la sol·licitud</string>
     <string name="pref_player_still_watching_after_episodes_summary">Mostra una confirmació després que aquest nombre d\'episodis es reprodueixin automàticament seguits. Estableix a 0 per inhabilitar.</string>
     <string name="pref_player_still_watching_after_minutes">Minuts d\'inactivitat abans de la sol·licitud</string>

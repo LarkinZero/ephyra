@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Rückblicke</string>
     <string name="pref_player_next_episode">Nächste Folge</string>
     <string name="pref_player_still_watching">Aufforderung \"Schaust du noch?\"</string>
+    <string name="pref_player_still_watching_summary">Fragt nach mehreren automatisch abgespielten Folgen oder langer Zeit ohne Eingabe, ob du noch schaust</string>
     <string name="pref_player_still_watching_after_episodes">Automatisch abgespielte Folgen vor Aufforderung</string>
     <string name="pref_player_still_watching_after_episodes_summary">Bestätigung anzeigen, nachdem so viele Folgen hintereinander automatisch abgespielt wurden. Auf 0 setzen, um zu deaktivieren.</string>
     <string name="pref_player_still_watching_after_minutes">Inaktivitätsminuten vor Aufforderung</string>

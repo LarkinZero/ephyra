@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Tóm tắt tập trước</string>
     <string name="pref_player_next_episode">Tập tiếp theo</string>
     <string name="pref_player_still_watching">Nhắc nhở \"Bạn vẫn đang xem?\"</string>
+    <string name="pref_player_still_watching_summary">Hỏi bạn có còn đang xem không sau nhiều tập tự động phát hoặc một thời gian dài không thao tác</string>
     <string name="pref_player_still_watching_after_episodes">Số tập tự động phát trước khi nhắc</string>
     <string name="pref_player_still_watching_after_episodes_summary">Hiện xác nhận sau khi phát tự động liên tiếp bấy nhiêu tập. Đặt thành 0 để tắt.</string>
     <string name="pref_player_still_watching_after_minutes">Số phút không hoạt động trước khi nhắc</string>
