@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Заблокировать этот профиль на этом устройстве</string>
     <string name="ce_settings_profile_lock">Блокировка профиля</string>
     <string name="ce_settings_detail_pages">Страницы сведений</string>
+    <string name="ce_settings_detail_pages_summary">Выберите, что показывают страницы фильмов, сериалов и серий</string>
     <string name="ce_pref_detail_critic_rating">Рейтинг Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Оценка критиков, если она есть на вашем сервере</string>
     <string name="ce_pref_detail_tagline">Слоган</string>
+    <string name="ce_pref_detail_tagline_summary">Короткая строка над описанием</string>
     <string name="ce_pref_detail_studios">Студии и телеканалы</string>
+    <string name="ce_pref_detail_studios_summary">Студии фильма, телесети сериала</string>
     <string name="ce_pref_detail_air_schedule">Расписание выхода</string>
     <string name="ce_pref_detail_air_schedule_summary">Дни и время выхода новых серий идущего сериала</string>
     <string name="ce_pref_detail_watch_history">История просмотров</string>

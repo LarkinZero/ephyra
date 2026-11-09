@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Khóa hồ sơ này trên thiết bị này</string>
     <string name="ce_settings_profile_lock">Khóa hồ sơ</string>
     <string name="ce_settings_detail_pages">Trang chi tiết</string>
+    <string name="ce_settings_detail_pages_summary">Chọn nội dung hiển thị trên trang phim, chương trình và tập</string>
     <string name="ce_pref_detail_critic_rating">Điểm Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Điểm của giới phê bình, khi máy chủ của bạn có</string>
     <string name="ce_pref_detail_tagline">Khẩu hiệu</string>
+    <string name="ce_pref_detail_tagline_summary">Dòng ngắn phía trên phần tóm tắt</string>
     <string name="ce_pref_detail_studios">Hãng phim và đài truyền hình</string>
+    <string name="ce_pref_detail_studios_summary">Hãng phim của một bộ phim, kênh phát sóng của một chương trình</string>
     <string name="ce_pref_detail_air_schedule">Lịch phát sóng</string>
     <string name="ce_pref_detail_air_schedule_summary">Các ngày và giờ phát sóng của một chương trình đang chiếu</string>
     <string name="ce_pref_detail_watch_history">Lịch sử xem</string>

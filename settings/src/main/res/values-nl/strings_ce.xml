@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Dit profiel op dit apparaat vergrendelen</string>
     <string name="ce_settings_profile_lock">Profielvergrendeling</string>
     <string name="ce_settings_detail_pages">Detailpagina\'s</string>
+    <string name="ce_settings_detail_pages_summary">Kies wat de pagina\'s van films, series en afleveringen tonen</string>
     <string name="ce_pref_detail_critic_rating">Score van Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">De score van critici, als je server die heeft</string>
     <string name="ce_pref_detail_tagline">Slagzin</string>
+    <string name="ce_pref_detail_tagline_summary">De korte regel boven de beschrijving</string>
     <string name="ce_pref_detail_studios">Studio\'s en zenders</string>
+    <string name="ce_pref_detail_studios_summary">De studio\'s van een film, de zenders van een serie</string>
     <string name="ce_pref_detail_air_schedule">Uitzendschema</string>
     <string name="ce_pref_detail_air_schedule_summary">De dagen en het tijdstip waarop een lopende serie wordt uitgezonden</string>
     <string name="ce_pref_detail_watch_history">Kijkgeschiedenis</string>

@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Lukitse tämä profiili tällä laitteella</string>
     <string name="ce_settings_profile_lock">Profiilin lukitus</string>
     <string name="ce_settings_detail_pages">Tietosivut</string>
+    <string name="ce_settings_detail_pages_summary">Valitse, mitä elokuvien, sarjojen ja jaksojen sivut näyttävät</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoes -arvosana</string>
+    <string name="ce_pref_detail_critic_rating_summary">Kriitikoiden arvosana, kun palvelimellasi on se</string>
     <string name="ce_pref_detail_tagline">Tunnuslause</string>
+    <string name="ce_pref_detail_tagline_summary">Lyhyt rivi kuvauksen yläpuolella</string>
     <string name="ce_pref_detail_studios">Studiot ja kanavat</string>
+    <string name="ce_pref_detail_studios_summary">Elokuvan studiot, sarjan kanavat</string>
     <string name="ce_pref_detail_air_schedule">Lähetysaikataulu</string>
     <string name="ce_pref_detail_air_schedule_summary">Päivät ja kellonaika, jolloin käynnissä oleva sarja esitetään</string>
     <string name="ce_pref_detail_watch_history">Katseluhistoria</string>

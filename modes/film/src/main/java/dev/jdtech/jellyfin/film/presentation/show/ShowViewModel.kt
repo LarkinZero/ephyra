@@ -8,6 +8,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
 import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.keeping
 import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
 import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidEpisode
@@ -64,6 +65,7 @@ constructor(
     private var loadJob: Job? = null
     private var relatedJob: Job? = null
     private var relatedFor: UUID? = null
+    private var relatedRequest: RelatedItemsRequest? = null
 
     /** Whether coming back to the page needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(
@@ -155,6 +157,8 @@ constructor(
                                 } ?: _state.value.hasDownloads,
                         )
                     )
+                    // A reload of a page that has its rows: a switch may have changed since.
+                    if (relatedFor == showId) loadRelated(showId)
 
                     if (localCounts == null) return@coroutineScope
                     // Offline, the stored episodes are all there is.
@@ -215,20 +219,25 @@ constructor(
      */
     fun loadRelated(showId: UUID) {
         val show = _state.value.show?.takeIf { it.id == showId } ?: return
-        if (downloadsOnly || relatedFor == showId) return
+        if (downloadsOnly) return
+        val request =
+            RelatedItemsRequest.forItem(
+                    localTrailerCount = show.localTrailerCount,
+                    specialFeatureCount = show.specialFeatureCount,
+                    collections = false,
+                )
+                .shownIn(appPreferences.detailSections())
+        if (relatedFor == showId && relatedRequest == request) return
         relatedFor = showId
+        relatedRequest = request
         relatedJob?.cancel()
+        // A row whose switch was turned off since the last load goes away.
+        _state.update { it.copy(related = it.related.keeping(request)) }
         relatedJob =
             viewModelScope.launchRelatedItems(
                 repository = repository,
                 itemId = showId,
-                request =
-                    RelatedItemsRequest.forItem(
-                        localTrailerCount = show.localTrailerCount,
-                        specialFeatureCount = show.specialFeatureCount,
-                        collections = false,
-                    )
-                        .shownIn(appPreferences.detailSections()),
+                request = request,
             ) { change ->
                 _state.update { it.copy(related = change(it.related)) }
             }

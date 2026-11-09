@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Zablokuj ten profil na tym urządzeniu</string>
     <string name="ce_settings_profile_lock">Blokada profilu</string>
     <string name="ce_settings_detail_pages">Strony szczegółów</string>
+    <string name="ce_settings_detail_pages_summary">Wybierz, co pokazują strony filmów, seriali i odcinków</string>
     <string name="ce_pref_detail_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Ocena krytyków, jeśli serwer ją ma</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Krótka linijka nad opisem</string>
     <string name="ce_pref_detail_studios">Studia i stacje</string>
+    <string name="ce_pref_detail_studios_summary">Studia filmu, stacje emitujące serial</string>
     <string name="ce_pref_detail_air_schedule">Harmonogram emisji</string>
     <string name="ce_pref_detail_air_schedule_summary">Dni i godzina, w których emitowany jest trwający serial</string>
     <string name="ce_pref_detail_watch_history">Historia oglądania</string>

@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Заключване на този профил на това устройство</string>
     <string name="ce_settings_profile_lock">Заключване на профила</string>
     <string name="ce_settings_detail_pages">Страници с подробности</string>
+    <string name="ce_settings_detail_pages_summary">Изберете какво показват страниците на филмите, сериалите и епизодите</string>
     <string name="ce_pref_detail_critic_rating">Оценка в Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Оценката на критиците, когато сървърът ви я има</string>
     <string name="ce_pref_detail_tagline">Слоган</string>
+    <string name="ce_pref_detail_tagline_summary">Краткият ред над описанието</string>
     <string name="ce_pref_detail_studios">Студиа и телевизии</string>
+    <string name="ce_pref_detail_studios_summary">Студиата на филма, телевизионните мрежи на сериала</string>
     <string name="ce_pref_detail_air_schedule">График на излъчване</string>
     <string name="ce_pref_detail_air_schedule_summary">Дните и часът, в които се излъчва текущ сериал</string>
     <string name="ce_pref_detail_watch_history">История на гледане</string>

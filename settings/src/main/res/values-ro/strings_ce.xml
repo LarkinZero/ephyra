@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Blochează acest profil pe acest dispozitiv</string>
     <string name="ce_settings_profile_lock">Blocarea profilului</string>
     <string name="ce_settings_detail_pages">Pagini de detalii</string>
+    <string name="ce_settings_detail_pages_summary">Alege ce afișează paginile filmelor, serialelor și episoadelor</string>
     <string name="ce_pref_detail_critic_rating">Scor Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Scorul criticilor, când serverul tău îl are</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Rândul scurt de deasupra descrierii</string>
     <string name="ce_pref_detail_studios">Studiouri și rețele</string>
+    <string name="ce_pref_detail_studios_summary">Studiourile unui film, rețelele unui serial</string>
     <string name="ce_pref_detail_air_schedule">Program de difuzare</string>
     <string name="ce_pref_detail_air_schedule_summary">Zilele și ora la care se difuzează un serial în desfășurare</string>
     <string name="ce_pref_detail_watch_history">Istoric de vizionare</string>

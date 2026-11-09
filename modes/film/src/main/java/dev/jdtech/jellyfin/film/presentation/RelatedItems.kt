@@ -48,6 +48,14 @@ data class RelatedItemsRequest(
     }
 }
 
+/** Without the rows [request] doesn't ask for. */
+fun RelatedItems.keeping(request: RelatedItemsRequest) =
+    copy(
+        extras = if (request.localTrailers || request.specialFeatures) extras else emptyList(),
+        collections = if (request.collections) collections else emptyList(),
+        similar = if (request.similar) similar else emptyList(),
+    )
+
 /**
  * Loads the [RelatedItems] of [itemId], each kind in its own coroutine so a slow one never holds the
  * others back. Every result is passed to [update] as soon as it is there; a failure is only logged

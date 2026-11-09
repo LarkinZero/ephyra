@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Bloquear este perfil neste dispositivo</string>
     <string name="ce_settings_profile_lock">Bloqueio do perfil</string>
     <string name="ce_settings_detail_pages">Páginas de detalhes</string>
+    <string name="ce_settings_detail_pages_summary">Escolha o que as páginas de filmes, séries e episódios mostram</string>
     <string name="ce_pref_detail_critic_rating">Pontuação do Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">A pontuação da crítica, quando o seu servidor a tem</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">A frase curta acima da sinopse</string>
     <string name="ce_pref_detail_studios">Estúdios e redes</string>
+    <string name="ce_pref_detail_studios_summary">Os estúdios de um filme, os canais de uma série</string>
     <string name="ce_pref_detail_air_schedule">Horário de emissão</string>
     <string name="ce_pref_detail_air_schedule_summary">Os dias e a hora a que uma série em exibição é emitida</string>
     <string name="ce_pref_detail_watch_history">Histórico de visualização</string>

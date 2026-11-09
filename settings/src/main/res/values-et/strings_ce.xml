@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Lukusta see profiil selles seadmes</string>
     <string name="ce_settings_profile_lock">Profiili lukk</string>
     <string name="ce_settings_detail_pages">Üksikasjade lehed</string>
+    <string name="ce_settings_detail_pages_summary">Vali, mida filmide, sarjade ja osade lehed näitavad</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoesi hinne</string>
+    <string name="ce_pref_detail_critic_rating_summary">Kriitikute hinnang, kui sinu serveris see on</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Lühike rida ülevaate kohal</string>
     <string name="ce_pref_detail_studios">Stuudiod ja telekanalid</string>
+    <string name="ce_pref_detail_studios_summary">Filmi stuudiod, sarja telekanalid</string>
     <string name="ce_pref_detail_air_schedule">Eetriaeg</string>
     <string name="ce_pref_detail_air_schedule_summary">Päevad ja kellaaeg, millal käimasolev sari eetris on</string>
     <string name="ce_pref_detail_watch_history">Vaatamisajalugu</string>

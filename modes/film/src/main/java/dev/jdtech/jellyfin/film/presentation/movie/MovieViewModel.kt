@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
 import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
 import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.keeping
 import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
 import dev.jdtech.jellyfin.film.presentation.shownIn
 import dev.jdtech.jellyfin.models.FindroidItemPerson
@@ -48,6 +49,7 @@ constructor(
     private var loadJob: Job? = null
     private var relatedJob: Job? = null
     private var relatedFor: UUID? = null
+    private var relatedRequest: RelatedItemsRequest? = null
 
     /** Whether coming back to the screen needs a load (#251), see [ReloadPolicy]. */
     fun shouldReload(movieId: UUID, stopEventFollows: Boolean = false): Boolean =
@@ -88,6 +90,8 @@ constructor(
                         displayExtraInfo = displayExtraInfo,
                     )
                 )
+                // A reload of a page that has its rows: a switch may have changed since.
+                if (relatedFor == movieId) loadRelated(movieId)
                 reloadPolicy.complete(token)
             } catch (e: CancellationException) {
                 throw e
@@ -104,20 +108,24 @@ constructor(
      */
     fun loadRelated(movieId: UUID) {
         val movie = _state.value.movie?.takeIf { it.id == movieId } ?: return
-        if (relatedFor == movieId) return
+        val request =
+            RelatedItemsRequest.forItem(
+                    localTrailerCount = movie.localTrailerCount,
+                    specialFeatureCount = movie.specialFeatureCount,
+                    collections = true,
+                )
+                .shownIn(appPreferences.detailSections())
+        if (relatedFor == movieId && relatedRequest == request) return
         relatedFor = movieId
+        relatedRequest = request
         relatedJob?.cancel()
+        // A row whose switch was turned off since the last load goes away.
+        _state.update { it.copy(related = it.related.keeping(request)) }
         relatedJob =
             viewModelScope.launchRelatedItems(
                 repository = repository,
                 itemId = movieId,
-                request =
-                    RelatedItemsRequest.forItem(
-                        localTrailerCount = movie.localTrailerCount,
-                        specialFeatureCount = movie.specialFeatureCount,
-                        collections = true,
-                    )
-                        .shownIn(appPreferences.detailSections()),
+                request = request,
             ) { change ->
                 _state.update { it.copy(related = change(it.related)) }
             }

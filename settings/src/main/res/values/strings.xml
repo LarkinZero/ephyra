@@ -276,9 +276,13 @@
     <string name="ce_settings_profile_lock">Profile lock</string>
     <!-- CE (#332): what the movie, show and episode pages show -->
     <string name="ce_settings_detail_pages">Detail pages</string>
+    <string name="ce_settings_detail_pages_summary">Choose what the movie, show and episode pages show</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoes score</string>
+    <string name="ce_pref_detail_critic_rating_summary">The score from critics, when your server has one</string>
     <string name="ce_pref_detail_tagline">Tagline</string>
+    <string name="ce_pref_detail_tagline_summary">The short line above the overview</string>
     <string name="ce_pref_detail_studios">Studios and networks</string>
+    <string name="ce_pref_detail_studios_summary">The studios behind a movie, the networks of a show</string>
     <string name="ce_pref_detail_air_schedule">Air schedule</string>
     <string name="ce_pref_detail_air_schedule_summary">The days and time a running show airs</string>
     <string name="ce_pref_detail_watch_history">Watch history</string>

@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">נעילת הפרופיל הזה במכשיר הזה</string>
     <string name="ce_settings_profile_lock">נעילת פרופיל</string>
     <string name="ce_settings_detail_pages">דפי פרטים</string>
+    <string name="ce_settings_detail_pages_summary">בחירת מה שמוצג בדפי הסרטים, הסדרות והפרקים</string>
     <string name="ce_pref_detail_critic_rating">ציון Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">ציון המבקרים, כשהוא קיים בשרת שלך</string>
     <string name="ce_pref_detail_tagline">סלוגן</string>
+    <string name="ce_pref_detail_tagline_summary">השורה הקצרה שמעל התקציר</string>
     <string name="ce_pref_detail_studios">אולפנים ורשתות</string>
+    <string name="ce_pref_detail_studios_summary">האולפנים של סרט, הרשתות של סדרה</string>
     <string name="ce_pref_detail_air_schedule">לוח שידורים</string>
     <string name="ce_pref_detail_air_schedule_summary">הימים והשעה שבהם משודרת סדרה פעילה</string>
     <string name="ce_pref_detail_watch_history">היסטוריית צפייה</string>

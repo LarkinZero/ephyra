@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Zamknout tento profil na tomto zařízení</string>
     <string name="ce_settings_profile_lock">Zámek profilu</string>
     <string name="ce_settings_detail_pages">Stránky s podrobnostmi</string>
+    <string name="ce_settings_detail_pages_summary">Vyberte, co zobrazují stránky filmů, seriálů a epizod</string>
     <string name="ce_pref_detail_critic_rating">Hodnocení Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Hodnocení kritiků, pokud ho váš server má</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Krátký řádek nad popisem</string>
     <string name="ce_pref_detail_studios">Studia a televize</string>
+    <string name="ce_pref_detail_studios_summary">Studia filmu, televizní stanice seriálu</string>
     <string name="ce_pref_detail_air_schedule">Čas vysílání</string>
     <string name="ce_pref_detail_air_schedule_summary">Dny a čas, kdy se vysílá právě běžící seriál</string>
     <string name="ce_pref_detail_watch_history">Historie sledování</string>

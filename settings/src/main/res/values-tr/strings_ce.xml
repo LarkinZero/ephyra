@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Bu profili bu cihazda kilitle</string>
     <string name="ce_settings_profile_lock">Profil kilidi</string>
     <string name="ce_settings_detail_pages">Ayrıntı sayfaları</string>
+    <string name="ce_settings_detail_pages_summary">Film, dizi ve bölüm sayfalarının ne göstereceğini seçin</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoes puanı</string>
+    <string name="ce_pref_detail_critic_rating_summary">Eleştirmen puanı, sunucunuzda varsa</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Özetin üstündeki kısa satır</string>
     <string name="ce_pref_detail_studios">Stüdyolar ve kanallar</string>
+    <string name="ce_pref_detail_studios_summary">Bir filmin stüdyoları, bir dizinin kanalları</string>
     <string name="ce_pref_detail_air_schedule">Yayın takvimi</string>
     <string name="ce_pref_detail_air_schedule_summary">Devam eden bir dizinin yayınlandığı günler ve saat</string>
     <string name="ce_pref_detail_watch_history">İzleme geçmişi</string>

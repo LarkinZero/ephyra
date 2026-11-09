@@ -184,6 +184,60 @@ class RelatedItemsLoadingTest {
         assertEquals(98f, movie.criticRating)
     }
 
+    @Test
+    fun `a row switched off goes away when the page reloads`() = runBlocking {
+        val viewModel = movieViewModel(movie(itemId, "Movie"))
+        viewModel.loadMovie(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.movie != null } }
+        viewModel.loadRelated(itemId)
+        withTimeout(5_000) {
+            viewModel.state.first {
+                it.related.similar.isNotEmpty() && it.related.collections.isNotEmpty()
+            }
+        }
+
+        switchedOff += "pref_detail_similar"
+        calls.clear()
+        viewModel.loadMovie(itemId)
+        val related =
+            withTimeout(5_000) { viewModel.state.first { it.related.similar.isEmpty() } }.related
+
+        assertEquals(listOf(collection), related.collections)
+        assertTrue("getSimilarItems" !in calls)
+    }
+
+    @Test
+    fun `a row switched on is requested when the page reloads`() = runBlocking {
+        switchedOff += "pref_detail_similar"
+        val viewModel = movieViewModel(movie(itemId, "Movie"))
+        viewModel.loadMovie(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.movie != null } }
+        viewModel.loadRelated(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.related.collections.isNotEmpty() } }
+
+        switchedOff.clear()
+        viewModel.loadMovie(itemId)
+        val related =
+            withTimeout(5_000) { viewModel.state.first { it.related.similar.isNotEmpty() } }.related
+
+        assertEquals(listOf(similar), related.similar)
+    }
+
+    @Test
+    fun `a reload with the same switches asks for no row again`() = runBlocking {
+        val viewModel = movieViewModel(movie(itemId, "Movie"))
+        viewModel.loadMovie(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.movie != null } }
+        viewModel.loadRelated(itemId)
+        withTimeout(5_000) { viewModel.state.first { it.related.similar.isNotEmpty() } }
+
+        calls.clear()
+        viewModel.loadMovie(itemId)
+        withTimeout(5_000) { viewModel.state.first { "getMovie" in synchronized(calls) { calls.toList() } } }
+
+        assertEquals(listOf("getMovie"), calls)
+    }
+
     private fun movieViewModel(movie: FindroidMovie) =
         MovieViewModel(repository(movie), appPreferences(), VideoMetadataParser)
 

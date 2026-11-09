@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">اقفل هذا الملف الشخصي على هذا الجهاز</string>
     <string name="ce_settings_profile_lock">قفل الملف الشخصي</string>
     <string name="ce_settings_detail_pages">صفحات التفاصيل</string>
+    <string name="ce_settings_detail_pages_summary">اختر ما تعرضه صفحات الأفلام والمسلسلات والحلقات</string>
     <string name="ce_pref_detail_critic_rating">تقييم Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">تقييم النقاد، عندما يوفّره خادمك</string>
     <string name="ce_pref_detail_tagline">الشعار الترويجي</string>
+    <string name="ce_pref_detail_tagline_summary">السطر القصير فوق الملخص</string>
     <string name="ce_pref_detail_studios">الاستوديوهات والشبكات</string>
+    <string name="ce_pref_detail_studios_summary">الاستوديوهات المنتجة للفيلم وشبكات عرض المسلسل</string>
     <string name="ce_pref_detail_air_schedule">جدول البث</string>
     <string name="ce_pref_detail_air_schedule_summary">أيام وموعد عرض المسلسل الجاري</string>
     <string name="ce_pref_detail_watch_history">سجل المشاهدة</string>

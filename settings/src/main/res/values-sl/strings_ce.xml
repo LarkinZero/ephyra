@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">Zakleni ta profil v tej napravi</string>
     <string name="ce_settings_profile_lock">Zaklepanje profila</string>
     <string name="ce_settings_detail_pages">Strani s podrobnostmi</string>
+    <string name="ce_settings_detail_pages_summary">Izberite, kaj prikazujejo strani filmov, serij in epizod</string>
     <string name="ce_pref_detail_critic_rating">Ocena Rotten Tomatoes</string>
+    <string name="ce_pref_detail_critic_rating_summary">Ocena kritikov, če jo vaš strežnik ima</string>
     <string name="ce_pref_detail_tagline">Slogan</string>
+    <string name="ce_pref_detail_tagline_summary">Kratka vrstica nad opisom</string>
     <string name="ce_pref_detail_studios">Studii in televizijske mreže</string>
+    <string name="ce_pref_detail_studios_summary">Studii filma, televizijske mreže serije</string>
     <string name="ce_pref_detail_air_schedule">Urnik predvajanja</string>
     <string name="ce_pref_detail_air_schedule_summary">Dnevi in ura, ko se predvaja serija, ki je še v teku</string>
     <string name="ce_pref_detail_watch_history">Zgodovina ogledov</string>

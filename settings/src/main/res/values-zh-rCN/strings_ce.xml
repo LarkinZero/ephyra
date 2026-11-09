@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">在此设备上锁定此个人资料</string>
     <string name="ce_settings_profile_lock">个人资料锁</string>
     <string name="ce_settings_detail_pages">详情页</string>
+    <string name="ce_settings_detail_pages_summary">选择电影、节目和剧集页面显示的内容</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoes 评分</string>
+    <string name="ce_pref_detail_critic_rating_summary">影评人评分（服务器提供时）</string>
     <string name="ce_pref_detail_tagline">宣传语</string>
+    <string name="ce_pref_detail_tagline_summary">简介上方的短句</string>
     <string name="ce_pref_detail_studios">制片公司和电视网</string>
+    <string name="ce_pref_detail_studios_summary">电影的制片公司、节目的播出平台</string>
     <string name="ce_pref_detail_air_schedule">播出时间表</string>
     <string name="ce_pref_detail_air_schedule_summary">连载剧集的播出日期和时间</string>
     <string name="ce_pref_detail_watch_history">观看记录</string>

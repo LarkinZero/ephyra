@@ -158,9 +158,13 @@
     <string name="ce_settings_profile_pin_summary">इस डिवाइस पर इस प्रोफ़ाइल को लॉक करें</string>
     <string name="ce_settings_profile_lock">प्रोफ़ाइल लॉक</string>
     <string name="ce_settings_detail_pages">विवरण पृष्ठ</string>
+    <string name="ce_settings_detail_pages_summary">चुनें कि फ़िल्म, शो और एपिसोड के पेज क्या दिखाएँ</string>
     <string name="ce_pref_detail_critic_rating">Rotten Tomatoes स्कोर</string>
+    <string name="ce_pref_detail_critic_rating_summary">समीक्षकों का स्कोर, जब आपके सर्वर पर हो</string>
     <string name="ce_pref_detail_tagline">टैगलाइन</string>
+    <string name="ce_pref_detail_tagline_summary">सारांश के ऊपर की छोटी पंक्ति</string>
     <string name="ce_pref_detail_studios">स्टूडियो और नेटवर्क</string>
+    <string name="ce_pref_detail_studios_summary">फ़िल्म के स्टूडियो, शो के नेटवर्क</string>
     <string name="ce_pref_detail_air_schedule">प्रसारण समय-सारणी</string>
     <string name="ce_pref_detail_air_schedule_summary">चालू शो किन दिनों और किस समय प्रसारित होता है</string>
     <string name="ce_pref_detail_watch_history">देखने का इतिहास</string>
