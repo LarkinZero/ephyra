@@ -28,9 +28,10 @@ empty password. **Emulators:** six AVDs, one at a time per tester, all with `-gp
   - API 37: two native `SIGABRT`s in libplacebo when mpv starts in landscape under SwiftShader (E4).
   - API 37: one ANR on the very first launch (`No response to onStartJob for #OrphanSweepWorker#`, load
     32 right after boot, while a GMS ANR fired at the same moment). It did not happen again.
-- **What was found:** 4 wrong-behaviour findings that are the app's (F1 to F4), 2 that need a real
-  device to place (F5, F6), 1 that the emulator causes (F7), 15 unpolished findings, a few TV observations
-  (F19) and 3 log-noise findings. The most visible ones:
+- **What was found:** 4 wrong-behaviour findings that are the app's (F1 to F4), 1 that needs a real
+  device to place (F5), 1 that the emulator causes (F7), 15 unpolished findings (one of them, F20, not
+  confirmed), a few TV observations (F19) and 3 log-noise findings. F6 (the TV login form and the D-pad)
+  was withdrawn: it came from the way the keys were sent, not from the app. The most visible ones:
   - A library opened from the back stack after process death spins forever (F1, API 36). Seen once,
     confirmed in the code, and the code is the same on every version.
   - The notification permission is asked before the Welcome screen and again on every activity
@@ -53,7 +54,7 @@ a failure comes from the emulator and not the app, the cell says so.
 | # | Smoke step (checklist row) | API 29 (Android 10) | API 30 (Android 11) | API 33 (Android 13) | API 36 (Android 16) | API 37 (Android 17) | TV API 30 (Android TV 11) |
 |---|---|---|---|---|---|---|---|
 | 1 | Install, first launch, Welcome (SUP-01) | works | works | works; the notification prompt covers Welcome (F2) | works | works; one ANR on the first launch under boot load | works; banner in the launcher (TVS-12) |
-| 2 | Add server by address, log in (SUP-06) | unpolished: disclaimer shows `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: login only via the keyboard's action key (F6), focus starts on Add user (F21), `<br/>` (F9) |
+| 2 | Add server by address, log in (SUP-06) | unpolished: disclaimer shows `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: `<br/>` (F9) | unpolished: focus starts on Add user (F21), `<br/>` (F9); the D-pad finding F6 is withdrawn |
 | – | Quick Connect (SUP-08) | not tested: not in the brief | not tested: not in the brief | not tested: not in the brief | not tested: not in the brief | not tested: not in the brief | not tested: not in the brief |
 | 3 | Notification permission (LIF-12) | n/a (below API 33) | n/a (below API 33) | unpolished: asked before Welcome, again after recreation (F2) | broken: asked again on rotation after a deny (F2) | unpolished: asked before Welcome, again on each cold start (F2) | n/a (below API 33) |
 | 4 | Local network permission (LIF-13) | n/a | n/a | n/a | n/a: no rationale screen, correctly | unpolished: rationale and settings card work; after a deny, discovery and LAN addresses fail without a reason (F8) | n/a |
@@ -61,7 +62,7 @@ a failure comes from the emulator and not the app, the cell says so.
 | 6 | Library, sort, filter, movie, show, season, episode (BRW-07) | works | works | works; empty hero on one movie (F22) | works | works | works; show, season and episode pages not visited |
 | 7 | Search | works | works | works | works | works | not tested: not in the TV steps |
 | 8 | ExoPlayer: start, picture, pause, controls (PLY-01 start only; resume not checked) | works for a 2.5-min file; long files fail: emulator limit, 16 MB heap (E1); then an empty player (F4) | works | works | works | broken: emulator limit, probably: goldfish H.264 decoder fails (E3); then an empty player (F4) | works |
-| 8 | Seek (PLY-04) | works: double tap; scrubbing not tested | works: scrub with trickplay, double tap | works: scrub, double tap | works: scrub, double tap | not tested on ExoPlayer (nothing plays); works on mpv | unpolished: Right seeks +30 s with controls hidden but no indicator was seen (F20); seek bar focus not tested |
+| 8 | Seek (PLY-04) | works: double tap; scrubbing not tested | works: scrub with trickplay, double tap | works: scrub, double tap | works: scrub, double tap | not tested on ExoPlayer (nothing plays); works on mpv | unpolished: Right seeks +30 s with controls hidden but no indicator was seen (F20, not confirmed); seek bar focus not tested |
 | 9 | Volume keys (PLY-64) | works | works | works; level not measured | works | works | works; level not measured |
 | 9 | Media keys, Back (PLY-65) | works, both backends | works, both backends | works, both backends | works, both backends | works: ExoPlayer in its error state, mpv while playing | works (ExoPlayer) |
 | 10 | Picture-in-picture (PLY-100) | works with the PiP button; Home gesture: works on ExoPlayer, no PiP on mpv (F7, emulator); Back after it goes to the launcher (F17) | same as API 29 (F7, F17) | works | works | works (mpv) | n/a |
@@ -247,7 +248,13 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F6. fix(tv): the login form cannot be completed with the D-pad once the on-screen keyboard is hidden
 
-- Issue: not filed, needs a real-device or D-pad check first
+**Withdrawn.** Keys sent with `adb shell input keyevent` come from a virtual input device, and Compose
+text fields move focus on D-pad keys only from a real D-pad device. The Android TV 14 run (#355)
+repeated the steps with a real D-pad device (registered with `adb shell uinput`): with the keyboard
+hidden, Down moves from Username to Password, Login and Quick Connect, and OK on a field reopens the
+keyboard. The form works. The entry below is kept as it was first reported.
+
+- Issue: none, withdrawn
 - Seen on: Android TV 11 (API 30) only so far. A check on Android TV 14 is pending.
 - Steps: add a server, Users > demo, Sign in. The keyboard is up with focus in Username. Press Back: the
   keyboard hides. Press Down.
@@ -325,7 +332,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F11. fix(settings): the player backend shows the raw values `exoplayer` and `mpv`
 
-- Issue: not filed yet, to be merged with the findings of #353 to #356
+- Issue: #399
 - Seen on: API 33 and TV 30 (the other testers did not mention it).
 - Steps: Settings > Player > Player backend, and its dialog.
 - Cause: `SettingsViewModel.kt:501-502` uses `R.array.player_backends` for both labels and values, and
@@ -333,7 +340,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F12. fix(i18n): "Continar viendo" typo in upstream Spanish
 
-- Issue: not filed yet, to be merged with the findings of #353 to #356
+- Issue: #403
 - Seen on: API 33, phone, app language Español (US). Not checked on TV.
 - Seen: the Home row reads "Continar viendo"; it should be "Continuar viendo".
 - Cause: `modes/film/src/main/res/values-b+es+419/strings.xml:3` and `values-es-rMX/strings.xml:3`.
@@ -400,7 +407,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F18. fix(settings): "Max days in Next Up" reads "0 days" by default
 
-- Issue: not filed yet, to be merged with the findings of #353 to #356
+- Issue: #400
 - Seen on: API 33, phone.
 - Steps: Settings > Interface.
 - Seen: "0 days"; it is unclear that 0 means no limit.
@@ -417,7 +424,10 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F20. fix(tv): no seek feedback when the controls are hidden
 
-- Issue: not filed yet, to be merged with the findings of #353 to #356
+**Not confirmed.** The code shows an indicator for one second (see Cause), so the screenshot most likely
+came after it had gone. The TV player run (#356) will settle it.
+
+- Issue: not filed, not confirmed
 - Seen on: TV 30, ExoPlayer.
 - Steps: controls hidden, press Right.
 - Seen: the position jumps about 30 s, but the screenshot right after shows plain video. One screenshot
@@ -439,7 +449,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F22. fix(film): an item without a backdrop shows an empty hero
 
-- Issue: not filed yet, to be merged with the findings of #353 to #356
+- Issue: #433
 - Seen on: API 33, phone. Not seen on TV (its page shows the art differently).
 - Steps: Movies > King Lear.
 - Seen: the hero area (about 600 px) is empty, with the back and home buttons floating on it. Other items
