@@ -452,23 +452,12 @@ class JellyfinRepositoryOfflineImpl(
     override suspend fun postPlaybackStop(
         itemId: UUID,
         positionTicks: Long,
-        playedPercentage: Int,
+        playedPercentage: Int?,
     ) {
+        val userData = stopUserData(positionTicks, playedPercentage) ?: return
         withContext(Dispatchers.IO) {
-            when {
-                playedPercentage < 10 -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, 0)
-                    database.setPlayed(currentUserId, itemId, false)
-                }
-                playedPercentage > 90 -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, 0)
-                    database.setPlayed(currentUserId, itemId, true)
-                }
-                else -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, positionTicks)
-                    database.setPlayed(currentUserId, itemId, false)
-                }
-            }
+            database.setPlaybackPositionTicks(itemId, currentUserId, userData.positionTicks)
+            database.setPlayed(currentUserId, itemId, userData.played)
             database.setUserDataToBeSynced(currentUserId, itemId, true)
         }
     }

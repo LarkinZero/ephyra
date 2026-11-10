@@ -744,30 +744,22 @@ class JellyfinRepositoryImpl(
     override suspend fun postPlaybackStop(
         itemId: UUID,
         positionTicks: Long,
-        playedPercentage: Int,
+        playedPercentage: Int?,
     ) {
         Timber.d("Sending stop $itemId")
         withContext(Dispatchers.IO) {
-            when {
-                playedPercentage < 10 -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, 0)
-                    database.setPlayed(currentUserId, itemId, false)
-                }
-                playedPercentage > 90 -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, 0)
-                    database.setPlayed(currentUserId, itemId, true)
-                }
-                else -> {
-                    database.setPlaybackPositionTicks(itemId, currentUserId, positionTicks)
-                    database.setPlayed(currentUserId, itemId, false)
-                }
+            val userData = stopUserData(positionTicks, playedPercentage)
+            if (userData != null) {
+                database.setPlaybackPositionTicks(itemId, currentUserId, userData.positionTicks)
+                database.setPlayed(currentUserId, itemId, userData.played)
             }
             try {
                 jellyfinApi.sessionApi.reportPlaybackStopped(
                     PlaybackStopInfo(itemId = itemId, positionTicks = positionTicks, failed = false)
                 )
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                // Nothing local changed without user data, so there is nothing to sync later.
+                if (userData != null) database.setUserDataToBeSynced(currentUserId, itemId, true)
             }
         }
     }

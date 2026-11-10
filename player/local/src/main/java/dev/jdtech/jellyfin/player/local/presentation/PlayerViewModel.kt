@@ -64,6 +64,7 @@ import dev.jdtech.jellyfin.player.local.domain.UpNextDecision
 import dev.jdtech.jellyfin.player.local.domain.autoPlayNextFollowsServer
 import dev.jdtech.jellyfin.player.local.domain.buildMediaSourceFactory
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
+import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
@@ -97,6 +98,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jellyfin.sdk.model.api.BaseItemKind
 import timber.log.Timber
 
@@ -324,8 +326,16 @@ constructor(
      * `null` before the first transition, after [releasePlayer], and after the still-watching
      * prompt already reported the finished item (so the transition that follows does not report it
      * again).
+     *
+     * [startJob] is the item's playback start report, `null` until it is sent. Until the duration
+     * is known, [positionMs] is the position playback was asked to start at (#461).
      */
-    private data class PlayingSnapshot(val itemId: UUID, val positionMs: Long, val durationMs: Long)
+    private data class PlayingSnapshot(
+        val itemId: UUID,
+        val positionMs: Long,
+        val durationMs: Long,
+        val startJob: Job? = null,
+    )
 
     private var playing: PlayingSnapshot? = null
 
@@ -767,25 +777,35 @@ constructor(
 
     /**
      * Tell the server (and the local database) that [snapshot]'s item stopped playing. The only
-     * caller of [JellyfinRepository.postPlaybackStop]; skipped when the duration is unknown.
+     * caller of [JellyfinRepository.postPlaybackStop]. Before the duration is known the stop is
+     * only sent if the start was, and it leaves the local database alone ([playbackStopReport]).
      *
      * Runs in [GlobalScope] because it must outlive [viewModelScope]: [releasePlayer] runs from
-     * [onCleared], and the player can be closed right after an item change.
+     * [onCleared], and the player can be closed right after an item change. It waits up to
+     * [START_REPORT_WAIT_MS] for the item's start report, so the stop reaches the server after it.
      *
      * @return the reporting job, so a caller can wait for it, or `null` if nothing was sent.
      */
     @OptIn(DelicateCoroutinesApi::class)
     private fun reportStopped(snapshot: PlayingSnapshot): Job? {
-        val (itemId, position, duration) = snapshot
-        if (duration == C.TIME_UNSET || duration <= 0) return null
+        val (itemId, position, duration, startJob) = snapshot
+        val report = playbackStopReport(position, duration, startSent = startJob != null)
+        if (report == null) {
+            Timber.d("No playback stop for $itemId: neither loaded nor started")
+            return null
+        }
         return GlobalScope.launch(Dispatchers.IO) {
             try {
-                Timber.d("Sending playback stop for $itemId at $position / $duration ms")
-                repository.postPlaybackStop(
-                    itemId,
-                    position.times(10000),
-                    position.div(duration.toFloat()).times(100).toInt(),
-                )
+                if (startJob != null && !startJob.isCompleted) {
+                    withTimeoutOrNull(START_REPORT_WAIT_MS) { startJob.join() }
+                        ?: Timber.w("Start report for $itemId still running, sending stop anyway")
+                }
+                if (report.playedPercentage == null) {
+                    Timber.d("Sending playback stop for $itemId at its start, $position ms")
+                } else {
+                    Timber.d("Sending playback stop for $itemId at $position / $duration ms")
+                }
+                repository.postPlaybackStop(itemId, report.positionTicks, report.playedPercentage)
             } catch (e: Exception) {
                 Timber.e(e)
             } finally {
@@ -945,11 +965,7 @@ constructor(
                         // auto-advance code did. A stop that reaches the server after the start
                         // can clear the session's now-playing item.
                         stopJob?.join()
-                        try {
-                            repository.postPlaybackStart(item.itemId)
-                        } catch (e: Exception) {
-                            Timber.e(e)
-                        }
+                        sendPlaybackStart(item)
 
                         segmentTracker.setSegments(emptyList())
                         if (shouldPollSegments()) {
@@ -970,6 +986,43 @@ constructor(
                 Timber.e(e)
             }
         }
+    }
+
+    /**
+     * Tell the server that [item] started playing, and record the report on [playing] so that
+     * leaving the item, even before it loaded, sends the stop this start is owed (#461). Until the
+     * duration is known the snapshot holds the position playback was asked to start at, so that
+     * stop keeps a saved resume position.
+     *
+     * The report runs in [GlobalScope] so that closing the player does not cut it off halfway;
+     * [reportStopped] waits for it (with a time limit) to keep the stop behind it.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun sendPlaybackStart(item: PlayerItem) {
+        // The player moved on while the previous item's stop was being sent (Previous or Next
+        // pressed while this item was loading). A start now would arrive after the next item's,
+        // and nothing would stop it.
+        if (playing?.itemId != item.itemId) {
+            Timber.d("No playback start for ${item.itemId}: left before it was sent")
+            return
+        }
+        val start =
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    repository.postPlaybackStart(item.itemId)
+                } catch (e: Exception) {
+                    Timber.e(e)
+                }
+            }
+        playing =
+            playing?.let {
+                if (it.durationMs == C.TIME_UNSET) {
+                    it.copy(positionMs = item.playbackPosition, startJob = start)
+                } else {
+                    it.copy(startJob = start)
+                }
+            }
+        start.join()
     }
 
     /** The item whose trickplay and neighbour queueing wait for the first ready state. */
@@ -1951,6 +2004,12 @@ private const val SLEEP_TIMER_TICK_MS = 1_000L
 
 /** How often [PlayerViewModel.upNext] is updated. */
 private const val UP_NEXT_TICK_MS = 500L
+
+/**
+ * How long a stop report waits for its item's start report before it is sent anyway (#461), so a
+ * start that hangs (no network) cannot hold back the stop.
+ */
+private const val START_REPORT_WAIT_MS = 5_000L
 
 /** `S01E02` (VISION §4), `S01E02-E03` for a double episode, or null without numbers. */
 internal fun episodeLabel(item: PlayerItem): String? {
