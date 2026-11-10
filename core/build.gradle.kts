@@ -62,4 +62,5 @@ dependencies {
     implementation(libs.slf4j.android)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }

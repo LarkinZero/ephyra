@@ -357,9 +357,11 @@ class DownloaderImpl(
     }
 
     override suspend fun cancelDownload(item: FindroidItem, downloadId: Long) {
+        // First, and even when the row is already gone: a resume started while the queue entry
+        // was being removed (#426) must not keep writing.
+        engine.cancel(downloadId)
         val source =
             database.getSourceByDownloadId(downloadId)?.toFindroidSource(database) ?: return
-        source.downloadId?.let { engine.cancel(it) }
         deleteItem(item, source)
     }
 
