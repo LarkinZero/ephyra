@@ -35,7 +35,8 @@ suspend fun MediaSourceInfo.toFindroidSource(
     val transcoded = !transcodeUrl.isNullOrBlank()
     val path =
         when {
-            transcoded -> jellyfinRepository.getBaseUrl() + transcodeUrl
+            transcodeUrl != null && transcoded ->
+                serverUrl(jellyfinRepository.getBaseUrl(), transcodeUrl)
             protocol == MediaProtocol.FILE -> {
                 try {
                     if (includePath) jellyfinRepository.getStreamUrl(itemId, id.orEmpty()) else ""
