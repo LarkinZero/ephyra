@@ -936,16 +936,33 @@ class PlayerActivity : BasePlayerActivity() {
         }
     }
 
-    /** Keys the system acts on (volume, Back, Home, power...) are left to it. */
+    /**
+     * Keys the system acts on (volume, Back, Home, power...) are left to it. The media keys are
+     * listed here instead of asking `KeyEvent.isMediaSessionKey`: that is API 31, and calling it
+     * crashed the player on Android 10 and 11 at the first key press (#350).
+     */
     private fun isSystemKey(keyCode: Int): Boolean =
-        KeyEvent.isMediaSessionKey(keyCode) ||
-            keyCode == KeyEvent.KEYCODE_BACK ||
-            keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-            keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-            keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
-            keyCode == KeyEvent.KEYCODE_HOME ||
-            keyCode == KeyEvent.KEYCODE_POWER ||
-            keyCode == KeyEvent.KEYCODE_APP_SWITCH
+        when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY,
+            KeyEvent.KEYCODE_MEDIA_PAUSE,
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+            KeyEvent.KEYCODE_MEDIA_STOP,
+            KeyEvent.KEYCODE_MEDIA_NEXT,
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+            KeyEvent.KEYCODE_MEDIA_REWIND,
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
+            KeyEvent.KEYCODE_MEDIA_RECORD,
+            KeyEvent.KEYCODE_HEADSETHOOK,
+            KeyEvent.KEYCODE_MUTE,
+            KeyEvent.KEYCODE_BACK,
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_VOLUME_DOWN,
+            KeyEvent.KEYCODE_VOLUME_MUTE,
+            KeyEvent.KEYCODE_HOME,
+            KeyEvent.KEYCODE_POWER,
+            KeyEvent.KEYCODE_APP_SWITCH -> true
+            else -> false
+        }
 
     private fun View.isInside(ancestor: View): Boolean {
         var current = parent
