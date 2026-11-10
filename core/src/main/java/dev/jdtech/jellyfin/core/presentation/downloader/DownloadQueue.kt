@@ -331,13 +331,16 @@ constructor(
         ensurePump()
     }
 
-    /** Cancels an active download or drops a pending/failed/completed entry. */
+    /**
+     * Cancels a download that has not finished (its partial file and rows go too) or drops a
+     * completed entry.
+     */
     fun remove(id: UUID) {
         scope.launch {
             var cancelEntry: Entry? = null
             mutex.withLock {
                 val target = _entries.value.firstOrNull { it.id == id } ?: return@withLock
-                if (target.state is EntryState.Downloading || target.state is EntryState.Paused) {
+                if (target.state !is EntryState.Completed) {
                     cancelEntry = target
                 }
                 _entries.value = _entries.value.filter { it.id != id }
@@ -348,7 +351,7 @@ constructor(
                 Timber.e(e, "Failed to drop persisted pending row for $id")
             }
             cancelEntry?.let { entry ->
-                entry.downloadId?.let { dlId ->
+                for (dlId in unfinishedDownloadIds(entry)) {
                     try {
                         downloader.cancelDownload(entry.item, dlId)
                     } catch (e: Exception) {
@@ -358,6 +361,26 @@ constructor(
             }
             ensurePump()
         }
+    }
+
+    /**
+     * The downloads to cancel for [entry]. Not only a running or paused one: a download waiting
+     * for its auto-retry, a failed one and one restored at start have no downloadId on the entry
+     * but keep their source row and partial file, which would bring them back at the next start
+     * (#426). Their ids are on the source rows.
+     */
+    private suspend fun unfinishedDownloadIds(entry: Entry): List<Long> {
+        val fromRows =
+            try {
+                database
+                    .getSources(entry.id)
+                    .filter { it.path.endsWith(".download") }
+                    .mapNotNull { it.downloadId }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to read the source rows of ${entry.item.name}")
+                emptyList()
+            }
+        return (listOfNotNull(entry.downloadId) + fromRows).distinct()
     }
 
     /** Re-queues a failed entry. */
