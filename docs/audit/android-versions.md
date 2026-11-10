@@ -163,7 +163,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F1. fix(library): a library shows a spinner forever after the app was killed in the background
 
-- Issue: TBD
+- Issue: #371
 - Seen on: API 36 (2 of 2), phone. API 37: not tried with this back stack. The code is the same on every
   version.
 - Steps: My media > Movies > King Lear, Home, `adb shell am kill nl.midasvo.findroid.ce.debug`, reopen
@@ -179,7 +179,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F2. fix(permissions): the notification permission is asked on every launch and rotation, and before the Welcome screen
 
-- Issue: TBD
+- Issue: #372
 - Seen on: API 33, 36 and 37, phone. n/a below API 33 and on TV.
 - Steps: fresh install, launch: the system dialog appears on top of Welcome. Deny. Then rotate (API 36),
   change the app language (API 33), or close and relaunch (API 33, 37).
@@ -193,7 +193,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F3. fix(downloads): episode rows on the season page offer Download when the server does not allow the user to download
 
-- Issue: TBD
+- Issue: #373
 - Seen on: API 36 and 37, phone.
 - Steps: log in as `demo`, Shows > Pioneer One > Season 1.
 - Seen: every episode row has a Download button and the download completes (181 MB
@@ -208,7 +208,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F4. fix(player): the player stays open, empty and silent when playback fails to start
 
-- Issue: TBD
+- Issue: #374
 - Seen on: API 29 (ExoPlayer source error from E1), API 36 (server 503 during the demo reset), API 37
   (decoder failure from E3); phone, ExoPlayer.
 - Steps: start playback while it cannot start: the server answers an error, or the stream or decoder
@@ -231,7 +231,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F5. fix(player): mpv plays a downloaded episode offline with sound but no picture
 
-- Issue: TBD
+- Issue: not filed, needs a real-device or D-pad check first
 - Seen on: API 37, phone, mpv: 2 of 2 offline, 0 of 1 online. API 36 offline: 0 of 1.
 - Steps: mpv backend, download Pioneer One S1E1, airplane mode on, Downloads > Pioneer One > Earthfall.
 - Seen: black screen, sound, media session `PLAYING` with the position advancing. Expected: picture.
@@ -247,7 +247,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F6. fix(tv): the login form cannot be completed with the D-pad once the on-screen keyboard is hidden
 
-- Issue: TBD
+- Issue: not filed, needs a real-device or D-pad check first
 - Seen on: Android TV 11 (API 30) only so far. A check on Android TV 14 is pending.
 - Steps: add a server, Users > demo, Sign in. The keyboard is up with focus in Username. Press Back: the
   keyboard hides. Press Down.
@@ -266,7 +266,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F7. Home does not enter picture-in-picture on mpv (emulator, from E2)
 
-- Issue: TBD
+- Issue: not filed, needs a real-device or D-pad check first
 - Seen on: API 29 and 30, phone, mpv, with Settings > Player > "Picture-in-picture home gesture" on.
   On API 37 the same steps on mpv open PiP.
 - Steps: mpv backend, home gesture on, play a movie, press Home.
@@ -281,7 +281,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F8. fix(setup): after local network access is denied on Android 17, discovery and LAN addresses fail without saying why
 
-- Issue: TBD
+- Issue: #376
 - Seen on: API 37, phone. n/a below API 37.
 - Steps: fresh install, Welcome > Continue > Grant > Don't allow (twice) > Not now > Add server. Enter a
   LAN address (`10.0.2.2:5568`) and Connect.
@@ -302,7 +302,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F9. fix(setup): the server's login disclaimer shows literal HTML such as `<br/>`
 
-- Issue: TBD
+- Issue: #375
 - Seen on: every version, phone and TV. Not tied to the Android version.
 - Steps: add the demo server, pick `demo`.
 - Seen: "...for testing and evaluation.<br/>" and "...above.<br/>Please contact...". Expected: line
@@ -314,7 +314,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F10. fix(home): the Home error dialog shows a raw stack trace
 
-- Issue: TBD
+- Issue: #377
 - Seen on: API 30, phone (the demo server answered 503 while restarting). Not tied to the Android version.
 - Steps: the server answers 503 on a Home refresh; tap the red error icon on Home.
 - Seen: "Invalid HTTP status in response: 503" and the full `InvalidStatusException` stack trace, with
@@ -325,7 +325,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F11. fix(settings): the player backend shows the raw values `exoplayer` and `mpv`
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33 and TV 30 (the other testers did not mention it).
 - Steps: Settings > Player > Player backend, and its dialog.
 - Cause: `SettingsViewModel.kt:501-502` uses `R.array.player_backends` for both labels and values, and
@@ -333,7 +333,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F12. fix(i18n): "Continar viendo" typo in upstream Spanish
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33, phone, app language Español (US). Not checked on TV.
 - Seen: the Home row reads "Continar viendo"; it should be "Continuar viendo".
 - Cause: `modes/film/src/main/res/values-b+es+419/strings.xml:3` and `values-es-rMX/strings.xml:3`.
@@ -341,7 +341,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F13. fix(app): the launch window is blank white on Android 10 and 11
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 29 and 30, phone. Not compared on API 31+ by that tester.
 - Steps: force-stop, launch from the launcher, screenshot within 0.3 s.
 - Seen: an empty white window until Home draws (about a second on the emulator). Expected: the app icon
@@ -353,7 +353,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F14. fix(settings): App language is greyed out on Android 10 to 12 without a reason
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 29 and 30, phone. By the code also API 31 and 32.
 - Steps: Settings > Language.
 - Seen: "App language" is disabled and does nothing. Expected: a reason, as Dynamic colours gives
@@ -364,7 +364,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F15. fix(navigation): the predictive back preview cross-fades two full-size pages
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 36 and 37, phone, gesture navigation.
 - Steps: open a movie page, swipe slowly from the left edge and hold.
 - Seen: both pages at full size and half opacity on top of each other, text overlapping. Commit, cancel
@@ -377,7 +377,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F16. fix(ui): the bottom navigation bar is two-tone with 3-button navigation
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 36 and 37, phone, 3-button navigation. Gesture navigation is one colour.
 - Steps: `cmd overlay enable com.android.internal.systemui.navbar.threebutton`, open Home.
 - Seen: the app's bar colour (223,239,245) runs down to the system bar, then the system draws its
@@ -388,7 +388,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F17. fix(player): Back after returning from a Home-gesture PiP leaves the app
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 29 and 30, phone, ExoPlayer. Not reported on 33, 36 or 37.
 - Steps: home gesture on; play from an item page; Home (PiP opens); tap the PiP window and its full-screen
   button; Back.
@@ -400,7 +400,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F18. fix(settings): "Max days in Next Up" reads "0 days" by default
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33, phone.
 - Steps: Settings > Interface.
 - Seen: "0 days"; it is unclear that 0 means no limit.
@@ -417,7 +417,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F20. fix(tv): no seek feedback when the controls are hidden
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: TV 30, ExoPlayer.
 - Steps: controls hidden, press Right.
 - Seen: the position jumps about 30 s, but the screenshot right after shows plain video. One screenshot
@@ -429,7 +429,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F21. fix(tv): the Users screen focuses "Add user" instead of the user
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: TV 30.
 - Steps: add the demo server; the Users screen opens.
 - Seen: focus on "Add user"; the demo user needs an Up press first.
@@ -439,7 +439,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F22. fix(film): an item without a backdrop shows an empty hero
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33, phone. Not seen on TV (its page shows the art differently).
 - Steps: Movies > King Lear.
 - Seen: the hero area (about 600 px) is empty, with the back and home buttons floating on it. Other items
@@ -448,14 +448,14 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F23. Home carousel peeks behind the navigation rail in landscape
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33, phone. Minor, noted in the tester's rotation step.
 
 ### Log noise
 
 #### F24. chore(logging): cancelled trickplay loads are logged as errors with stack traces
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 30, 33, 36 and 37 (25 to 47 per run while scrubbing).
 - Seen: `E PreviewScrubListener$onScrubMove: Trickplay tile load failed` and
   `E TrickplayLoader...: Failed to load trickplay sheet 0`, each with a `JobCancellationException`.
@@ -466,7 +466,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F25. chore(logging): download workers log "No authenticated user" before login
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 33 and 37, before the first login (four times on API 37, about once a minute, then it
   stops).
 - Seen: `E DownloadQueue: Failed to query active downloads for restore` and `E OrphanSweepWorker`, both
@@ -477,7 +477,7 @@ None that is the app's. The process deaths in the logs are E1 and E4.
 
 #### F26. chore(logging): a cancelled progress update is logged as an error
 
-- Issue: TBD
+- Issue: not filed yet, to be merged with the findings of #353 to #356
 - Seen on: API 29 (`PlayerViewModel$updatePlaybackProgress: JobCancellationException`, three times).
 - Cause: `PlayerViewModel.kt:826-827` catches `Exception` and logs it with `Timber.e`, cancellation
   included.
