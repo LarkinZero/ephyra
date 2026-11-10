@@ -561,26 +561,16 @@ constructor(
                     )
                 } catch (e: Exception) {
                     Timber.e(e)
-                    // A Toast without text throws, and some errors (an NPE) have no message.
-                    e.localizedMessage?.let {
-                        Toast.makeText(application, it, Toast.LENGTH_LONG).show()
-                    }
                     failure = e
                     null
                 }
 
             if (startItem == null) {
                 Timber.e("No start item, stopping player initialization")
-                // CE (#131): nothing will play, so tell the screen (the TV player shows it).
-                eventsChannel.trySend(
-                    PlayerEvents.PlayerError(
-                        PlaybackException(
-                            failure?.localizedMessage,
-                            failure,
-                            PlaybackException.ERROR_CODE_UNSPECIFIED,
-                        )
-                    )
-                )
+                // CE (#131, #374): nothing will play, so tell the screen. The TV player shows the
+                // message; the phone player shows a toast and closes. No toast here, or the
+                // phone showed the raw exception text as a second toast.
+                eventsChannel.trySend(PlayerEvents.PlayerError.startFailed(failure))
                 return@launch
             }
 
@@ -1335,7 +1325,7 @@ constructor(
             player.prepare()
             return
         }
-        eventsChannel.trySend(PlayerEvents.PlayerError(error))
+        eventsChannel.trySend(PlayerEvents.PlayerError.fromPlayer(error, player.currentMediaItem))
     }
 
     override fun onPlaybackStateChanged(state: Int) {
@@ -1928,7 +1918,29 @@ sealed interface PlayerEvents {
 
     data class IsPlayingChanged(val isPlaying: Boolean) : PlayerEvents
 
-    data class PlayerError(val error: PlaybackException) : PlayerEvents
+    /**
+     * Playback failed. [nothingLoaded] is true when the player has no item at all, so nothing will
+     * ever play: the phone player closes then (#374). With an item loaded, Play retries.
+     */
+    data class PlayerError(val error: PlaybackException, val nothingLoaded: Boolean) :
+        PlayerEvents {
+        companion object {
+            /** The item to start with could not be loaded ([failure] is null without an item). */
+            fun startFailed(failure: Exception?) =
+                PlayerError(
+                    PlaybackException(
+                        failure?.localizedMessage,
+                        failure,
+                        PlaybackException.ERROR_CODE_UNSPECIFIED,
+                    ),
+                    nothingLoaded = true,
+                )
+
+            /** The player reported [error] while on [currentMediaItem]. */
+            fun fromPlayer(error: PlaybackException, currentMediaItem: MediaItem?) =
+                PlayerError(error, nothingLoaded = currentMediaItem == null)
+        }
+    }
 
     /** CE (#298): the sleep timer paused playback. */
     data object SleepTimerFired : PlayerEvents

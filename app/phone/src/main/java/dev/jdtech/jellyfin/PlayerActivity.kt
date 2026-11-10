@@ -637,6 +637,10 @@ class PlayerActivity : BasePlayerActivity() {
                                         Toast.LENGTH_LONG,
                                     )
                                     .show()
+                                // Nothing loaded, so nothing will ever play: back to where the
+                                // user came from instead of an empty player (#374). With an item
+                                // loaded the player stays, and Play retries.
+                                if (event.nothingLoaded) finishPlayback()
                             }
                             // CE (#298): paused with the controls up, so a tap on play resumes.
                             is PlayerEvents.SleepTimerFired -> binding.playerView.showController()
