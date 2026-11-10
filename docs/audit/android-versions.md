@@ -29,9 +29,10 @@ empty password. **Emulators:** six AVDs, one at a time per tester, all with `-gp
   - API 37: one ANR on the very first launch (`No response to onStartJob for #OrphanSweepWorker#`, load
     32 right after boot, while a GMS ANR fired at the same moment). It did not happen again.
 - **What was found:** 4 wrong-behaviour findings that are the app's (F1 to F4), 1 that needs a real
-  device to place (F5), 1 that the emulator causes (F7), 15 unpolished findings (one of them, F20, not
-  confirmed), a few TV observations (F19) and 3 log-noise findings. F6 (the TV login form and the D-pad)
-  was withdrawn: it came from the way the keys were sent, not from the app. The most visible ones:
+  device to place (F5), 1 that the emulator causes (F7), 14 unpolished findings, a few TV
+  observations (F19) and 3 log-noise findings. F6 (the TV login form and the D-pad) was withdrawn: it
+  came from the way the keys were sent, not from the app. F20 (no seek feedback on TV) was withdrawn:
+  the TV player run (#356) saw the indicator. The most visible ones:
   - A library opened from the back stack after process death spins forever (F1, API 36). Seen once,
     confirmed in the code, and the code is the same on every version.
   - The notification permission is asked before the Welcome screen and again on every activity
@@ -62,7 +63,7 @@ a failure comes from the emulator and not the app, the cell says so.
 | 6 | Library, sort, filter, movie, show, season, episode (BRW-07) | works | works | works; empty hero on one movie (F22) | works | works | works; show, season and episode pages not visited |
 | 7 | Search | works | works | works | works | works | not tested: not in the TV steps |
 | 8 | ExoPlayer: start, picture, pause, controls (PLY-01 start only; resume not checked) | works for a 2.5-min file; long files fail: emulator limit, 16 MB heap (E1); then an empty player (F4) | works | works | works | broken: emulator limit, probably: goldfish H.264 decoder fails (E3); then an empty player (F4) | works |
-| 8 | Seek (PLY-04) | works: double tap; scrubbing not tested | works: scrub with trickplay, double tap | works: scrub, double tap | works: scrub, double tap | not tested on ExoPlayer (nothing plays); works on mpv | unpolished: Right seeks +30 s with controls hidden but no indicator was seen (F20, not confirmed); seek bar focus not tested |
+| 8 | Seek (PLY-04) | works: double tap; scrubbing not tested | works: scrub with trickplay, double tap | works: scrub, double tap | works: scrub, double tap | not tested on ExoPlayer (nothing plays); works on mpv | works: Right seeks +30 s with controls hidden; seek bar focus not tested; the seek-feedback finding F20 is withdrawn |
 | 9 | Volume keys (PLY-64) | works | works | works; level not measured | works | works | works; level not measured |
 | 9 | Media keys, Back (PLY-65) | works, both backends | works, both backends | works, both backends | works, both backends | works: ExoPlayer in its error state, mpv while playing | works (ExoPlayer) |
 | 10 | Picture-in-picture (PLY-100) | works with the PiP button; Home gesture: works on ExoPlayer, no PiP on mpv (F7, emulator); Back after it goes to the launcher (F17) | same as API 29 (F7, F17) | works | works | works (mpv) | n/a |
@@ -424,10 +425,12 @@ keyboard. The form works. The entry below is kept as it was first reported.
 
 #### F20. fix(tv): no seek feedback when the controls are hidden
 
-**Not confirmed.** The code shows an indicator for one second (see Cause), so the screenshot most likely
-came after it had gone. The TV player run (#356) will settle it.
+**Withdrawn.** The TV player run (#356, Android TV 14, real D-pad device) saw the indicator: one press
+of Right with the controls hidden showed "⏩ 1:52 / 31:36" at the top with a trickplay thumbnail above it
+for about a second, in a screenshot taken straight after the key and in a screen recording. The
+screenshot on TV 30 came after the indicator had gone. The entry below is kept as it was first reported.
 
-- Issue: not filed, not confirmed
+- Issue: none, withdrawn
 - Seen on: TV 30, ExoPlayer.
 - Steps: controls hidden, press Right.
 - Seen: the position jumps about 30 s, but the screenshot right after shows plain video. One screenshot
