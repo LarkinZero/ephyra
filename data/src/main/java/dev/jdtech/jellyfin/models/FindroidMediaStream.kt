@@ -30,7 +30,7 @@ fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): F
         codec = codec.orEmpty(),
         profile = profile,
         isExternal = isExternal,
-        path = jellyfinRepository.getBaseUrl() + deliveryUrl,
+        path = deliveryUrl?.let { serverUrl(jellyfinRepository.getBaseUrl(), it) },
         channelLayout = channelLayout,
         videoRangeType = videoRangeType,
         height = height,
