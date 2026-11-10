@@ -416,12 +416,15 @@ class JellyfinRepositoryOfflineImpl(
             database.getSources(itemId).map { it.toFindroidSource(database) }
         }
 
-    // Offline playback is always a local file — no server, no transcoding.
+    // Offline playback is always a local file — no server, no transcoding. Only a finished
+    // download: an unfinished one's partial file plays as far as it got, or not at all (#454).
     override suspend fun getPlaybackSources(
         itemId: UUID,
         mediaSourceId: String?,
     ): List<FindroidSource> =
-        getMediaSources(itemId, includePath = false)
+        withContext(Dispatchers.IO) {
+            database.getCompletedSources(itemId).map { it.toFindroidSource(database) }
+        }
 
     override suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String {
         TODO("Not yet implemented")

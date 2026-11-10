@@ -151,6 +151,10 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM sources WHERE type = 'LOCAL' AND path NOT LIKE '%.download'")
     suspend fun getCompletedDownloadSources(): List<FindroidSourceDto>
 
+    /** The item's finished downloads: a `.download` file is still being written (#454). */
+    @Query("SELECT * FROM sources WHERE itemId = :itemId AND path NOT LIKE '%.download'")
+    suspend fun getCompletedSources(itemId: UUID): List<FindroidSourceDto>
+
     @Query(
         "SELECT DISTINCT episodes.seriesId FROM episodes " +
             "JOIN sources ON sources.itemId = episodes.id " +

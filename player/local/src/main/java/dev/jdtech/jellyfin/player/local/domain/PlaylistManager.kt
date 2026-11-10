@@ -354,8 +354,15 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             (prefetchedSources ?: repository.getPlaybackSources(id, mediaSourceId)).let { sources ->
                 sources.filter { it.id == mediaSourceId }.ifEmpty { sources }
             }
+        // Never an unfinished download (#454): its partial file plays as far as it got, or not at
+        // all. With no other source (offline) there is nothing to play: the exception carries no
+        // message, so the player shows its own error instead of a raw one.
         val mediaSource =
-            mediaSources.firstOrNull { it.type == FindroidSourceType.LOCAL } ?: mediaSources[0]
+            mediaSources.firstOrNull {
+                it.type == FindroidSourceType.LOCAL && !it.path.endsWith(".download")
+            }
+                ?: mediaSources.firstOrNull { it.type != FindroidSourceType.LOCAL }
+                ?: throw NoSuchElementException()
         val externalSubtitles =
             mediaSource.mediaStreams
                 .filter { mediaStream ->
