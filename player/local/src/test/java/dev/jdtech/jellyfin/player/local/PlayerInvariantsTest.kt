@@ -76,4 +76,24 @@ class PlayerInvariantsTest {
             Regex("""if \(!matchRefreshRate\s*\|\|""").containsMatchIn(mpvPlayer),
         )
     }
+
+    @Test
+    fun `mpv asks whether the stream broke before it ends or advances`() {
+        // #445: a lost connection reaches eof-reached like a real end, so the item was reported
+        // finished at its full length and the next episode started. MpvStreamBreakTest covers the
+        // decision; this checks the eof-reached handler still asks before ENDED or advancing.
+        val mpvPlayer = source("mpv/MPVPlayer.kt")
+        val handler = Regex(""""eof-reached" -> \{[\s\S]*?\n {16}\}""").find(mpvPlayer)
+        assertTrue("MPVPlayer's eof-reached handler not found", handler != null)
+        val body = handler!!.value
+        val check = body.indexOf("streamBreak.atEndOfFile(")
+        assertTrue("eof-reached must call streamBreak.atEndOfFile (#445)", check >= 0)
+        listOf("STATE_ENDED", "prepareMediaItem(", "END_OF_MEDIA_ITEM").forEach {
+            assertTrue("eof-reached must check the stream before $it (#445)", check < body.indexOf(it))
+        }
+        assertTrue(
+            "MPVPlayer must feed the log observer's errors to streamBreak (#445)",
+            mpvPlayer.contains("streamBreak.onErrorLog("),
+        )
+    }
 }

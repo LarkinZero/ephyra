@@ -8,6 +8,7 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -105,7 +106,10 @@ class MPVPlayer(
         object : MPVLib.LogObserver {
             override fun logMessage(prefix: String, level: Int, text: String) {
                 if (level <= MPVLib.MpvLogLevel.MPV_LOG_LEVEL_ERROR) {
-                    post { lastLoadError = "$prefix: ${text.trim()}" }
+                    post {
+                        lastLoadError = "$prefix: ${text.trim()}"
+                        streamBreak.onErrorLog(prefix, text, SystemClock.elapsedRealtime())
+                    }
                 }
             }
         }
@@ -366,6 +370,9 @@ class MPVPlayer(
     /** CE (#453): which item listeners were last told is playing. */
     private val itemTransitions = MpvItemTransitions(listeners)
 
+    /** CE (#445): whether an end of file is a real end or a lost connection. */
+    private val streamBreak = MpvStreamBreak()
+
     // Internal state.
     private var internalMediaItems = mutableListOf<MediaItem>()
 
@@ -457,6 +464,14 @@ class MPVPlayer(
             when (property) {
                 "eof-reached" -> {
                     if (value && isPlayerReady) {
+                        // #445: a lost connection reaches the end of the file too. It must not
+                        // end the item, report it finished or advance to the next one.
+                        val outcome = streamBreak.atEndOfFile(currentDurationMs)
+                        Timber.d("mpv end of file, $streamBreak, duration $currentDurationMs: $outcome")
+                        if (outcome is MpvStreamBreak.Outcome.Broken) {
+                            onStreamBroken(outcome)
+                            return@post
+                        }
                         if (currentMediaItemIndex < (internalMediaItems.size - 1)) {
                             if (pauseAtEndOfMediaItems) {
                                 setPlayerStateAndNotifyIfChanged(
@@ -536,10 +551,19 @@ class MPVPlayer(
         post {
             when (property) {
                 // Doubles, not INT64: mpv rounds an INT64 observation to whole seconds.
-                "time-pos" -> currentPositionMs = (value * C.MILLIS_PER_SECOND).toLong()
+                "time-pos" -> {
+                    // #445: after a lost connection mpv jumps to the last frame; the position
+                    // stays where playback broke.
+                    if (playerError == null) {
+                        currentPositionMs = (value * C.MILLIS_PER_SECOND).toLong()
+                        streamBreak.onPosition(currentPositionMs!!, currentDurationMs)
+                    }
+                }
                 "duration" -> currentDurationMs = (value * C.MILLIS_PER_SECOND).toLong()
-                "demuxer-cache-time" ->
+                "demuxer-cache-time" -> {
                     currentCacheDurationMs = (value * C.MILLIS_PER_SECOND).toLong()
+                    streamBreak.onBufferedEnd(currentCacheDurationMs!!, SystemClock.elapsedRealtime())
+                }
                 "speed" -> {
                     playbackParameters = playbackParameters.withSpeed(value.toFloat())
                     listeners.sendEvent(EVENT_PLAYBACK_PARAMETERS_CHANGED) { listener ->
@@ -557,6 +581,7 @@ class MPVPlayer(
                     fileLoaded = false
                     endFileExpected = false
                     lastLoadError = null
+                    streamBreak.reset()
                     if (!isPlayerReady) {
                         for (command in initialCommands) {
                             mpvLib.command(command)
@@ -632,7 +657,30 @@ class MPVPlayer(
             } else {
                 PlaybackException.ERROR_CODE_IO_UNSPECIFIED
             }
-        val error = PlaybackException(message, null, errorCode)
+        failPlayback(PlaybackException(message, null, errorCode))
+    }
+
+    /**
+     * #445: the stream broke during playback ([MpvStreamBreak]). Reported like ExoPlayer does: a
+     * network error and IDLE, at the position where playback broke, which progress and stop reports
+     * then carry. No ENDED, so the item is not reported finished and nothing advances.
+     */
+    private fun onStreamBroken(broken: MpvStreamBreak.Outcome.Broken) {
+        Timber.e(
+            "mpv lost the stream at ${broken.positionMs} / $currentDurationMs ms: ${broken.message}"
+        )
+        currentPositionMs = broken.positionMs
+        failPlayback(
+            PlaybackException(
+                broken.message,
+                null,
+                PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
+            )
+        )
+    }
+
+    /** Stops mpv on its current file and reports [error], then IDLE. */
+    private fun failPlayback(error: PlaybackException) {
         playerError = error
         endFileExpected = true
         mpvLib.command(arrayOf("stop", "keep-playlist"))
@@ -666,10 +714,13 @@ class MPVPlayer(
     ) {
         var playerStateChanged = false
         val wasPlaying = isPlaying
-        if (playbackState != getPlaybackState()) {
-            this.playbackState = playbackState
+        // An error holds the player in IDLE until prepare(): mpv's events for the file it was
+        // stopped on (a seek, a restart, the cache) can still arrive after it.
+        val state = if (playerError != null) STATE_IDLE else playbackState
+        if (state != getPlaybackState()) {
+            this.playbackState = state
             listeners.queueEvent(EVENT_PLAYBACK_STATE_CHANGED) { listener ->
-                listener.onPlaybackStateChanged(playbackState)
+                listener.onPlaybackStateChanged(state)
             }
             playerStateChanged = true
         }
@@ -686,7 +737,7 @@ class MPVPlayer(
             // onPlaybackStateChanged, so every state change arrived twice (ENDED too).
             listeners.queueEvent(C.INDEX_UNSET) { listener ->
                 @Suppress("DEPRECATION")
-                listener.onPlayerStateChanged(playWhenReady, playbackState)
+                listener.onPlayerStateChanged(playWhenReady, state)
             }
         }
         if (wasPlaying != isPlaying) {
@@ -1330,6 +1381,7 @@ class MPVPlayer(
         mpvLib.command(
             arrayOf("seek", "${initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)}", "absolute")
         )
+        streamBreak.onSeek(initialSeekTo)
         initialSeekTo = 0L
         return true
     }
