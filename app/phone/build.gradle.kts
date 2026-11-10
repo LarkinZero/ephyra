@@ -24,6 +24,14 @@ val keystoreProps: Properties? =
 // marks the staging build as a beta and keeps its versionCode increasing across branches.
 val betaBuild: Int? = System.getenv("BETA_BUILD")?.toIntOrNull()
 
+// CE-owned: the licence list is built from config/aboutlibraries, without the network. The plugin
+// otherwise downloads each licence text during the build and leaves it out when that fails, which
+// made the v2.3.0 APK differ from F-Droid's rebuild of it.
+aboutLibraries {
+    offlineMode = true
+    collect { configPath = rootProject.layout.projectDirectory.dir("config/aboutlibraries") }
+}
+
 composeCompiler {
     stabilityConfigurationFiles.add(
         rootProject.layout.projectDirectory.file("compose_stability.conf")
