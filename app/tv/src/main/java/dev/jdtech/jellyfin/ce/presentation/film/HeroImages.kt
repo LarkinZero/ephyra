@@ -11,6 +11,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.memory.MemoryCache
+import coil3.network.HttpException
 import coil3.request.Disposable
 import coil3.request.ImageRequest
 import coil3.request.ImageResult
@@ -22,6 +23,7 @@ import coil3.transition.TransitionTarget
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.utils.withImageSize
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * The hero's backdrop and logo requests, and the prefetch of the cards around the focused one
@@ -43,10 +45,14 @@ internal class HeroImages(
     /** Prefetches that may still be loading, by memory cache key. */
     private val pending = mutableMapOf<MemoryCache.Key, Disposable>()
 
+    /** Backdrops the server doesn't have (404), so the hero goes on to the next candidate. */
+    private val missing: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    /** The first of [heroBackdropUrls] that isn't known to be missing. */
     fun backdrop(item: FindroidItem): ImageRequest? =
-        heroBackdropUrl(item, backdropWidthPx)?.let {
-            request(it, backdropWidthPx, backdropWidthPx * 9 / 16, Scale.FILL)
-        }
+        heroBackdropUrls(item, backdropWidthPx)
+            .firstOrNull { it !in missing }
+            ?.let { request(it, backdropWidthPx, backdropWidthPx * 9 / 16, Scale.FILL) }
 
     fun logo(item: FindroidItem): ImageRequest? =
         heroLogoUrl(item, logoWidthPx)?.let { request(it, logoWidthPx, logoHeightPx, Scale.FIT) }
@@ -66,6 +72,12 @@ internal class HeroImages(
             .size(width, height)
             .scale(scale)
             .precision(Precision.INEXACT)
+            // A prefetch finds a missing image as well as the hero does, before focus gets there.
+            .listener(
+                onError = { _, result ->
+                    if ((result.throwable as? HttpException)?.response?.code == 404) missing += url
+                }
+            )
             .build()
 
     private fun requests(item: FindroidItem) = listOfNotNull(backdrop(item), logo(item))
@@ -175,7 +187,45 @@ internal fun heroCrossfade(durationMillis: Int): Transition.Factory =
                 CrossfadeTransition(target, result, durationMillis)
         }
 
-/** The hero shows an episode on its show's backdrop and logo. */
+/**
+ * The backdrops the hero can show for [item], best first. An episode has its show's backdrop, then
+ * its own, then its season's, then its own picture, the one on its card: a hero with the episode's
+ * still beats an empty one.
+ *
+ * The server sends an episode the backdrop of its show but not of its season, so the season's is
+ * asked for without a tag and may not exist: [HeroImages] skips it after the first 404.
+ */
+internal fun heroBackdropUrls(item: FindroidItem, widthPx: Int): List<String> {
+    val uris =
+        when (item) {
+            is FindroidEpisode ->
+                listOf(
+                    item.images.showBackdrop,
+                    item.images.backdrop,
+                    seasonBackdrop(item),
+                    item.images.primary,
+                )
+            else -> listOf(item.images.backdrop)
+        }
+    return uris.filterNotNull().map { it.toString().withImageSize(widthPx, null) }.distinct()
+}
+
+/** The season's backdrop, next to the episode's own picture on the same server. */
+private fun seasonBackdrop(episode: FindroidEpisode): Uri? {
+    val own = episode.images.primary ?: return null
+    val path = own.encodedPath ?: return null
+    val at = path.indexOf("items/${episode.id}/Images/")
+    if (at < 0) return null
+    return own.buildUpon()
+        .encodedPath(path.substring(0, at) + "items/${episode.seasonId}/Images/Backdrop/0")
+        .clearQuery()
+        .build()
+}
+
+/**
+ * The backdrop the server said the item has: an episode's is its show's. The screensaver uses it,
+ * which only wants pictures that are there.
+ */
 internal fun heroBackdropUrl(item: FindroidItem, widthPx: Int): String? {
     val uri =
         when (item) {
