@@ -218,7 +218,12 @@ interface JellyfinRepository {
 
     suspend fun postPlaybackStart(itemId: UUID)
 
-    suspend fun postPlaybackStop(itemId: UUID, positionTicks: Long, playedPercentage: Int)
+    /**
+     * Report that [itemId] stopped playing at [positionTicks]. [playedPercentage] decides what the
+     * local database stores (see [stopUserData]); `null`, for an item left before its duration was
+     * known, leaves the local database as it is and only tells the server.
+     */
+    suspend fun postPlaybackStop(itemId: UUID, positionTicks: Long, playedPercentage: Int?)
 
     suspend fun postPlaybackProgress(itemId: UUID, positionTicks: Long, isPaused: Boolean)
 
