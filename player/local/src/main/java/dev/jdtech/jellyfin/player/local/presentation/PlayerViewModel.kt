@@ -197,6 +197,12 @@ constructor(
         val fileLoaded: Boolean,
         val showStillWatching: Boolean,
         val stillWatchingTimeoutSeconds: Int,
+        /**
+         * CE (#367): when the still-watching prompt times out, in [SystemClock.elapsedRealtime]
+         * time. The dialog counts down to it, so it shows the time really left after the app was
+         * in the background.
+         */
+        val stillWatchingEndsAtMs: Long = 0L,
         /** CE (#131): the item in the player, for the TV overlay (series name, episode line). */
         val currentItem: PlayerItem? = null,
     )
@@ -1258,11 +1264,12 @@ constructor(
 
     private fun showStillWatchingPrompt() {
         Timber.d("Still-watching threshold tripped — prompting user")
-        _uiState.update { it.copy(showStillWatching = true) }
+        val endsAtMs = SystemClock.elapsedRealtime() + stillWatchingPromptTimeoutSeconds * 1000L
+        _uiState.update { it.copy(showStillWatching = true, stillWatchingEndsAtMs = endsAtMs) }
         stillWatchingTimeoutJob?.cancel()
         stillWatchingTimeoutJob =
             viewModelScope.launch {
-                delay(stillWatchingPromptTimeoutSeconds * 1000L)
+                delay(endsAtMs - SystemClock.elapsedRealtime())
                 // Timeout: user is gone. Hide the dialog and leave the player paused. The current
                 // item's stop was already reported in onPlayWhenReadyChanged (with the actual
                 // position), so the season won't be marked watched.
