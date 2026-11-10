@@ -23,8 +23,9 @@ from Findroid; that happens beforehand, in its own PR (see the `upstream-sync` s
   `Versions.APP_NAME` / `APP_CODE` are not used; ignore them.
 - **Tags:** releases are `vX.Y.Z` and trigger `.github/workflows/release.yml`, which builds the
   signed APKs and attaches them to the release. Betas are `v<next patch>-beta.<run>` and come
-  from `beta.yml` on every push to `main`. Tags below `v2` (`v0.x`, `v1.x`) are Findroid's and
-  `v1.2.0-ce.N` are the old Findroid CE releases; never reuse or move them.
+  from `beta.yml` on every push to `main`, except the merge of a release PR. Tags below `v2`
+  (`v0.x`, `v1.x`) are Findroid's and `v1.2.0-ce.N` are the old Findroid CE releases; never reuse
+  or move them.
 - **Semver:** a breaking change (`type!:` or a `BREAKING CHANGE` footer) is major, a `feat` is
   minor, anything else is patch. For users "breaking" means something they have to act on: a
   setting reset, a dropped Android version, a lost download. `scripts/next-version.sh` applies

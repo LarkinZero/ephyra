@@ -37,6 +37,10 @@ env:
 jobs:
   beta:
     name: Build and publish beta APK
+    # Merging a release PR is a push to main too, but that code is the stable release and the
+    # previous beta already has all of it. The merge commit reads
+    # "Merge pull request #N from midasvo/release/vX.Y.Z".
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '/release/v')
     runs-on: ubuntu-latest
 
     steps:
