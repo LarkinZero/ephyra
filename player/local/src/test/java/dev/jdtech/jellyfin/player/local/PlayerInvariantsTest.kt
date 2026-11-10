@@ -37,6 +37,26 @@ class PlayerInvariantsTest {
     }
 
     @Test
+    fun `mpv reports a replaced playlist from setMediaItems`() {
+        // #453: setMediaItems swapped the playlist without a timeline change or transition, so
+        // the media session crashed on the state change prepare() sends, and a jump from the first
+        // item kept the old item's title and server reports. MpvItemTransitionsTest covers the
+        // events; this checks MPVPlayer still sends them.
+        val mpvPlayer = source("mpv/MPVPlayer.kt")
+        val setMediaItems =
+            Regex(
+                    """override fun setMediaItems\(\s*mediaItems: MutableList<MediaItem>,\s*""" +
+                        """startWindowIndex: Int,[\s\S]*?\n    }"""
+                )
+                .find(mpvPlayer)
+        assertTrue("MPVPlayer.setMediaItems(items, index, position) not found", setMediaItems != null)
+        assertTrue(
+            "MPVPlayer.setMediaItems must call itemTransitions.playlistReplaced (#453)",
+            setMediaItems!!.value.contains("itemTransitions.playlistReplaced("),
+        )
+    }
+
+    @Test
     fun `mpv hints the surface with the video frame rate on every device`() {
         // mpv has no frame rate hint of its own (nothing in its Android sources calls
         // Surface.setFrameRate), so MPVPlayer sends one: seamless-only by default, like ExoPlayer,

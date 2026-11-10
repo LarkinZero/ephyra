@@ -363,6 +363,9 @@ class MPVPlayer(
         }
     private val videoListeners = CopyOnWriteArraySet<Player.Listener>()
 
+    /** CE (#453): which item listeners were last told is playing. */
+    private val itemTransitions = MpvItemTransitions(listeners)
+
     // Internal state.
     private var internalMediaItems = mutableListOf<MediaItem>()
 
@@ -391,7 +394,6 @@ class MPVPlayer(
      * and seeking afterwards. The seek in [applyInitialSeek] is skipped for it once the file is up.
      */
     private var startPassedToLoadMs: Long? = null
-    private var oldMediaItem: MediaItem? = null
     private var notifiedAvailableCommands: Commands = Commands.EMPTY
     private var playerError: PlaybackException? = null
 
@@ -520,22 +522,10 @@ class MPVPlayer(
                     if (value < 0) {
                         return@post
                     }
+                    val indexChanged = currentMediaItemIndex != value.toInt()
                     currentMediaItemIndex = value.toInt()
-                    val newMediaItem = currentMediaItem
-                    if (oldMediaItem?.mediaId != newMediaItem?.mediaId) {
-                        oldMediaItem = newMediaItem
-                        listeners.sendEvent(EVENT_MEDIA_ITEM_TRANSITION) { listener ->
-                            listener.onMediaItemTransition(
-                                newMediaItem,
-                                MEDIA_ITEM_TRANSITION_REASON_AUTO,
-                            )
-                        }
-                        // The media session reads the notification's title and artwork from
-                        // getMediaMetadata(), which follows the current item.
-                        listeners.sendEvent(EVENT_MEDIA_METADATA_CHANGED) { listener ->
-                            listener.onMediaMetadataChanged(mediaMetadata)
-                        }
-                    }
+                    itemTransitions.currentPositionChanged(timeline, currentMediaItem, indexChanged)
+                    listeners.flushEvents()
                     notifyAvailableCommandsIfChanged()
                 }
             }
@@ -940,6 +930,10 @@ class MPVPlayer(
         currentMediaItemIndex = 0
         initialIndex = startWindowIndex
         initialSeekTo = startPositionMs
+        // Before prepare() sends a state change: the media session checks its cached position
+        // against the timeline then, and crashed on a shorter playlist (#453).
+        itemTransitions.playlistReplaced(timeline, internalMediaItems, startWindowIndex)
+        listeners.flushEvents()
     }
 
     /**
