@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import dev.jdtech.jellyfin.ce.presentation.settings.TvSettingsLayout
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -126,112 +128,13 @@ private fun SettingsSubScreenLayout(
     state: SettingsState,
     onAction: (SettingsAction) -> Unit,
 ) {
-    val focusRequester = remember { FocusRequester() }
-
-    var focusedPreference by
-        remember(state.preferenceGroups.isNotEmpty()) {
-            mutableStateOf(state.preferenceGroups.firstOrNull()?.preferences?.firstOrNull())
-        }
-
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
-                .padding(
-                    start = TvSafeArea.horizontal,
-                    top = TvSafeArea.vertical,
-                    end = TvSafeArea.horizontal,
-                )
-    ) {
-        Column {
-            Text(text = stringResource(id = title), style = MaterialTheme.typography.displayMedium)
-            Text(
-                text = stringResource(id = SettingsR.string.title_settings),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large)) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-                contentPadding = PaddingValues(vertical = MaterialTheme.spacings.large),
-                modifier = Modifier.weight(1f).focusRequester(focusRequester),
-            ) {
-                items(state.preferenceGroups) { group ->
-                    SettingsGroupCard(
-                        group = group,
-                        onAction = onAction,
-                        onFocusChange = { focusState, preference ->
-                            if (focusState.isFocused) {
-                                focusedPreference = preference
-                            }
-                        },
-                    )
-                }
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                focusedPreference?.let { preference ->
-                    when (preference) {
-                        is PreferenceSelect -> {
-                            SettingsSelectDetailsCard(
-                                preference = preference,
-                                modifier =
-                                    Modifier.fillMaxSize()
-                                        .padding(bottom = MaterialTheme.spacings.large),
-                                onUpdate = { value ->
-                                    onAction(
-                                        SettingsAction.OnUpdate(preference.copy(value = value))
-                                    )
-                                },
-                            )
-                        }
-                        is PreferenceMultiSelect -> {
-                            SettingsMultiSelectDetailsCard(
-                                preference = preference,
-                                modifier =
-                                    Modifier.fillMaxSize()
-                                        .padding(bottom = MaterialTheme.spacings.large),
-                                onUpdate = { value ->
-                                    onAction(
-                                        SettingsAction.OnUpdate(preference.copy(value = value))
-                                    )
-                                },
-                            )
-                        }
-                        else -> {
-                            Surface(
-                                shape = MaterialTheme.shapes.medium,
-                                colors =
-                                    SurfaceDefaults.colors(
-                                        containerColor = MaterialTheme.colorScheme.surface
-                                    ),
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .padding(bottom = MaterialTheme.spacings.large),
-                            ) {
-                                Column(modifier = Modifier.padding(MaterialTheme.spacings.large)) {
-                                    Text(
-                                        text = stringResource(id = preference.nameStringResource),
-                                        style = MaterialTheme.typography.headlineMedium,
-                                    )
-                                    preference.descriptionStringRes?.let { descRes ->
-                                        Spacer(
-                                            modifier =
-                                                Modifier.height(MaterialTheme.spacings.medium)
-                                        )
-                                        Text(
-                                            text = stringResource(id = descRes),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    LaunchedEffect(true) { focusRequester.requestFocus() }
+    // CE: one layout for every settings page, see TvSettingsLayout.
+    TvSettingsLayout(
+        title = stringResource(id = title),
+        parentTitle = stringResource(id = SettingsR.string.title_settings),
+        groups = state.preferenceGroups,
+        onAction = onAction,
+    )
 }
 
 @Preview(device = "id:tv_1080p")

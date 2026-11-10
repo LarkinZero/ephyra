@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import dev.jdtech.jellyfin.ce.presentation.settings.TvSettingsLayout
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -111,35 +113,12 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsScreenLayout(state: SettingsState, onAction: (SettingsAction) -> Unit) {
-    // CE (#211): Back from a category (About, Interface, ...) returns focus to that category.
-    val focusPosition = rememberFocusPosition()
-
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-        contentPadding =
-            PaddingValues(
-                horizontal = TvSafeArea.horizontal,
-                vertical = TvSafeArea.vertical,
-            ),
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        item(span = { GridItemSpan(this.maxLineSpan) }) {
-            Text(
-                text = stringResource(id = SettingsR.string.title_settings),
-                style = MaterialTheme.typography.displayMedium,
-            )
-        }
-        itemsIndexed(state.preferenceGroups) { index, group ->
-            SettingsGroupCard(
-                group = group,
-                onAction = onAction,
-                modifier = Modifier.focusPosition(focusPosition, row = 0, column = index),
-            )
-        }
-    }
-    RestoreFocus(position = focusPosition, ready = state.preferenceGroups.isNotEmpty())
+    // CE: the first page uses the same list as every category, see TvSettingsLayout.
+    TvSettingsLayout(
+        title = stringResource(id = SettingsR.string.title_settings),
+        groups = state.preferenceGroups,
+        onAction = onAction,
+    )
 }
 
 @Preview(device = "id:tv_1080p")
