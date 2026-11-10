@@ -1,0 +1,6 @@
+A crash fix for Android 10 and 11, and tidier settings on TV.
+
+- Fixed: the player crashed on Android 10 and 11 when a volume key or Back was pressed.
+- "Still watching?" prompt: now a switch in Settings, Player, off by default.
+- TV: settings in one list layout, and number settings can be changed with the remote.
+- TV: the Home hero shows long titles in full and finds a picture for more episodes.

@@ -13,6 +13,36 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.4.0] — 2026-11-10
+
+A fix for Android 10 and 11 first: the player crashed there as soon as you pressed a volume key
+or Back, and no longer does. The "still watching?" prompt gets a switch and is now off until you
+turn it on. On TV the settings are one tidy list, number settings can finally be changed with the
+remote, and the Home hero shows long titles in full.
+
+### Added
+- TV: number settings, such as the "still watching?" thresholds, can be changed with steps in the
+  details pane (#127).
+
+### Changed
+- "Still watching?" prompt: a switch in Settings → Player, off by default. If you used the
+  prompt, switch it on again; the thresholds keep their values (#349).
+- TV settings: one list layout for every page, with the options or the description of the
+  focused setting on the right. Focus returns to the row you left (#347).
+
+### Fixed
+- The player crashed on Android 10 and 11 when a volume key, Back or most other keys were
+  pressed during playback, on both ExoPlayer and mpv (#350).
+- A leftover manifest entry for a download receiver that no longer exists could crash the app
+  when a system download finished (#350).
+- TV: the Home hero title shrinks to fit, on up to two lines, instead of being cut off (#346).
+- TV: the Home hero falls back to the season's backdrop or the episode's picture when the show
+  has no backdrop (#348).
+
+### Maintenance
+- The licence list in the app is built from texts in the repository instead of downloads during
+  the build, so F-Droid can reproduce the release APK (#364).
+
 ## [v2.3.0] — 2026-11-09
 
 Profiles can be locked, the player learns a few manners, and item pages show much more of what
@@ -701,6 +731,7 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.4.0]: https://github.com/midasvo/ephyra/releases/tag/v2.4.0
 [v2.3.0]: https://github.com/midasvo/ephyra/releases/tag/v2.3.0
 [v2.2.0]: https://github.com/midasvo/ephyra/releases/tag/v2.2.0
 [v2.1.0]: https://github.com/midasvo/ephyra/releases/tag/v2.1.0
