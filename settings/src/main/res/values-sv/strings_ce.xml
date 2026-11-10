@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Sammanfattningar</string>
     <string name="pref_player_next_episode">Nästa avsnitt</string>
     <string name="pref_player_still_watching">Fråga \"Tittar du fortfarande?\"</string>
+    <string name="pref_player_still_watching_summary">Frågar om du fortfarande tittar efter flera automatiskt uppspelade avsnitt eller lång tid utan aktivitet</string>
     <string name="pref_player_still_watching_after_episodes">Automatiskt uppspelade avsnitt före frågan</string>
     <string name="pref_player_still_watching_after_episodes_summary">Visa en bekräftelse efter att så många avsnitt har spelats upp automatiskt i följd. Ställ in på 0 för att inaktivera.</string>
     <string name="pref_player_still_watching_after_minutes">Inaktivitetsminuter före frågan</string>

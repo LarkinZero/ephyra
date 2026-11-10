@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">ملخصات الحلقات السابقة</string>
     <string name="pref_player_next_episode">الحلقة التالية</string>
     <string name="pref_player_still_watching">مطالبة متابعة المشاهدة</string>
+    <string name="pref_player_still_watching_summary">السؤال عمّا إذا كنت ما زلت تشاهد بعد تشغيل عدة حلقات تلقائيًا أو بعد وقت طويل دون تفاعل</string>
     <string name="pref_player_still_watching_after_episodes">عدد الحلقات المشغلة تلقائيًا قبل المطالبة</string>
     <string name="pref_player_still_watching_after_episodes_summary">إظهار تأكيد بعد تشغيل هذا العدد من الحلقات تلقائيًا على التوالي. عيّنه على 0 للتعطيل.</string>
     <string name="pref_player_still_watching_after_minutes">دقائق الخمول قبل المطالبة</string>

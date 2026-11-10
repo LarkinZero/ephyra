@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">前情提要</string>
     <string name="pref_player_next_episode">下一集</string>
     <string name="pref_player_still_watching">仍在此觀看提示</string>
+    <string name="pref_player_still_watching_summary">在自動播放多集後或長時間沒有操作時，詢問您是否仍在觀看</string>
     <string name="pref_player_still_watching_after_episodes">提示前自動播放的集數</string>
     <string name="pref_player_still_watching_after_episodes_summary">連續自動播放此數量的集數後顯示確認提示。設為 0 可停用。</string>
     <string name="pref_player_still_watching_after_minutes">提示前的無操作時間（分鐘）</string>

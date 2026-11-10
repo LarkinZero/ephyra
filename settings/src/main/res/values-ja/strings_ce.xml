@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">ダイジェスト</string>
     <string name="pref_player_next_episode">次のエピソード</string>
     <string name="pref_player_still_watching">視聴継続の確認</string>
+    <string name="pref_player_still_watching_summary">複数のエピソードが自動再生された後、または長時間操作がないときに、視聴を続けているか確認します</string>
     <string name="pref_player_still_watching_after_episodes">確認を表示するまでの自動再生エピソード数</string>
     <string name="pref_player_still_watching_after_episodes_summary">連続で指定した数のエピソードを自動再生した後に確認を表示します。0 に設定すると無効になります。</string>
     <string name="pref_player_still_watching_after_minutes">確認を表示するまでの無操作時間（分）</string>

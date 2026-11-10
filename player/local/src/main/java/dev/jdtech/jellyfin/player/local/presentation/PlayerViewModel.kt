@@ -362,13 +362,17 @@ constructor(
 
         maxBitrate = appPreferences.getValue(appPreferences.playerMaxBitrate)
 
+        // CE: the switch turns the whole prompt off, whatever the thresholds say.
+        val enabled = appPreferences.getValue(appPreferences.stillWatchingEnabled)
         val episodes = appPreferences.getValue(appPreferences.stillWatchingAfterEpisodes)
         val minutes = appPreferences.getValue(appPreferences.stillWatchingAfterMinutes)
         stillWatchingTracker =
             StillWatchingTracker(
-                autoAdvanceThreshold = episodes.coerceAtLeast(0),
+                autoAdvanceThreshold =
+                    if (enabled) episodes.coerceAtLeast(0) else StillWatchingTracker.OFF,
                 inactivityThresholdMs =
-                    if (minutes <= 0) StillWatchingTracker.OFF_MS else minutes * 60_000L,
+                    if (!enabled || minutes <= 0) StillWatchingTracker.OFF_MS
+                    else minutes * 60_000L,
             )
         stillWatchingTracker.reset(nowMs = System.currentTimeMillis())
         stillWatchingPromptTimeoutSeconds =

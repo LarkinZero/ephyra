@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Kilas balik</string>
     <string name="pref_player_next_episode">Episode berikutnya</string>
     <string name="pref_player_still_watching">Peringatan \"Masih menonton?\"</string>
+    <string name="pref_player_still_watching_summary">Menanyakan apakah Anda masih menonton setelah beberapa episode diputar otomatis atau lama tanpa aktivitas</string>
     <string name="pref_player_still_watching_after_episodes">Episode yang diputar otomatis sebelum peringatan</string>
     <string name="pref_player_still_watching_after_episodes_summary">Tampilkan konfirmasi setelah beberapa episode diputar secara otomatis berturut-turut. Atur ke 0 untuk menonaktifkan.</string>
     <string name="pref_player_still_watching_after_minutes">Menit tidak aktif sebelum peringatan</string>

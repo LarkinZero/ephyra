@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Kordused</string>
     <string name="pref_player_next_episode">Järgmine episood</string>
     <string name="pref_player_still_watching">\"Kas vaatad ikka veel?\" teavitus</string>
+    <string name="pref_player_still_watching_summary">Küsib, kas vaatad ikka veel, pärast mitut automaatselt esitatud osa või pikka aega ilma tegevuseta</string>
     <string name="pref_player_still_watching_after_episodes">Automaatselt esitatud episoode enne teavitust</string>
     <string name="pref_player_still_watching_after_episodes_summary">Kuva kinnitus pärast seda, kui mitu episoodi on järjest automaatselt esitatud. Keelamiseks määra väärtuseks 0.</string>
     <string name="pref_player_still_watching_after_minutes">Tegevusetuse minutid enne teavitust</string>

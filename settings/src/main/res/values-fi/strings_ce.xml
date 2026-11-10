@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Kertaukset</string>
     <string name="pref_player_next_episode">Seuraava jakso</string>
     <string name="pref_player_still_watching">\"Katseletko vielä?\" -kysely</string>
+    <string name="pref_player_still_watching_summary">Kysyy, katseletko vielä, usean automaattisesti toistetun jakson tai pitkän toimettoman ajan jälkeen</string>
     <string name="pref_player_still_watching_after_episodes">Automaattisesti toistetut jaksot ennen kyselyä</string>
     <string name="pref_player_still_watching_after_episodes_summary">Näytä vahvistus, kun näin monta jaksoa on toistettu automaattisesti peräkkäin. Poista käytöstä asettamalla arvoksi 0.</string>
     <string name="pref_player_still_watching_after_minutes">Toimettomat minuutit ennen kyselyä</string>

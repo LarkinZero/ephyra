@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Samandrag</string>
     <string name="pref_player_next_episode">Neste episode</string>
     <string name="pref_player_still_watching">Spørsmålet \"Ser du framleis på?\"</string>
+    <string name="pref_player_still_watching_summary">Spør om du framleis ser på etter fleire automatisk avspela episodar eller lang tid utan aktivitet</string>
     <string name="pref_player_still_watching_after_episodes">Automatisk avspelte episodar før spørsmålet</string>
     <string name="pref_player_still_watching_after_episodes_summary">Vis ei stadfesting etter at så mange episodar vert spelte av automatisk på rad. Set til 0 for å deaktivere.</string>
     <string name="pref_player_still_watching_after_minutes">Inaktivitetsminutt før spørsmålet</string>

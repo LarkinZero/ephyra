@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Короткий зміст</string>
     <string name="pref_player_next_episode">Наступна серія</string>
     <string name="pref_player_still_watching">Запит \"Ви ще дивитеся?\"</string>
+    <string name="pref_player_still_watching_summary">Запитує, чи ви ще дивитеся, після кількох автоматично відтворених серій або тривалого часу без дій</string>
     <string name="pref_player_still_watching_after_episodes">Автовідтворених серій перед запитом</string>
     <string name="pref_player_still_watching_after_episodes_summary">Показувати підтвердження після відтворення вказаної кількості серій поспіль. Встановіть 0, щоб вимкнути.</string>
     <string name="pref_player_still_watching_after_minutes">Хвилин бездіяльності перед запитом</string>

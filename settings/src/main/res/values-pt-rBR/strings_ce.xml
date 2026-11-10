@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Recapitulações</string>
     <string name="pref_player_next_episode">Próximo episódio</string>
     <string name="pref_player_still_watching">Prompt \"Ainda está assistindo?\"</string>
+    <string name="pref_player_still_watching_summary">Pergunta se você ainda está assistindo após vários episódios reproduzidos automaticamente ou muito tempo sem atividade</string>
     <string name="pref_player_still_watching_after_episodes">Episódios reproduzidos automaticamente antes do prompt</string>
     <string name="pref_player_still_watching_after_episodes_summary">Mostra uma confirmação após este número de episódios reproduzidos automaticamente em sequência. Defina como 0 para desativar.</string>
     <string name="pref_player_still_watching_after_minutes">Minutos de inatividade antes do prompt</string>

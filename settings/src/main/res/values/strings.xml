@@ -174,6 +174,7 @@
     <string name="player_autoplay_next_on">Always</string>
     <string name="player_autoplay_next_off">Never</string>
     <string name="pref_player_still_watching">Still watching prompt</string>
+    <string name="pref_player_still_watching_summary">Ask if you are still watching after a run of auto-played episodes or a long time without input</string>
     <string name="pref_player_still_watching_after_episodes">Auto-played episodes before prompt</string>
     <string name="pref_player_still_watching_after_episodes_summary">Show a confirmation after this many episodes auto-play in a row. Set to 0 to disable.</string>
     <string name="pref_player_still_watching_after_minutes">Inactivity minutes before prompt</string>

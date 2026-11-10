@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Resumos</string>
     <string name="pref_player_next_episode">Próximo episódio</string>
     <string name="pref_player_still_watching">Aviso \"Ainda a ver?\"</string>
+    <string name="pref_player_still_watching_summary">Pergunta se ainda está a ver após vários episódios reproduzidos automaticamente ou muito tempo sem atividade</string>
     <string name="pref_player_still_watching_after_episodes">Episódios reproduzidos automaticamente antes do aviso</string>
     <string name="pref_player_still_watching_after_episodes_summary">Mostra uma confirmação após a reprodução automática de tantos episódios seguidos. Defina como 0 para desativar.</string>
     <string name="pref_player_still_watching_after_minutes">Minutos de inatividade antes do aviso</string>

@@ -146,6 +146,8 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Player - "Are you still watching?" inactivity prompt.
     // 0 disables the corresponding axis. Either axis tripping fires the prompt.
+    // CE: the prompt as a whole. Off by default; the thresholds below only count when it is on.
+    val stillWatchingEnabled = Preference("pref_player_still_watching_enabled", false)
     val stillWatchingAfterEpisodes = Preference("pref_player_still_watching_after_episodes", 3)
     val stillWatchingAfterMinutes = Preference("pref_player_still_watching_after_minutes", 90)
     val stillWatchingPromptTimeoutSeconds =

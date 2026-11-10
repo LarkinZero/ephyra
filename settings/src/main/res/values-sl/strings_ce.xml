@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Obnove prejšnjih delov</string>
     <string name="pref_player_next_episode">Naslednja epizoda</string>
     <string name="pref_player_still_watching">Poziv \"Ali še vedno gledate?\"</string>
+    <string name="pref_player_still_watching_summary">Vpraša, ali še vedno gledate, po več samodejno predvajanih epizodah ali daljšem času brez dejavnosti</string>
     <string name="pref_player_still_watching_after_episodes">Samodejno predvajanih epizod pred pozivom</string>
     <string name="pref_player_still_watching_after_episodes_summary">Pokaži potrditev po toliko zaporednih samodejno predvajanih epizodah. Nastavite na 0, da onemogočite.</string>
     <string name="pref_player_still_watching_after_minutes">Minut nedejavnosti pred pozivom</string>

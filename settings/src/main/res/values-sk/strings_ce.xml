@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Zhrnutia</string>
     <string name="pref_player_next_episode">Nasledujúca epizóda</string>
     <string name="pref_player_still_watching">Výzva \"Stále sledujete?\"</string>
+    <string name="pref_player_still_watching_summary">Opýta sa, či stále sledujete, po niekoľkých automaticky prehraných epizódach alebo po dlhom čase bez aktivity</string>
     <string name="pref_player_still_watching_after_episodes">Automaticky prehraných epizód pred výzvou</string>
     <string name="pref_player_still_watching_after_episodes_summary">Zobraziť potvrdenie po automatickom prehratí tohto počtu epizód za sebou. Nastavte na 0 na vypnutie.</string>
     <string name="pref_player_still_watching_after_minutes">Minút nečinnosti pred výzvou</string>

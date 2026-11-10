@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">रीकैप</string>
     <string name="pref_player_next_episode">अगला एपिसोड</string>
     <string name="pref_player_still_watching">\"क्या आप अभी भी देख रहे हैं?\" संकेत</string>
+    <string name="pref_player_still_watching_summary">कई एपिसोड अपने-आप चलने के बाद या लंबे समय तक कोई गतिविधि न होने पर पूछता है कि क्या आप अभी भी देख रहे हैं</string>
     <string name="pref_player_still_watching_after_episodes">संकेत से पहले स्वचालित रूप से चलाए गए एपिसोड</string>
     <string name="pref_player_still_watching_after_episodes_summary">लगातार इतने एपिसोड स्वचालित रूप से चलने के बाद पुष्टि दिखाएं। अक्षम करने के लिए 0 पर सेट करें।</string>
     <string name="pref_player_still_watching_after_minutes">संकेत से पहले निष्क्रियता के मिनट</string>

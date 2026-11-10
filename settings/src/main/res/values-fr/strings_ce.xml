@@ -40,6 +40,7 @@
     <string name="pref_player_media_segments_action_recap">Résumés</string>
     <string name="pref_player_next_episode">Épisode suivant</string>
     <string name="pref_player_still_watching">Invite \"Êtes-vous toujours là ?\"</string>
+    <string name="pref_player_still_watching_summary">Demande si vous regardez toujours après plusieurs épisodes lus automatiquement ou une longue période sans action</string>
     <string name="pref_player_still_watching_after_episodes">Épisodes lus automatiquement avant l\'invite</string>
     <string name="pref_player_still_watching_after_episodes_summary">Afficher une confirmation après la lecture automatique consécutive de ce nombre d\'épisodes. Définir sur 0 pour désactiver.</string>
     <string name="pref_player_still_watching_after_minutes">Minutes d\'inactivité avant l\'invite</string>
