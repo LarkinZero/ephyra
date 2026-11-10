@@ -533,8 +533,10 @@ class JellyfinRepositoryImpl(
     ): List<FindroidSource> =
         withContext(Dispatchers.IO) {
             // A downloaded copy wins over any server source (see PlaylistManager), so do not wait
-            // for the server when it is the one that will play.
-            val localSources = database.getSources(itemId).map { it.toFindroidSource(database) }
+            // for the server when it is the one that will play. Only a finished one: an unfinished
+            // download's partial file would play as far as it got, or not at all (#454).
+            val localSources =
+                database.getCompletedSources(itemId).map { it.toFindroidSource(database) }
             if (localSources.isNotEmpty() && (mediaSourceId == null || localSources.any { it.id == mediaSourceId })) {
                 return@withContext localSources
             }
@@ -583,7 +585,7 @@ class JellyfinRepositoryImpl(
                         it.toFindroidSource(this@JellyfinRepositoryImpl, itemId, includePath = true)
                     }
             )
-            sources.addAll(database.getSources(itemId).map { it.toFindroidSource(database) })
+            sources.addAll(localSources)
             sources
         }
 
