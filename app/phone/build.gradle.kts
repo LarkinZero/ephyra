@@ -122,6 +122,9 @@ android {
         compose = true
     }
 
+    // CE-owned: Compose UI tests run on the JVM with Robolectric, so CI needs no emulator.
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+
     dependenciesInfo {
         // Disables dependency metadata when building APKs.
         includeInApk = false
@@ -215,4 +218,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.savedstate.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

@@ -138,14 +138,7 @@ fun NavigationRoot(
         )
     val navigator = remember(navigationState) { Navigator(navigationState) }
 
-    // The entry decorators hold the per-entry SavedState and ViewModel stores. They must be
-    // hoisted as well, otherwise the retained state would be discarded when switching modes.
-    val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
-    val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
-    val entryDecorators =
-        remember(saveableStateHolderDecorator, viewModelStoreDecorator) {
-            listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
-        }
+    val entryDecorators = rememberModeEntryDecorators()
 
     // Exposed as a state object (rather than a plain value) so the entry content closures, which
     // nav3 caches per back stack snapshot, always read the current value.
@@ -200,7 +193,7 @@ fun NavigationRoot(
             MainNavigation(
                 navigationState = navigationState,
                 navigator = navigator,
-                entryDecorators = entryDecorators,
+                entryDecorators = entryDecorators.main,
                 isOfflineMode = LocalOfflineMode.current,
                 showFavoritesTab = showFavoritesTab,
                 searchExpanded = searchExpanded,
@@ -211,7 +204,7 @@ fun NavigationRoot(
     } else {
         SetupNavigation(
             backStack = setupBackStack,
-            entryDecorators = entryDecorators,
+            entryDecorators = entryDecorators.setup,
             permissionViewModel = permissionViewModel,
             permissionApplicable = permissionState.currentRequest != null,
         )
@@ -223,6 +216,37 @@ fun NavigationRoot(
  * observable state: it is written during composition, which must not schedule recompositions.
  */
 private class AppliedSetupMode(var setupComplete: Boolean)
+
+/** The entry decorators of the main and the setup [NavDisplay]. */
+internal class ModeEntryDecorators(
+    val main: List<NavEntryDecorator<NavKey>>,
+    val setup: List<NavEntryDecorator<NavKey>>,
+)
+
+/**
+ * The entry decorators hold the per-entry SavedState and ViewModel stores. They are hoisted to
+ * [NavigationRoot], otherwise the retained state would be discarded when switching modes.
+ *
+ * Each mode has its own pair (#381): both back stacks can hold the same route (Settings pushes
+ * [UsersRoute] on the main stack, and setup restarts on it when the current user is removed), and
+ * the outgoing display releases its entries only after the incoming one has registered them, so a
+ * shared saved state holder would see the key twice and throw.
+ */
+@Composable
+internal fun rememberModeEntryDecorators(): ModeEntryDecorators {
+    val main = rememberEntryDecorators()
+    val setup = rememberEntryDecorators()
+    return remember(main, setup) { ModeEntryDecorators(main = main, setup = setup) }
+}
+
+@Composable
+private fun rememberEntryDecorators(): List<NavEntryDecorator<NavKey>> {
+    val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+    val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+    return remember(saveableStateHolderDecorator, viewModelStoreDecorator) {
+        listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
+    }
+}
 
 @Composable
 private fun MainNavigation(
