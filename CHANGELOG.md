@@ -13,6 +13,75 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.4.2] — 2026-11-11
+
+A second release of fixes from the run-through of the app on phone, tablet and TV. What you
+watch from a download while the server cannot be reached is now sent to the server as soon as it
+is back, without restarting the app, and it is no longer lost when you delete the download first.
+The player picks up by itself when the network returns. And many smaller things on the TV, the
+tablet layouts, Home, the setup screens and the settings read and behave as they should.
+
+### Fixed
+- Downloads: progress, watched state and favourites changed while the server could not be reached
+  are sent when it is reachable again, not at the next app start. The app notices on its next
+  request to the server, when it comes to the foreground and when the network changes (#552).
+- Downloads: deleting a download before its progress was sent no longer loses that progress
+  (#552).
+- Downloads: a download queued without a network waits for it, the item page says "Waiting for
+  network" like the Downloads row, and the Downloads header counts failed downloads apart (#530,
+  #558, #546).
+- Player: playback loads again by itself when the network comes back, and the connection-lost
+  line covers no control (#450).
+- Player: track names are readable and the same on both backends, and the phone player's title
+  names the series (#451, #452).
+- Player: the controls stay clear of the system bars in split-screen, and the buttons under the
+  episode sheet are hidden while it is open (#455, #456).
+- Home: a server renamed on the server is renamed in the app, the server name keeps its room
+  when a refresh fails, and a pull to refresh shows one loading indicator (#543, #392, #391).
+- Home: a new first item in a row shows at the start, Back from a search opened on Home returns
+  to Home, and the carousel counts its pages by the window's width (#393, #394, #438).
+- Detail pages: the episode page links to its show, the watched button fills when watched, cast
+  without a photo shows a person icon, and premiere dates keep the four-digit year (#395, #397,
+  #396, #414).
+- Detail pages: items without artwork get no empty scrim or backdrop, on the page and on
+  Suggestions cards (#433, #437).
+- Accessibility: the Home buttons and the badges on cards have labels, keyboard focus is visible
+  on the carousel and the cards, and Tab skips plain text on item pages and the hidden bottom
+  bar (#441, #398, #442).
+- Right-to-left languages: arrows are mirrored and server text keeps its own direction (#401).
+- Setup: the username is trimmed before logging in, "Server not found" clears when the address
+  is changed, the Addresses screen says why a removal or an addition did nothing, and the
+  server's login disclaimer is shown as text instead of HTML (#516, #443, #390, #375).
+- Settings: the player backends have names, number settings say "1 episode" and "No limit", and
+  the still-watching timeout is at least 5 seconds (#399, #400, #559).
+- Wording: the delete download dialog says "from your device", and Latin American Spanish reads
+  "Continuar viendo" (#402, #403).
+- Profiles: the profile sheet opens fully in landscape (#440).
+- Tablet: the open search docks beside the rail on wide windows, the Season list keeps its
+  position over a rotation, the person page starts below its back and home buttons, and the rows
+  of seven screens keep to their designed widths (#439, #435, #436, #434).
+- TV: a long overview or biography opens in full, and the person page's first row fits (#545,
+  #508).
+- TV: the movie page shows Resume, Restart and the time left, and drops its spinner once the
+  movie has loaded; a season without episodes says so instead of spinning forever (#412, #544,
+  #505).
+- TV: focus is visible and goes where you expect: on Retry, the licence text, the About, login
+  and sort dialog buttons, back from Settings, a licence and the Users screen, down to a cast or
+  seasons row below the screen, and off the login screen's server button (#540, #418, #533, #424,
+  #541, #514, #557).
+- TV: Home, the library counter and the login screen keep out of the overscan margin, the Home
+  hero shows the overview for every row, and Back on Home opens the drawer on Home (#423, #410,
+  #411).
+- TV: Retry on Home also loads the drawer's libraries, and a failed search says why and offers
+  Retry (#513, #417).
+- TV: a season card without its own poster shows the show's, an undetermined language is left
+  out of the audio chip, and the credits under the buttons wrap (#416, #415, #413).
+- TV: OK after the remote's number keys submits the PIN, and the drawer's lock badge follows the
+  PIN at once (#409, #408).
+- TV settings: Left and Back from a details pane return to its row, millisecond settings step by
+  whole seconds, the screensaver settings keep label and value apart, and the mpv options page
+  has no empty "Advanced" heading (#419, #420, #422, #421).
+
 ## [v2.4.1] — 2026-11-11
 
 A release of fixes, from a full run-through of the app on phone, tablet and TV. Playback copes
@@ -795,6 +864,7 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.4.2]: https://github.com/midasvo/ephyra/releases/tag/v2.4.2
 [v2.4.1]: https://github.com/midasvo/ephyra/releases/tag/v2.4.1
 [v2.4.0]: https://github.com/midasvo/ephyra/releases/tag/v2.4.0
 [v2.3.0]: https://github.com/midasvo/ephyra/releases/tag/v2.3.0
