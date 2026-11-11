@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin
 
+import android.animation.TimeInterpolator
 import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.PictureInPictureParams
@@ -53,6 +54,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
@@ -369,6 +371,12 @@ class PlayerActivity : BasePlayerActivity() {
                         },
                         onDismiss = { closeEpisodeSheet() },
                         onClosed = { binding.episodeSheet.isVisible = false },
+                        onBoundsChanged = { bounds ->
+                            if (bounds != episodeSheetBounds) {
+                                episodeSheetBounds = bounds
+                                updateControlsUnderEpisodeSheet()
+                            }
+                        },
                     )
                 }
             }
@@ -379,6 +387,7 @@ class PlayerActivity : BasePlayerActivity() {
         // The controls stay up while the sheet is open.
         binding.playerView.controllerShowTimeoutMs = 0
         binding.playerView.showController()
+        updateControlsUnderEpisodeSheet()
     }
 
     /** Closes the sheet with its fade, or at once when [animate] is false. */
@@ -389,6 +398,57 @@ class PlayerActivity : BasePlayerActivity() {
         if (!animate) binding.episodeSheet.isVisible = false
         // Restarts the hide timer when the controls are showing.
         binding.playerView.controllerShowTimeoutMs = controlsHideTimeoutMs
+        updateControlsUnderEpisodeSheet(animate)
+    }
+
+    /** CE (#456): the sheet's bounds in the window, from the sheet; null until it is laid out. */
+    private var episodeSheetBounds: Rect? = null
+
+    /**
+     * CE (#456): the sheet is 92 % opaque (design §9), so the top-row controls under it showed
+     * through. While it is open, those fade out with the sheet's motion and leave the focus order;
+     * closing brings them back, at once when [animate] is false. The seek bar is left as it is.
+     */
+    private fun updateControlsUnderEpisodeSheet(animate: Boolean = true) {
+        val sheet = episodeSheetBounds?.takeIf { episodeSheetBackCallback.isEnabled }
+        val duration =
+            (if (sheet != null) EphyraMotion.DURATION_MEDIUM else EphyraMotion.DURATION_SHORT)
+                .toLong()
+        val easing = if (sheet != null) EphyraMotion.EasingEnter else EphyraMotion.EasingExit
+        val interpolator = TimeInterpolator { easing.transform(it) }
+        val location = IntArray(2)
+
+        val extraButtons = binding.playerView.findViewById<ViewGroup>(R.id.extra_buttons)
+        val topRow = extraButtons.getChildAt(0) as ViewGroup
+        for (i in 0 until topRow.childCount) {
+            val view = topRow.getChildAt(i)
+            if (view is Space) continue
+            view.getLocationInWindow(location)
+            val bounds =
+                Rect(location[0], location[1], location[0] + view.width, location[1] + view.height)
+            val covered = sheet != null && isUnderEpisodeSheet(bounds, sheet)
+            if (covered && view.isFocused) {
+                // Opened from the keyboard: the Episodes button has focus. It moves into the
+                // sheet once the sheet is laid out, or to the player view while the season is
+                // still loading, rather than to the first control.
+                binding.episodeSheet.post {
+                    if (!binding.episodeSheet.requestFocus()) parkFocusOnPlayerView()
+                    if (episodeSheetBackCallback.isEnabled) view.isFocusable = false
+                }
+            } else if (view is ImageButton) {
+                view.isFocusable = !covered
+            }
+            view.importantForAccessibility =
+                if (covered) View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                else View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+            val alpha = if (covered) 0f else 1f
+            view.animate().cancel()
+            if (animate) {
+                view.animate().alpha(alpha).setDuration(duration).setInterpolator(interpolator)
+            } else {
+                view.alpha = alpha
+            }
+        }
     }
 
     private val isPipSupported by lazy {
