@@ -138,6 +138,13 @@ class PlayerActivity : BasePlayerActivity() {
     private var foldHalfOpened = false
 
     /**
+     * CE (#363): the display answered "Keep the player in landscape" with a letterboxed box
+     * ([refusesLandscape]). Latched for the life of this player, so it follows the device from
+     * then on instead of flipping between the box and full screen.
+     */
+    private var landscapeRefused = false
+
+    /**
      * CE (R6, T7, #363): asks for the orientation [playerOrientation] picks, from the window the
      * player gets when it fills the screen, the "Keep the player in landscape" setting, the window
      * mode, the fold and the lock.
@@ -149,17 +156,36 @@ class PlayerActivity : BasePlayerActivity() {
      * or unfolding changes the maximum window, hence the call from [onConfigurationChanged].
      */
     private fun updatePlayerOrientation() {
-        val bounds = WindowMetricsCalculator.getOrCreate().computeMaximumWindowMetrics(this).bounds
+        val calculator = WindowMetricsCalculator.getOrCreate()
+        val bounds = calculator.computeMaximumWindowMetrics(this).bounds
         val shorterSideDp = minOf(bounds.width(), bounds.height()) / resources.displayMetrics.density
+        val keepLandscape = appPreferences.getValue(appPreferences.playerKeepLandscape)
+        if (keepLandscape && !landscapeRefused) {
+            val window = calculator.computeCurrentWindowMetrics(this).bounds
+            val letterboxed =
+                isLetterboxed(
+                    windowWidth = window.width(),
+                    windowHeight = window.height(),
+                    maxWidth = bounds.width(),
+                    maxHeight = bounds.height(),
+                    multiWindow = isInMultiWindowMode,
+                    pictureInPicture = isInPictureInPictureMode,
+                )
+            if (refusesLandscape(requestedOrientation, keepLandscape, shorterSideDp, letterboxed)) {
+                Timber.d("Keep landscape: letterboxed in $window of $bounds, following the device")
+                landscapeRefused = true
+            }
+        }
         val orientation =
             playerOrientation(
                 shorterSideDp = shorterSideDp,
-                keepLandscape = appPreferences.getValue(appPreferences.playerKeepLandscape),
+                keepLandscape = keepLandscape,
                 locked = isControlsLocked,
                 multiWindow = isInMultiWindowMode,
                 pictureInPicture = isInPictureInPictureMode,
                 foldHalfOpened = foldHalfOpened,
                 sdkInt = Build.VERSION.SDK_INT,
+                landscapeRefused = landscapeRefused,
             )
         if (requestedOrientation != orientation) {
             requestedOrientation = orientation
