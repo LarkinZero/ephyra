@@ -16,6 +16,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -80,6 +81,9 @@ constructor(private val repository: SetupRepository, private val appPreferences:
                 // CE (#404): the TV screen passes the field as typed; spaces around the address
                 // made the SDK reject it with "Server not found".
                 connectToServer(address = action.address.trim())
+            }
+            is AddServerAction.OnAddressChange -> {
+                if (_state.value.error != null) _state.update { it.copy(error = null) }
             }
             else -> Unit
         }

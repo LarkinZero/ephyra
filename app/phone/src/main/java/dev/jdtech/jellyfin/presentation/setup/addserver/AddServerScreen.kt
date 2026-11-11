@@ -138,7 +138,11 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                         contentDescription = null,
                     )
                 },
-                onValueChange = { serverAddress = it },
+                onValueChange = {
+                    serverAddress = it
+                    // CE (#443): the error belongs to the address that was tried.
+                    onAction(AddServerAction.OnAddressChange)
+                },
                 label = {
                     Text(text = stringResource(SetupR.string.edit_text_server_address_hint))
                 },
