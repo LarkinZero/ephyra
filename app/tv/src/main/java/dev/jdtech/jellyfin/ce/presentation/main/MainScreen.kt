@@ -50,10 +50,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.tv.material3.DrawerValue
@@ -249,7 +251,30 @@ internal fun reloadsLibrariesOnRetry(hasLibraries: Boolean, librariesLoading: Bo
 private const val ITEM_PROFILE = "profile"
 private const val ITEM_SETTINGS = "settings"
 
+/**
+ * Where the pages beside the drawer start. Each page pads its own content by
+ * [TvSafeArea.horizontal], so its content starts at 128 dp. The collapsed rail is wider
+ * ([DrawerStartPadding] + the 56 dp item = 92 dp) and covers the first 12 dp of that padding,
+ * which holds no content: the pages stay where they were before #539.
+ */
 val ClosedDrawerWidth = 80.dp
+
+/**
+ * #539 (ADR 0002, safe area): the drawer's icons, avatar and labels sit inside the TV safe area,
+ * its background and focus pill may reach into the margin. tv-material puts the collapsed item's
+ * 24 dp icon 16 dp in from the item's edge (20 dp when expanded) and the profile's 32 dp avatar
+ * overflows that box by 4 dp on each side, so the avatar starts 12 dp in: at
+ * [TvSafeArea.horizontal].
+ */
+internal val DrawerStartPadding = TvSafeArea.horizontal - 12.dp
+
+/**
+ * The expanded drawer keeps 12 dp of surface after the pill. The collapsed rail ends at the pill:
+ * its opaque surface covers the pages' padding, and 12 dp more cut the glow of a focused first
+ * card off with a visible edge (#539).
+ */
+internal fun drawerEndPadding(drawerValue: DrawerValue): Dp =
+    if (drawerValue == DrawerValue.Open) 12.dp else 0.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Suppress("DEPRECATION")
@@ -268,6 +293,7 @@ fun MainScreenLayout(
     libraryContent: @Composable (library: FindroidCollection) -> Unit,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val baseUrl =
         remember(context) { runCatching { JellyfinApi.getInstance(context).api.baseUrl }.getOrNull() }
     val coroutineScope = rememberCoroutineScope()
@@ -362,8 +388,25 @@ fun MainScreenLayout(
                         }
                         .focusGroup()
                         .onFocusChanged { drawerFocus.onFocusChanged(it.hasFocus) }
+                        // #539: the expanded items end at 292 dp, right of a 150 dp poster at the
+                        // page's 128 dp (Favorites), so a plain Right can find nothing right of the
+                        // item and leave focus in the drawer. Then the content is entered instead.
+                        .onPreviewKeyEvent {
+                            if (it.type != KeyEventType.KeyDown || it.key != Key.DirectionRight) {
+                                return@onPreviewKeyEvent false
+                            }
+                            if (!focusManager.moveFocus(FocusDirection.Right)) {
+                                contentFocusRequester.tryRequestFocus()
+                            }
+                            true
+                        }
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(vertical = TvSafeArea.vertical, horizontal = 12.dp)
+                        .padding(
+                            start = DrawerStartPadding,
+                            top = TvSafeArea.vertical,
+                            end = drawerEndPadding(drawerValue),
+                            bottom = TvSafeArea.vertical,
+                        )
                         .testTag("main_drawer_content"),
                 horizontalAlignment = Alignment.Start,
             ) {
@@ -389,13 +432,15 @@ fun MainScreenLayout(
                                     user = shown,
                                     baseUrl = baseUrl,
                                     size = 32.dp,
-                                    modifier = Modifier.requiredSize(32.dp),
+                                    modifier =
+                                        Modifier.requiredSize(32.dp)
+                                            .testTag("drawer_icon_profile"),
                                 )
                             } else {
                                 Icon(
                                     painter = painterResource(id = CoreR.drawable.ic_user),
                                     contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).testTag("drawer_icon_profile"),
                                 )
                             }
                         }
@@ -458,7 +503,7 @@ fun MainScreenLayout(
                                 Icon(
                                     painter = painterResource(id = CoreR.drawable.ic_search),
                                     contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).testTag("drawer_icon_search"),
                                 )
                             },
                             border = ephyraDrawerItemBorder(),
@@ -482,7 +527,7 @@ fun MainScreenLayout(
                                 Icon(
                                     painter = painterResource(id = CoreR.drawable.ic_home),
                                     contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).testTag("drawer_icon_home"),
                                 )
                             },
                             border = ephyraDrawerItemBorder(),
@@ -512,7 +557,8 @@ fun MainScreenLayout(
                                     Icon(
                                         painter = painterResource(id = CoreR.drawable.ic_heart),
                                         contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
+                                        modifier =
+                                            Modifier.size(24.dp).testTag("drawer_icon_favorites"),
                                     )
                                 },
                                 border = ephyraDrawerItemBorder(),
@@ -540,7 +586,9 @@ fun MainScreenLayout(
                                 Icon(
                                     painter = painterResource(id = library.type.drawerIconRes()),
                                     contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier =
+                                        Modifier.size(24.dp)
+                                            .testTag("drawer_icon_library_${library.id}"),
                                 )
                             },
                             border = ephyraDrawerItemBorder(),
@@ -572,7 +620,7 @@ fun MainScreenLayout(
                         Icon(
                             painter = painterResource(id = CoreR.drawable.ic_settings),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(24.dp).testTag("drawer_icon_settings"),
                         )
                     },
                     border = ephyraDrawerItemBorder(),
