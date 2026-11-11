@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s kijelentkeztetett. A folytatáshoz jelentkezz be újra.</string>
     <string name="ce_download_error_server">A szerver elutasította a letöltést (HTTP %1$d)</string>
     <string name="ce_error_server_status">A szerver hibával válaszolt (HTTP %1$d). Próbáld újra később.</string>
+    <string name="ce_media_info">Médiainformáció</string>
 </resources>

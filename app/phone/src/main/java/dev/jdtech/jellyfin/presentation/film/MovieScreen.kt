@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +57,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemsRow
 import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
-import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -181,6 +182,7 @@ private fun MovieScreenLayout(
     val scrollState = rememberScrollState()
 
     var downloadQualityDialogOpen by remember { mutableStateOf(false) }
+    var mediaInfoOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
@@ -268,7 +270,11 @@ private fun MovieScreenLayout(
                     }
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        VideoMetadataBar(videoMetadata, is3D = movie.is3D)
+                        VideoMetadataBar(
+                            videoMetadata,
+                            is3D = movie.is3D,
+                            onInfoClick = { mediaInfoOpen = true },
+                        )
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -308,10 +314,6 @@ private fun MovieScreenLayout(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                    }
                     movie.tagline?.let { tagline ->
                         TaglineText(tagline)
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
@@ -359,6 +361,13 @@ private fun MovieScreenLayout(
             onBackClick = { onAction(MovieAction.OnBackClick) },
             onHomeClick = { onAction(MovieAction.OnHomeClick) },
         )
+
+        if (mediaInfoOpen) {
+            MediaInfoSheet(
+                sources = state.movie?.sources.orEmpty(),
+                onDismissRequest = { mediaInfoOpen = false },
+            )
+        }
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(

@@ -19,6 +19,12 @@ data class FindroidMediaStream(
     val height: Int?,
     val width: Int?,
     val videoDoViTitle: String?,
+    // CE (#510): what the media info sheet shows. Not stored with a download, so a local
+    // stream has none of it.
+    val bitRate: Int? = null,
+    val frameRate: Float? = null,
+    val bitDepth: Int? = null,
+    val sampleRate: Int? = null,
 )
 
 fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): FindroidMediaStream {
@@ -36,6 +42,10 @@ fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): F
         height = height,
         width = width,
         videoDoViTitle = videoDoViTitle,
+        bitRate = bitRate,
+        frameRate = realFrameRate ?: averageFrameRate,
+        bitDepth = bitDepth,
+        sampleRate = sampleRate,
     )
 }
 

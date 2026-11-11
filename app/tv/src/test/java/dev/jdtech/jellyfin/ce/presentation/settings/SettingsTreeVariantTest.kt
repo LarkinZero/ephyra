@@ -258,33 +258,27 @@ class SettingsTreeVariantTest {
     }
 
     @Test
-    fun `Phone variant shows the extra info switch and TV variant hides it`() = runTest {
-        // #406: only the phone pages show the extra info.
+    fun `the extra info switch is gone from both variants`() = runTest {
+        // #510: the media info sheet on the item page replaced the switch.
         val path =
             listOf(
                 SettingsR.string.settings_category_interface,
                 SettingsR.string.ce_settings_detail_pages,
             )
-        fun names(variant: AppVariant): List<Int> {
+        for (variant in AppVariant.entries) {
             val viewModel = SettingsViewModel(context, appPreferences, variant)
             viewModel.loadPreferences(path)
-            return viewModel.state.value.preferenceGroups
-                .flatMap { it.preferences }
-                .map { it.nameStringResource }
+            val names =
+                viewModel.state.value.preferenceGroups
+                    .flatMap { it.preferences }
+                    .map { it.nameStringResource }
+            // The page itself loads: its other switches are there.
+            assertTrue(names.contains(SettingsR.string.cast_and_crew))
+            assertFalse(
+                "Extra info switch must be gone on $variant",
+                names.contains(SettingsR.string.extra_info),
+            )
         }
-
-        val phonePrefs = names(AppVariant.PHONE)
-        assertTrue(
-            "Extra info switch must be present on Phone",
-            phonePrefs.contains(SettingsR.string.extra_info),
-        )
-        // The page itself loads on TV: its other switches are there.
-        val tvPrefs = names(AppVariant.TV)
-        assertTrue(tvPrefs.contains(SettingsR.string.cast_and_crew))
-        assertFalse(
-            "Extra info switch must be hidden on TV",
-            tvPrefs.contains(SettingsR.string.extra_info),
-        )
     }
 
     @Test

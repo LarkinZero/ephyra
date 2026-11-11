@@ -21,6 +21,9 @@ data class FindroidSource(
      * download path (Dolby Vision conversion or a user-picked quality cap).
      */
     val transcoded: Boolean = false,
+    /** CE (#510): for the media info sheet. A downloaded source has neither. */
+    val container: String? = null,
+    val bitrate: Int? = null,
 )
 
 suspend fun MediaSourceInfo.toFindroidSource(
@@ -56,6 +59,8 @@ suspend fun MediaSourceInfo.toFindroidSource(
         mediaStreams =
             mediaStreams?.map { it.toFindroidMediaStream(jellyfinRepository) } ?: emptyList(),
         transcoded = transcoded,
+        container = container,
+        bitrate = bitrate,
     )
 }
 

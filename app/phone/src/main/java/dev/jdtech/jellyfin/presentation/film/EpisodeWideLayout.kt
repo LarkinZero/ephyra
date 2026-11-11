@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +38,7 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
-import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.HeroChips
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
 import dev.jdtech.jellyfin.presentation.film.components.HeroSubtitle
@@ -132,6 +133,7 @@ fun EpisodeWideContent(
         PaddingValues(start = safePadding.start + margin, end = safePadding.end + margin)
 
     var downloadQualityDialogOpen by remember { mutableStateOf(false) }
+    var mediaInfoOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         state.episode?.let { episode ->
@@ -165,7 +167,12 @@ fun EpisodeWideContent(
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        HeroChips { VideoMetadataBar(videoMetadata) }
+                        HeroChips {
+                            VideoMetadataBar(
+                                videoMetadata,
+                                onInfoClick = { mediaInfoOpen = true },
+                            )
+                        }
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -205,10 +212,6 @@ fun EpisodeWideContent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                    }
                     OverviewText(text = episode.overview, maxCollapsedLines = 4)
                     EpisodeWatchAndLinks(episode, onAction)
                 }
@@ -231,6 +234,13 @@ fun EpisodeWideContent(
                     onRetryClick = { onAction(EpisodeAction.OnRetryClick) },
                 )
             }
+
+        if (mediaInfoOpen) {
+            MediaInfoSheet(
+                sources = state.episode?.sources.orEmpty(),
+                onDismissRequest = { mediaInfoOpen = false },
+            )
+        }
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(

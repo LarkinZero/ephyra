@@ -69,12 +69,11 @@ constructor(
             val token = reloadPolicy.begin()
             _state.emit(_state.value.copy(error = null))
             try {
-                // The preferences don't depend on the movie, so they are read while it loads.
-                val (movie, displayCastAndCrew, displayExtraInfo) = coroutineScope {
+                // The preference doesn't depend on the movie, so it is read while it loads.
+                val (movie, displayCastAndCrew) = coroutineScope {
                     val movieAsync = async { repository.getMovie(movieId) }
                     val castAsync = async { appPreferences.getValue(appPreferences.displayCastAndCrew) }
-                    val extraAsync = async { appPreferences.getValue(appPreferences.displayExtraInfo) }
-                    Triple(movieAsync.await(), castAsync.await(), extraAsync.await())
+                    movieAsync.await() to castAsync.await()
                 }
                 val videoMetadata = movie.sources.firstOrNull()?.let { videoMetadataParser.parse(it) }
                 val actors = if (displayCastAndCrew) getActors(movie) else emptyList()
@@ -87,7 +86,6 @@ constructor(
                         actors = actors,
                         director = director,
                         writers = writers,
-                        displayExtraInfo = displayExtraInfo,
                     )
                 )
                 // A reload of a page that has its rows: a switch may have changed since.

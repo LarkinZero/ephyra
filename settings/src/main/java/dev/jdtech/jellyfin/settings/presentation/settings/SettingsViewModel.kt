@@ -313,13 +313,6 @@ class SettingsViewModel @Inject constructor(
                                                                             descriptionStringRes = R.string.cast_and_crew_summary,
                                                                             backendPreference = appPreferences.displayCastAndCrew,
                                                                         ),
-                                                                        // Only the phone pages show the extra info (#406).
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource = R.string.extra_info,
-                                                                            descriptionStringRes = R.string.extra_info_summary,
-                                                                            supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                                            backendPreference = appPreferences.displayExtraInfo,
-                                                                        ),
                                                                     )
                                                             ),
                                                             PreferenceGroup(

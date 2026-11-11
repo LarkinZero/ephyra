@@ -105,4 +105,5 @@
     <string name="ce_session_revoked">%1$s завершил ваш сеанс. Войдите снова, чтобы продолжить.</string>
     <string name="ce_download_error_server">Сервер отклонил загрузку (HTTP %1$d)</string>
     <string name="ce_error_server_status">Сервер ответил ошибкой (HTTP %1$d). Повторите попытку позже.</string>
+    <string name="ce_media_info">Сведения о медиа</string>
 </resources>

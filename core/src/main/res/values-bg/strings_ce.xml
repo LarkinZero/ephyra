@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s ви отписа. Влезте отново, за да продължите.</string>
     <string name="ce_download_error_server">Сървърът отказа изтеглянето (HTTP %1$d)</string>
     <string name="ce_error_server_status">Сървърът отговори с грешка (HTTP %1$d). Опитайте отново по-късно.</string>
+    <string name="ce_media_info">Информация за медията</string>
 </resources>

@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s ने आपको साइन आउट कर दिया। जारी रखने के लिए फिर से साइन इन करें।</string>
     <string name="ce_download_error_server">सर्वर ने डाउनलोड अस्वीकार कर दिया (HTTP %1$d)</string>
     <string name="ce_error_server_status">सर्वर ने त्रुटि के साथ जवाब दिया (HTTP %1$d)। बाद में फिर से कोशिश करें।</string>
+    <string name="ce_media_info">मीडिया जानकारी</string>
 </resources>
