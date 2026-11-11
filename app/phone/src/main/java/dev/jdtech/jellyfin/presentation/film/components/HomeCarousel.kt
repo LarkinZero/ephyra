@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -17,20 +18,28 @@ import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.WidthClass
+import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
+import dev.jdtech.jellyfin.presentation.utils.isCompactHeight
 import kotlinx.coroutines.delay
 
-private val dynamicPageSize =
-    object : PageSize {
-        override fun Density.calculateMainAxisPageSize(availableSpace: Int, pageSpacing: Int): Int {
-            val nPages =
-                when {
-                    availableSpace.toDp() >= 840.dp -> 3
-                    availableSpace.toDp() >= 600.dp -> 2
-                    else -> 1
-                }
+/**
+ * Pages side by side in the Home carousel (docs/tablet/4-design.md §4 and §12), by the window's
+ * width class rather than the pager's own width, which is the window minus the rail and the margins
+ * and so came out a page short (#438). A window of compact height (a phone in landscape) is
+ * Expanded wide but too short for three, so it keeps two.
+ */
+internal fun carouselPageCount(width: WidthClass, compactHeight: Boolean): Int =
+    when (width) {
+        WidthClass.Compact -> 1
+        WidthClass.Medium -> 2
+        WidthClass.Expanded -> if (compactHeight) 2 else 3
+    }
 
-            return (availableSpace - (nPages - 1) * pageSpacing) / nPages
-        }
+private fun carouselPageSize(pages: Int) =
+    object : PageSize {
+        override fun Density.calculateMainAxisPageSize(availableSpace: Int, pageSpacing: Int): Int =
+            (availableSpace - (pages - 1) * pageSpacing) / pages
     }
 
 @Composable
@@ -42,6 +51,9 @@ fun HomeCarousel(
 ) {
     val pagerState = rememberPagerState(pageCount = { items.size })
     val pagerIsDragged by pagerState.interactionSource.collectIsDraggedAsState()
+
+    val pages = carouselPageCount(currentWidthClass(), isCompactHeight())
+    val pageSize = remember(pages) { carouselPageSize(pages) }
 
     val autoScrollDelay = 5000L
 
@@ -65,7 +77,7 @@ fun HomeCarousel(
     HorizontalPager(
         state = pagerState,
         contentPadding = itemsPadding,
-        pageSize = dynamicPageSize,
+        pageSize = pageSize,
         pageSpacing = MaterialTheme.spacings.medium,
     ) { page ->
         val item = items[page]
