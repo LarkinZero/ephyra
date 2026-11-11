@@ -261,8 +261,8 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-01 | Every setting changed below is still set after `am force-stop` and a new start | | works | works | works |
-| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | unpolished #419, #420: Left lands on the wrong row, ms values step by 1 and 10 |
-| SET-03 | Settings that make no sense on TV (gestures, PiP, downloads, theme) are not shown on TV | #133 | n/a | n/a | works; leftover: empty "Advanced" heading (#421) |
+| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | works: Left and Back from the details pane return to the row that opened it (#419); ms values step by 1 and 10 s (#420) |
+| SET-03 | Settings that make no sense on TV (gestures, PiP, downloads, theme) are not shown on TV | #133 | n/a | n/a | works; the mpv options page has no empty "Advanced" heading any more (#421) |
 
 ### Offline and language
 
@@ -346,7 +346,7 @@ is shown, saved and kept.
 | SET-59 | Media segments: Commercial action | #271 | works | works | works |
 | SET-60 | Skip button duration (seconds) | #271 | works | works | works |
 | SET-61 | Auto-skip: always or only in picture-in-picture | #271 | unpolished #399: options in lower case | unpolished #399: raw lower-case values | n/a |
-| SET-62 | Next episode threshold (ms) | `playerMediaSegmentsNextEpisodeThreshold` | works | works | unpolished #420: steps of 1 and 10 ms |
+| SET-62 | Next episode threshold (ms) | `playerMediaSegmentsNextEpisodeThreshold` | works | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-63 | Trickplay | #134 | works | works | works |
 | SET-64 | Trickplay while seeking with the gesture (needs Trickplay) | `playerGesturesSeekTrickplay` | works | works | n/a |
 | SET-65 | Play next episode automatically: server setting, always, never | #66 | works | works | works |
@@ -372,9 +372,9 @@ is shown, saved and kept.
 | SET-80 | Smart Downloads | #116 | works | works | n/a |
 | SET-81 | Episodes to keep ready (at least 1) | #116 | unpolished #400: "1 episodes" | unpolished #400: "1 episodes" | n/a |
 | SET-82 | Transcode Dolby Vision downloads | ce.30 | works | works | n/a |
-| SET-83 | Request timeout | `requestTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
-| SET-84 | Connect timeout | `connectTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
-| SET-85 | Socket timeout | `socketTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
+| SET-83 | Request timeout | `requestTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
+| SET-84 | Connect timeout | `connectTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
+| SET-85 | Socket timeout | `socketTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-86 | Image cache on or off | `imageCache` | not tested: effect not observable (value kept) | works | works |
 | SET-87 | Image cache size (MB; TV defaults to 100) | #155 | works | works | works |
 | SET-88 | Load artwork at display size (on by default) | #254, #294 | not tested: effect not observable (value kept) | works | works |
@@ -605,7 +605,7 @@ All rows are TV only.
 | TVS-07 | After a user switch, a program of the other user does not play as the current user | `WatchNextLink` | n/a | n/a | not tested: needs own server (one user) |
 | TVS-08 | A locked profile asks its PIN before a Watch Next program plays | #299 | n/a | n/a | not tested: no Watch Next program to pick |
 | TVS-09 | Screensaver shows random backdrops from the library, with logo and clock | #140, #235 | n/a | n/a | works; title text, no logo seen |
-| TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | unpolished #422: label and value run together |
+| TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
 | TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | unpolished #423: text in the overscan margin at 1080p; 4K not run |

@@ -7,10 +7,12 @@ import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.presentation.enums.AppVariant
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceFileEdit
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -309,6 +311,37 @@ class SettingsTreeVariantTest {
             assertFalse(
                 "Theme music switch must be hidden on Phone",
                 phonePrefs.contains(SettingsR.string.pref_tv_theme_music),
+            )
+        }
+
+    @Test
+    fun `mpv options show the Advanced file editors on Phone and no Advanced group on TV`() =
+        runTest {
+            // #421: the TV has no file editor, so its group heading stood alone.
+            val path =
+                listOf(SettingsR.string.settings_category_player, SettingsR.string.mpv_options)
+            val tvViewModel = SettingsViewModel(context, appPreferences, AppVariant.TV)
+            tvViewModel.loadPreferences(path)
+            val tvGroups = tvViewModel.state.value.preferenceGroups
+            assertTrue("mpv options must have settings on TV", tvGroups.isNotEmpty())
+            assertFalse(
+                "Advanced group must be hidden on TV",
+                tvGroups.any { it.nameStringResource == SettingsR.string.advanced },
+            )
+            assertTrue(
+                "No file editor on TV",
+                tvGroups.flatMap { it.preferences }.none { it is PreferenceFileEdit },
+            )
+
+            val phoneViewModel = SettingsViewModel(context, appPreferences, AppVariant.PHONE)
+            phoneViewModel.loadPreferences(path)
+            val advanced =
+                phoneViewModel.state.value.preferenceGroups.single {
+                    it.nameStringResource == SettingsR.string.advanced
+                }
+            assertEquals(
+                listOf("mpv/mpv.conf", "mpv/input.conf"),
+                advanced.preferences.filterIsInstance<PreferenceFileEdit>().map { it.filePath },
             )
         }
 

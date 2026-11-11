@@ -566,6 +566,8 @@ class SettingsViewModel @Inject constructor(
                                                                     listOf(
                                                                         PreferenceFileEdit(
                                                                             nameStringResource = R.string.edit_file_title,
+                                                                            // CE (#421): the TV has no file editor.
+                                                                            supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                                             filePath = "mpv/mpv.conf",
                                                                             onClick = {
                                                                                 viewModelScope.launch {
@@ -577,6 +579,8 @@ class SettingsViewModel @Inject constructor(
                                                                         ),
                                                                         PreferenceFileEdit(
                                                                             nameStringResource = R.string.edit_file_title,
+                                                                            // CE (#421): the TV has no file editor.
+                                                                            supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                                             filePath = "mpv/input.conf",
                                                                             onClick = {
                                                                                 viewModelScope.launch {
