@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 
 @Composable
 fun HomeSection(
@@ -37,6 +38,7 @@ fun HomeSection(
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
         LazyRow(
+            state = rememberLazyListStateAtStart(firstKey = section.items.firstOrNull()?.id),
             contentPadding = itemsPadding,
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
         ) {

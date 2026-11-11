@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +62,7 @@ import dev.jdtech.jellyfin.presentation.film.components.TopContentScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
+import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.launch
 
@@ -146,8 +145,6 @@ internal fun HomeScreenLayout(
     val profileSheetState = rememberModalBottomSheetState()
     var showProfileBottomSheet by remember { mutableStateOf(false) }
 
-    val listState = rememberLazyListState()
-
     // A switch to another user dips the rows to dark and brings the new ones up (VISION §6), so it
     // reads as a change of person rather than a reload. One list, so the scroll state stays shared.
     val userFade = remember { Animatable(1f) }
@@ -168,13 +165,7 @@ internal fun HomeScreenLayout(
     // above it. That would leave the carousel out of view, so stay at the top instead.
     // CE (#142): the rows in the order the user chose, hidden ones left out.
     val rows = remember(state) { state.orderedRows() }
-    val firstItemKey = rows.firstOrNull()?.id
-    DisposableEffect(firstItemKey) {
-        if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
-            listState.requestScrollToItem(0)
-        }
-        onDispose {}
-    }
+    val listState = rememberLazyListStateAtStart(firstKey = rows.firstOrNull()?.id)
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
         PullToRefreshBox(isRefreshing = state.isLoading, onRefresh = { onAction(HomeAction.OnRetryClick) }) {

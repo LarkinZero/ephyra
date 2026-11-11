@@ -27,6 +27,7 @@ import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 
 @Composable
 fun HomeView(
@@ -65,6 +66,7 @@ fun HomeView(
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
         LazyRow(
+            state = rememberLazyListStateAtStart(firstKey = view.view.items.firstOrNull()?.id),
             contentPadding = itemsPadding,
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
         ) {
