@@ -84,10 +84,14 @@ fun FilmSearchBar(
             label = "search_bar_padding_end",
         )
 
+    // Focus the field when the search opens, not again when it is restored open after a rotation
+    // or theme switch (#387): that would bring the keyboard up over the results.
+    var focusedForExpansion by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(expanded) {
-        if (expanded) {
+        if (expanded && !focusedForExpansion) {
             focusRequester.requestFocus()
         }
+        focusedForExpansion = expanded
     }
 
     LaunchedEffect(query) { onAction(SearchAction.Search(query)) }

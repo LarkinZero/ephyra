@@ -142,7 +142,7 @@ fun NavigationRoot(
 
     // Exposed as a state object (rather than a plain value) so the entry content closures, which
     // nav3 caches per back stack snapshot, always read the current value.
-    val searchExpanded = remember { mutableStateOf(false) }
+    val searchExpanded = rememberSearchExpanded()
 
     // Live setup condition: keep the back stacks in a consistent state across mode switches. The
     // stacks are reconciled during composition (rather than in a LaunchedEffect, which only runs
@@ -210,6 +210,14 @@ fun NavigationRoot(
         )
     }
 }
+
+/**
+ * Whether the My media search is expanded. Saved (#387): the activity is recreated on rotation, a
+ * theme switch or a resize, and the search must stay open with its query and results.
+ */
+@Composable
+internal fun rememberSearchExpanded(): MutableState<Boolean> =
+    rememberSaveable { mutableStateOf(false) }
 
 /**
  * Remembers the setup mode that the back stacks were last reconciled for. Deliberately not
