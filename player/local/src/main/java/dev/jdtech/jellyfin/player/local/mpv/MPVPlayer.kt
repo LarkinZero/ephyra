@@ -240,6 +240,11 @@ class MPVPlayer(
         mpvLib.setOptionString("cache-pause-initial", "yes")
         mpvLib.setOptionString("demuxer-max-bytes", "64MiB")
         mpvLib.setOptionString("demuxer-max-back-bytes", "32MiB")
+        // #460: a read on a dead or starved connection blocks until this timeout before ffmpeg
+        // reconnects. mpv's default of 60 s kept playback stuck for over a minute after the
+        // network came back. 10 s used up ffmpeg's reconnect attempts during a longer stall; the
+        // slowest single transcode request measured on the demo server took 6.4 s.
+        mpvLib.setOptionString("network-timeout", "30")
 
         // Subs
         mpvLib.setOptionString("sub-scale-with-window", "yes")
