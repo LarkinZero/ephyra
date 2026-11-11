@@ -296,7 +296,7 @@ is shown, saved and kept.
 | SET-19 | Watch history on or off | #332 | works | works | works |
 | SET-20 | External links on or off | #332 | works | works | n/a |
 | SET-21 | Cast and crew on or off | #104, #332 | works | works | works |
-| SET-22 | Extra info on or off: detailed audio, video and subtitle information on item pages | `displayExtraInfo` | works | works | broken #406: no effect on TV |
+| SET-22 | Extra info on or off: detailed audio, video and subtitle information on item pages | `displayExtraInfo` | works | works | n/a: hidden on TV (#406) |
 | SET-23 | Extras row on or off | #332 | not tested: no extras on the demo server | not tested: no extras on the demo server | not tested: no extras on the demo server |
 | SET-24 | Collections row on or off | #332 | not tested: no collections on the demo server | not tested: no collections on the demo server | not tested: no collections on the demo server |
 | SET-25 | More like this row on or off | #332 | works | works | works |
