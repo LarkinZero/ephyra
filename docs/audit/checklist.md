@@ -159,7 +159,7 @@ Libraries, search, favourites and the item pages.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| BRW-18 | Movie page: Play or Resume, restart from the beginning (phone and tablet; the TV movie page has none), trailer, watched, favourite | `ItemButtonsBar`, TV `MovieScreen` | works | works | unpolished #412: always Play, no progress, no restart |
+| BRW-18 | Movie page: Play or Resume, restart from the beginning (phone and tablet; the TV movie page has none), trailer, watched, favourite | `ItemButtonsBar`, TV `MovieScreen` | works | works | works: Resume, Restart and the minutes left on a partly watched movie, Play otherwise (#412); trailer not tested (no YouTube handler) |
 | BRW-19 | Version picker: an item with more than one version asks which one to play, for Play and for play from the beginning | #28, #93 | not tested: no multi-version item on the demo server | not tested: no multi-version item on the demo server | not tested: no multi-version item on the demo server |
 | BRW-20 | Trailer: one plays or opens; several give a menu; hidden when offline | `ItemButtonsBar` | works | works | not tested: emulator has no YouTube handler |
 | BRW-21 | Show page: seasons, Play, trailer, watched, favourite | `ShowScreen` | works | works | works |
@@ -404,7 +404,7 @@ detail.
 | ID | Feature: what to do, and what "works" means | Source | Phone Exo | Phone mpv | Tablet Exo | Tablet mpv | TV Exo | TV mpv |
 |---|---|---|---|---|---|---|---|---|
 | PLY-01 | Resume from Continue Watching: starts at the saved position, no spinner after the first frame, buttons enabled | mpv-checklist, #303 | works | works | works | works | works: resumed from the episode page and a Watch Next intent (the demo server has no Continue Watching) | works: resumed through a Watch Next intent |
-| PLY-02 | Play from 0 from the item page, and restart from the beginning on an item with progress | mpv-checklist | works | works | works | works | unpolished #412: from 0 works; the movie page has no Restart and Play resumes | works: from 0 through an intent; the movie page's missing Restart (#412) is the same UI |
+| PLY-02 | Play from 0 from the item page, and restart from the beginning on an item with progress | mpv-checklist | works | works | works | works | works: the movie page's Resume starts at the position and Restart at 0:00 (#412) | works: from 0 through an intent; the movie page's Restart (#412) not tested on mpv |
 | PLY-03 | Play and pause; the button shows the right state, including after loading and after an item change | #305 | works | works; stays paused after going back to Original | as phone: works | as phone: works; stays paused after going back to Original | works | works |
 | PLY-04 | Seek bar: phone drags and lands where dropped; TV focuses the bar, Left/Right pick a time, OK commits | mpv-checklist, `TvSeekBar` | works | works | works | works | works | not tested: only the hidden-controls seek was used on mpv |
 | PLY-05 | Skip back and forward buttons use the seek increments | mpv-checklist | works | works | as phone: works | as phone: works | n/a | n/a |
