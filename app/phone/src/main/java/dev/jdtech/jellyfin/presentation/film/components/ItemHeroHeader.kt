@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -21,19 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -41,11 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.core.presentation.ephyra.backdropCrossfadeMillis
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -71,6 +59,7 @@ fun ItemHeroHeader(
     scrollState: ScrollState,
     widthClass: WidthClass,
     title: @Composable ColumnScope.() -> Unit,
+    artwork: ArtworkState = rememberArtworkState(item, ArtworkPlacement.Hero),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val safePadding = rememberSafePadding()
@@ -80,7 +69,6 @@ fun ItemHeroHeader(
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val windowHeight =
             with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
-        val heroHeight = Layout.heroHeight(maxWidth, windowHeight)
         // The form follows the room this header has (a Season detail pane, a split-screen
         // half), not the window's width class (#429).
         val innerWidth = maxWidth - safePadding.start - safePadding.end - margin * 2
@@ -90,22 +78,29 @@ fun ItemHeroHeader(
             else heroPosterWidth(item, widthClass)
         // The poster hangs half its height over the backdrop's bottom edge.
         val posterOverlap = heroPosterHeight(item, posterWidth) / 2
+        val heroHeight =
+            if (artwork.hasArtwork) Layout.heroHeight(maxWidth, windowHeight)
+            else collapsedHeroHeight(safePadding.top, posterOverlap)
 
-        Box(modifier = Modifier.fillMaxWidth().height(heroHeight).clipToBounds()) {
-            HeroBackdrop(
-                item = item,
-                scrollState = scrollState,
-                modifier = Modifier.matchParentSize(),
-            )
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRect(
-                    brush =
-                        Brush.verticalGradient(
-                            0.5f to Color.Transparent,
-                            1f to pageBackground,
-                        )
+        if (artwork.hasArtwork) {
+            Box(modifier = Modifier.fillMaxWidth().height(heroHeight).clipToBounds()) {
+                ArtworkBackdrop(
+                    state = artwork,
+                    modifier =
+                        Modifier.matchParentSize()
+                            .parallaxLayoutModifier(scrollState = scrollState, rate = 2),
+                    alignment = Alignment.TopCenter,
                 )
-                drawTopScrimOverArt()
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    drawRect(
+                        brush =
+                            Brush.verticalGradient(
+                                0.5f to Color.Transparent,
+                                1f to pageBackground,
+                            )
+                    )
+                    drawTopScrimOverArt()
+                }
             }
         }
         val headerPadding =
@@ -137,6 +132,13 @@ fun ItemHeroHeader(
         }
     }
 }
+
+/**
+ * CE (#433): the hero without any artwork is only the top bar's room and the half of the poster
+ * that would hang over the backdrop, so the poster starts right below the top bar.
+ */
+internal fun collapsedHeroHeight(safeTop: Dp, posterOverlap: Dp): Dp =
+    safeTop + Layout.topBarHeight + posterOverlap
 
 /** The narrowest text column beside the poster; below it the header stacks (4-design.md §6). */
 internal val HeroMinColumnWidth: Dp = 360.dp
@@ -260,46 +262,4 @@ private fun HeroPoster(item: FindroidItem, posterWidth: Dp) {
             modifier = Modifier.width(posterWidth).clip(MaterialTheme.shapes.small),
         )
     }
-}
-
-/**
- * The backdrop. An episode shows its still beside the text, so the hero behind it uses the show's
- * backdrop and only falls back to the still.
- */
-@Composable
-private fun HeroBackdrop(item: FindroidItem, scrollState: ScrollState, modifier: Modifier) {
-    val context = LocalContext.current
-    val sources =
-        remember(item.id, item.images) {
-            when (item) {
-                    is FindroidEpisode -> listOf(item.images.showBackdrop, item.images.primary)
-                    else -> listOf(item.images.backdrop)
-                }
-                .filterNotNull()
-                .distinct()
-                .map { uri ->
-                    // Downloaded images are stored as paths relative to the files directory.
-                    if (uri.scheme == null) {
-                        Uri.Builder()
-                            .appendEncodedPath("${context.filesDir}")
-                            .appendEncodedPath(uri.path)
-                            .build()
-                    } else uri
-                }
-        }
-    var index by remember(sources) { mutableIntStateOf(0) }
-
-    AsyncImage(
-        model =
-            ImageRequest.Builder(context)
-                .data(sources.getOrNull(index))
-                .crossfade(backdropCrossfadeMillis())
-                .build(),
-        contentDescription = null,
-        modifier = modifier.parallaxLayoutModifier(scrollState = scrollState, rate = 2),
-        placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
-        onError = { if (index < sources.lastIndex) index++ },
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.TopCenter,
-    )
 }

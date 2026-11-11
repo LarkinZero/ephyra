@@ -103,6 +103,9 @@ object Layout {
             WidthClass.Expanded -> 200.dp
         }
 
+    /** Height of an item page's top bar below the status bar: 8 dp + 48 dp buttons + 8 dp. */
+    val topBarHeight: Dp = 64.dp
+
     /**
      * Height of the backdrop hero on item pages at Medium and Expanded width (4-design.md §6): as
      * close to 16:9 as the window allows, never more than 45 % of its height, never below 320 dp,
