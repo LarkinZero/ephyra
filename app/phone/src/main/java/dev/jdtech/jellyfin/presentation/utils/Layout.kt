@@ -120,6 +120,15 @@ object Layout {
 fun useWideItemLayout(): Boolean = currentWidthClass() != WidthClass.Compact && !isCompactHeight()
 
 /**
+ * True when the open search on My media stays docked in the top area (docs/tablet/4-design.md §3
+ * and §5, #439): the rail stays, the field keeps the collapsed bar's place and is capped at
+ * [Layout.textMaxWidth], and the results fill the content area beside the rail. Medium and Expanded
+ * windows with room in height; a phone, in either orientation, keeps the full-screen search.
+ */
+@Composable
+fun useDockedSearch(): Boolean = currentWidthClass() != WidthClass.Compact && !isCompactHeight()
+
+/**
  * True when the Season page (and an episode opened on its own) should be the list-detail of
  * docs/tablet/4-design.md §7: Expanded width with room in height. Medium windows and phones in
  * landscape keep the single-column page.

@@ -50,8 +50,8 @@ Unchanged in structure; this is the part that already works.
 | Width | Navigation | Top area |
 |---|---|---|
 | Compact | Bottom `NavigationBar` | Server chip, search, avatar as today |
-| Medium | `NavigationRail` (library default) | Same |
-| Expanded | `NavigationRail` (forced, as today) | Same; the search icon opens the search *field docked in the top area*, not a full-width sheet (§5) |
+| Medium | `NavigationRail` (library default) | Same; the open search is docked as at expanded (§5) |
+| Expanded | `NavigationRail` (forced, as today) | Same; the search icon opens the search *field docked in the top area*, not a full-width sheet (§5). A window of compact height (a phone in landscape, expanded wide) keeps the full-screen search |
 
 - The rail stays an icon rail. No drawer on expanded: a drawer hides the content behind the libraries, and the Media tab already lists them. (This differs from the TV ADR 0002 on purpose: TV has no touch and needs the drawer for library names; a tablet has a tap.)
 - The rail hides on item pages exactly as the bar does today (`showBottomBar`). Back goes one level up; nothing else changes.
@@ -66,6 +66,7 @@ Unchanged in structure; this is the part that already works.
 ## 5. Media, Library, Collection, Favorites, Search, Downloads
 
 - **Media**: library cards keep their 160 / 240 / 320 dp breakpoints. The search bar is capped at `textMaxWidth` and aligned to the start at medium and expanded (T9); expanded is the only width that actually hits the cap.
+- **Open search** (#439): at medium and expanded, unless the height is compact, the search opens docked: the rail stays, the field stays where the collapsed bar was and grows to at most `textMaxWidth` (keeping the margin at the end on narrower windows), and the results fill the content area beside the rail below it. A rail destination tapped while it is open closes the search and goes there; the query stays in the collapsed bar, as after Back. A phone, in either orientation, keeps the full-screen search.
 - **Grids** (Library, Collection, Favorites, search results): `gridMinCell` per width class, minimum 2 columns stays. Section headers in `CollectionGrid` use `maxLineSpan`. Nothing centred: a feed uses the width.
 - **Downloads**: at expanded the download rows become a two-column `LazyVerticalGrid(GridCells.Adaptive(minSize = 480.dp))`; a row never exceeds 720 dp. Favorites and Downloads put the title in the same place (T11): title first, actions in the top bar.
 - **Downloads, full-width items** (#434): the storage summary, the Downloading group and the section headers span the grid but are capped at 720 dp, aligned to the start with the columns below, not centred. A downloaded show's episode list is capped at 720 dp too.
@@ -170,7 +171,7 @@ Tier 2 items that cost little and make the app usable on a Chromebook or with a 
 | Screen | Compact | Medium (600–839) | Expanded (840+) |
 |---|---|---|---|
 | Home | bar, 1 page | rail, 2 pages, cards 300/170 | rail, 3 pages, cards 320/180 |
-| Media | as today | search ≤ 720 dp | search ≤ 720 dp |
+| Media | as today | search ≤ 720 dp, open search docked beside the rail | search ≤ 720 dp, open search docked beside the rail |
 | Library / Collection / Favorites / Search | 160 dp cells | 170 dp cells | 180 dp cells |
 | Downloads | list | list ≤ 720 dp | 2 columns |
 | Movie / Show / Episode | header + column | hero + poster 160 + column | hero + poster 200 + column, rows full width |

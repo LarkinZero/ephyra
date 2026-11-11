@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
@@ -67,6 +71,7 @@ fun FilmSearchBar(
     modifier: Modifier = Modifier,
     paddingStart: Dp = 0.dp,
     paddingEnd: Dp = 0.dp,
+    docked: Boolean = false,
 ) {
     val focusRequester = remember { FocusRequester() }
     val safePadding = rememberSafePadding()
@@ -85,15 +90,27 @@ fun FilmSearchBar(
             label = "search_bar_padding_end",
         )
 
+    // #439: docked, the open field stays where the collapsed bar was and keeps a readable width;
+    // the results below it fill the content area.
     val searchBarInputPaddingStart by
         animateDpAsState(
-            targetValue = if (expanded) safePadding.start else 0.dp,
+            targetValue =
+                when {
+                    !expanded -> 0.dp
+                    docked -> paddingStart
+                    else -> safePadding.start
+                },
             label = "search_bar_padding_start",
         )
 
     val searchBarInputPaddingEnd by
         animateDpAsState(
-            targetValue = if (expanded) safePadding.end else 0.dp,
+            targetValue =
+                when {
+                    !expanded -> 0.dp
+                    docked -> paddingEnd
+                    else -> safePadding.end
+                },
             label = "search_bar_padding_end",
         )
 
@@ -144,6 +161,17 @@ fun FilmSearchBar(
                     Modifier.padding(
                             start = searchBarInputPaddingStart,
                             end = searchBarInputPaddingEnd,
+                        )
+                        // The open bar measures the field at its full width; take that slot
+                        // and keep the field at the start of it.
+                        .then(
+                            if (docked && expanded) {
+                                Modifier.wrapContentWidth(Alignment.Start)
+                                    .widthIn(max = Layout.textMaxWidth)
+                                    .fillMaxWidth()
+                            } else {
+                                Modifier
+                            }
                         )
                         .focusRequester(focusRequester)
                         .onPreviewKeyEvent { event ->
