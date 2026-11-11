@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -121,7 +123,7 @@ fun HomeHeader(
                     ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_search),
-                            contentDescription = null,
+                            contentDescription = stringResource(CoreR.string.search),
                         )
                     }
                 }
@@ -133,8 +135,13 @@ fun HomeHeader(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
+                // #441: a screen reader says what the button does, not the avatar's initial.
+                val profile = stringResource(CoreR.string.ce_home_profile)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth().clearAndSetSemantics {
+                            contentDescription = profile
+                        },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

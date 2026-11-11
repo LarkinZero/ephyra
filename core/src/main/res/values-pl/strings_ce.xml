@@ -106,4 +106,12 @@
     <string name="ce_download_error_server">Serwer odrzucił pobieranie (HTTP %1$d)</string>
     <string name="ce_error_server_status">Serwer odpowiedział błędem (HTTP %1$d). Spróbuj ponownie później.</string>
     <string name="ce_media_info">Informacje o multimediach</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Obejrzane</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d nieobejrzany</item>
+        <item quantity="few">%d nieobejrzane</item>
+        <item quantity="many">%d nieobejrzanych</item>
+        <item quantity="other">%d nieobejrzanych</item>
+    </plurals>
 </resources>

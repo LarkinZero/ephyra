@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">O servidor recusou a transferência (HTTP %1$d)</string>
     <string name="ce_error_server_status">O servidor respondeu com um erro (HTTP %1$d). Tente novamente mais tarde.</string>
     <string name="ce_media_info">Informações multimédia</string>
+    <string name="ce_home_profile">Perfil</string>
+    <string name="ce_watched">Visto</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d por ver</item>
+        <item quantity="other">%d por ver</item>
+    </plurals>
 </resources>

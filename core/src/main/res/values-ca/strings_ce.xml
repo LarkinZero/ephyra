@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">El servidor ha rebutjat la baixada (HTTP %1$d)</string>
     <string name="ce_error_server_status">El servidor ha respost amb un error (HTTP %1$d). Torna-ho a provar més tard.</string>
     <string name="ce_media_info">Informació multimèdia</string>
+    <string name="ce_home_profile">Perfil</string>
+    <string name="ce_watched">Vist</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d sense veure</item>
+        <item quantity="other">%d sense veure</item>
+    </plurals>
 </resources>

@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">서버가 다운로드를 거부했습니다 (HTTP %1$d)</string>
     <string name="ce_error_server_status">서버가 오류로 응답했습니다(HTTP %1$d). 나중에 다시 시도하세요.</string>
     <string name="ce_media_info">미디어 정보</string>
+    <string name="ce_home_profile">프로필</string>
+    <string name="ce_watched">시청함</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d개 안 봄</item>
+    </plurals>
 </resources>

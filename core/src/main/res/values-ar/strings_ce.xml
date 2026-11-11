@@ -112,4 +112,14 @@
     <string name="ce_download_error_server">رفض الخادم التنزيل (HTTP %1$d)</string>
     <string name="ce_error_server_status">ردّ الخادم بخطأ (HTTP %1$d). حاول مرة أخرى لاحقًا.</string>
     <string name="ce_media_info">معلومات الوسائط</string>
+    <string name="ce_home_profile">الملف الشخصي</string>
+    <string name="ce_watched">تمت المشاهدة</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="zero">%d غير مُشاهَد</item>
+        <item quantity="one">%d غير مُشاهَد</item>
+        <item quantity="two">%d غير مُشاهَد</item>
+        <item quantity="few">%d غير مُشاهَد</item>
+        <item quantity="many">%d غير مُشاهَد</item>
+        <item quantity="other">%d غير مُشاهَد</item>
+    </plurals>
 </resources>

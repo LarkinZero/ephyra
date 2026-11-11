@@ -106,4 +106,12 @@
     <string name="ce_download_error_server">Сервер отклонил загрузку (HTTP %1$d)</string>
     <string name="ce_error_server_status">Сервер ответил ошибкой (HTTP %1$d). Повторите попытку позже.</string>
     <string name="ce_media_info">Сведения о медиа</string>
+    <string name="ce_home_profile">Профиль</string>
+    <string name="ce_watched">Просмотрено</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d непросмотренный</item>
+        <item quantity="few">%d непросмотренных</item>
+        <item quantity="many">%d непросмотренных</item>
+        <item quantity="other">%d непросмотренных</item>
+    </plurals>
 </resources>

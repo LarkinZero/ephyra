@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Server keeldus allalaadimisest (HTTP %1$d)</string>
     <string name="ce_error_server_status">Server vastas veaga (HTTP %1$d). Proovi hiljem uuesti.</string>
     <string name="ce_media_info">Meediainfo</string>
+    <string name="ce_home_profile">Profiil</string>
+    <string name="ce_watched">Vaadatud</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d vaatamata</item>
+        <item quantity="other">%d vaatamata</item>
+    </plurals>
 </resources>

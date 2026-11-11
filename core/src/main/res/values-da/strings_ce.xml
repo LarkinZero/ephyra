@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Serveren afviste downloadet (HTTP %1$d)</string>
     <string name="ce_error_server_status">Serveren svarede med en fejl (HTTP %1$d). Prøv igen senere.</string>
     <string name="ce_media_info">Medieoplysninger</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Set</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d ikke set</item>
+        <item quantity="other">%d ikke set</item>
+    </plurals>
 </resources>

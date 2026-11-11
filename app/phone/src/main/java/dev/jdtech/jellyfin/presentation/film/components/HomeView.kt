@@ -60,7 +60,7 @@ fun HomeView(
             ) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_arrow_right),
-                    contentDescription = null,
+                    contentDescription = stringResource(CoreR.string.view_all),
                 )
             }
         }

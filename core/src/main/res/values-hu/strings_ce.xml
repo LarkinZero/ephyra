@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">A szerver elutasította a letöltést (HTTP %1$d)</string>
     <string name="ce_error_server_status">A szerver hibával válaszolt (HTTP %1$d). Próbáld újra később.</string>
     <string name="ce_media_info">Médiainformáció</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Megnézve</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d nem látott</item>
+        <item quantity="other">%d nem látott</item>
+    </plurals>
 </resources>

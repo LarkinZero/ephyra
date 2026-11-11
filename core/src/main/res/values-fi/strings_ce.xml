@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Palvelin hylkäsi latauksen (HTTP %1$d)</string>
     <string name="ce_error_server_status">Palvelin vastasi virheellä (HTTP %1$d). Yritä myöhemmin uudelleen.</string>
     <string name="ce_media_info">Mediatiedot</string>
+    <string name="ce_home_profile">Profiili</string>
+    <string name="ce_watched">Katsottu</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d katsomatta</item>
+        <item quantity="other">%d katsomatta</item>
+    </plurals>
 </resources>

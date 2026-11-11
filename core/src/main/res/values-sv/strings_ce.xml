@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Servern nekade nedladdningen (HTTP %1$d)</string>
     <string name="ce_error_server_status">Servern svarade med ett fel (HTTP %1$d). Försök igen senare.</string>
     <string name="ce_media_info">Medieinformation</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Sedd</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d osedd</item>
+        <item quantity="other">%d osedda</item>
+    </plurals>
 </resources>
