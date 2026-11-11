@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Model setat</string>
     <string name="ce_profile_pattern_removed">Model eliminat</string>
     <string name="ce_profile_pattern_grid">Model de deblocare, o grilă de 3 pe 3 puncte</string>
+    <string name="ce_server_address_in_use">Această adresă este în uz și nu poate fi eliminată</string>
+    <string name="ce_server_address_already_added">Această adresă este deja adăugată</string>
 </resources>

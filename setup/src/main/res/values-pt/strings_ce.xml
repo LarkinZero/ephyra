@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Padrão definido</string>
     <string name="ce_profile_pattern_removed">Padrão removido</string>
     <string name="ce_profile_pattern_grid">Padrão de desbloqueio, uma grelha de 3 por 3 pontos</string>
+    <string name="ce_server_address_in_use">Este endereço está em uso e não pode ser removido</string>
+    <string name="ce_server_address_already_added">Este endereço já foi adicionado</string>
 </resources>

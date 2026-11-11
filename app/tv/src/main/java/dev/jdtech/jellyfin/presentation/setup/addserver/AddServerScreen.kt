@@ -116,7 +116,10 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                         contentDescription = null,
                     )
                 },
-                onValueChange = { serverAddress = it },
+                onValueChange = {
+                    serverAddress = it
+                    onAction(AddServerAction.OnAddressChange)
+                },
                 label = {
                     Text(text = stringResource(id = R.string.edit_text_server_address_hint))
                 },

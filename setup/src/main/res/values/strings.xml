@@ -94,4 +94,7 @@
     <string name="ce_profile_pattern_saved">Pattern set</string>
     <string name="ce_profile_pattern_removed">Pattern removed</string>
     <string name="ce_profile_pattern_grid">Unlock pattern, a grid of 3 by 3 dots</string>
+    <!-- CE (#390): the Addresses screen says why a removal or an addition did nothing -->
+    <string name="ce_server_address_in_use">This address is in use and cannot be removed</string>
+    <string name="ce_server_address_already_added">This address is already added</string>
 </resources>

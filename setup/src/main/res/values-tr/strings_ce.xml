@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Desen ayarlandı</string>
     <string name="ce_profile_pattern_removed">Desen kaldırıldı</string>
     <string name="ce_profile_pattern_grid">Kilit açma deseni, 3 × 3 noktalık bir ızgara</string>
+    <string name="ce_server_address_in_use">Bu adres kullanımda ve kaldırılamaz</string>
+    <string name="ce_server_address_already_added">Bu adres zaten eklenmiş</string>
 </resources>

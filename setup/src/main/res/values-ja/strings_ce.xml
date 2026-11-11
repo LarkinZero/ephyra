@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">パターンを設定しました</string>
     <string name="ce_profile_pattern_removed">パターンを削除しました</string>
     <string name="ce_profile_pattern_grid">ロック解除パターン、3×3の点のグリッド</string>
+    <string name="ce_server_address_in_use">このアドレスは使用中のため削除できません</string>
+    <string name="ce_server_address_already_added">このアドレスは既に追加されています</string>
 </resources>

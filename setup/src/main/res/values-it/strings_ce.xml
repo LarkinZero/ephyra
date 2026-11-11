@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Sequenza impostata</string>
     <string name="ce_profile_pattern_removed">Sequenza rimossa</string>
     <string name="ce_profile_pattern_grid">Sequenza di sblocco, una griglia di 3 per 3 punti</string>
+    <string name="ce_server_address_in_use">Questo indirizzo è in uso e non può essere rimosso</string>
+    <string name="ce_server_address_already_added">Questo indirizzo è già stato aggiunto</string>
 </resources>

@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Графічний ключ встановлено</string>
     <string name="ce_profile_pattern_removed">Графічний ключ видалено</string>
     <string name="ce_profile_pattern_grid">Графічний ключ, сітка з 3 × 3 точок</string>
+    <string name="ce_server_address_in_use">Ця адреса використовується, її не можна вилучити</string>
+    <string name="ce_server_address_already_added">Цю адресу вже додано</string>
 </resources>

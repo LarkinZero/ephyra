@@ -43,7 +43,7 @@ class LoginViewModel @Inject constructor(private val repository: SetupRepository
         viewModelScope.launch {
             try {
                 val loginDisclaimer = repository.loadDisclaimer()
-                _state.emit(_state.value.copy(disclaimer = loginDisclaimer))
+                _state.emit(_state.value.copy(disclaimer = loginDisclaimerText(loginDisclaimer)))
             } catch (e: Exception) { Timber.e(e, "Failed to load disclaimer") }
         }
     }

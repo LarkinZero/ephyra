@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Mønster sett</string>
     <string name="ce_profile_pattern_removed">Mønster fjerna</string>
     <string name="ce_profile_pattern_grid">Opplåsingsmønster, eit rutenett med 3 gonger 3 prikkar</string>
+    <string name="ce_server_address_in_use">Denne adressa er i bruk og kan ikkje fjernast</string>
+    <string name="ce_server_address_already_added">Denne adressa er allereie lagd til</string>
 </resources>

@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Wzór ustawiony</string>
     <string name="ce_profile_pattern_removed">Wzór usunięty</string>
     <string name="ce_profile_pattern_grid">Wzór odblokowania, siatka 3 na 3 punkty</string>
+    <string name="ce_server_address_in_use">Ten adres jest używany i nie można go usunąć</string>
+    <string name="ce_server_address_already_added">Ten adres jest już dodany</string>
 </resources>

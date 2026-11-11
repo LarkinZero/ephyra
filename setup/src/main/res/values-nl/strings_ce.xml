@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Patroon ingesteld</string>
     <string name="ce_profile_pattern_removed">Patroon verwijderd</string>
     <string name="ce_profile_pattern_grid">Ontgrendelpatroon, een raster van 3 bij 3 punten</string>
+    <string name="ce_server_address_in_use">Dit adres is in gebruik en kan niet worden verwijderd</string>
+    <string name="ce_server_address_already_added">Dit adres is al toegevoegd</string>
 </resources>

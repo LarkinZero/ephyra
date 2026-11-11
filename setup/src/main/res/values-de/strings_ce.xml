@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Muster festgelegt</string>
     <string name="ce_profile_pattern_removed">Muster entfernt</string>
     <string name="ce_profile_pattern_grid">Entsperrmuster, ein Raster aus 3 × 3 Punkten</string>
+    <string name="ce_server_address_in_use">Diese Adresse wird verwendet und kann nicht entfernt werden</string>
+    <string name="ce_server_address_already_added">Diese Adresse wurde bereits hinzugefügt</string>
 </resources>

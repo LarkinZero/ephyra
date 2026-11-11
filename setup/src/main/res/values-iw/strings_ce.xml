@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">קו ביטול הנעילה הוגדר</string>
     <string name="ce_profile_pattern_removed">קו ביטול הנעילה הוסר</string>
     <string name="ce_profile_pattern_grid">קו ביטול נעילה, רשת של 3 על 3 נקודות</string>
+    <string name="ce_server_address_in_use">הכתובת הזו בשימוש ואי אפשר להסיר אותה</string>
+    <string name="ce_server_address_already_added">הכתובת הזו כבר נוספה</string>
 </resources>

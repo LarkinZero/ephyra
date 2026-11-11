@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Muster määratud</string>
     <string name="ce_profile_pattern_removed">Muster eemaldatud</string>
     <string name="ce_profile_pattern_grid">Avamismuster, 3 × 3 punktist koosnev ruudustik</string>
+    <string name="ce_server_address_in_use">See aadress on kasutusel ja seda ei saa eemaldada</string>
+    <string name="ce_server_address_already_added">See aadress on juba lisatud</string>
 </resources>

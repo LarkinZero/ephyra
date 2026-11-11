@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Đã đặt hình mở khóa</string>
     <string name="ce_profile_pattern_removed">Đã xóa hình mở khóa</string>
     <string name="ce_profile_pattern_grid">Hình mở khóa, lưới 3 × 3 điểm</string>
+    <string name="ce_server_address_in_use">Địa chỉ này đang được sử dụng và không thể xóa</string>
+    <string name="ce_server_address_already_added">Địa chỉ này đã được thêm</string>
 </resources>
