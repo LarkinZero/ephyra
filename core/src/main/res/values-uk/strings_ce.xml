@@ -103,4 +103,5 @@
     <string name="item_included_in">Входить до</string>
     <string name="item_more_like_this">Схоже</string>
     <string name="ce_session_revoked">%1$s завершив ваш сеанс. Увійдіть знову, щоб продовжити.</string>
+    <string name="ce_download_error_server">Сервер відхилив завантаження (HTTP %1$d)</string>
 </resources>

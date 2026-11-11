@@ -94,4 +94,5 @@
     <string name="item_included_in">収録コレクション</string>
     <string name="item_more_like_this">似た作品</string>
     <string name="ce_session_revoked">%1$s からサインアウトされました。続けるにはもう一度サインインしてください。</string>
+    <string name="ce_download_error_server">サーバーがダウンロードを拒否しました (HTTP %1$d)</string>
 </resources>

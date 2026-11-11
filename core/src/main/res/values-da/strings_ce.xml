@@ -97,4 +97,5 @@
     <string name="item_included_in">Indgår i</string>
     <string name="item_more_like_this">Mere som dette</string>
     <string name="ce_session_revoked">%1$s har logget dig ud. Log ind igen for at fortsætte.</string>
+    <string name="ce_download_error_server">Serveren afviste downloadet (HTTP %1$d)</string>
 </resources>

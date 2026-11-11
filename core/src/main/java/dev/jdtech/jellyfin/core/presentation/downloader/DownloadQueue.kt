@@ -19,6 +19,7 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import dev.jdtech.jellyfin.utils.download.DownloadStatus
 import dev.jdtech.jellyfin.utils.download.estimateCappedDownloadSize
+import dev.jdtech.jellyfin.utils.download.isPermanentHttpFailure
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -487,6 +488,8 @@ constructor(
             }
             if (active.isNotEmpty()) {
                 val updates = mutableMapOf<UUID, Entry>()
+                // Refused by the server in a way asking again won't change (#383).
+                val permanentFailures = mutableSetOf<UUID>()
                 val now = System.currentTimeMillis()
                 val dlIds = active.mapNotNull { it.downloadId }
                 val snapshots = downloader.getProgress(dlIds)
@@ -512,7 +515,13 @@ constructor(
                                 if (entry.state is EntryState.Paused) null
                                 else EntryState.Paused
                             DownloadStatus.SUCCESSFUL -> EntryState.Completed
-                            DownloadStatus.FAILED -> EntryState.Failed(null)
+                            DownloadStatus.FAILED -> {
+                                val httpStatus = snapshot.httpStatus
+                                if (httpStatus != null && isPermanentHttpFailure(httpStatus)) {
+                                    permanentFailures.add(entry.id)
+                                }
+                                EntryState.Failed(httpStatus?.let(::serverRefused))
+                            }
                             // Unknown/unhandled status (e.g. engine entry disappeared).
                             // Treat as failed rather than silently claiming success.
                             else -> EntryState.Failed(null)
@@ -642,7 +651,10 @@ constructor(
                     // Schedule auto-retry for eligible entries; notify for permanent failures.
                     val retryUpdates = mutableMapOf<UUID, Entry>()
                     for (failed in failedEntries) {
-                        if (failed.retryCount < MAX_AUTO_RETRIES) {
+                        if (
+                            failed.retryCount < MAX_AUTO_RETRIES &&
+                                failed.id !in permanentFailures
+                        ) {
                             val backoffMs = RETRY_BACKOFF_MS[failed.retryCount.coerceAtMost(RETRY_BACKOFF_MS.lastIndex)]
                             retryUpdates[failed.id] = failed.copy(
                                 state = EntryState.Pending,
@@ -793,6 +805,10 @@ constructor(
             }
         }
     }
+
+    /** The reason a download the server answered with an HTTP error shows (#383). */
+    private fun serverRefused(httpStatus: Int): UiText =
+        UiText.StringResource(CoreR.string.ce_download_error_server, httpStatus)
 
     private fun notifyFailure(item: FindroidItem) {
         val nm = context.getSystemService<NotificationManager>() ?: return

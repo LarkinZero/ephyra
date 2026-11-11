@@ -97,4 +97,5 @@
     <string name="item_included_in">Sisältyy kokoelmaan</string>
     <string name="item_more_like_this">Samankaltaisia</string>
     <string name="ce_session_revoked">%1$s kirjasi sinut ulos. Jatka kirjautumalla uudelleen sisään.</string>
+    <string name="ce_download_error_server">Palvelin hylkäsi latauksen (HTTP %1$d)</string>
 </resources>
