@@ -1247,9 +1247,12 @@ class PlayerActivity : BasePlayerActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        // CE (#568): the media notification's intent carries no item. It only brings the player
+        // back, which goes on with what it plays, as onCreate does for it.
+        val itemIdExtra = intent.extras?.getString("itemId") ?: return
         setIntent(intent)
 
-        val itemId = UUID.fromString(intent.extras!!.getString("itemId"))
+        val itemId = UUID.fromString(itemIdExtra)
         val itemKind = intent.extras!!.getString("itemKind")
         val startFromBeginning = intent.extras!!.getBoolean("startFromBeginning")
         val mediaSourceId = intent.extras!!.getString("mediaSourceId")
