@@ -37,18 +37,22 @@ class DownloadPumpService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var observeJob: Job? = null
+    private var count = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
+        running = true
         ensureNotificationChannel()
         startForegroundWithCount(0)
         observeQueue()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Already posted foreground notification in onCreate; nothing to do.
+        // The foreground notification was posted in onCreate. CE (#372): post it again on request,
+        // for a download that started before the notification permission was granted.
+        if (intent?.action == ACTION_REFRESH_NOTIFICATION && count > 0) updateNotification(count)
         return START_STICKY
     }
 
@@ -66,6 +70,7 @@ class DownloadPumpService : Service() {
                     }
                     .distinctUntilChanged()
                     .collect { count ->
+                        this@DownloadPumpService.count = count
                         if (count == 0) {
                             stopForegroundCompat()
                             stopSelf()
@@ -156,12 +161,16 @@ class DownloadPumpService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        running = false
         scope.cancel()
     }
 
     companion object {
         private const val CHANNEL_ID = "download_pump"
         private const val NOTIFICATION_ID = 42
+        private const val ACTION_REFRESH_NOTIFICATION = "refresh_notification"
+
+        @Volatile private var running = false
 
         fun start(context: Context) {
             val intent = Intent(context, DownloadPumpService::class.java)
@@ -173,6 +182,22 @@ class DownloadPumpService : Service() {
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to start DownloadPumpService")
+            }
+        }
+
+        /**
+         * CE (#372): posts the notification of a running service again, after the notification
+         * permission was granted. Does nothing when no download is running.
+         */
+        fun refreshNotification(context: Context) {
+            if (!running) return
+            val intent =
+                Intent(context, DownloadPumpService::class.java)
+                    .setAction(ACTION_REFRESH_NOTIFICATION)
+            try {
+                context.startService(intent)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to refresh the DownloadPumpService notification")
             }
         }
     }
