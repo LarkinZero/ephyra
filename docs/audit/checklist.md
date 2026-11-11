@@ -387,7 +387,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-92 | About shows the app version and install, server and device information | #223, #211 | works | works | works |
-| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works |
+| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened) |
 | SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | works | broken #385: "Could not build device profile" | n/a |
 | SET-95 | Device profile screen: what the device can decode | #211 | n/a | n/a | works |
 | SET-96 | Report a problem and source code: links on phone, a QR code on TV | #223 | works | works | works |
@@ -608,7 +608,7 @@ All rows are TV only.
 | TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
-| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | unpolished #423: text in the overscan margin at 1080p; 4K not run |
+| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; the drawer's icons still sit in the left margin; 4K not run |
 | TVS-14 | The 32-bit (`armeabi-v7a`) APK installs and starts on the Xiaomi box **[device]** | ADR 0006, #359 | n/a | n/a | not tested: emulator |
 | TVS-15 | Pressing Home and coming back to the app returns to the same screen and focus | | n/a | n/a | works |
 | TVS-16 | D-pad latency on Home and in the player feels immediate **[device]** | #359 | n/a | n/a | not tested: emulator |
@@ -623,7 +623,7 @@ All rows are TV only.
 | LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | episode and movie pages work at 600 dp since #429: the episode's still goes above the text, a movie's last button wraps to a second line; works at 8 inch and fold | n/a |
 | LIF-05 | Free-form window resize: layouts follow the width | #288 | n/a | works | n/a |
 | LIF-06 | Fold and unfold keeps the screen and state | test matrix | n/a | works on the fold since #429: the Season detail pane stacks the still above the text at the unfolded 841 dp width (checked as a 841 dp window on the 10.5 inch emulator); the half-opened posture is not tested on a device, the pane follows its own width and a unit test covers a ~420 dp pane; 10.5 and 8 inch are not foldables | n/a |
-| LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | unpolished #423: Home card titles run off the screen at 1.3 |
+| LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | works (#423 fixed: Home card titles take one line and stay inside the safe area at 1.3) |
 | LIF-08 | A right-to-left language (Arabic or Hebrew): layouts mirror, nothing overlaps | #353 | unpolished #401: arrows not mirrored, overview clipped | unpolished #401: row arrows not mirrored | works |
 | LIF-09 | CE screens are translated: no English left in a non-English language | #106, #110 | works | unpolished: upstream Player strings untranslated (Dutch); works at 8 inch (Arabic) | unpolished: upstream strings untranslated |
 | LIF-10 | Edge-to-edge: no content under the status bar, navigation bar or floating headers | #94, #357 | works | unpolished #437: no scrim over the Season detail pane, grey band without artwork; works at 8 inch and fold; the person page's back and home buttons are clear of the photo since #436 | n/a |

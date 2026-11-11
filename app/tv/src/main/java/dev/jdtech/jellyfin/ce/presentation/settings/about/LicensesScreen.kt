@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +42,7 @@ import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
@@ -49,6 +52,10 @@ import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.util.withJson
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
+import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
+import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
+import dev.jdtech.jellyfin.ce.ui.focus.rememberFocusPosition
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import kotlinx.coroutines.Dispatchers
@@ -62,8 +69,20 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LicensesScreen(navigateToLicense: (uniqueId: String) -> Unit) {
     val libraries by rememberLibraries()
-    val firstItem = remember { FocusRequester() }
+    LicensesLayout(libraries = libraries, onLibraryClick = navigateToLicense)
+}
 
+/**
+ * The list of libraries. Focus starts on the first one and comes back to the one that was opened
+ * (#424, ADR 0003); the list loads again on the way back, so the entry is found by its id.
+ */
+@Composable
+internal fun LicensesLayout(
+    libraries: List<Library>?,
+    onLibraryClick: (uniqueId: String) -> Unit,
+    listState: LazyListState = rememberLazyListState(),
+    focusPosition: FocusPosition = rememberFocusPosition(),
+) {
     Column(
         modifier =
             Modifier.fillMaxSize()
@@ -80,28 +99,37 @@ fun LicensesScreen(navigateToLicense: (uniqueId: String) -> Unit) {
             }
         } else {
             LazyColumn(
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                 contentPadding =
                     PaddingValues(top = MaterialTheme.spacings.default, bottom = TvSafeArea.vertical),
             ) {
-                items(list, key = { it.uniqueId }) { library ->
+                itemsIndexed(list, key = { _, library -> library.uniqueId }) { index, library ->
                     FocusableCard(
-                        onClick = { navigateToLicense(library.uniqueId) },
+                        onClick = { onLibraryClick(library.uniqueId) },
                         modifier =
                             Modifier.fillMaxWidth()
-                                .then(
-                                    if (library == list.first()) Modifier.focusRequester(firstItem)
-                                    else Modifier
-                                ),
+                                .focusPosition(focusPosition, 0, index, library.uniqueId)
+                                .testTag(licenseRowTag(library.uniqueId)),
                     ) {
                         LibraryRow(library)
                     }
                 }
             }
-            LaunchedEffect(Unit) { firstItem.requestFocus() }
+        }
+    }
+
+    RestoreFocus(position = focusPosition, ready = libraries != null) { position ->
+        val list = libraries.orEmpty()
+        position.resolve(0, list.size) { i -> list[i].uniqueId }
+        // Scroll first: an entry that isn't laid out can't take focus.
+        if (listState.layoutInfo.visibleItemsInfo.none { it.index == position.column }) {
+            listState.scrollToItem(position.column)
         }
     }
 }
+
+internal fun licenseRowTag(uniqueId: String) = "ce_license_row_$uniqueId"
 
 @Composable
 private fun LibraryRow(library: Library) {

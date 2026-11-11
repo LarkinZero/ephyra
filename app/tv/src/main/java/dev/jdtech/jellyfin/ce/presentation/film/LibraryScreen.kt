@@ -303,7 +303,8 @@ internal fun LibraryScreenLayout(
                     Modifier.align(Alignment.BottomEnd)
                         .padding(
                             end = TvSafeArea.horizontal + LETTER_BAR_WIDTH,
-                            bottom = TvSafeArea.vertical / 2,
+                            // #423: the whole safe area; the grid's padding leaves room for it.
+                            bottom = TvSafeArea.vertical,
                         ),
             )
         }
