@@ -8,8 +8,8 @@ import androidx.media3.common.PlaybackException
  * network and tells the player to load again, at the same position and with the same play/pause
  * state, as pressing Play would.
  *
- * Only for a player that can load again with `prepare()` (ExoPlayer). mpv does not offer that
- * after an error yet (#474), so it keeps its error.
+ * Only for a player that can load again with `prepare()` (`COMMAND_PREPARE`): ExoPlayer, and mpv
+ * since #474.
  *
  * The caller retries when a network with internet access becomes available, and every
  * [RETRY_INTERVAL_MS] while one is up but loading still fails. After [GIVE_UP_MS] without
