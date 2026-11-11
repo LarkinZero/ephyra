@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Подобни заглавия от вашата библиотека</string>
     <string name="ce_pref_detail_credits">Режисьор и сценаристи</string>
     <string name="ce_pref_detail_credits_summary">Под описанието на страниците на филми и сериали</string>
+    <string name="ce_media_segments_auto_skip_pip">Само в режим „картина в картината“</string>
+    <string name="ce_media_segments_auto_skip_always">Винаги</string>
 </resources>

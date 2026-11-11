@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Podobni naslovi iz vaše knjižnice</string>
     <string name="ce_pref_detail_credits">Režiser in scenaristi</string>
     <string name="ce_pref_detail_credits_summary">Pod opisom na straneh filmov in serij</string>
+    <string name="ce_media_segments_auto_skip_pip">Samo v načinu slika v sliki</string>
+    <string name="ce_media_segments_auto_skip_always">Vedno</string>
 </resources>

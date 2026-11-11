@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Похожие произведения из вашей медиатеки</string>
     <string name="ce_pref_detail_credits">Режиссёр и сценаристы</string>
     <string name="ce_pref_detail_credits_summary">Под описанием на страницах фильмов и сериалов</string>
+    <string name="ce_media_segments_auto_skip_pip">Только в режиме «картинка в картинке»</string>
+    <string name="ce_media_segments_auto_skip_always">Всегда</string>
 </resources>

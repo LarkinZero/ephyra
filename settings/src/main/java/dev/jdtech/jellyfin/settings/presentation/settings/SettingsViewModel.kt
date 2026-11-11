@@ -500,7 +500,7 @@ class SettingsViewModel @Inject constructor(
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.pref_player_backend,
                                                     backendPreference = appPreferences.playerBackend,
-                                                    options = R.array.player_backends,
+                                                    options = R.array.player_backend_names,
                                                     optionValues = R.array.player_backends
                                                 ),
                                                 PreferenceSwitch(

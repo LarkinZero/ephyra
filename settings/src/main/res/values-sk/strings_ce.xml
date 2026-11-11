@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Podobné tituly z vašej knižnice</string>
     <string name="ce_pref_detail_credits">Režisér a scenáristi</string>
     <string name="ce_pref_detail_credits_summary">Pod popisom na stránkach filmov a seriálov</string>
+    <string name="ce_media_segments_auto_skip_pip">Iba v režime obraz v obraze</string>
+    <string name="ce_media_segments_auto_skip_always">Vždy</string>
 </resources>

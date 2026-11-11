@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Títulos similares de tu biblioteca</string>
     <string name="ce_pref_detail_credits">Director y guionistas</string>
     <string name="ce_pref_detail_credits_summary">Debajo de la sinopsis en las páginas de películas y series</string>
+    <string name="ce_media_segments_auto_skip_pip">Solo en pantalla en pantalla</string>
+    <string name="ce_media_segments_auto_skip_always">Siempre</string>
 </resources>

@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">عناوين مشابهة من مكتبتك</string>
     <string name="ce_pref_detail_credits">المخرج والكتّاب</string>
     <string name="ce_pref_detail_credits_summary">تحت الملخص في صفحات الأفلام والمسلسلات</string>
+    <string name="ce_media_segments_auto_skip_pip">فقط في وضع صورة داخل صورة</string>
+    <string name="ce_media_segments_auto_skip_always">دائمًا</string>
 </resources>

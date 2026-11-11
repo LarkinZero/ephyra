@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Podobné tituly z vaší knihovny</string>
     <string name="ce_pref_detail_credits">Režisér a scenáristé</string>
     <string name="ce_pref_detail_credits_summary">Pod popisem na stránkách filmů a seriálů</string>
+    <string name="ce_media_segments_auto_skip_pip">Pouze v režimu obraz v obraze</string>
+    <string name="ce_media_segments_auto_skip_always">Vždy</string>
 </resources>

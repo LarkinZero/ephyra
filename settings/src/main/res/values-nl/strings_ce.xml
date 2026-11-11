@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Vergelijkbare titels uit je bibliotheek</string>
     <string name="ce_pref_detail_credits">Regisseur en schrijvers</string>
     <string name="ce_pref_detail_credits_summary">Onder de beschrijving op film- en seriepagina\'s</string>
+    <string name="ce_media_segments_auto_skip_pip">Alleen in scherm-in-scherm</string>
+    <string name="ce_media_segments_auto_skip_always">Altijd</string>
 </resources>

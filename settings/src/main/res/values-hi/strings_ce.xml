@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">आपकी लाइब्रेरी से मिलते-जुलते शीर्षक</string>
     <string name="ce_pref_detail_credits">निर्देशक और लेखक</string>
     <string name="ce_pref_detail_credits_summary">फ़िल्म और शो के पेज पर सारांश के नीचे</string>
+    <string name="ce_media_segments_auto_skip_pip">केवल पिक्चर-इन-पिक्चर में</string>
+    <string name="ce_media_segments_auto_skip_always">हमेशा</string>
 </resources>

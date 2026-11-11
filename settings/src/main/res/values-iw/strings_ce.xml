@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">כותרים דומים מהספרייה שלך</string>
     <string name="ce_pref_detail_credits">במאי וכותבים</string>
     <string name="ce_pref_detail_credits_summary">מתחת לתקציר בדפי סרטים וסדרות</string>
+    <string name="ce_media_segments_auto_skip_pip">רק בתמונה-בתוך-תמונה</string>
+    <string name="ce_media_segments_auto_skip_always">תמיד</string>
 </resources>

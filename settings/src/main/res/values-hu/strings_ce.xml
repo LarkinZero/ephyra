@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Hasonló címek a könyvtáradból</string>
     <string name="ce_pref_detail_credits">Rendező és írók</string>
     <string name="ce_pref_detail_credits_summary">A leírás alatt a filmek és sorozatok oldalán</string>
+    <string name="ce_media_segments_auto_skip_pip">Csak kép a képben módban</string>
+    <string name="ce_media_segments_auto_skip_always">Mindig</string>
 </resources>

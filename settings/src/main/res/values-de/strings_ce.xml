@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Ähnliche Titel aus deiner Mediathek</string>
     <string name="ce_pref_detail_credits">Regie und Drehbuch</string>
     <string name="ce_pref_detail_credits_summary">Unter der Beschreibung auf Film- und Serienseiten</string>
+    <string name="ce_media_segments_auto_skip_pip">Nur im Bild-in-Bild-Modus</string>
+    <string name="ce_media_segments_auto_skip_always">Immer</string>
 </resources>

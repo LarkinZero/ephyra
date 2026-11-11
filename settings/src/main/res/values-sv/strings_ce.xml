@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Liknande titlar från ditt bibliotek</string>
     <string name="ce_pref_detail_credits">Regissör och manusförfattare</string>
     <string name="ce_pref_detail_credits_summary">Under beskrivningen på film- och seriesidor</string>
+    <string name="ce_media_segments_auto_skip_pip">Bara i bild-i-bild</string>
+    <string name="ce_media_segments_auto_skip_always">Alltid</string>
 </resources>

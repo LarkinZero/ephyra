@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Titluri similare din biblioteca ta</string>
     <string name="ce_pref_detail_credits">Regizor și scenariști</string>
     <string name="ce_pref_detail_credits_summary">Sub descriere, pe paginile filmelor și serialelor</string>
+    <string name="ce_media_segments_auto_skip_pip">Doar în modul picture-in-picture</string>
+    <string name="ce_media_segments_auto_skip_always">Întotdeauna</string>
 </resources>

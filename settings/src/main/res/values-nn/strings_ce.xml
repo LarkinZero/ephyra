@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Liknande titlar frå biblioteket ditt</string>
     <string name="ce_pref_detail_credits">Regissør og forfattarar</string>
     <string name="ce_pref_detail_credits_summary">Under skildringa på film- og seriesider</string>
+    <string name="ce_media_segments_auto_skip_pip">Berre i bilete-i-bilete</string>
+    <string name="ce_media_segments_auto_skip_always">Alltid</string>
 </resources>

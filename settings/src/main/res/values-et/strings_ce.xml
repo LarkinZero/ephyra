@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Sarnased pealkirjad sinu kogust</string>
     <string name="ce_pref_detail_credits">Režissöör ja stsenaristid</string>
     <string name="ce_pref_detail_credits_summary">Kirjelduse all filmide ja sarjade lehtedel</string>
+    <string name="ce_media_segments_auto_skip_pip">Ainult pilt-pildis-režiimis</string>
+    <string name="ce_media_segments_auto_skip_always">Alati</string>
 </resources>

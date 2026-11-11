@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Kitabxananızdan oxşar adlar</string>
     <string name="ce_pref_detail_credits">Rejissor və ssenaristlər</string>
     <string name="ce_pref_detail_credits_summary">Film və serial səhifələrində icmalın altında</string>
+    <string name="ce_media_segments_auto_skip_pip">Yalnız şəkil içində şəkil rejimində</string>
+    <string name="ce_media_segments_auto_skip_always">Həmişə</string>
 </resources>

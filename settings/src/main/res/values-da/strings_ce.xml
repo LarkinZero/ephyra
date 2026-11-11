@@ -180,4 +180,6 @@
     <string name="ce_pref_detail_similar_summary">Lignende titler fra dit bibliotek</string>
     <string name="ce_pref_detail_credits">Instruktør og forfattere</string>
     <string name="ce_pref_detail_credits_summary">Under beskrivelsen på film- og seriesider</string>
+    <string name="ce_media_segments_auto_skip_pip">Kun i billede-i-billede</string>
+    <string name="ce_media_segments_auto_skip_always">Altid</string>
 </resources>
