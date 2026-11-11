@@ -103,12 +103,14 @@ import kotlinx.coroutines.withTimeoutOrNull
  * - The suggestions carousel is gone: the hero shows the focused card, so suggestions are a row of
  *   their own. The rows follow the order and visibility set in Settings (#142).
  * - OK on an episode opens its season (#130). Movies and shows open their page.
+ * - [onRetry] runs with Retry after a failed load, for what else the start missed (#513).
  */
 @Composable
 fun HomeScreen(
     navigateToMovie: (itemId: UUID) -> Unit,
     navigateToShow: (itemId: UUID) -> Unit,
     navigateToEpisode: (episodeId: UUID) -> Unit,
+    onRetry: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -141,6 +143,7 @@ fun HomeScreen(
                         is FindroidEpisode -> navigateToEpisode(action.item.id)
                     }
                 }
+                is HomeAction.OnRetryClick -> onRetry()
                 else -> Unit
             }
             viewModel.onAction(action)
