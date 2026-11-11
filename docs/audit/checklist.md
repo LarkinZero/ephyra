@@ -182,7 +182,7 @@ Libraries, search, favourites and the item pages.
 | BRW-38 | Movie, show, season and episode pages show new progress after leaving the player | #95 | works | works; not tested at 8 inch (player) | works |
 | BRW-39 | Status-bar icons stay readable over the backdrop | #291, #297 | works | works | n/a |
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | works for person cards: the person icon without a photo since #396; season fallback not checked | works: a season without a poster shows the show's, a show without any keeps the placeholder (#416); failing image not provoked |
-| BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | unpolished #414: two-digit years |
+| BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | works (#414): four-digit year, "Jan 18, 1940" |
 | BRW-42 | Theme music on the show page (setting on): plays softly, fades out on leaving, on Play and when the screensaver starts, stays quiet when another app plays audio | #141 | n/a | n/a | not tested: no theme songs on the demo server |
 | BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring) |
 
@@ -318,7 +318,7 @@ is shown, saved and kept.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| SET-34 | Player backend: ExoPlayer or mpv; the next playback uses it | `playerBackend` | unpolished #399: raw values "exoplayer" and "mpv" | works | unpolished #399: raw values "exoplayer" and "mpv" |
+| SET-34 | Player backend: ExoPlayer or mpv; the next playback uses it | `playerBackend` | works (#399): "ExoPlayer" and "mpv" | works | works (#399): "ExoPlayer" and "mpv" |
 | SET-35 | Direct play Dolby Vision (on by default; ExoPlayer only; effect: PLY-116, PLY-118) | #96 | works | works | works |
 | SET-36 | Match display refresh rate (TV, off by default; effect: PLY-123) | #139 | n/a | n/a | works |
 | SET-37 | mpv: hardware decoding | `playerMpvHwdec` | works | works | works |
@@ -345,7 +345,7 @@ is shown, saved and kept.
 | SET-58 | Media segments: Preview action | #271 | works | works | works |
 | SET-59 | Media segments: Commercial action | #271 | works | works | works |
 | SET-60 | Skip button duration (seconds) | #271 | works | works | works |
-| SET-61 | Auto-skip: always or only in picture-in-picture | #271 | unpolished #399: options in lower case | unpolished #399: raw lower-case values | n/a |
+| SET-61 | Auto-skip: always or only in picture-in-picture | #271 | works (#399): "Only in picture-in-picture" and "Always" | works (#399): same labels as the phone, checked on the phone | n/a |
 | SET-62 | Next episode threshold (ms) | `playerMediaSegmentsNextEpisodeThreshold` | works | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-63 | Trickplay | #134 | works | works | works |
 | SET-64 | Trickplay while seeking with the gesture (needs Trickplay) | `playerGesturesSeekTrickplay` | works | works | n/a |
@@ -370,7 +370,7 @@ is shown, saved and kept.
 | SET-78 | Storage location: internal storage and each SD card, with free space | `PreferenceDynamicSelect` | works | works | n/a |
 | SET-79 | Maximum concurrent downloads | `maxConcurrentDownloads` | works | works | n/a |
 | SET-80 | Smart Downloads | #116 | works | works | n/a |
-| SET-81 | Episodes to keep ready (at least 1) | #116 | unpolished #400: "1 episodes" | unpolished #400: "1 episodes" | n/a |
+| SET-81 | Episodes to keep ready (at least 1) | #116 | works (#400): "1 episode", checked on the shared still-watching row | works (#400): same code as the phone, checked on the phone | n/a |
 | SET-82 | Transcode Dolby Vision downloads | ce.30 | works | works | n/a |
 | SET-83 | Request timeout | `requestTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-84 | Connect timeout | `connectTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
@@ -624,7 +624,7 @@ All rows are TV only.
 | LIF-05 | Free-form window resize: layouts follow the width | #288 | n/a | works | n/a |
 | LIF-06 | Fold and unfold keeps the screen and state | test matrix | n/a | works on the fold since #429: the Season detail pane stacks the still above the text at the unfolded 841 dp width (checked as a 841 dp window on the 10.5 inch emulator); the half-opened posture is not tested on a device, the pane follows its own width and a unit test covers a ~420 dp pane; 10.5 and 8 inch are not foldables | n/a |
 | LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | works (#423 fixed: Home card titles take one line and stay inside the safe area at 1.3) |
-| LIF-08 | A right-to-left language (Arabic or Hebrew): layouts mirror, nothing overlaps | #353 | unpolished #401: arrows not mirrored, overview clipped | unpolished #401: row arrows not mirrored | works |
+| LIF-08 | A right-to-left language (Arabic or Hebrew): layouts mirror, nothing overlaps | #353 | works (#401): arrows mirrored, English overview left to right and not clipped | works (#401): same drawables as the phone, checked on the phone | works |
 | LIF-09 | CE screens are translated: no English left in a non-English language | #106, #110 | works | unpolished: upstream Player strings untranslated (Dutch); works at 8 inch (Arabic) | unpolished: upstream strings untranslated |
 | LIF-10 | Edge-to-edge: no content under the status bar, navigation bar or floating headers | #94, #357 | works | works: the Season detail pane has its own band, and no grey band without artwork, since #437; works at 8 inch and fold; the person page's back and home buttons are clear of the photo since #436 | n/a |
 | LIF-11 | Predictive back on Android 16 and 17 | #357 | not tested: Android 14 | not tested: Android 14 | n/a |
