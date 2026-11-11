@@ -86,7 +86,12 @@ class JellyfinApi(
                     androidContext.applicationInfo
                         .loadLabel(androidContext.packageManager)
                         .toString(),
-                version = BuildConfig.VERSION_NAME,
+                // CE (#386): the installed app's version, as Settings > About shows it. This
+                // module's BuildConfig carries upstream's Versions.APP_NAME.
+                version =
+                    androidContext.packageManager
+                        .getPackageInfo(androidContext.packageName, 0)
+                        .versionName ?: "unknown",
             )
         context = androidContext
         deviceInfo = buildDeviceInfo(androidContext)
