@@ -59,7 +59,7 @@ Unchanged in structure; this is the part that already works.
 
 ## 4. Home
 
-- Carousel: 1 / 2 / 3 pages (exists). At expanded the page height is `min(width / 3 × 9/16, window height × 0.4)` so three pages never push "Continue watching" below the fold on a 10.5" landscape tablet.
+- Carousel: 1 / 2 / 3 pages at compact / medium / expanded, by the window's width class (#438; it used to count from the pager's own width, the window minus the rail and the margins, so an 8" tablet in portrait and the fold showed a page fewer). A window of compact height (a phone in landscape) keeps 2 pages although it is expanded wide. Pages are smallest at the bottom of each class: about 230 dp at 600 and 841 dp, about 250 dp at 640 dp. At expanded the page height is `min(width / 3 × 9/16, window height × 0.4)` so three pages never push "Continue watching" below the fold on a 10.5" landscape tablet.
 - Rows use `Layout.cardHorizontal` / `cardVertical` instead of the fixed 260 / 150 dp (T10). Row headers keep their 42 dp. Row content padding is the rail-aware safe padding plus `Layout.margin`.
 - Nothing else changes. Home is the screen the user sees most, and its rhythm (carousel, rows) is already right.
 

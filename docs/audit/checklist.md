@@ -103,7 +103,7 @@ variant. An empty cell is work still to do.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| HOM-01 | Suggestions carousel: pages through items, pauses while scrolling, opens the item on tap | #266 | works | unpolished #433: blank card for an item without a backdrop; unpolished #438 at 8 inch and fold: one page fewer | n/a |
+| HOM-01 | Suggestions carousel: pages through items, pauses while scrolling, opens the item on tap | #266 | works | unpolished #433: blank card for an item without a backdrop; pages by width class since #438: 2 at 8 inch and fold portrait, 3 on the fold landscape | n/a |
 | HOM-02 | TV hero: the focused card's backdrop, logo or title, info line and overview | 1.2.0-ce.5 (#132) | n/a | n/a | works (#410): Continue Watching, Next Up and Latest cards show their overview too |
 | HOM-03 | TV hero title: a long title is fitted, not cut off | #346 | n/a | n/a | works |
 | HOM-04 | TV hero backdrop for an episode: falls back to the show's, the season's or the episode's picture instead of staying empty | #348 | n/a | n/a | works |
@@ -193,7 +193,7 @@ Libraries, search, favourites and the item pages.
 | BRW-44 | Movie, show and episode pages use the hero layout: poster beside the text over a full-width backdrop | #291 | n/a | unpolished #433, #432: empty hero without a backdrop, landscape crop 3.6:1 (3.2:1 at 8 inch, 2.6:1 on the fold) | n/a |
 | BRW-45 | Title and text of the hero sit under the backdrop, readable over bright artwork | #339 | n/a | works | n/a |
 | BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | works: rotation keeps the selected episode, the list position and the top bar's background since #435 (from an episode link see #517); detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
-| BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | unpolished #439: search opens full width; unpolished #438 at 8 inch and fold: one carousel page fewer | n/a |
+| BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | unpolished #439: search opens full width; carousel pages follow the width class since #438 | n/a |
 | BRW-48 | Tab on a hardware keyboard reaches every control on Home, Media and an item page | #310, test matrix | unpolished #398: no focus indicator on the carousel | unpolished #398: no focus on Home cards, same at 8 inch and fold, plus #442 at 8 inch; My media works since #430: Tab goes rail, search bar, Movies, Shows at 1280, 800 and 1024 dp, Enter or typing opens the search, Esc closes it | n/a |
 
 ## 5. Downloads
