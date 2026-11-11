@@ -95,4 +95,5 @@
     <string name="item_more_like_this">비슷한 콘텐츠</string>
     <string name="ce_session_revoked">%1$s에서 로그아웃되었습니다. 계속하려면 다시 로그인하세요.</string>
     <string name="ce_download_error_server">서버가 다운로드를 거부했습니다 (HTTP %1$d)</string>
+    <string name="ce_error_server_status">서버가 오류로 응답했습니다(HTTP %1$d). 나중에 다시 시도하세요.</string>
 </resources>

@@ -95,4 +95,5 @@
     <string name="item_more_like_this">類似內容</string>
     <string name="ce_session_revoked">%1$s 已將你登出。請重新登入以繼續。</string>
     <string name="ce_download_error_server">伺服器拒絕咗下載 (HTTP %1$d)</string>
+    <string name="ce_error_server_status">伺服器回應咗錯誤 (HTTP %1$d)。請稍後再試。</string>
 </resources>

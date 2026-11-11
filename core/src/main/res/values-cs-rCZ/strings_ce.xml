@@ -101,4 +101,5 @@
     <string name="item_more_like_this">Podobné tituly</string>
     <string name="ce_session_revoked">%1$s vás odhlásil. Pro pokračování se znovu přihlaste.</string>
     <string name="ce_download_error_server">Server stahování odmítl (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Server odpověděl chybou (HTTP %1$d). Zkuste to později.</string>
 </resources>

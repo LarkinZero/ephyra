@@ -226,7 +226,11 @@ private fun HomeScreenLayout(
         }
 
         if (state.error != null && showErrorDialog) {
-            ErrorDialog(exception = state.error!!, onDismissRequest = { showErrorDialog = false })
+            ErrorDialog(
+                exception = state.error!!,
+                onDismissRequest = { showErrorDialog = false },
+                onRetry = { onAction(HomeAction.OnRetryClick) },
+            )
         }
     }
 

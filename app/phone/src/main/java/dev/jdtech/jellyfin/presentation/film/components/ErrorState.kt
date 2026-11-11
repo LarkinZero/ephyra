@@ -42,7 +42,11 @@ fun ErrorState(error: Exception, onRetryClick: () -> Unit, modifier: Modifier = 
     )
 
     if (showErrorDialog) {
-        ErrorDialog(exception = error, onDismissRequest = { showErrorDialog = false })
+        ErrorDialog(
+            exception = error,
+            onDismissRequest = { showErrorDialog = false },
+            onRetry = onRetryClick,
+        )
     }
 }
 

@@ -178,6 +178,7 @@ private fun MediaScreenLayout(
                 ErrorDialog(
                     exception = state.error!!,
                     onDismissRequest = { showErrorDialog = false },
+                    onRetry = { onAction(MediaAction.OnRetryClick) },
                 )
             }
         }

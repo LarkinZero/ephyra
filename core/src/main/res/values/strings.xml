@@ -101,6 +101,8 @@
     <string name="download_error_no_sources">No playable sources available for this item</string>
     <!-- CE (#383): the server answered a download with an HTTP error. %1$d is the status, such as 404. -->
     <string name="ce_download_error_server">The server refused the download (HTTP %1$d)</string>
+    <!-- CE (#377): a screen failed to load because the server answered with an HTTP error. %1$d is the status, such as 503. -->
+    <string name="ce_error_server_status">The server answered with an error (HTTP %1$d). Try again later.</string>
     <string name="not_enough_storage">This item requires %1$s of free storage but only %2$s is available</string>
     <string name="no_server_connection">No connection to the Jellyfin server, to watch offline enable Offline Mode</string>
     <string name="select_storage_location">Select storage location</string>

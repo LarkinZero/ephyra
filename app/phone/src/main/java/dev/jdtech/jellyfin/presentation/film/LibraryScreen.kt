@@ -260,7 +260,11 @@ private fun ErrorGroup(
             modifier = modifier,
         )
         if (showErrorDialog) {
-            ErrorDialog(exception = it.error, onDismissRequest = { showErrorDialog = false })
+            ErrorDialog(
+                exception = it.error,
+                onDismissRequest = { showErrorDialog = false },
+                onRetry = onRefresh,
+            )
         }
     }
 }

@@ -95,4 +95,5 @@
     <string name="item_more_like_this">更多类似内容</string>
     <string name="ce_session_revoked">%1$s 已将你退出登录。请重新登录以继续。</string>
     <string name="ce_download_error_server">服务器拒绝了下载 (HTTP %1$d)</string>
+    <string name="ce_error_server_status">服务器返回了错误 (HTTP %1$d)。请稍后再试。</string>
 </resources>

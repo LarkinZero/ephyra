@@ -98,4 +98,5 @@
     <string name="item_more_like_this">Més com aquest</string>
     <string name="ce_session_revoked">%1$s ha tancat la teva sessió. Torna a iniciar la sessió per continuar.</string>
     <string name="ce_download_error_server">El servidor ha rebutjat la baixada (HTTP %1$d)</string>
+    <string name="ce_error_server_status">El servidor ha respost amb un error (HTTP %1$d). Torna-ho a provar més tard.</string>
 </resources>
