@@ -17,6 +17,7 @@ import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
+import dev.jdtech.jellyfin.utils.NetworkConnectivity
 import dev.jdtech.jellyfin.utils.download.DownloadStatus
 import dev.jdtech.jellyfin.utils.download.estimateCappedDownloadSize
 import dev.jdtech.jellyfin.utils.download.isPermanentHttpFailure
@@ -53,6 +54,7 @@ constructor(
     private val database: ServerDatabaseDao,
     @ApplicationContext private val context: Context,
     private val dataChanges: DataChangeEvents = DataChangeEvents(),
+    private val connectivity: NetworkConnectivity = AlwaysOnline,
 ) {
     // Resolved per use, never captured: the active repository can change at runtime without
     // this @Singleton being recreated (offline <-> online switch).
@@ -108,6 +110,11 @@ constructor(
         val retryCount: Int = 0,
         /** Epoch ms at which an auto-retry should fire, or null. */
         val retryAt: Long? = null,
+        /**
+         * CE (#530): a Pending entry held back because the device has no network. It starts by
+         * itself once the network returns; the UI shows it as waiting for the network.
+         */
+        val waitingForNetwork: Boolean = false,
     )
 
     private val _entries = MutableStateFlow<List<Entry>>(emptyList())
@@ -693,14 +700,17 @@ constructor(
                 }
             }
 
-            // 2. Fill free slots from Pending queue
+            // 2. Fill free slots from Pending queue. Without a network nothing can start: the
+            //    pending entries wait for it instead of failing (#530).
+            val online = connectivity.isOnline()
+            markWaitingForNetwork(waiting = !online)
             val maxConcurrent = appPreferences.getValue(appPreferences.maxConcurrentDownloads)
             val currentlyActive =
                 _entries.value.count {
                     it.state is EntryState.Downloading || it.state is EntryState.Paused
                 }
             val freeSlots = (maxConcurrent - currentlyActive).coerceAtLeast(0)
-            if (freeSlots > 0) {
+            if (online && freeSlots > 0) {
                 val now = System.currentTimeMillis()
                 val pending = _entries.value.filter {
                     it.state is EntryState.Pending && (it.retryAt == null || it.retryAt <= now)
@@ -769,6 +779,18 @@ constructor(
                 Pair(-1L, UiText.StringResource(CoreR.string.downloading_error))
             }
 
+        // A start that failed because the network went away is not a failure of the download: it
+        // waits for the network as the queue does and is not counted as a retry (#530). A failure
+        // while online stays Failed, with Retry.
+        val waitForNetwork = downloadId == -1L && !connectivity.isOnline()
+        if (waitForNetwork) {
+            try {
+                downloader.savePendingDownload(entry.item, entry.maxBitrate, entry.smartQueued)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to persist download ${entry.item.name} waiting for network")
+            }
+        }
+
         var orphaned = false
         mutex.withLock {
             val stillPresent = _entries.value.any { it.id == entry.id }
@@ -790,7 +812,10 @@ constructor(
                                 downloadId = downloadId,
                                 startedAt = System.currentTimeMillis(),
                                 isTranscode = isTranscode,
+                                waitingForNetwork = false,
                             )
+                        } else if (waitForNetwork) {
+                            e.copy(state = EntryState.Pending, waitingForNetwork = true)
                         } else {
                             e.copy(state = EntryState.Failed(errorText))
                         }
@@ -803,6 +828,17 @@ constructor(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to clean up orphaned download ${entry.item.name}")
             }
+        }
+    }
+
+    /** Marks the Pending entries as waiting for the network, or clears the mark (#530). */
+    private suspend fun markWaitingForNetwork(waiting: Boolean) {
+        fun stale(entry: Entry) =
+            entry.state is EntryState.Pending && entry.waitingForNetwork != waiting
+        if (_entries.value.none(::stale)) return
+        mutex.withLock {
+            _entries.value =
+                _entries.value.map { if (stale(it)) it.copy(waitingForNetwork = waiting) else it }
         }
     }
 
@@ -835,6 +871,15 @@ constructor(
             .build()
         // Use item hashCode as id so each failed item gets its own notification.
         nm.notify(item.id.hashCode(), notification)
+    }
+
+    /** For a queue built by hand, as the tests do: connectivity is not part of what they test. */
+    private object AlwaysOnline : NetworkConnectivity {
+        override fun isOnline() = true
+
+        override fun isMetered() = false
+
+        override fun isRoaming() = false
     }
 
     companion object {

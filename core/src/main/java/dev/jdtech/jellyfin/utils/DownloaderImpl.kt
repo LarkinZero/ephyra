@@ -80,6 +80,22 @@ internal fun shouldDeleteOrphanFile(
 internal fun isUnderMountedRoot(path: String, mountedRoots: List<String>): Boolean =
     mountedRoots.any { path.startsWith("$it/") }
 
+/**
+ * What a download that could not start tells the user. Never the exception's own text: it can
+ * hold URLs, hosts or stack fragments. CE (#530): the Jellyfin SDK wraps a refused or unreachable
+ * connection in its own exception, so the cause chain is searched too; that read "Unknown error".
+ */
+internal fun downloadErrorText(e: Throwable): UiText =
+    when {
+        e is UnknownHostException || e is ConnectException ->
+            UiText.StringResource(CoreR.string.download_error_server_unreachable)
+        e is SocketTimeoutException -> UiText.StringResource(CoreR.string.download_error_timeout)
+        LoadErrorText.isConnectionError(e) ->
+            UiText.StringResource(CoreR.string.download_error_server_unreachable)
+        e is IOException -> UiText.StringResource(CoreR.string.download_error_network)
+        else -> UiText.StringResource(CoreR.string.unknown_error)
+    }
+
 class DownloaderImpl(
     private val context: Context,
     private val database: ServerDatabaseDao,
@@ -826,19 +842,7 @@ class DownloaderImpl(
         result
     }
 
-    // Maps exceptions to user-facing text. Raw exception messages may contain URLs,
-    // hostnames, or stack fragments that shouldn't surface in the UI — log the full
-    // exception via Timber and show a generic localized message instead.
-    private fun mapDownloadError(e: Throwable): UiText =
-        when (e) {
-            is UnknownHostException, is ConnectException ->
-                UiText.StringResource(CoreR.string.download_error_server_unreachable)
-            is SocketTimeoutException ->
-                UiText.StringResource(CoreR.string.download_error_timeout)
-            is IOException ->
-                UiText.StringResource(CoreR.string.download_error_network)
-            else -> UiText.StringResource(CoreR.string.unknown_error)
-        }
+    private fun mapDownloadError(e: Throwable): UiText = downloadErrorText(e)
 
     override suspend fun sweepOrphans() = withContext(Dispatchers.IO) {
         val userId = jellyfinRepository.getUserId()
