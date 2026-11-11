@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.ce.presentation.film
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -108,6 +109,24 @@ fun TvLabeledValue(label: String, value: String) {
             color = Color.White.copy(alpha = .5f),
         )
         Text(text = value, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+/**
+ * The genres, director, writers and studios under the buttons, as label/value columns (#413). A
+ * column that doesn't fit beside the others starts a new line, and one wider than the page wraps
+ * inside it, so a long list never squeezes the column after it. Empty values are left out.
+ */
+@Composable
+fun TvCredits(columns: List<Pair<String, String>>, modifier: Modifier = Modifier) {
+    val shown = columns.filter { (_, value) -> value.isNotBlank() }
+    if (shown.isEmpty()) return
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        modifier = modifier,
+    ) {
+        shown.forEach { (label, value) -> TvLabeledValue(label = label, value = value) }
     }
 }
 

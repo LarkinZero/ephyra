@@ -401,54 +401,18 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                 }
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
-                            Row(
-                                horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.large)
-                            ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(id = CoreR.string.genres),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.White.copy(alpha = .5f),
-                                    )
-                                    Text(
-                                        text = show.genres.joinToString(),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                }
-                                state.director?.let { director ->
-                                    Column {
-                                        Text(
-                                            text = stringResource(id = CoreR.string.director),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.White.copy(alpha = .5f),
-                                        )
-                                        Text(
-                                            text = director.name,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                        )
-                                    }
-                                }
-                                if (state.writers.isNotEmpty()) {
-                                    Column {
-                                        Text(
-                                            text = stringResource(id = CoreR.string.writers),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.White.copy(alpha = .5f),
-                                        )
-                                        Text(
-                                            text = state.writers.joinToString { it.name },
-                                            style = MaterialTheme.typography.bodyMedium,
-                                        )
-                                    }
-                                }
-                                if (show.studios.isNotEmpty()) {
-                                    TvLabeledValue(
-                                        label = stringResource(CoreR.string.item_networks),
-                                        value = show.studios.joinToString(),
-                                    )
-                                }
-                            }
+                            TvCredits(
+                                listOf(
+                                    stringResource(CoreR.string.genres) to
+                                        show.genres.joinToString(),
+                                    stringResource(CoreR.string.director) to
+                                        state.director?.name.orEmpty(),
+                                    stringResource(CoreR.string.writers) to
+                                        state.writers.joinToString { it.name },
+                                    stringResource(CoreR.string.item_networks) to
+                                        show.studios.joinToString(),
+                                )
+                            )
                             if (state.seasons.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
                                 Text(

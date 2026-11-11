@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,22 +43,12 @@ enum class Direction {
 
 @Composable
 fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Modifier) {
-    var imageUri = item.images.primary
+    val sources = remember(item.images, direction) { posterSources(item, direction) }
 
-    when (direction) {
-        Direction.HORIZONTAL -> {
-            if (item is FindroidMovie) imageUri = item.images.backdrop
-        }
-        Direction.VERTICAL -> {
-            when (item) {
-                is FindroidEpisode -> imageUri = item.images.showPrimary
-            }
-        }
-    }
-
-    // CE (#135): without artwork, or when it doesn't load, the card shows the title and an icon
-    // instead of an empty rectangle. Only a failed load changes this state, not every frame.
-    var failed by remember(imageUri) { mutableStateOf(false) }
+    // CE (#135): without artwork, or when none of it loads, the card shows the title and an icon
+    // instead of an empty rectangle. A failed load moves on to the next source (#416).
+    var index by remember(sources) { mutableIntStateOf(0) }
+    val imageUri = sources.getOrNull(index)
 
     Box(
         modifier =
@@ -66,7 +57,7 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
                 .aspectRatio(if (direction == Direction.HORIZONTAL) 1.77f else 0.66f)
                 .background(MaterialTheme.colorScheme.surface)
     ) {
-        if (imageUri == null || failed) {
+        if (imageUri == null) {
             PosterPlaceholder(
                 item = item,
                 // A vertical episode poster is the show's, a horizontal one the episode's own.
@@ -80,12 +71,32 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
                 model = imageUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                onError = { failed = true },
+                onError = { index++ },
                 modifier = Modifier.fillMaxSize(),
             )
         }
     }
 }
+
+/**
+ * The artwork a card tries, in order: a horizontal movie its backdrop, a vertical episode its
+ * show's poster, a vertical season its own poster and then its show's (#416), anything else its
+ * own poster.
+ */
+internal fun posterSources(item: FindroidItem, direction: Direction): List<Uri> =
+    when (direction) {
+        Direction.HORIZONTAL ->
+            when (item) {
+                is FindroidMovie -> listOf(item.images.backdrop)
+                else -> listOf(item.images.primary)
+            }
+        Direction.VERTICAL ->
+            when (item) {
+                is FindroidEpisode -> listOf(item.images.showPrimary)
+                is FindroidSeason -> listOf(item.images.primary, item.images.showPrimary)
+                else -> listOf(item.images.primary)
+            }
+    }.filterNotNull()
 
 @Composable
 private fun PosterPlaceholder(item: FindroidItem, title: String, modifier: Modifier = Modifier) {
