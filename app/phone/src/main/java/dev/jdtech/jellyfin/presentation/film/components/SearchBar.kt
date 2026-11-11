@@ -2,6 +2,9 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,11 +27,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -96,20 +109,62 @@ fun FilmSearchBar(
 
     LaunchedEffect(query) { onAction(SearchAction.Search(query)) }
 
+    // #430: Material 3's field asks to expand whenever it gains focus, so Tab opened the
+    // full-screen search and never reached the library cards. Focus from the keyboard leaves the
+    // bar closed; a tap or click, typing and Enter open it.
+    val inputModeManager = LocalInputModeManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val currentExpanded by rememberUpdatedState(expanded)
+    val currentOnExpand by rememberUpdatedState(onExpand)
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            // Covers a mouse click, and a tap after Tab left the app in keyboard mode.
+            if (interaction is PressInteraction.Press && !currentExpanded) currentOnExpand(true)
+        }
+    }
+    val focused by interactionSource.collectIsFocusedAsState()
+    // The same M3 focus state layer the cards and the rail show.
+    val focusStateLayer = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    val focusShape = SearchBarDefaults.inputFieldShape
+
     SearchBar(
         inputField = {
             SearchBarDefaults.InputField(
                 query = query,
-                onQueryChange = { query = it },
+                onQueryChange = {
+                    query = it
+                    if (!expanded && it.isNotEmpty()) onExpand(true)
+                },
                 onSearch = { onExpand(true) },
                 expanded = expanded,
-                onExpandedChange = { onExpand(it) },
+                onExpandedChange = {
+                    if (!it || inputModeManager.inputMode == InputMode.Touch) onExpand(it)
+                },
                 modifier =
                     Modifier.padding(
                             start = searchBarInputPaddingStart,
                             end = searchBarInputPaddingEnd,
                         )
-                        .focusRequester(focusRequester),
+                        .focusRequester(focusRequester)
+                        .onPreviewKeyEvent { event ->
+                            val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                            if (!expanded && isEnter) {
+                                if (event.type == KeyEventType.KeyDown) onExpand(true)
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            if (focused && !expanded) {
+                                drawOutline(
+                                    focusShape.createOutline(size, layoutDirection, this),
+                                    focusStateLayer,
+                                )
+                            }
+                        },
+                interactionSource = interactionSource,
                 placeholder = {
                     Text(
                         text = stringResource(FilmR.string.search_placeholder),

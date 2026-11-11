@@ -64,6 +64,8 @@ fun MediaScreen(
 
     // CE (R8): Ctrl+F opens the search bar, which focuses its field when it expands.
     KeyboardShortcuts.OnFind { if (!searchExpanded) onSearchExpand(true) }
+    // #430: Esc closes the open search, also when Tab has moved focus out of its field.
+    if (searchExpanded) KeyboardShortcuts.OnEscape { onSearchExpand(false) }
 
     MediaScreenLayout(
         state = state,

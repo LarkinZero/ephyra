@@ -194,7 +194,7 @@ Libraries, search, favourites and the item pages.
 | BRW-45 | Title and text of the hero sit under the backdrop, readable over bright artwork | #339 | n/a | works | n/a |
 | BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | unpolished #435: rotation loses the list scroll and scrim; detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
 | BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | unpolished #439: search opens full width; unpolished #438 at 8 inch and fold: one carousel page fewer | n/a |
-| BRW-48 | Tab on a hardware keyboard reaches every control on Home, Media and an item page | #310, test matrix | unpolished #398: no focus indicator on the carousel | broken #430, #398: Tab on My media stays in search, no focus on Home cards; same at 8 inch and fold, plus #442 at 8 inch | n/a |
+| BRW-48 | Tab on a hardware keyboard reaches every control on Home, Media and an item page | #310, test matrix | unpolished #398: no focus indicator on the carousel | unpolished #398: no focus on Home cards, same at 8 inch and fold, plus #442 at 8 inch; My media works since #430: Tab goes rail, search bar, Movies, Shows at 1280, 800 and 1024 dp, Enter or typing opens the search, Esc closes it | n/a |
 
 ## 5. Downloads
 
