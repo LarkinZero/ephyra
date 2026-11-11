@@ -139,10 +139,12 @@ internal fun HomeScreenLayout(
         )
 
     var showErrorDialog by rememberSaveable { mutableStateOf(false) }
-    val showServerSelectionSheetState = rememberModalBottomSheetState()
+    // #440: both sheets open fully. Half the height of a short landscape window hides their last
+    // entries (Settings, Manage servers) behind the taskbar.
+    val showServerSelectionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showServerSelectionBottomSheet by remember { mutableStateOf(false) }
 
-    val profileSheetState = rememberModalBottomSheetState()
+    val profileSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showProfileBottomSheet by remember { mutableStateOf(false) }
 
     // A switch to another user dips the rows to dark and brings the new ones up (VISION §6), so it

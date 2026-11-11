@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.Dp
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
-import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyPersonDetail
@@ -48,6 +45,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.PersonPhoto
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -234,16 +232,11 @@ private fun PersonImage(
     modifier: Modifier = Modifier,
     height: Dp = 320.dp,
 ) {
-    AsyncImage(
-        model = person.images.primary,
+    PersonPhoto(
+        uri = person.images.primary,
         contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier =
-            modifier
-                .height(height)
-                .aspectRatio(0.66f)
-                .clip(MaterialTheme.shapes.extraLarge)
-                .background(MaterialTheme.colorScheme.surfaceContainer),
+        modifier = modifier.height(height).aspectRatio(0.66f).clip(MaterialTheme.shapes.extraLarge),
+        iconSize = 96.dp,
     )
 }
 

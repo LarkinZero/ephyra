@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">Server endirməni rədd etdi (HTTP %1$d)</string>
     <string name="ce_error_server_status">Server xəta ilə cavab verdi (HTTP %1$d). Sonra yenidən cəhd edin.</string>
     <string name="ce_media_info">Media məlumatı</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Baxılıb</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d baxılmayıb</item>
+    </plurals>
 </resources>

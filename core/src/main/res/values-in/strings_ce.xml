@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">Server menolak unduhan (HTTP %1$d)</string>
     <string name="ce_error_server_status">Server merespons dengan galat (HTTP %1$d). Coba lagi nanti.</string>
     <string name="ce_media_info">Info media</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Sudah ditonton</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d belum ditonton</item>
+    </plurals>
 </resources>

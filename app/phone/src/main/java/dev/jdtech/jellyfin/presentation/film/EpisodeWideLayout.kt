@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import dev.jdtech.jellyfin.core.Constants
@@ -100,22 +102,41 @@ fun EpisodeWideLayout(
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
             onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
         ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-            state.episode?.let { episode ->
-                Button(
-                    onClick = {
-                        onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId))
-                    },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Black.copy(alpha = 0.5f),
-                            contentColor = Color.White,
-                        ),
-                ) {
-                    Text(seasonName(episode))
-                }
-            }
+            state.episode?.let { episode -> EpisodeTopBarLinks(episode, onAction) }
         }
+    }
+}
+
+/**
+ * CE (#395): the episode page's way up, as a breadcrumb after back and home: the show, then the
+ * season. A long show name gives way first, so the season button always stays whole.
+ */
+@Composable
+internal fun RowScope.EpisodeTopBarLinks(
+    episode: FindroidEpisode,
+    onAction: (EpisodeAction) -> Unit,
+) {
+    val colors =
+        ButtonDefaults.buttonColors(
+            containerColor = Color.Black.copy(alpha = 0.5f),
+            contentColor = Color.White,
+        )
+    Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+    if (episode.seriesName.isNotBlank()) {
+        Button(
+            onClick = { onAction(EpisodeAction.NavigateToSeries(episode.seriesId)) },
+            modifier = Modifier.weight(1f, fill = false),
+            colors = colors,
+        ) {
+            Text(text = episode.seriesName, overflow = TextOverflow.Ellipsis, maxLines = 1)
+        }
+        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+    }
+    Button(
+        onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId)) },
+        colors = colors,
+    ) {
+        Text(text = seasonName(episode), maxLines = 1)
     }
 }
 

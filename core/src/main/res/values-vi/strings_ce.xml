@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">Máy chủ đã từ chối tải xuống (HTTP %1$d)</string>
     <string name="ce_error_server_status">Máy chủ trả về lỗi (HTTP %1$d). Hãy thử lại sau.</string>
     <string name="ce_media_info">Thông tin phương tiện</string>
+    <string name="ce_home_profile">Hồ sơ</string>
+    <string name="ce_watched">Đã xem</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d chưa xem</item>
+    </plurals>
 </resources>

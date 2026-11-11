@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">サーバーがダウンロードを拒否しました (HTTP %1$d)</string>
     <string name="ce_error_server_status">サーバーがエラーを返しました (HTTP %1$d)。しばらくしてからもう一度お試しください。</string>
     <string name="ce_media_info">メディア情報</string>
+    <string name="ce_home_profile">プロフィール</string>
+    <string name="ce_watched">視聴済み</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">未視聴 %d</item>
+    </plurals>
 </resources>

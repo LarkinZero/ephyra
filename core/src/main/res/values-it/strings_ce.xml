@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Il server ha rifiutato il download (HTTP %1$d)</string>
     <string name="ce_error_server_status">Il server ha risposto con un errore (HTTP %1$d). Riprova più tardi.</string>
     <string name="ce_media_info">Informazioni multimediali</string>
+    <string name="ce_home_profile">Profilo</string>
+    <string name="ce_watched">Visto</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d da vedere</item>
+        <item quantity="other">%d da vedere</item>
+    </plurals>
 </resources>
