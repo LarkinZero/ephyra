@@ -656,7 +656,7 @@ resume position), then install the build under test over it.
 | UPG-12 | Still watching after the upgrade: off, with the thresholds kept | #349 | works | | not tested: TV not in the #358 run |
 | UPG-13 | Phone APK replaced by the TV APK on a box: login and settings kept, a higher versionCode | ADR 0005, #173 | n/a | n/a | not tested: TV not in the #358 run |
 | UPG-14 | Stable and beta installed side by side, each with its own data | #83, #98 | not tested: no beta install | | not tested: TV not in the #358 run |
-| UPG-15 | Downgrade to the previous release: write down what is lost (the login is known to go) | #358 | works: across a Room version the servers, login and downloads list are lost (#379), see upgrade-path.md | | not tested: TV not in the #358 run |
+| UPG-15 | Downgrade to the previous release: write down what is lost (the login is known to go) | #358 | works: across a Room version the servers, login and downloads list are lost; the files left on disk are removed by the daily sweep once a day old (#379), see upgrade-path.md | | not tested: TV not in the #358 run |
 | UPG-16 | Every Room schema version has an exported schema or a migration test to compare against | `data/schemas` | works: schemas 2 to 18 exported; `ServerDatabaseMigrationTest` migrates each one to the current schema, with data from 12, 14, 16 and 18 (#380) | works: same `data` module and unit test (#380) | works: same `data` module and unit test (#380) |
 
 ## Smoke set for the Android version matrix (#357)

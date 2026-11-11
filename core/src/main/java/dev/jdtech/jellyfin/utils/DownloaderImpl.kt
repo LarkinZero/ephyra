@@ -55,30 +55,91 @@ import org.jellyfin.sdk.model.api.MediaStreamType
 import timber.log.Timber
 
 /**
- * Returns true if [path] should be deleted as an orphaned `.download` file:
- * not tracked by any DB source row AND not actively being written by the engine.
- *
- * Only `.download`-suffixed files are candidates — finalized files are never deleted
- * by the sweep.
+ * CE (#379): how old an untracked finished file, or an artwork folder's newest file, must be
+ * before the sweep removes it. The sweep runs daily, so the space comes back within two days.
+ */
+internal const val ORPHAN_MIN_AGE_MS = 24L * 60 * 60 * 1000
+
+/**
+ * Returns true if the file at [path] under one of the [downloadRoots] should be deleted by the
+ * orphan sweep.
+ * - A `.download` partial goes when no source row ([knownPaths]) and no running engine task
+ *   ([livePaths]) writes to it.
+ * - A finished file (CE, #379) goes only when nothing can still claim it: no row has its path,
+ *   in any case or with a trailing separator, with or without `.download` ([knownFinalPaths]
+ *   covers a download being renamed while its row still has the `.download` path), no running
+ *   task ends in it, and it was last written at least [minAgeMs] before [now]. An unknown or
+ *   future modification time keeps it.
  */
 internal fun shouldDeleteOrphanFile(
     path: String,
+    lastModified: Long,
+    now: Long,
+    downloadRoots: List<String>,
     knownPaths: Set<String>,
-    liveDmPaths: Set<String>,
+    knownFinalPaths: Set<String>,
+    livePaths: Set<String>,
+    minAgeMs: Long = ORPHAN_MIN_AGE_MS,
 ): Boolean {
-    if (!path.endsWith(".download")) return false
-    if (path in knownPaths) return false
-    if (path in liveDmPaths) return false
-    return true
+    if (!isUnderMountedRoot(path, downloadRoots)) return false
+    if (path.endsWith(".download")) {
+        if (path in knownPaths) return false
+        if (path in livePaths) return false
+        return true
+    }
+    if (knownPaths.any { sameSweepPath(it, path) }) return false
+    if (knownFinalPaths.any { sameSweepPath(it, path) }) return false
+    if (livePaths.any { sameSweepPath(it.removeSuffix(".download"), path) }) return false
+    return isOldEnough(lastModified, now, minAgeMs)
 }
+
+/**
+ * Returns true if the folder `files/images/<dirName>` or `files/trickplay/<dirName>` belongs to no
+ * movie, show, season or episode row ([knownItemIds], every server and user) and its newest file
+ * is at least [minAgeMs] old. Only the download code writes there, always for an item it has a
+ * row for. A name that is not an item id is never deleted.
+ */
+internal fun shouldDeleteOrphanArtwork(
+    dirName: String,
+    newestModified: Long,
+    now: Long,
+    knownItemIds: Set<UUID>,
+    minAgeMs: Long = ORPHAN_MIN_AGE_MS,
+): Boolean {
+    val id = runCatching { UUID.fromString(dirName) }.getOrNull() ?: return false
+    if (id.toString() != dirName.lowercase()) return false
+    if (id in knownItemIds) return false
+    return isOldEnough(newestModified, now, minAgeMs)
+}
+
+/**
+ * Returns true if the empty folder at [path] under a download root may be removed: never the root
+ * itself, and only once it is [minAgeMs] old, so a folder a new download has just made stays.
+ */
+internal fun shouldPruneEmptyDir(
+    path: String,
+    isEmpty: Boolean,
+    lastModified: Long,
+    now: Long,
+    downloadRoots: List<String>,
+    minAgeMs: Long = ORPHAN_MIN_AGE_MS,
+): Boolean =
+    isEmpty && isUnderMountedRoot(path, downloadRoots) && isOldEnough(lastModified, now, minAgeMs)
+
+private fun isOldEnough(lastModified: Long, now: Long, minAgeMs: Long): Boolean =
+    lastModified in 1..now && now - lastModified >= minAgeMs
+
+private fun sameSweepPath(a: String, b: String): Boolean =
+    a.trimEnd('/').equals(b.trimEnd('/'), ignoreCase = true)
 
 /**
  * Returns true if [path] starts with one of the [mountedRoots] paths, meaning it is on
  * an accessible volume. Paths on unmounted/ejected volumes cannot be judged for
- * existence — we must not make sweep decisions about them.
+ * existence — we must not make sweep decisions about them. ([File.separator] is `/` on Android;
+ * it lets the unit tests run on Windows too.)
  */
 internal fun isUnderMountedRoot(path: String, mountedRoots: List<String>): Boolean =
-    mountedRoots.any { path.startsWith("$it/") }
+    mountedRoots.any { path.startsWith("$it/") || path.startsWith("$it${File.separator}") }
 
 /**
  * What a download that could not start tells the user. Never the exception's own text: it can
@@ -895,23 +956,87 @@ class DownloaderImpl(
             }
         }
 
-        // Untracked .download files anywhere under a mounted downloads root.
+        // CE (#379): read before anything below is deleted, so a database that cannot be read
+        // deletes nothing.
+        val knownItemIds = database.getAllItemIds().toSet()
+        val knownFinalPaths = knownPaths.map { it.removeSuffix(".download") }.toSet()
+        val now = System.currentTimeMillis()
+        var deletedFiles = 0
+        var deletedBytes = 0L
+
+        // Untracked files anywhere under a mounted downloads root: partials, and finished files
+        // whose rows are gone (a database reset, #379).
         for (root in mountedRoots) {
             val downloadsDir = File(root)
             if (!downloadsDir.isDirectory) continue
-            downloadsDir.walkTopDown()
-                .filter { it.isFile && it.name.endsWith(".download") }
-                .filter { shouldDeleteOrphanFile(it.absolutePath, knownPaths, liveTaskPaths) }
-                .forEach { file ->
-                    Timber.i("Deleting orphan download file: ${file.absolutePath}")
-                    try {
-                        file.delete()
-                        pruneEmptyParents(file)
-                    } catch (e: Exception) {
-                        Timber.w(e, "Failed to delete orphan ${file.absolutePath}")
+            val orphans =
+                downloadsDir
+                    .walkTopDown()
+                    .filter { it.isFile }
+                    .filter {
+                        shouldDeleteOrphanFile(
+                            path = it.absolutePath,
+                            lastModified = it.lastModified(),
+                            now = now,
+                            downloadRoots = mountedRoots,
+                            knownPaths = knownPaths,
+                            knownFinalPaths = knownFinalPaths,
+                            livePaths = liveTaskPaths,
+                        )
+                    }
+                    .toList()
+            for (file in orphans) {
+                try {
+                    val bytes = file.length()
+                    if (file.delete()) {
+                        deletedFiles++
+                        deletedBytes += bytes
+                        Timber.i("Deleted orphan download file: ${file.relativeTo(downloadsDir)}")
+                    }
+                    pruneEmptyParents(file)
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to delete orphan ${file.relativeTo(downloadsDir)}")
+                }
+            }
+            // Folders left empty earlier, by a deletion outside the sweep.
+            downloadsDir
+                .walkBottomUp()
+                .filter {
+                    it.isDirectory &&
+                        shouldPruneEmptyDir(
+                            path = it.absolutePath,
+                            isEmpty = it.listFiles()?.isEmpty() == true,
+                            lastModified = it.lastModified(),
+                            now = now,
+                            downloadRoots = mountedRoots,
+                        )
+                }
+                .forEach { dir ->
+                    if (dir.delete()) {
+                        Timber.i("Deleted empty download folder: ${dir.relativeTo(downloadsDir)}")
+                        pruneEmptyParents(dir)
                     }
                 }
         }
+
+        // Artwork of downloads whose rows are gone.
+        for (kind in listOf("images", "trickplay")) {
+            val base = File(context.filesDir, kind)
+            for (dir in base.listFiles().orEmpty()) {
+                if (!dir.isDirectory) continue
+                val newest = dir.walkTopDown().maxOfOrNull { it.lastModified() } ?: 0L
+                if (!shouldDeleteOrphanArtwork(dir.name, newest, now, knownItemIds)) continue
+                val files = dir.walkTopDown().filter { it.isFile }.toList()
+                val bytes = files.sumOf { it.length() }
+                if (dir.deleteRecursively()) {
+                    deletedFiles += files.size
+                    deletedBytes += bytes
+                    Timber.i("Deleted orphan artwork folder: $kind/${dir.name}")
+                }
+            }
+        }
+
+        Timber.i("Orphan sweep deleted $deletedFiles files, $deletedBytes bytes")
     }
 
     override suspend fun finalizeDownload(downloadId: Long): Boolean = withContext(Dispatchers.IO) {
