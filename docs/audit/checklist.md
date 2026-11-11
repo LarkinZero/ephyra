@@ -57,7 +57,7 @@ variant. An empty cell is work still to do.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SUP-01 | Fresh install opens the Welcome screen; Continue goes to the permission screen (Android 17+) or Servers. The phone's jellyfish logo swims and reacts to tap and drag | #227, `WelcomeScreen` | works | works | works |
-| SUP-02 | Add server: servers on the local network are discovered and listed; picking one connects | `AddServerViewModel` | not tested: no Jellyfin server on the emulator's network | not tested: no Jellyfin server on the emulator's network | not tested: no Jellyfin server on the emulator's network |
+| SUP-02 | Add server: servers on the local network are discovered and listed; picking one connects | `AddServerViewModel` | not tested: no Jellyfin server on the emulator's network; #376 fixed: on Android 17 with local network access denied the screen says so, with an "Allow access" button, instead of searching without a word, and searches once access returns | not tested: no Jellyfin server on the emulator's network | not tested: no Jellyfin server on the emulator's network |
 | SUP-03 | Add server by hand: a bare host (no scheme, no port) and an address with spaces around it both connect | ce.26, ce.1, `SetupRepositoryImpl` | works | works | works: `AddServerViewModel` trims the address (#404) |
 | SUP-04 | Add server by hand: an unreachable or non-Jellyfin address shows an error in the screen, no crash | ce.1 | works (#443 fixed: the error clears as soon as the address changes) | works (#443 fixed in the same screen, tested on the phone) | works; #443 fixed in code, not tested on TV |
 | SUP-05 | Adding a server that is already saved, through another address, adds the address and does not create a second server | `SetupRepositoryImpl` | works | broken #425: re-adding the saved server drops the session (401 until restart) | works |
@@ -380,7 +380,7 @@ is shown, saved and kept.
 | SET-88 | Load artwork at display size (on by default) | #254, #294 | not tested: effect not observable (value kept) | works | works |
 | SET-89 | Remember Home rows (Home cache) | #251, #270 | works | works | works |
 | SET-90 | Clear cache empties the image caches and the remembered Home rows, with a toast | #270 | works | works | works |
-| SET-91 | Permissions section (Android 17+ only): local network permission state and request | 1.2.0-ce.0 | not tested: Android 14 | not tested: Android 14 | not tested: Android 14 |
+| SET-91 | Permissions section (Android 17+ only): local network permission state and request | 1.2.0-ce.0 | works on Android 17 in the version smoke run (#357): Denied, then Granted after allowing "Nearby devices" in App info; the card is unchanged by #376 | not tested: Android 14 | not tested: Android 14 |
 
 ### About
 
@@ -629,7 +629,7 @@ All rows are TV only.
 | LIF-10 | Edge-to-edge: no content under the status bar, navigation bar or floating headers | #94, #357 | works | works: the Season detail pane has its own band, and no grey band without artwork, since #437; works at 8 inch and fold; the person page's back and home buttons are clear of the photo since #436 | n/a |
 | LIF-11 | Predictive back on Android 16 and 17 | #357 | not tested: Android 14 | not tested: Android 14 | n/a |
 | LIF-12 | Notification permission asked on Android 13+; downloads work without it | ce.32, `MainActivity` | works (#372): asked when a download starts, never on a start, rotation, relaunch, language change or return; the download runs after Allow and after one or two denials, and Allow shows its notification | works; downloads without it not tested | n/a |
-| LIF-13 | Local network permission on Android 17: asked in setup, a one-time prompt for existing users, the app works after a denial and explains why it needs it | 1.2.0-ce.0 | not tested: Android 14 | not tested: Android 14 | not tested: Android 14 |
+| LIF-13 | Local network permission on Android 17: asked in setup, a one-time prompt for existing users, the app works after a denial and explains why it needs it | 1.2.0-ce.0 | works on Android 17 (API 37); #376 fixed: after a denial Add server says that local network access is off and where the system lists it ("Nearby devices"), a LAN address that fails names the permission instead of only "Server not found", and the text after the second denial names the system's setting. An internet server still connects | not tested: Android 14 | not tested: Android 14 |
 | LIF-14 | The debug and beta builds are labelled "Ephyra Debug" and "Ephyra Beta" | #172 | works; beta not tested | works | works |
 | LIF-15 | Screen reader (TalkBack) reads the back, sort and main buttons | ce.26 | works after #441 in the accessibility tree (uiautomator): Home's Search and Profile, the Latest rows' arrow ("View all"), the watched tick ("Watched", also on movies and shows) and the unwatched count ("5 unwatched") are labelled; TalkBack not switched on | works after #441, tested on the phone (same components): the Home header buttons are labelled; TalkBack not run | not tested: TalkBack needs a system setting change |
 | LIF-16 | Cold start time and scrolling feel against `docs/performance.md` **[device]** | #259, #269 | not tested: emulator | not tested: emulator | not tested: emulator |
