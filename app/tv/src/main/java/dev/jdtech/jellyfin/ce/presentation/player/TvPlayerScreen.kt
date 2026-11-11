@@ -255,6 +255,8 @@ fun TvPlayerScreen(
     }
 
     var seekIndicator by remember { mutableStateOf<SeekIndicator?>(null) }
+    // CE (#486): the player's state, for the buffering indicator.
+    var playerState by remember { mutableIntStateOf(player.playbackState) }
     var pendingSeekMs by remember { mutableStateOf<Long?>(null) }
     var dialog by remember { mutableStateOf<PlayerDialog?>(null) }
     var queueOpen by remember { mutableStateOf(false) }
@@ -452,6 +454,18 @@ fun TvPlayerScreen(
             modifier = Modifier.fillMaxSize(),
         )
 
+        TvBufferingIndicator(
+            shown =
+                bufferingShown(
+                    playbackState = playerState,
+                    fileLoaded = uiState.fileLoaded,
+                    hasError = playbackError != null,
+                    pendingSeek = pendingSeekMs != null,
+                    stillWatching = uiState.showStillWatching,
+                ),
+            modifier = Modifier.align(Alignment.Center),
+        )
+
         // CE (#134): with the controls hidden, the thumbnail sits above the seek indicator.
         val indicatorFrame =
             rememberTrickplayFrame(
@@ -607,12 +621,14 @@ fun TvPlayerScreen(
         val recoveryListener =
             object : androidx.media3.common.Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
+                    playerState = playbackState
                     if (playbackState == androidx.media3.common.Player.STATE_READY) {
                         playbackError = null
                     }
                 }
             }
         player.addListener(recoveryListener)
+        playerState = player.playbackState
         onDispose { player.removeListener(recoveryListener) }
     }
 
