@@ -49,6 +49,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Text
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -119,7 +120,9 @@ private fun LoginScreenLayout(
     Box(modifier = Modifier.fillMaxSize().padding(TvSafeArea.paddingValues)) {
         IconButton(
             onClick = { onAction(LoginAction.OnChangeServerClick) },
-            modifier = Modifier.align(Alignment.TopEnd),
+            border = ephyraButtonBorder(), // CE (#540)
+            // CE (#540): room for the focus scale and the ring inside the safe area.
+            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
         ) {
             Icon(painter = painterResource(R.drawable.ic_server), contentDescription = null)
         }
@@ -213,6 +216,7 @@ private fun LoginScreenLayout(
                 Button(
                     onClick = { doLogin() },
                     enabled = !state.isLoading,
+                    border = ephyraButtonBorder(), // CE (#540)
                     modifier =
                         Modifier.width(360.dp)
                             .then(if (state.quickConnectEnabled) Modifier else scrollToEndOnFocus),
@@ -257,6 +261,7 @@ private fun LoginScreenLayout(
                     Box {
                         OutlinedButton(
                             onClick = { onAction(LoginAction.OnQuickConnectClick) },
+                            border = ephyraButtonBorder(), // CE (#540)
                             modifier = Modifier.width(360.dp).then(scrollToEndOnFocus),
                         ) {
                             Box(modifier = Modifier.fillMaxWidth()) {

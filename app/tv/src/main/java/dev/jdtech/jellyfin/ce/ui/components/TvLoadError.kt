@@ -14,6 +14,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
+import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.rememberFocusPosition
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -58,6 +59,7 @@ fun TvLoadError(
         )
         Button(
             onClick = onRetry,
+            border = ephyraButtonBorder(),
             modifier =
                 Modifier.focusPosition(focusPosition, 0, 0).testTag(TV_LOAD_ERROR_RETRY_TAG),
         ) {

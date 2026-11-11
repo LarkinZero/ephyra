@@ -85,7 +85,7 @@ variant. An empty cell is work still to do.
 | PRF-02 | Default avatar: a user without a picture gets initials on a colour that stays the same for that user | #248, `EphyraAvatar` | works | not tested: demo user has a picture | not tested: demo user has a picture |
 | PRF-03 | Profile sheet (tap the face on Home): current user, server name, the other users, public users, Add user, Settings | #248, `ProfileBottomSheet` | works; after #440 it opens fully in landscape too, with two users the other user shows at once and the sheet scrolls to Add user and Settings; the server sheet opens fully as well | works after #440, tested on the phone in landscape (411 dp tall, shorter than the 8 inch tablet and the fold): the sheet opens fully instead of half-way | n/a |
 | PRF-04 | One-tap switch from the profile sheet loads Home with the other user's rows, favourites and progress | #248 | not tested: needs own server (one user) | not tested: needs own server (second user) | n/a |
-| PRF-05 | Switch user from the Users screen (Settings → Users; on TV the face in the drawer) | `UsersScreen` | not tested: needs own server (one user) | works | works |
+| PRF-05 | Switch user from the Users screen (Settings → Users; on TV the face in the drawer) | `UsersScreen` | not tested: needs own server (one user) | works | works; #541 fixed: Back from Add user, Switch server or a public user puts focus on it again |
 | PRF-06 | "Ask who is watching" on: with more than one saved user, the user list shows once per app start, not again on rotation | #245, `askUserOnStart` | not tested: needs more than one saved user | not tested: needs more than one saved user | not tested: needs more than one saved user |
 | PRF-07 | Set a 4 to 6 digit PIN (Settings → Profile lock / Profile PIN); the lock badge shows on the face | #299 | works | works | works |
 | PRF-08 | Change the PIN: the new one works, the old one no longer does | #299, #329 | works | works | works |
@@ -133,7 +133,7 @@ Libraries, search, favourites and the item pages.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | BRW-01 | Bottom bar with Home, Favorites, Media and Downloads; on an expanded window a navigation rail instead | #188, #288 | works | works | n/a |
-| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | works (#411): after a library, Back and Left on Home open the drawer on Home; #513 fixed: after a start without the server, Retry on Home brings the libraries back into the drawer |
+| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | works (#411): after a library, Back and Left on Home open the drawer on Home; #533 fixed: Back from Settings or the face puts focus on that drawer item, also after Home's refresh; #513 fixed: after a start without the server, Retry on Home brings the libraries back into the drawer |
 | BRW-03 | TV: switching drawer destinations does not shift the layout or make focus jump | #190 | n/a | n/a | works |
 | BRW-04 | TV: Back from a page puts focus on the card that opened it (library, show, season) | #124, ADR 0003 | n/a | n/a | works |
 | BRW-05 | Screen transitions and the predictive back preview animate without a snap at the end | #234, 1.1.0-ce.4 | not tested: a snap is not visible in screenshots | not tested: a snap is not visible in screenshots | n/a |
@@ -184,7 +184,7 @@ Libraries, search, favourites and the item pages.
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | works for person cards: the person icon without a photo since #396; season fallback not checked | works: a season without a poster shows the show's, a show without any keeps the placeholder (#416); failing image not provoked |
 | BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | works (#414): four-digit year, "Jan 18, 1940" |
 | BRW-42 | Theme music on the show page (setting on): plays softly, fades out on leaving, on Play and when the screensaver starts, stays quiet when another app plays audio | #141 | n/a | n/a | not tested: no theme songs on the demo server |
-| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring) |
+| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring; #540 fixed: so do Retry, the licence text, the About buttons and the login buttons) |
 
 ### Wide windows
 
@@ -387,7 +387,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-92 | About shows the app version and install, server and device information | #223, #211 | works | works | works |
-| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened) |
+| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened; #540 fixed: the licence text shows the cyan ring and ends inside the safe area) |
 | SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | works | broken #385: "Could not build device profile" | n/a |
 | SET-95 | Device profile screen: what the device can decode | #211 | n/a | n/a | works |
 | SET-96 | Report a problem and source code: links on phone, a QR code on TV | #223 | works | works | works |
@@ -608,7 +608,7 @@ All rows are TV only.
 | TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
-| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; the drawer's icons still sit in the left margin; 4K not run |
+| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; #540 and #539: the focused About buttons, the licence text and the login screen's server button too; the drawer's icons still sit in the left margin; 4K not run |
 | TVS-14 | The 32-bit (`armeabi-v7a`) APK installs and starts on the Xiaomi box **[device]** | ADR 0006, #359 | n/a | n/a | not tested: emulator |
 | TVS-15 | Pressing Home and coming back to the app returns to the same screen and focus | | n/a | n/a | works |
 | TVS-16 | D-pad latency on Home and in the player feels immediate **[device]** | #359 | n/a | n/a | not tested: emulator |
