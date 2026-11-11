@@ -192,7 +192,7 @@ Libraries, search, favourites and the item pages.
 |---|---|---|---|---|---|
 | BRW-44 | Movie, show and episode pages use the hero layout: poster beside the text over a full-width backdrop | #291 | n/a | unpolished #433, #432: empty hero without a backdrop, landscape crop 3.6:1 (3.2:1 at 8 inch, 2.6:1 on the fold) | n/a |
 | BRW-45 | Title and text of the hero sit under the backdrop, readable over bright artwork | #339 | n/a | works | n/a |
-| BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | unpolished #435: rotation loses the list scroll and scrim; broken #429 at 8 inch and fold: detail pane buttons cut off | n/a |
+| BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | unpolished #435: rotation loses the list scroll and scrim; detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
 | BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | unpolished #439: search opens full width; unpolished #438 at 8 inch and fold: one carousel page fewer | n/a |
 | BRW-48 | Tab on a hardware keyboard reaches every control on Home, Media and an item page | #310, test matrix | unpolished #398: no focus indicator on the carousel | broken #430, #398: Tab on My media stays in search, no focus on Home cards; same at 8 inch and fold, plus #442 at 8 inch | n/a |
 
@@ -620,9 +620,9 @@ All rows are TV only.
 | LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | works | unpolished #435: Season list loses scroll and scrim; broken #387 at 8 inch: rotation closes the search | n/a |
 | LIF-02 | Background and return keeps the screen and scroll position; pages reload only when stale | #268 | works | works | works |
 | LIF-03 | Process death (`am kill` in the background) restores the screen without a crash | #353 | works (#371): the restored library loads, on top and under a movie page | works; broken #371 at 8 inch and fold: library spins after `am kill` | works |
-| LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | broken #429: episode buttons cut off at 600 dp; works at 8 inch and fold | n/a |
+| LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | episode and movie pages work at 600 dp since #429: the episode's still goes above the text, a movie's last button wraps to a second line; works at 8 inch and fold | n/a |
 | LIF-05 | Free-form window resize: layouts follow the width | #288 | n/a | works | n/a |
-| LIF-06 | Fold and unfold keeps the screen and state | test matrix | n/a | broken #429 on the fold: half-opened posture squeezes the Season detail pane; 10.5 and 8 inch are not foldables | n/a |
+| LIF-06 | Fold and unfold keeps the screen and state | test matrix | n/a | works on the fold since #429: the Season detail pane stacks the still above the text at the unfolded 841 dp width (checked as a 841 dp window on the 10.5 inch emulator); the half-opened posture is not tested on a device, the pane follows its own width and a unit test covers a ~420 dp pane; 10.5 and 8 inch are not foldables | n/a |
 | LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | unpolished #423: Home card titles run off the screen at 1.3 |
 | LIF-08 | A right-to-left language (Arabic or Hebrew): layouts mirror, nothing overlaps | #353 | unpolished #401: arrows not mirrored, overview clipped | unpolished #401: row arrows not mirrored | works |
 | LIF-09 | CE screens are translated: no English left in a non-English language | #106, #110 | works | unpolished: upstream Player strings untranslated (Dutch); works at 8 inch (Arabic) | unpolished: upstream strings untranslated |
