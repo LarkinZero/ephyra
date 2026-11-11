@@ -3,17 +3,22 @@ package dev.jdtech.jellyfin.presentation.film.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +43,9 @@ const val MEDIA_INFO_CHIP_TAG = "media_info_chip"
 /**
  * The badges that sum up the file. With [onInfoClick] (CE, #510) the row ends in an info chip and
  * the whole row opens the media info sheet: the chip says there is more, the row is the touch
- * target, since a badge alone is too small to aim for.
+ * target, since a badge alone is too small to aim for. A press shows on the chip alone, wherever
+ * on the row it lands: a ripple over the whole row would flash across the gaps between the badges
+ * and, on the hero layouts, across the artwork behind them.
  */
 @Composable
 fun VideoMetadataBar(
@@ -47,13 +54,14 @@ fun VideoMetadataBar(
     onInfoClick: (() -> Unit)? = null,
 ) {
     val mediaInfoLabel = stringResource(CoreR.string.ce_media_info)
+    val interactionSource = remember { MutableInteractionSource() }
     // CE: wraps instead of overflowing, now that HDR10+ and spatial audio add badges.
     FlowRow(
         modifier =
             if (onInfoClick != null) {
-                Modifier.clip(MaterialTheme.shapes.small)
-                    .clickable(
-                        onClickLabel = mediaInfoLabel,
+                Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
                         role = Role.Button,
                         onClick = onInfoClick,
                     )
@@ -106,6 +114,8 @@ fun VideoMetadataBar(
                 text = null,
                 icon = CoreR.drawable.ic_info,
                 contentDescription = mediaInfoLabel,
+                squareIcon = true,
+                interactionSource = interactionSource,
             )
         }
     }
@@ -113,18 +123,29 @@ fun VideoMetadataBar(
 
 /**
  * A metadata chip. [text] may be null for an icon-only badge (a wordmark such as HDR10+); give
- * those a [contentDescription].
+ * those a [contentDescription]. An icon-only badge shows its drawable at the size it was drawn,
+ * which suits a wordmark; [squareIcon] is for a 24 dp glyph, drawn as high as a line of text.
+ * With an [interactionSource] the chip shows that source's presses as its own.
  */
 @Composable
 fun VideoMetadataBarItem(
     text: String?,
     @DrawableRes icon: Int? = null,
     contentDescription: String? = null,
+    squareIcon: Boolean = false,
+    interactionSource: InteractionSource? = null,
 ) {
     Row(
         modifier =
             Modifier.clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .then(
+                    if (interactionSource != null) {
+                        Modifier.indication(interactionSource, ripple())
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(
                     horizontal = MaterialTheme.spacings.small,
                     vertical = MaterialTheme.spacings.extraSmall,
@@ -143,8 +164,7 @@ fun VideoMetadataBarItem(
                     Icon(
                         painter = painterResource(icon),
                         contentDescription = contentDescription,
-                        // A wordmark is already this low; a 24 dp glyph is brought down to it.
-                        modifier = Modifier.heightIn(max = lineHeight),
+                        modifier = if (squareIcon) Modifier.size(lineHeight) else Modifier,
                     )
                 }
             } else {

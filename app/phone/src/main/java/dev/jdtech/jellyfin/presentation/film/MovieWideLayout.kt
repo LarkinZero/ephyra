@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,7 +29,6 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
-import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.HeroChips
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
 import dev.jdtech.jellyfin.presentation.film.components.HeroSubtitle
@@ -62,6 +60,7 @@ fun MovieWideLayout(
     downloaderState: () -> DownloaderState,
     onAction: (MovieAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
+    onMediaInfoClick: (() -> Unit)? = null,
 ) {
     val widthClass = currentWidthClass()
     val safePadding = rememberSafePadding()
@@ -73,7 +72,6 @@ fun MovieWideLayout(
     val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
 
     var downloadQualityDialogOpen by remember { mutableStateOf(false) }
-    var mediaInfoOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
@@ -109,7 +107,7 @@ fun MovieWideLayout(
                             VideoMetadataBar(
                                 videoMetadata,
                                 is3D = movie.is3D,
-                                onInfoClick = { mediaInfoOpen = true },
+                                onInfoClick = onMediaInfoClick,
                             )
                         }
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
@@ -199,12 +197,6 @@ fun MovieWideLayout(
             onHomeClick = { onAction(MovieAction.OnHomeClick) },
         )
 
-        if (mediaInfoOpen) {
-            MediaInfoSheet(
-                sources = state.movie?.sources.orEmpty(),
-                onDismissRequest = { mediaInfoOpen = false },
-            )
-        }
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(

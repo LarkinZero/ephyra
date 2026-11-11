@@ -124,6 +124,7 @@ class ItemHeroHeaderTest {
                             downloaderState = { DownloaderState() },
                             onAction = {},
                             onDownloaderAction = {},
+                            onMediaInfoClick = {},
                             scrollState = rememberScrollState(),
                         )
                     }

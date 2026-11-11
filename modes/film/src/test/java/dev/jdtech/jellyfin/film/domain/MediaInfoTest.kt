@@ -98,7 +98,7 @@ class MediaInfoTest {
             listOf(
                 MediaInfoTrack(
                     "4K HEVC Dolby Vision",
-                    listOf("3840×2160", "23.976 fps", "10 bit", "58.3 Mbps"),
+                    listOf("3840×2160", "23.976 fps", "10-bit", "58.3 Mbps"),
                 )
             ),
             info.video,
@@ -107,7 +107,7 @@ class MediaInfoTest {
             listOf(
                 MediaInfoTrack(
                     "English - TrueHD 7.1 - Default",
-                    listOf("48 kHz", "24 bit", "4.2 Mbps"),
+                    listOf("48 kHz", "24-bit", "4.2 Mbps"),
                 ),
                 MediaInfoTrack("English - Dolby Digital 5.1", listOf("44.1 kHz", "640 kbps")),
             ),
@@ -152,21 +152,95 @@ class MediaInfoTest {
     }
 
     @Test
-    fun `whole numbers lose their decimals and zero is left out`() {
-        assertEquals("25 fps", formatFrameRate(25f, Locale.US))
-        assertEquals("59.94 fps", formatFrameRate(59.94f, Locale.US))
-        assertEquals("96 kHz", formatSampleRate(96_000, Locale.US))
-        assertEquals("128 kbps", formatBitrate(128_000, Locale.US))
-        assertNull(formatBitrate(0, Locale.US))
-        assertNull(formatFrameRate(0f, Locale.US))
-        assertNull(formatSampleRate(0, Locale.US))
+    fun `whole numbers lose their decimals`() {
+        val numbers = MediaInfoNumbers(Locale.US)
+
+        assertEquals("25 fps", numbers.frameRate(25f))
+        assertEquals("59.94 fps", numbers.frameRate(59.94006f))
+        assertEquals("29.97 fps", numbers.frameRate(29.97003f))
+        assertEquals("96 kHz", numbers.sampleRate(96_000))
+        assertEquals("22.05 kHz", numbers.sampleRate(22_050))
+        assertEquals("11.025 kHz", numbers.sampleRate(11_025))
+        assertEquals("120 fps", numbers.frameRate(120f))
+        assertEquals("7", numbers.count(7))
+        assertEquals("128 kbps", numbers.bitrate(128_000))
+        assertEquals("8.0 Mbps", numbers.bitrate(8_000_000))
+        assertEquals("3840×2160", numbers.resolution(3840, 2160))
+    }
+
+    @Test
+    fun `a value that is not a measurement is left out`() {
+        val numbers = MediaInfoNumbers(Locale.US)
+
+        assertNull(numbers.bitrate(0))
+        assertNull(numbers.bitrate(-1))
+        assertNull(numbers.frameRate(0f))
+        assertNull(numbers.frameRate(Float.NaN))
+        assertNull(numbers.frameRate(Float.POSITIVE_INFINITY))
+        // A time base in place of a rate, as variable frame rate files can report.
+        assertNull(numbers.frameRate(1000f))
+        assertNull(numbers.frameRate(90000f))
+        assertNull(numbers.sampleRate(0))
+        assertNull(numbers.bitDepth(0))
+        assertNull(numbers.resolution(1920, null))
+        assertNull(numbers.resolution(0, 0))
+    }
+
+    @Test
+    fun `a stream with zeros where the numbers should be shows no details`() {
+        val info =
+            source(
+                    stream(
+                        MediaStreamType.VIDEO,
+                        displayTitle = "1080p H264",
+                        width = 0,
+                        height = 0,
+                        bitRate = 0,
+                        frameRate = 0f,
+                        bitDepth = 0,
+                    ),
+                    bitrate = 0,
+                )
+                .toMediaInfo(Locale.US)
+
+        assertNull(info.bitrate)
+        assertEquals(listOf(MediaInfoTrack("1080p H264", emptyList())), info.video)
     }
 
     @Test
     fun `numbers follow the locale's decimal separator`() {
-        assertEquals("62,1 Mbps", formatBitrate(62_100_000, Locale.GERMANY))
-        assertEquals("23,976 fps", formatFrameRate(23.976f, Locale.GERMANY))
-        assertEquals("44,1 kHz", formatSampleRate(44_100, Locale.GERMANY))
-        assertEquals("100 fps", formatFrameRate(100f, Locale.GERMANY))
+        val numbers = MediaInfoNumbers(Locale.GERMANY)
+
+        assertEquals("62,1 Mbps", numbers.bitrate(62_100_000))
+        assertEquals("23,976 fps", numbers.frameRate(23.976f))
+        assertEquals("44,1 kHz", numbers.sampleRate(44_100))
+        assertEquals("100 fps", numbers.frameRate(100f))
+        // Never grouped: "3.840" would read as a decimal.
+        assertEquals("3840×2160", numbers.resolution(3840, 2160))
+    }
+
+    @Test
+    fun `a locale with its own digits uses them for every number`() {
+        val numbers = MediaInfoNumbers(Locale.forLanguageTag("ar-EG-u-nu-arab"))
+
+        assertEquals("٢٥ fps", numbers.frameRate(25f))
+        assertEquals("٣٨٤٠×٢١٦٠", numbers.resolution(3840, 2160))
+        assertEquals("١٠-bit", numbers.bitDepth(10))
+        assertEquals("٦٤٠ kbps", numbers.bitrate(640_000))
+    }
+
+    @Test
+    fun `a download, which stores only its sidecar subtitles, is not a version to describe`() {
+        val server = source(stream(MediaStreamType.VIDEO), stream(MediaStreamType.AUDIO))
+        val download =
+            source(stream(MediaStreamType.SUBTITLE, displayTitle = "German - SUBRIP - External"))
+                .copy(type = FindroidSourceType.LOCAL)
+        val audioOnly = source(stream(MediaStreamType.AUDIO))
+
+        assertEquals(listOf(server), listOf(server, download).withMediaInfo())
+        assertEquals(listOf(audioOnly), listOf(audioOnly).withMediaInfo())
+        // Offline, the downloads are all there is.
+        assertEquals(emptyList<FindroidSource>(), listOf(download).withMediaInfo())
+        assertEquals(emptyList<FindroidSource>(), listOf(source()).withMediaInfo())
     }
 }

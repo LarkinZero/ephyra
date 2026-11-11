@@ -43,7 +43,9 @@ fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): F
         width = width,
         videoDoViTitle = videoDoViTitle,
         bitRate = bitRate,
-        frameRate = realFrameRate ?: averageFrameRate,
+        // The average is what the server puts in the display title; the "real" rate is the
+        // stream's time base and can be far off for variable frame rate video.
+        frameRate = averageFrameRate ?: realFrameRate,
         bitDepth = bitDepth,
         sampleRate = sampleRate,
     )
