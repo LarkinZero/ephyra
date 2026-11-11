@@ -26,4 +26,5 @@
         <item quantity="one">%d सेकंड में शुरू होगा</item>
         <item quantity="other">%d सेकंड में शुरू होगा</item>
     </plurals>
+    <string name="ce_track_forced">अनिवार्य</string>
 </resources>

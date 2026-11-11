@@ -646,7 +646,7 @@ fun TvPlayerScreen(
                 val groups = remember {
                     player.currentTracks.groups.filter { it.type == trackType && it.isSupported }
                 }
-                val names = remember { groups.getTrackNames().toList() }
+                val names = remember { groups.getTrackNames(context).toList() }
                 val selected = groups.indexOfFirst { it.isSelected }
                 // Subtitles can be turned off. Audio can't: silence is never what's wanted.
                 val withNone = open == PlayerDialog.SUBTITLES

@@ -26,4 +26,5 @@
         <item quantity="one">Alkaa %d sekunnin kuluttua</item>
         <item quantity="other">Alkaa %d sekunnin kuluttua</item>
     </plurals>
+    <string name="ce_track_forced">Pakotetut</string>
 </resources>

@@ -26,4 +26,5 @@
         <item quantity="one">Börjar om %d sekund</item>
         <item quantity="other">Börjar om %d sekunder</item>
     </plurals>
+    <string name="ce_track_forced">Tvingade</string>
 </resources>

@@ -26,4 +26,5 @@
         <item quantity="one">Comença d\'aquí a %d segon</item>
         <item quantity="other">Comença d\'aquí a %d segons</item>
     </plurals>
+    <string name="ce_track_forced">Forçats</string>
 </resources>

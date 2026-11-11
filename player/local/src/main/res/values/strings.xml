@@ -49,4 +49,6 @@
         <item quantity="one">Starts in %d second</item>
         <item quantity="other">Starts in %d seconds</item>
     </plurals>
+    <!-- CE (#451): a forced subtitle track in the track dialog. -->
+    <string name="ce_track_forced">Forced</string>
 </resources>

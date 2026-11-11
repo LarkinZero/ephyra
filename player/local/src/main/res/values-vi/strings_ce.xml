@@ -24,4 +24,5 @@
     <plurals name="player_up_next_starts_in">
         <item quantity="other">Bắt đầu sau %d giây</item>
     </plurals>
+    <string name="ce_track_forced">Bắt buộc</string>
 </resources>

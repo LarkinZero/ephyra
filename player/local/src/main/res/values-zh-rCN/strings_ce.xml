@@ -24,4 +24,5 @@
     <plurals name="player_up_next_starts_in">
         <item quantity="other">%d 秒后开始</item>
     </plurals>
+    <string name="ce_track_forced">强制</string>
 </resources>

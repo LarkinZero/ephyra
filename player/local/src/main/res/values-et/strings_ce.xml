@@ -26,4 +26,5 @@
         <item quantity="one">Algab %d sekundi pärast</item>
         <item quantity="other">Algab %d sekundi pärast</item>
     </plurals>
+    <string name="ce_track_forced">Sunnitud</string>
 </resources>

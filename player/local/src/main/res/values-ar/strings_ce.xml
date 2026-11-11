@@ -34,4 +34,5 @@
         <item quantity="many">يبدأ بعد %d ثانية</item>
         <item quantity="other">يبدأ بعد %d ثانية</item>
     </plurals>
+    <string name="ce_track_forced">إجباري</string>
 </resources>

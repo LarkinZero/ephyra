@@ -26,4 +26,5 @@
         <item quantity="one">Starter om %d sekund</item>
         <item quantity="other">Starter om %d sekunder</item>
     </plurals>
+    <string name="ce_track_forced">Tvungne</string>
 </resources>

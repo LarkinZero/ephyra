@@ -24,4 +24,5 @@
     <plurals name="player_up_next_starts_in">
         <item quantity="other">Dimulai dalam %d detik</item>
     </plurals>
+    <string name="ce_track_forced">Paksa</string>
 </resources>

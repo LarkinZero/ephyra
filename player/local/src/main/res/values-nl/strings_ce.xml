@@ -26,4 +26,5 @@
         <item quantity="one">Begint over %d seconde</item>
         <item quantity="other">Begint over %d seconden</item>
     </plurals>
+    <string name="ce_track_forced">Geforceerd</string>
 </resources>

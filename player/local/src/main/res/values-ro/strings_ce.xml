@@ -28,4 +28,5 @@
         <item quantity="few">Începe în %d secunde</item>
         <item quantity="other">Începe în %d de secunde</item>
     </plurals>
+    <string name="ce_track_forced">Forțate</string>
 </resources>

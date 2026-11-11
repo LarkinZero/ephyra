@@ -28,4 +28,5 @@
         <item quantity="two">מתחיל בעוד %d שניות</item>
         <item quantity="other">מתחיל בעוד %d שניות</item>
     </plurals>
+    <string name="ce_track_forced">מאולצות</string>
 </resources>

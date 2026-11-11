@@ -26,4 +26,5 @@
         <item quantity="one">Startet in %d Sekunde</item>
         <item quantity="other">Startet in %d Sekunden</item>
     </plurals>
+    <string name="ce_track_forced">Erzwungen</string>
 </resources>

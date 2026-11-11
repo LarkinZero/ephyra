@@ -30,4 +30,5 @@
         <item quantity="many">Почнеться через %d секунд</item>
         <item quantity="other">Почнеться через %d секунди</item>
     </plurals>
+    <string name="ce_track_forced">Примусові</string>
 </resources>

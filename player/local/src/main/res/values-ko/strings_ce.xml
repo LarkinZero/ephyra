@@ -24,4 +24,5 @@
     <plurals name="player_up_next_starts_in">
         <item quantity="other">%d초 후 시작</item>
     </plurals>
+    <string name="ce_track_forced">강제</string>
 </resources>

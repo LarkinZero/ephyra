@@ -30,4 +30,5 @@
         <item quantity="many">Začne za %d sekundy</item>
         <item quantity="other">Začne za %d sekund</item>
     </plurals>
+    <string name="ce_track_forced">Vynucené</string>
 </resources>

@@ -28,4 +28,5 @@
         <item quantity="many">Commence dans %d secondes</item>
         <item quantity="other">Commence dans %d secondes</item>
     </plurals>
+    <string name="ce_track_forced">Forcés</string>
 </resources>
