@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.setup.domain.FakeLocalNetworkAccess
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerAction
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerViewModel
@@ -71,7 +72,7 @@ class AddServerAddressTrimTest {
 
     @Test
     fun `an address with spaces around it reaches the repository trimmed`() = runTest {
-        val viewModel = AddServerViewModel(repository, appPreferences)
+        val viewModel = AddServerViewModel(repository, appPreferences, FakeLocalNetworkAccess())
 
         viewModel.onAction(AddServerAction.OnConnectClick("  demo.jellyfin.org/stable  "))
 
