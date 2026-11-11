@@ -96,7 +96,7 @@ variant. An empty cell is work still to do.
 | PRF-13 | Switching to a locked profile asks its PIN or pattern; Cancel stays on the current profile | #299, `UsersViewModel` | works | not tested: needs a second profile | works |
 | PRF-14 | An unlocked profile stays unlocked until another profile is picked or the process ends (`am kill` locks it again) | `ProfileLock` | works | works | works |
 | PRF-15 | The PIN prompt stays usable with the keyboard up | #329 | works | works | n/a |
-| PRF-16 | TV PIN pad: digits, delete and OK with the D-pad, the remote's number keys type directly, OK needs at least 4 digits | #299, `TvPinPad` | n/a | n/a | unpolished #409: OK after the number keys adds a digit |
+| PRF-16 | TV PIN pad: digits, delete and OK with the D-pad, the remote's number keys type directly, OK needs at least 4 digits | #299, `TvPinPad` | n/a | n/a | works (#409): a number key moves focus to OK, so OK after the number keys submits |
 | PRF-17 | The PIN is stored on the device only: the same user on another device or app is not asked | #299 | not tested: needs a second device | not tested: needs a second device | not tested: needs a second device |
 
 ## 3. Home
