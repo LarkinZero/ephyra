@@ -61,6 +61,7 @@ import coil3.compose.AsyncImage
 import coil3.memory.MemoryCache
 import coil3.request.transitionFactory
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
@@ -256,8 +257,16 @@ private fun HomeScreenLayout(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (rows.isEmpty()) {
+            val error = state.error
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (error != null) {
+                // #405: nothing remembered and the server failed, so say so instead of a blank page.
+                TvLoadError(
+                    error = error,
+                    onRetry = { onAction(HomeAction.OnRetryClick) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
             }
             return@Box
         }
@@ -297,7 +306,12 @@ private fun HomeScreenLayout(
     // The card that had focus when Home was left, read once. While Home waits for the refresh,
     // the drawer moves focus into the rows, and that card must not overwrite it.
     val left = remember { Triple(focusPosition.row, focusPosition.column, focusPosition.key) }
-    RestoreFocus(position = focusPosition, ready = refreshed && rows.isNotEmpty()) { position ->
+    // Not while a Retry (#405) is loading: its rows come in one by one, and a row that arrives
+    // above the focused one would push the card focus went to out of view.
+    RestoreFocus(
+        position = focusPosition,
+        ready = refreshed && rows.isNotEmpty() && !state.isLoading,
+    ) { position ->
         // The saved card may have moved, even to another row (Next up to Continue watching).
         val (leftRow, leftColumn, key) = left
         val found =

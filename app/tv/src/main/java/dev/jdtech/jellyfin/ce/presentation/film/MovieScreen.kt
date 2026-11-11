@@ -55,6 +55,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.PersonCard
+import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
@@ -552,7 +553,19 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                     onDismiss = { versionDialogOpen = false },
                 )
             }
-        } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
+            ?: run {
+                val error = state.error
+                if (error != null) {
+                    TvLoadError(
+                        error = error,
+                        onRetry = { onAction(MovieAction.OnRetryClick) },
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
     }
 }
 
