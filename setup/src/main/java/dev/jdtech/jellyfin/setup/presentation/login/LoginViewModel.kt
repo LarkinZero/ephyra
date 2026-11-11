@@ -118,7 +118,9 @@ class LoginViewModel @Inject constructor(private val repository: SetupRepository
     fun onAction(action: LoginAction) {
         when (action) {
             is LoginAction.OnLoginClick -> {
-                login(action.username, action.password)
+                // CE (#516): a space around the name, easy to add with an on-screen keyboard,
+                // failed the login on TV. The password stays as typed.
+                login(action.username.trim(), action.password)
             }
             is LoginAction.OnQuickConnectClick -> {
                 quickConnect()

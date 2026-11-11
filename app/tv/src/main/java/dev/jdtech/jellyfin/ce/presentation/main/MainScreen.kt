@@ -149,6 +149,13 @@ fun MainScreen(
                 navigateToMovie = navigateToMovie,
                 navigateToShow = navigateToShow,
                 navigateToEpisode = navigateToEpisode,
+                // #513: after a failed start the drawer has no libraries; Retry loads them too.
+                onRetry = {
+                    val media = mediaViewModel.state.value
+                    if (reloadsLibrariesOnRetry(media.libraries.isNotEmpty(), media.isLoading)) {
+                        mediaViewModel.loadData()
+                    }
+                },
             )
         },
         searchContent = {
@@ -222,6 +229,13 @@ internal fun loadsOnReturn(
                 else -> LibrariesLoad.NONE
             },
     )
+
+/**
+ * Whether Retry on Home also loads the drawer's libraries (#513): only when there are none, as
+ * after a start without the server, and no load is running.
+ */
+internal fun reloadsLibrariesOnRetry(hasLibraries: Boolean, librariesLoading: Boolean): Boolean =
+    !hasLibraries && !librariesLoading
 
 private const val ITEM_PROFILE = "profile"
 private const val ITEM_SETTINGS = "settings"
