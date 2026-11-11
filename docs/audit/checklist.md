@@ -605,7 +605,7 @@ All rows are TV only.
 | TVS-07 | After a user switch, a program of the other user does not play as the current user | `WatchNextLink` | n/a | n/a | not tested: needs own server (one user) |
 | TVS-08 | A locked profile asks its PIN before a Watch Next program plays | #299 | n/a | n/a | not tested: no Watch Next program to pick |
 | TVS-09 | Screensaver shows random backdrops from the library, with logo and clock | #140, #235 | n/a | n/a | works; title text, no logo seen |
-| TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | unpolished #422: label and value run together |
+| TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
 | TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | unpolished #423: text in the overscan margin at 1080p; 4K not run |
