@@ -298,7 +298,7 @@ private fun ShowScreenLayout(
                         },
                         onTrailerClick = { uri -> onAction(ShowAction.PlayTrailer(uri)) },
                         onDownloadClick = {
-                            if (state.seasons.isNotEmpty()) {
+                            if (state.downloadableSeasons.isNotEmpty()) {
                                 seasonSelectionDialogOpen = true
                             }
                         },
@@ -306,11 +306,11 @@ private fun ShowScreenLayout(
                         onDownloadDeleteClick = onDeleteShowDownloads,
                         modifier = Modifier.fillMaxWidth(),
                         canPlay = state.seasons.isNotEmpty(),
-                        canDownload = state.seasons.isNotEmpty(),
+                        canDownload = state.canDownload,
                         isDownloaded = state.hasDownloads,
                         hasMoreToDownload =
                             state.seasonDownloadInfo.values.any {
-                                it.downloadedCount < it.totalCount
+                                it.canDownload && it.downloadedCount < it.totalCount
                             },
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
@@ -419,9 +419,9 @@ private fun ShowScreenLayout(
             onHomeClick = { onAction(ShowAction.OnHomeClick) },
         )
 
-        if (seasonSelectionDialogOpen && state.seasons.isNotEmpty()) {
+        if (seasonSelectionDialogOpen && state.downloadableSeasons.isNotEmpty()) {
             SeasonSelectionDialog(
-                seasons = state.seasons,
+                seasons = state.downloadableSeasons,
                 onConfirm = { selectedSeasonIds ->
                     pendingDownloadSeasonIds = selectedSeasonIds
                     seasonSelectionDialogOpen = false

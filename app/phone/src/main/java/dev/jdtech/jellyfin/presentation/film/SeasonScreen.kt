@@ -59,6 +59,7 @@ import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeCard
+import dev.jdtech.jellyfin.presentation.film.components.episodeRowDownloadClick
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
@@ -368,11 +369,12 @@ private fun SeasonScreenLayout(
                             if (episode.canPlay) {
                                 { context.playDownloadedItem(episode) }
                             } else null,
-                        // A pending removal would stop a download started now.
                         onDownloadClick =
-                            if (episode.id in undo.hiddenIds) null
-                            else {
-                                { episodeQualityTarget = episode }
+                            episodeRowDownloadClick(
+                                episode = episode,
+                                removalPending = episode.id in undo.hiddenIds,
+                            ) {
+                                episodeQualityTarget = episode
                             },
                         onDownloadCancelClick = {
                             removeDownload(episode, CoreR.string.download_cancelled)
