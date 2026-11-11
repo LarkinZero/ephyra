@@ -53,7 +53,8 @@ constructor(
                     if (!syncUserData(api, user.id, pending)) hadFailures = true
                     // A write that failed while this run was sending keeps its row marked, and
                     // asking for a sync during a run does nothing: run again for those rows.
-                    if (database.getAllUserDataToBeSynced(server.id, user.id).isNotEmpty()) {
+                    val stillMarked = database.getAllUserDataToBeSynced(server.id, user.id)
+                    if (needsAnotherRun(sent = pending, stillMarked = stillMarked)) {
                         hadFailures = true
                     }
                 }
@@ -126,15 +127,22 @@ constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: InvalidStatusException) {
-                if (e.status == HTTP_NOT_FOUND) {
-                    // The item is gone from the server: there is nothing to send, ever. Without
-                    // this the row of a deleted download would be retried for good.
-                    Timber.w("Item ${userData.itemId} is gone from the server, dropping its sync")
-                    database.setUserDataToBeSynced(userId, userData.itemId, false)
-                    database.deleteUserDataIfOrphaned(userId, userData.itemId)
-                } else {
-                    Timber.e(e, "Failed to sync user data")
-                    allOk = false
+                when (afterStatus(e.status)) {
+                    AfterStatus.DROP -> {
+                        // The item is gone from the server: there is nothing to send, ever.
+                        // Without this the row of a deleted download would be retried for good.
+                        Timber.w("Item ${userData.itemId} is gone from the server, dropping it")
+                        database.setUserDataToBeSynced(userId, userData.itemId, false)
+                        database.deleteUserDataIfOrphaned(userId, userData.itemId)
+                    }
+                    AfterStatus.LEAVE ->
+                        // Refused, and a retry in 30 seconds would be refused again. The row
+                        // stays marked for the next sync: app start, foreground, the next write.
+                        Timber.w("The server refused ${userData.itemId} with ${e.status}")
+                    AfterStatus.RETRY -> {
+                        Timber.e(e, "Failed to sync user data")
+                        allOk = false
+                    }
                 }
             } catch (e: Exception) {
                 // The server was not reached: the other rows would fail the same way, each after
@@ -147,4 +155,29 @@ constructor(
     }
 }
 
+internal enum class AfterStatus {
+    DROP,
+    LEAVE,
+    RETRY,
+}
+
+/** What an error status from the server means for the row that was sent. */
+internal fun afterStatus(status: Int): AfterStatus =
+    when {
+        status == HTTP_NOT_FOUND -> AfterStatus.DROP
+        status >= HTTP_SERVER_ERROR -> AfterStatus.RETRY
+        else -> AfterStatus.LEAVE
+    }
+
+/**
+ * Whether rows were marked or changed while the run was sending [sent]: those were not sent, or
+ * not in their current state. A row that is still marked exactly as it was sent failed in this
+ * run, and that failure decides for itself.
+ */
+internal fun needsAnotherRun(
+    sent: List<FindroidUserDataDto>,
+    stillMarked: List<FindroidUserDataDto>,
+): Boolean = stillMarked.any { it !in sent }
+
 private const val HTTP_NOT_FOUND = 404
+private const val HTTP_SERVER_ERROR = 500
