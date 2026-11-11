@@ -184,7 +184,7 @@ Libraries, search, favourites and the item pages.
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | unpolished #396: blank person cards; season fallback not checked | works: a season without a poster shows the show's, a show without any keeps the placeholder (#416); failing image not provoked |
 | BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | unpolished #414: two-digit years |
 | BRW-42 | Theme music on the show page (setting on): plays softly, fades out on leaving, on Play and when the screensaver starts, stays quiet when another app plays audio | #141 | n/a | n/a | not tested: no theme songs on the demo server |
-| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | unpolished #418: sort dialog focus is a faint band |
+| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring) |
 
 ### Wide windows
 
