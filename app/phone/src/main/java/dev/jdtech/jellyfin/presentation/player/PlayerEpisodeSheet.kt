@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.player
 
+import android.graphics.Rect
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
@@ -37,6 +38,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,12 +50,14 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.CompactEpisodeRow
 import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /**
  * CE (R10, design §9): the player's episode sheet at expanded width. The current season's
  * episodes in a side sheet over the right 30 % of the window (320 to 420 dp), the playing one
  * highlighted as the selected row of the Season list-detail. A tap anywhere outside the sheet
  * calls [onDismiss]; [onClosed] runs once the sheet has gone, so the host can hide its view.
+ * [onBoundsChanged] gets the bounds the open sheet takes in the window (#456).
  */
 @Composable
 fun PlayerEpisodeSheet(
@@ -63,6 +68,7 @@ fun PlayerEpisodeSheet(
     onEpisodeClick: (FindroidEpisode) -> Unit,
     onDismiss: () -> Unit,
     onClosed: () -> Unit,
+    onBoundsChanged: (Rect) -> Unit = {},
 ) {
     val currentOnClosed by rememberUpdatedState(onClosed)
     LaunchedEffect(visibleState) {
@@ -72,6 +78,27 @@ fun PlayerEpisodeSheet(
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val sheetWidth = (maxWidth * 0.3f).coerceIn(320.dp, 420.dp)
+
+        // CE (#456): where the sheet ends up, without its slide, so the player can clear the
+        // controls under it as the sheet opens.
+        val currentOnBoundsChanged by rememberUpdatedState(onBoundsChanged)
+        Box(
+            modifier =
+                Modifier.align(Alignment.CenterEnd)
+                    .width(sheetWidth)
+                    .fillMaxHeight()
+                    .onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInWindow()
+                        currentOnBoundsChanged(
+                            Rect(
+                                bounds.left.roundToInt(),
+                                bounds.top.roundToInt(),
+                                bounds.right.roundToInt(),
+                                bounds.bottom.roundToInt(),
+                            )
+                        )
+                    }
+        )
 
         if (visibleState.targetState) {
             Box(

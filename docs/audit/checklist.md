@@ -586,7 +586,7 @@ Use a debug build with `files/fake_segments.txt` where the server has no segment
 | ID | Feature: what to do, and what "works" means | Source | Phone Exo | Phone mpv | Tablet Exo | Tablet mpv | TV Exo | TV mpv |
 |---|---|---|---|---|---|---|---|---|
 | PLY-131 | Roomier controls on an expanded window; they resize when the window does | #301, #313 | n/a | n/a | works | works | n/a | n/a |
-| PLY-132 | Episode side sheet: lists the season's episodes, switches episode without leaving the player; Back closes it | #314 | n/a | n/a | unpolished #456: control icons show through the sheet header | works | n/a | n/a |
+| PLY-132 | Episode side sheet: lists the season's episodes, switches episode without leaving the player; Back closes it | #314 | n/a | n/a | works since #456: the top-row buttons under the sheet fade out while it is open (checked at 1024, 841, 1280 and 1600 dp wide); the seek bar still shows through the bottom of the sheet | works since #456: the top-row buttons under the sheet fade out (1280 dp, software rendering); the seek bar still shows through the bottom of the sheet | n/a | n/a |
 | PLY-133 | Tabletop posture on a foldable: video above the fold, controls below | #313 | n/a | n/a | works | not tested: fold pass on ExoPlayer only | n/a | n/a |
 | PLY-134 | Playback survives a fold, an unfold and a window resize | test matrix | n/a | n/a | unpolished #455: taskbar stays over the seek bar after unfolding | works for a resize; fold not tested | n/a | n/a |
 
