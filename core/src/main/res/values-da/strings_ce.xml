@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s har logget dig ud. Log ind igen for at fortsætte.</string>
     <string name="ce_download_error_server">Serveren afviste downloadet (HTTP %1$d)</string>
     <string name="ce_error_server_status">Serveren svarede med en fejl (HTTP %1$d). Prøv igen senere.</string>
+    <string name="ce_media_info">Medieoplysninger</string>
 </resources>

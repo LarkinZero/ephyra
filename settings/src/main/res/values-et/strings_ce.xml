@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Kogumikud, mille osa film on</string>
     <string name="ce_pref_detail_similar">Sarnased</string>
     <string name="ce_pref_detail_similar_summary">Sarnased pealkirjad sinu kogust</string>
+    <string name="ce_pref_detail_credits">Režissöör ja stsenaristid</string>
+    <string name="ce_pref_detail_credits_summary">Kirjelduse all filmide ja sarjade lehtedel</string>
 </resources>

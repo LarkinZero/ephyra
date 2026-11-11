@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,13 +48,14 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
-import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -176,9 +178,30 @@ private fun EpisodeScreenLayout(
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
 ) {
+    // CE (#510): above the narrow/wide branch, so the sheet stays open, on the version picked,
+    // when a rotation, a fold or a resized window changes the layout. Shown once there is
+    // something to show: after process death the flag is back before the episode is.
+    var mediaInfoOpen by rememberSaveable { mutableStateOf(false) }
+    val episodeSources = state.episode?.sources
+    val mediaInfoSources = remember(episodeSources) { episodeSources.orEmpty().withMediaInfo() }
+    // No chip when there is nothing to describe: offline, a download has no track data.
+    val onMediaInfoClick = { mediaInfoOpen = true }.takeIf { mediaInfoSources.isNotEmpty() }
+    if (mediaInfoOpen && mediaInfoSources.isNotEmpty()) {
+        MediaInfoSheet(
+            sources = mediaInfoSources,
+            onDismissRequest = { mediaInfoOpen = false },
+        )
+    }
+
     // CE: medium and expanded windows get the hero layout (docs/tablet/4-design.md §6).
     if (useWideItemLayout()) {
-        EpisodeWideLayout(state, downloaderState, onAction, onDownloaderAction)
+        EpisodeWideLayout(
+            state,
+            downloaderState,
+            onAction,
+            onDownloaderAction,
+            onMediaInfoClick = onMediaInfoClick,
+        )
         return
     }
 
@@ -279,7 +302,7 @@ private fun EpisodeScreenLayout(
                     }
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        VideoMetadataBar(videoMetadata)
+                        VideoMetadataBar(videoMetadata, onInfoClick = onMediaInfoClick)
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -319,10 +342,6 @@ private fun EpisodeScreenLayout(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                    }
                     OverviewText(text = episode.overview)
                     EpisodeWatchAndLinks(episode, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
@@ -375,6 +394,7 @@ private fun EpisodeScreenLayout(
                 }
             }
         }
+
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(

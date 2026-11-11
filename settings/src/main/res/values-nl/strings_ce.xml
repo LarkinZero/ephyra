@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">De collecties waar een film deel van uitmaakt</string>
     <string name="ce_pref_detail_similar">Meer zoals dit</string>
     <string name="ce_pref_detail_similar_summary">Vergelijkbare titels uit je bibliotheek</string>
+    <string name="ce_pref_detail_credits">Regisseur en schrijvers</string>
+    <string name="ce_pref_detail_credits_summary">Onder de beschrijving op film- en seriepagina\'s</string>
 </resources>

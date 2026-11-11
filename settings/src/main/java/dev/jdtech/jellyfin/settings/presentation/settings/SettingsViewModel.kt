@@ -313,12 +313,12 @@ class SettingsViewModel @Inject constructor(
                                                                             descriptionStringRes = R.string.cast_and_crew_summary,
                                                                             backendPreference = appPreferences.displayCastAndCrew,
                                                                         ),
-                                                                        // Only the phone pages show the extra info (#406).
+                                                                        // CE (#510): off by default, and part of the cast and crew.
                                                                         PreferenceSwitch(
-                                                                            nameStringResource = R.string.extra_info,
-                                                                            descriptionStringRes = R.string.extra_info_summary,
-                                                                            supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                                            backendPreference = appPreferences.displayExtraInfo,
+                                                                            nameStringResource = R.string.ce_pref_detail_credits,
+                                                                            descriptionStringRes = R.string.ce_pref_detail_credits_summary,
+                                                                            dependencies = listOf(appPreferences.displayCastAndCrew),
+                                                                            backendPreference = appPreferences.detailCredits,
                                                                         ),
                                                                     )
                                                             ),

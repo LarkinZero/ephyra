@@ -96,4 +96,5 @@
     <string name="ce_session_revoked">%1$s đã đăng xuất bạn. Hãy đăng nhập lại để tiếp tục.</string>
     <string name="ce_download_error_server">Máy chủ đã từ chối tải xuống (HTTP %1$d)</string>
     <string name="ce_error_server_status">Máy chủ trả về lỗi (HTTP %1$d). Hãy thử lại sau.</string>
+    <string name="ce_media_info">Thông tin phương tiện</string>
 </resources>

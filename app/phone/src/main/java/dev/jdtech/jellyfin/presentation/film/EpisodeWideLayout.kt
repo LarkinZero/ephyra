@@ -37,7 +37,6 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
-import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.HeroChips
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
 import dev.jdtech.jellyfin.presentation.film.components.HeroSubtitle
@@ -68,6 +67,7 @@ fun EpisodeWideLayout(
     downloaderState: () -> DownloaderState,
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
+    onMediaInfoClick: (() -> Unit)? = null,
 ) {
     val scrollState = rememberScrollState()
     val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
@@ -78,6 +78,7 @@ fun EpisodeWideLayout(
             downloaderState = downloaderState,
             onAction = onAction,
             onDownloaderAction = onDownloaderAction,
+            onMediaInfoClick = onMediaInfoClick,
             scrollState = scrollState,
         )
 
@@ -115,6 +116,10 @@ fun EpisodeWideLayout(
  * The scrolling part of [EpisodeWideLayout] (hero, cast) and its download quality dialog, without
  * the top bar. The Season list-detail (4-design.md §7) uses it as its detail pane, where the
  * page's single top bar sits over the list.
+ *
+ * The media info sheet (#510) belongs to the caller, which opens it on [onMediaInfoClick]: it has
+ * to outlive a switch between this layout and the compact one. Null when there is no media info
+ * to show, and then the badge row has no info chip.
  */
 @Composable
 fun EpisodeWideContent(
@@ -122,6 +127,7 @@ fun EpisodeWideContent(
     downloaderState: () -> DownloaderState,
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
+    onMediaInfoClick: (() -> Unit)?,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
 ) {
@@ -165,7 +171,12 @@ fun EpisodeWideContent(
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
                     state.videoMetadata?.let { videoMetadata ->
-                        HeroChips { VideoMetadataBar(videoMetadata) }
+                        HeroChips {
+                            VideoMetadataBar(
+                                videoMetadata,
+                                onInfoClick = onMediaInfoClick,
+                            )
+                        }
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                     }
                     ItemButtonsBar(
@@ -205,10 +216,6 @@ fun EpisodeWideContent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                    }
                     OverviewText(text = episode.overview, maxCollapsedLines = 4)
                     EpisodeWatchAndLinks(episode, onAction)
                 }
@@ -231,6 +238,7 @@ fun EpisodeWideContent(
                     onRetryClick = { onAction(EpisodeAction.OnRetryClick) },
                 )
             }
+
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(

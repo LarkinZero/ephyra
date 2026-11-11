@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Bir filmin dahil olduğu koleksiyonlar</string>
     <string name="ce_pref_detail_similar">Buna benzer</string>
     <string name="ce_pref_detail_similar_summary">Kitaplığınızdaki benzer yapımlar</string>
+    <string name="ce_pref_detail_credits">Yönetmen ve yazarlar</string>
+    <string name="ce_pref_detail_credits_summary">Film ve dizi sayfalarında özetin altında</string>
 </resources>

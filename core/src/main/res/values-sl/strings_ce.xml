@@ -105,4 +105,5 @@
     <string name="ce_session_revoked">%1$s vas je odjavil. Za nadaljevanje se znova prijavite.</string>
     <string name="ce_download_error_server">Strežnik je zavrnil prenos (HTTP %1$d)</string>
     <string name="ce_error_server_status">Strežnik je odgovoril z napako (HTTP %1$d). Poskusite znova pozneje.</string>
+    <string name="ce_media_info">Podatki o predstavnosti</string>
 </resources>

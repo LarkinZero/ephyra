@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">האוספים שסרט הוא חלק מהם</string>
     <string name="ce_pref_detail_similar">עוד בסגנון הזה</string>
     <string name="ce_pref_detail_similar_summary">כותרים דומים מהספרייה שלך</string>
+    <string name="ce_pref_detail_credits">במאי וכותבים</string>
+    <string name="ce_pref_detail_credits_summary">מתחת לתקציר בדפי סרטים וסדרות</string>
 </resources>

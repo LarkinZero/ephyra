@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">電影所屬嘅合集</string>
     <string name="ce_pref_detail_similar">類似內容</string>
     <string name="ce_pref_detail_similar_summary">你資料庫入面嘅類似作品</string>
+    <string name="ce_pref_detail_credits">導演同編劇</string>
+    <string name="ce_pref_detail_credits_summary">喺電影同劇集頁面嘅簡介下面</string>
 </resources>

@@ -70,6 +70,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisodes
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
+import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
@@ -77,6 +78,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.DownloadRow
@@ -653,9 +655,21 @@ private fun SeasonEpisodeDetailPane(
         }
     }
 
+    // CE (#510): the pane's own media info sheet, closed again when another episode is picked.
+    var mediaInfoOpen by rememberSaveable(episodeId) { mutableStateOf(false) }
+    val episodeSources = state.episode?.sources
+    val mediaInfoSources = remember(episodeSources) { episodeSources.orEmpty().withMediaInfo() }
+    if (mediaInfoOpen && mediaInfoSources.isNotEmpty()) {
+        MediaInfoSheet(
+            sources = mediaInfoSources,
+            onDismissRequest = { mediaInfoOpen = false },
+        )
+    }
+
     EpisodeWideContent(
         state = state,
         downloaderState = { downloaderState.value },
+        onMediaInfoClick = { mediaInfoOpen = true }.takeIf { mediaInfoSources.isNotEmpty() },
         onAction = { action ->
             when (action) {
                 is EpisodeAction.Play -> {

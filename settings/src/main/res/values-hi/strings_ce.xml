@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">वे संग्रह जिनका कोई फ़िल्म हिस्सा है</string>
     <string name="ce_pref_detail_similar">ऐसे और</string>
     <string name="ce_pref_detail_similar_summary">आपकी लाइब्रेरी से मिलते-जुलते शीर्षक</string>
+    <string name="ce_pref_detail_credits">निर्देशक और लेखक</string>
+    <string name="ce_pref_detail_credits_summary">फ़िल्म और शो के पेज पर सारांश के नीचे</string>
 </resources>

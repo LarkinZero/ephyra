@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Коллекции, в которые входит фильм</string>
     <string name="ce_pref_detail_similar">Похожее</string>
     <string name="ce_pref_detail_similar_summary">Похожие произведения из вашей медиатеки</string>
+    <string name="ce_pref_detail_credits">Режиссёр и сценаристы</string>
+    <string name="ce_pref_detail_credits_summary">Под описанием на страницах фильмов и сериалов</string>
 </resources>

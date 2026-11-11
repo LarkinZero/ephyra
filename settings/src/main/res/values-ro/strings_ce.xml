@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Colecțiile din care face parte un film</string>
     <string name="ce_pref_detail_similar">Mai multe asemănătoare</string>
     <string name="ce_pref_detail_similar_summary">Titluri similare din biblioteca ta</string>
+    <string name="ce_pref_detail_credits">Regizor și scenariști</string>
+    <string name="ce_pref_detail_credits_summary">Sub descriere, pe paginile filmelor și serialelor</string>
 </resources>

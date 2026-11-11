@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Các bộ sưu tập mà phim thuộc về</string>
     <string name="ce_pref_detail_similar">Nội dung tương tự</string>
     <string name="ce_pref_detail_similar_summary">Các tựa tương tự trong thư viện của bạn</string>
+    <string name="ce_pref_detail_credits">Đạo diễn và biên kịch</string>
+    <string name="ce_pref_detail_credits_summary">Bên dưới phần giới thiệu trên trang phim và chương trình</string>
 </resources>

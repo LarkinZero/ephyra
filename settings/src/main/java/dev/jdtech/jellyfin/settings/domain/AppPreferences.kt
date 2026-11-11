@@ -39,12 +39,14 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val tvScreensaverShowClock = Preference("pref_tv_screensaver_show_clock", true)
     // CE (#141): play a series' theme song on the TV show page. Only the TV app shows and uses it.
     val tvThemeMusic = Preference("pref_tv_theme_music", false)
-    val displayExtraInfo = Preference("pref_display_extra_info", false)
     val displayCastAndCrew = Preference("pref_display_cast_and_crew", true)
     // CE (#332): which of the server's metadata the detail pages show.
     val detailCriticRating = Preference("pref_detail_critic_rating", true)
     val detailTagline = Preference("pref_detail_tagline", true)
-    val detailStudios = Preference("pref_detail_studios", true)
+    // CE (#510): the credits under the overview are off until asked for. The director and the
+    // writers also need "Display cast and crew", which they were part of before.
+    val detailCredits = Preference("pref_detail_credits", false)
+    val detailStudios = Preference("pref_detail_studios", false)
     val detailAirSchedule = Preference("pref_detail_air_schedule", true)
     val detailWatchHistory = Preference("pref_detail_watch_history", true)
     val detailExternalLinks = Preference("pref_detail_external_links", true)

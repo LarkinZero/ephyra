@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Les col·leccions de les quals forma part una pel·lícula</string>
     <string name="ce_pref_detail_similar">Més com aquest</string>
     <string name="ce_pref_detail_similar_summary">Títols similars de la teva biblioteca</string>
+    <string name="ce_pref_detail_credits">Director i guionistes</string>
+    <string name="ce_pref_detail_credits_summary">Sota la sinopsi a les pàgines de pel·lícules i sèries</string>
 </resources>

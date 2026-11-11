@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Koleksi yang memuat film ini</string>
     <string name="ce_pref_detail_similar">Lainnya yang serupa</string>
     <string name="ce_pref_detail_similar_summary">Judul serupa dari pustaka Anda</string>
+    <string name="ce_pref_detail_credits">Sutradara dan penulis</string>
+    <string name="ce_pref_detail_credits_summary">Di bawah sinopsis pada halaman film dan serial</string>
 </resources>

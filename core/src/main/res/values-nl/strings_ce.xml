@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s heeft je afgemeld. Meld je opnieuw aan om verder te gaan.</string>
     <string name="ce_download_error_server">De server heeft de download geweigerd (HTTP %1$d)</string>
     <string name="ce_error_server_status">De server gaf een fout terug (HTTP %1$d). Probeer het later opnieuw.</string>
+    <string name="ce_media_info">Media-info</string>
 </resources>

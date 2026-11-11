@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">영화가 속한 컬렉션</string>
     <string name="ce_pref_detail_similar">비슷한 콘텐츠</string>
     <string name="ce_pref_detail_similar_summary">라이브러리의 비슷한 타이틀</string>
+    <string name="ce_pref_detail_credits">감독 및 작가</string>
+    <string name="ce_pref_detail_credits_summary">영화 및 시리즈 페이지의 줄거리 아래에 표시</string>
 </resources>

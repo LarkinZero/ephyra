@@ -99,4 +99,5 @@
     <string name="ce_session_revoked">%1$s ניתק אותך. יש להתחבר שוב כדי להמשיך.</string>
     <string name="ce_download_error_server">השרת דחה את ההורדה (HTTP %1$d)</string>
     <string name="ce_error_server_status">השרת השיב בשגיאה (HTTP %1$d). יש לנסות שוב מאוחר יותר.</string>
+    <string name="ce_media_info">פרטי מדיה</string>
 </resources>

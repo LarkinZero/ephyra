@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Azok a gyűjtemények, amelyeknek a film része</string>
     <string name="ce_pref_detail_similar">Hasonlók</string>
     <string name="ce_pref_detail_similar_summary">Hasonló címek a könyvtáradból</string>
+    <string name="ce_pref_detail_credits">Rendező és írók</string>
+    <string name="ce_pref_detail_credits_summary">A leírás alatt a filmek és sorozatok oldalán</string>
 </resources>
