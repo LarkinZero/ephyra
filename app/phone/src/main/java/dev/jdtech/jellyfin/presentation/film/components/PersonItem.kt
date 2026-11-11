@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,12 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyPerson
 import dev.jdtech.jellyfin.models.FindroidItemPerson
@@ -39,15 +36,10 @@ fun PersonItem(
                 .clip(MaterialTheme.shapes.small)
                 .copyOnLongClick(person.name, enabled = enabled, onClick = onClick)
     ) {
-        AsyncImage(
-            model = person.image.uri,
+        PersonPhoto(
+            uri = person.image.uri,
             contentDescription = stringResource(CoreR.string.person_image_description, person.name),
-            modifier =
-                Modifier.clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .height(160.dp),
-            contentScale = ContentScale.Crop,
+            modifier = Modifier.clip(MaterialTheme.shapes.small).fillMaxWidth().height(160.dp),
         )
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(

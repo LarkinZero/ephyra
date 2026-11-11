@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,7 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -163,6 +160,7 @@ fun EpisodeScreen(
                 is EpisodeAction.OnHomeClick -> navigateHome()
                 is EpisodeAction.NavigateToPerson -> navigateToPerson(action.personId)
                 is EpisodeAction.NavigateToSeason -> navigateToSeason(action.seasonId, action.seriesId)
+                is EpisodeAction.NavigateToSeries -> navigateToSeries(action.seriesId)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -372,29 +370,8 @@ private fun EpisodeScreenLayout(
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
             onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
         ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-            state.episode?.let { episode ->
-                Button(
-                    onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId, episode.seriesId)) },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Black.copy(alpha = 0.5f),
-                            contentColor = Color.White,
-                        ),
-                ) {
-                    episode.seasonName?.let { seasonName -> Text(seasonName) }
-                        ?: run {
-                            Text(
-                                stringResource(
-                                    CoreR.string.season_number,
-                                    episode.parentIndexNumber,
-                                )
-                            )
-                        }
-                }
-            }
+            state.episode?.let { episode -> EpisodeTopBarLinks(episode, onAction) }
         }
-
 
         if (downloadQualityDialogOpen) {
             DownloadQualityDialog(
