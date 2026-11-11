@@ -388,7 +388,7 @@ is shown, saved and kept.
 |---|---|---|---|---|---|
 | SET-92 | About shows the app version and install, server and device information | #223, #211 | works | works | works |
 | SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | broken #384: licence text cannot be opened | unpolished: "View license" opens the browser, not the text | works |
-| SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | broken #385: "Could not build device profile" | broken #385: "Could not build device profile" | n/a |
+| SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | works | broken #385: "Could not build device profile" | n/a |
 | SET-95 | Device profile screen: what the device can decode | #211 | n/a | n/a | works |
 | SET-96 | Report a problem and source code: links on phone, a QR code on TV | #223 | works | works | works |
 
