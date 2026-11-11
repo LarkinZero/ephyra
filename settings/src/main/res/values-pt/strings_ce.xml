@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">As coleções de que um filme faz parte</string>
     <string name="ce_pref_detail_similar">Mais como este</string>
     <string name="ce_pref_detail_similar_summary">Títulos semelhantes da sua biblioteca</string>
+    <string name="ce_pref_detail_credits">Realizador e argumentistas</string>
+    <string name="ce_pref_detail_credits_summary">Por baixo da sinopse nas páginas de filmes e séries</string>
 </resources>

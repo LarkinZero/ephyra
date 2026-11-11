@@ -313,6 +313,13 @@ class SettingsViewModel @Inject constructor(
                                                                             descriptionStringRes = R.string.cast_and_crew_summary,
                                                                             backendPreference = appPreferences.displayCastAndCrew,
                                                                         ),
+                                                                        // CE (#510): off by default, and part of the cast and crew.
+                                                                        PreferenceSwitch(
+                                                                            nameStringResource = R.string.ce_pref_detail_credits,
+                                                                            descriptionStringRes = R.string.ce_pref_detail_credits_summary,
+                                                                            dependencies = listOf(appPreferences.displayCastAndCrew),
+                                                                            backendPreference = appPreferences.detailCredits,
+                                                                        ),
                                                                     )
                                                             ),
                                                             PreferenceGroup(

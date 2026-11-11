@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Filmin daxil olduğu kolleksiyalar</string>
     <string name="ce_pref_detail_similar">Buna bənzər</string>
     <string name="ce_pref_detail_similar_summary">Kitabxananızdan oxşar adlar</string>
+    <string name="ce_pref_detail_credits">Rejissor və ssenaristlər</string>
+    <string name="ce_pref_detail_credits_summary">Film və serial səhifələrində icmalın altında</string>
 </resources>

@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Kokoelmat, joihin elokuva kuuluu</string>
     <string name="ce_pref_detail_similar">Samankaltaisia</string>
     <string name="ce_pref_detail_similar_summary">Samankaltaisia nimikkeitä kirjastostasi</string>
+    <string name="ce_pref_detail_credits">Ohjaaja ja käsikirjoittajat</string>
+    <string name="ce_pref_detail_credits_summary">Kuvauksen alla elokuvien ja sarjojen sivuilla</string>
 </resources>

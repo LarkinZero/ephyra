@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">De samlingar som en film ingår i</string>
     <string name="ce_pref_detail_similar">Mer som detta</string>
     <string name="ce_pref_detail_similar_summary">Liknande titlar från ditt bibliotek</string>
+    <string name="ce_pref_detail_credits">Regissör och manusförfattare</string>
+    <string name="ce_pref_detail_credits_summary">Under beskrivningen på film- och seriesidor</string>
 </resources>

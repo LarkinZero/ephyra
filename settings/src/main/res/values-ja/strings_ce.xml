@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">映画が含まれているコレクション</string>
     <string name="ce_pref_detail_similar">似た作品</string>
     <string name="ce_pref_detail_similar_summary">ライブラリ内の似たタイトル</string>
+    <string name="ce_pref_detail_credits">監督と脚本</string>
+    <string name="ce_pref_detail_credits_summary">映画と番組のページのあらすじの下に表示</string>
 </resources>

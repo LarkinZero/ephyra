@@ -178,4 +178,6 @@
     <string name="ce_pref_detail_collections_summary">Kolekcie, ktorých súčasťou je film</string>
     <string name="ce_pref_detail_similar">Podobné tituly</string>
     <string name="ce_pref_detail_similar_summary">Podobné tituly z vašej knižnice</string>
+    <string name="ce_pref_detail_credits">Režisér a scenáristi</string>
+    <string name="ce_pref_detail_credits_summary">Pod popisom na stránkach filmov a seriálov</string>
 </resources>

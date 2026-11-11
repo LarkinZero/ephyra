@@ -296,4 +296,6 @@
     <string name="ce_pref_detail_collections_summary">The collections a movie is part of</string>
     <string name="ce_pref_detail_similar">More like this</string>
     <string name="ce_pref_detail_similar_summary">Similar titles from your library</string>
+    <string name="ce_pref_detail_credits">Director and writers</string>
+    <string name="ce_pref_detail_credits_summary">Under the overview on movie and show pages</string>
 </resources>

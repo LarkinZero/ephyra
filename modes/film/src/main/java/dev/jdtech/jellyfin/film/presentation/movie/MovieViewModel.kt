@@ -77,8 +77,11 @@ constructor(
                 }
                 val videoMetadata = movie.sources.firstOrNull()?.let { videoMetadataParser.parse(it) }
                 val actors = if (displayCastAndCrew) getActors(movie) else emptyList()
-                val director = if (displayCastAndCrew) getDirector(movie) else null
-                val writers = if (displayCastAndCrew) getWriters(movie) else emptyList()
+                // CE (#510): the director and the writers have a switch of their own, off by default.
+                val displayCredits =
+                    displayCastAndCrew && appPreferences.getValue(appPreferences.detailCredits)
+                val director = if (displayCredits) getDirector(movie) else null
+                val writers = if (displayCredits) getWriters(movie) else emptyList()
                 _state.emit(
                     _state.value.copy(
                         movie = movie.shownIn(appPreferences.detailSections()),
