@@ -159,7 +159,7 @@ Libraries, search, favourites and the item pages.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| BRW-18 | Movie page: Play or Resume, restart from the beginning (phone and tablet; the TV movie page has none), trailer, watched, favourite | `ItemButtonsBar`, TV `MovieScreen` | works | works | works: Resume, Restart and the minutes left on a partly watched movie, Play otherwise (#412); trailer not tested (no YouTube handler) |
+| BRW-18 | Movie page: Play or Resume, restart from the beginning (phone and tablet; the TV movie page has none), trailer, watched, favourite | `ItemButtonsBar`, TV `MovieScreen` | works | works | works: Resume, Restart and the minutes left on a partly watched movie, Play otherwise (#412); no stray spinner over a loaded page (#544); trailer not tested (no YouTube handler) |
 | BRW-19 | Version picker: an item with more than one version asks which one to play, for Play and for play from the beginning | #28, #93 | not tested: no multi-version item on the demo server | not tested: no multi-version item on the demo server | not tested: no multi-version item on the demo server |
 | BRW-20 | Trailer: one plays or opens; several give a menu; hidden when offline | `ItemButtonsBar` | works | works | not tested: emulator has no YouTube handler |
 | BRW-21 | Show page: seasons, Play, trailer, watched, favourite | `ShowScreen` | works | works | works |

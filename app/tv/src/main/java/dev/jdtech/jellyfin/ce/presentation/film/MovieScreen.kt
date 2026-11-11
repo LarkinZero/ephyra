@@ -169,7 +169,10 @@ private fun MovieScreenContent(
     var versionDialogStartFromBeginning by remember { mutableStateOf<Boolean?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        state.movie?.let { movie ->
+        // CE (#544): an if, not movie?.let { } ?: run { }. That let ended with the version
+        // dialog's ?.let, null while the dialog is closed, so the spinner showed over the page.
+        val movie = state.movie
+        if (movie != null) {
             val versions = remember(movie.sources) { movie.getVersions() }
             val inProgress = movie.playbackPositionTicks > 0 && !movie.played
             val relatedRows =
@@ -591,19 +594,18 @@ private fun MovieScreenContent(
                     )
                 }
             }
-        }
-            ?: run {
-                val error = state.error
-                if (error != null) {
-                    TvLoadError(
-                        error = error,
-                        onRetry = { onAction(MovieAction.OnRetryClick) },
-                        modifier = Modifier.align(Alignment.Center),
-                    )
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
+        } else {
+            val error = state.error
+            if (error != null) {
+                TvLoadError(
+                    error = error,
+                    onRetry = { onAction(MovieAction.OnRetryClick) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            } else {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
+        }
     }
 }
 
