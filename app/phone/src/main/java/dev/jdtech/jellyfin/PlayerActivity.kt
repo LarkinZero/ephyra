@@ -110,6 +110,12 @@ class PlayerActivity : BasePlayerActivity() {
     /** CE (R8): locks or unlocks the controls as their buttons do. Set in [onCreate]. */
     private var toggleLock: () -> Unit = {}
 
+    /**
+     * CE (#448): the focused control is one the user moved to with Tab or the arrows, not one
+     * Android focused by itself. Only then do Space and the arrows go to it.
+     */
+    private var keyboardFocusChosen = false
+
     /** CE (R8): wheel movement not yet turned into a seek; touchpads scroll in fractions. */
     private var pendingScroll = 0f
 
@@ -434,6 +440,8 @@ class PlayerActivity : BasePlayerActivity() {
             PlayerView.ControllerVisibilityListener { visibility ->
                 if (visibility == View.GONE) {
                     hideSystemUI()
+                    // CE (#448): focus left in the hidden controls is no longer the user's.
+                    parkFocusOnPlayerView()
                 }
                 // CE (R8): a mouse pointer hides with the controls and comes back with them.
                 binding.playerView.pointerIcon =
@@ -445,6 +453,20 @@ class PlayerActivity : BasePlayerActivity() {
                 updateSkipSegmentButton(viewModel.uiState.value)
             }
         )
+
+        // CE (#448): Android also focuses a control by itself: the first control when a key ends
+        // touch mode (the back button, with the controls up), play/pause when the controls show,
+        // the next control when the focused one hides. Move focus back to the player view, so only
+        // a control the user moved to with Tab or the arrows has focus.
+        binding.playerView.viewTreeObserver.addOnTouchModeChangeListener {
+            keyboardFocusChosen = false
+        }
+        binding.playerView.viewTreeObserver.addOnGlobalFocusChangeListener { _, newFocus ->
+            val playerView = binding.playerView
+            if (!keyboardFocusChosen && newFocus?.isInside(playerView) == true) {
+                playerView.post { if (!keyboardFocusChosen) parkFocusOnPlayerView() }
+            }
+        }
 
         val playerControls = binding.playerView.findViewById<View>(R.id.player_controls)
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
@@ -751,6 +773,7 @@ class PlayerActivity : BasePlayerActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
             isControlsLocked = true
             updateUpNextCardAllowed()
+            parkFocusOnPlayerView()
         }
 
         unlockButton.setOnClickListener {
@@ -759,6 +782,7 @@ class PlayerActivity : BasePlayerActivity() {
             requestedOrientation = playerOrientation
             isControlsLocked = false
             updateUpNextCardAllowed()
+            parkFocusOnPlayerView()
         }
 
         // CE (R8): the L key presses whichever of the two is showing.
@@ -837,8 +861,10 @@ class PlayerActivity : BasePlayerActivity() {
      * | Media next / previous | next / previous item in the queue |
      *
      * Any key but the media keys and Escape also shows the controls, or keeps them up. While the
-     * controls are showing and one of them has focus (after Tab), the arrows and Space go to that
-     * control. With the controls locked only L, Escape and the media keys do anything.
+     * controls are showing and the user moved focus to one of them (with Tab), the arrows and Space
+     * go to that control; focus Android gave a control by itself does not count (#448). With the
+     * controls locked only L, Escape and the media keys do anything, and Space presses Unlock or a
+     * skip button only when the user moved to it.
      */
     private fun onPlayerKey(event: KeyEvent): Boolean {
         // A picture-in-picture window takes no keys; leave everything to the system.
@@ -865,24 +891,51 @@ class PlayerActivity : BasePlayerActivity() {
         val playerView = binding.playerView
         // Judged before the controls are shown: showing them may move focus into them.
         val controlFocused =
-            playerView.isControllerFullyVisible &&
-                currentFocus.let { it != null && it !== playerView && it.isInside(playerView) }
+            keyGoesToFocusedControl(
+                focusChosenByKeyboard = keyboardFocusChosen,
+                focusOnControl =
+                    currentFocus.let { it != null && it !== playerView && it.isInside(playerView) },
+                controlsShowing = playerView.isControllerFullyVisible,
+            )
         viewModel.markUserInteraction()
         // Shows the controls, or restarts their hide timer when they are up.
         if (playerView.useController) playerView.showController()
+
+        // CE (#448): Tab, and the arrows this passes on, move focus: the user chose that control.
+        // Any other key keeps focus off the controls unless the user chose one. Showing the
+        // controls puts focus on play/pause, which would turn the next arrow into focus navigation
+        // and let Space or Enter press a control the user never moved to.
+        val arrowPassedOn = !event.hasNoModifiers() || isControlsLocked || controlFocused
+        if (keyCode == KeyEvent.KEYCODE_TAB || (isArrowKey(keyCode) && arrowPassedOn)) {
+            keyboardFocusChosen = true
+        } else if (!controlFocused) {
+            parkFocusOnPlayerView()
+        }
 
         if (!event.hasNoModifiers()) return false
         if (keyCode == KeyEvent.KEYCODE_L) {
             if (event.repeatCount == 0) toggleLock()
             return true
         }
-        if (isControlsLocked) return false
+        if (isControlsLocked) {
+            // With Unlock the only control, Android's Tab search finds nothing from the player
+            // view itself (it needs two focusables), so Tab moves to Unlock here.
+            if (keyCode == KeyEvent.KEYCODE_TAB && !controlFocused) {
+                if (playerView.findViewById<View>(R.id.btn_unlock).requestFocus()) return true
+            }
+            // Space presses only an Unlock or skip the user moved to; other keys go on as before.
+            return keyCode == KeyEvent.KEYCODE_SPACE &&
+                spaceKeyAction(locked = true, controlFocused) == SpaceKeyAction.NOTHING
+        }
 
         val handled =
             when (keyCode) {
                 KeyEvent.KEYCODE_SPACE -> {
-                    if (!controlFocused && event.repeatCount == 0) togglePlayPause()
-                    !controlFocused
+                    val action = spaceKeyAction(locked = false, controlFocused)
+                    if (action == SpaceKeyAction.PLAY_PAUSE && event.repeatCount == 0) {
+                        togglePlayPause()
+                    }
+                    action != SpaceKeyAction.FOCUSED_CONTROL
                 }
                 KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
@@ -907,17 +960,31 @@ class PlayerActivity : BasePlayerActivity() {
                 }
                 else -> false
             }
-        // Showing the controls puts focus on play/pause, which would turn the next arrow into
-        // focus navigation. A shortcut keeps focus where it was; Tab still moves into the controls.
-        if (handled && !controlFocused && currentFocus?.isInside(playerView) == true) {
-            // The player view itself, not its first focusable child.
-            val focusability = playerView.descendantFocusability
-            playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
-            playerView.requestFocus()
-            playerView.descendantFocusability = focusability
-        }
         return handled
     }
+
+    /**
+     * Moves focus from a control to the player view itself, not its first focusable child, so no
+     * control has focus until the user moves to one (#448). Focus outside the player stays put.
+     */
+    private fun parkFocusOnPlayerView() {
+        keyboardFocusChosen = false
+        val playerView = binding.playerView
+        if (currentFocus?.isInside(playerView) != true) return
+        val focusability = playerView.descendantFocusability
+        playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
+        playerView.requestFocus()
+        playerView.descendantFocusability = focusability
+    }
+
+    private fun isArrowKey(keyCode: Int): Boolean =
+        when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN -> true
+            else -> false
+        }
 
     /** The media keys, which act without showing the controls. */
     private fun mediaKeyAction(keyCode: Int): (() -> Unit)? {
