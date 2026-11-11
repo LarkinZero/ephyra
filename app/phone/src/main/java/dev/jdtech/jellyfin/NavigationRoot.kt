@@ -19,6 +19,8 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -479,6 +481,8 @@ private fun MainNavigation(
                     },
                     enabled = item.enabled,
                     label = { Text(text = stringResource(item.title)) },
+                    // #442: the hidden bar stays composed; Tab must not stop on it.
+                    modifier = Modifier.focusProperties { canFocus = showBottomBar },
                 )
             }
         },
