@@ -103,4 +103,7 @@
         <item quantity="other">%d chưa xem</item>
     </plurals>
     <string name="ce_delete_download_message">Bạn có chắc muốn xóa bản tải xuống này khỏi thiết bị không?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="other">%d không thành công</item>
+    </plurals>
 </resources>

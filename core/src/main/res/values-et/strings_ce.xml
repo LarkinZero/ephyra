@@ -107,4 +107,8 @@
         <item quantity="other">%d vaatamata</item>
     </plurals>
     <string name="ce_delete_download_message">Kas oled kindel, et soovid selle allalaaditud faili oma seadmest kustutada?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">%d ebaõnnestus</item>
+        <item quantity="other">%d ebaõnnestus</item>
+    </plurals>
 </resources>

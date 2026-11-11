@@ -107,4 +107,8 @@
         <item quantity="other">%d sin ver</item>
     </plurals>
     <string name="ce_delete_download_message">¿Estás seguro de que quieres eliminar esta descarga de tu dispositivo?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">%d fallida</item>
+        <item quantity="other">%d fallidas</item>
+    </plurals>
 </resources>

@@ -107,4 +107,8 @@
         <item quantity="other">%d osedda</item>
     </plurals>
     <string name="ce_delete_download_message">Är du säker på att du vill ta bort denna nedladdning från din enhet?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">%d misslyckades</item>
+        <item quantity="other">%d misslyckades</item>
+    </plurals>
 </resources>

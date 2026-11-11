@@ -103,4 +103,7 @@
         <item quantity="other">%d baxılmayıb</item>
     </plurals>
     <string name="ce_delete_download_message">Bu endirməni cihazınızdan silmək istədiyinizə əminsiniz?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="other">%d uğursuz</item>
+    </plurals>
 </resources>

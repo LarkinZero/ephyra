@@ -115,4 +115,10 @@
         <item quantity="other">%d непереглянутих</item>
     </plurals>
     <string name="ce_delete_download_message">Ви впевнені, що хочете видалити це завантаження зі свого пристрою?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">Помилка: %d</item>
+        <item quantity="few">Помилка: %d</item>
+        <item quantity="many">Помилка: %d</item>
+        <item quantity="other">Помилка: %d</item>
+    </plurals>
 </resources>
