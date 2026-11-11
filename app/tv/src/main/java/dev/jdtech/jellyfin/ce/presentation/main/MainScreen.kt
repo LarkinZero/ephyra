@@ -50,6 +50,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -292,6 +293,7 @@ fun MainScreenLayout(
     libraryContent: @Composable (library: FindroidCollection) -> Unit,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val baseUrl =
         remember(context) { runCatching { JellyfinApi.getInstance(context).api.baseUrl }.getOrNull() }
     val coroutineScope = rememberCoroutineScope()
@@ -386,6 +388,18 @@ fun MainScreenLayout(
                         }
                         .focusGroup()
                         .onFocusChanged { drawerFocus.onFocusChanged(it.hasFocus) }
+                        // #539: the expanded items end at 292 dp, right of a 150 dp poster at the
+                        // page's 128 dp (Favorites), so a plain Right can find nothing right of the
+                        // item and leave focus in the drawer. Then the content is entered instead.
+                        .onPreviewKeyEvent {
+                            if (it.type != KeyEventType.KeyDown || it.key != Key.DirectionRight) {
+                                return@onPreviewKeyEvent false
+                            }
+                            if (!focusManager.moveFocus(FocusDirection.Right)) {
+                                contentFocusRequester.tryRequestFocus()
+                            }
+                            true
+                        }
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(
                             start = DrawerStartPadding,

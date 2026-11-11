@@ -4,13 +4,19 @@ import android.app.Application
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
@@ -44,7 +50,11 @@ class DrawerSafeAreaTest {
             "drawer_icon_settings",
         ) + dummyCollections.map { "drawer_icon_library_${it.id}" }
 
-    private fun setUp() {
+    private fun setUp(
+        homeContent: @Composable () -> Unit = {
+            Box(Modifier.fillMaxSize().testTag("home_screen_content").focusable())
+        }
+    ) {
         rule.setContent {
             FindroidTheme {
                 MainScreenLayout(
@@ -53,9 +63,7 @@ class DrawerSafeAreaTest {
                     libraries = dummyCollections,
                     navigateToSettings = {},
                     navigateToUsers = {},
-                    homeContent = {
-                        Box(Modifier.fillMaxSize().testTag("home_screen_content").focusable())
-                    },
+                    homeContent = homeContent,
                     searchContent = {},
                     favoritesContent = {},
                     libraryContent = {},
@@ -104,6 +112,37 @@ class DrawerSafeAreaTest {
             val left = rule.onNodeWithText(label, useUnmergedTree = true).getBoundsInRoot().left
             assertTrue("The label $label starts at $left", left >= TvSafeArea.horizontal)
         }
+    }
+
+    /**
+     * The expanded drawer's items now end at 292 dp, right of a poster that starts at the page's
+     * 128 dp and is 150 dp wide (Favorites). A plain Right finds nothing right of the item there and
+     * left focus in the drawer.
+     */
+    @Test
+    fun rightFromTheDrawerReachesAPosterThatEndsBeforeTheDrawerItem() {
+        setUp(
+            homeContent = {
+                Box(Modifier.fillMaxSize()) {
+                    Box(
+                        Modifier.padding(start = TvSafeArea.horizontal, top = 120.dp)
+                            .size(150.dp, 225.dp)
+                            .focusable()
+                            .testTag("poster")
+                    )
+                }
+            }
+        )
+        rule.onNodeWithTag("poster").requestFocus()
+        rule.waitForIdle()
+
+        rule.onNodeWithTag("poster").performKeyInput { pressKey(Key.DirectionLeft) }
+        rule.waitForIdle()
+        rule.onNodeWithTag("drawer_item_home").assertIsFocused()
+
+        rule.onNodeWithTag("drawer_item_home").performKeyInput { pressKey(Key.DirectionRight) }
+        rule.waitForIdle()
+        rule.onNodeWithTag("poster").assertIsFocused()
     }
 
     @Test
