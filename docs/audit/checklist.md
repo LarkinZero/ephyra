@@ -174,7 +174,7 @@ Libraries, search, favourites and the item pages.
 | BRW-30 | Links to IMDb, TMDB, TVDB and Trakt open in the browser; hidden offline | #332 | works | works | n/a |
 | BRW-31 | Extras row: an extra plays as a single video | #332 | not tested: no extras on the demo server | not tested: no extras on the demo server | not tested: no extras on the demo server |
 | BRW-32 | Collections row and "More like this" row open the item | #332 | works; collections row not tested (none on the demo server) | works; collections row not tested (none on the demo server) | works; collections row not tested (none on the demo server) |
-| BRW-33 | Media chips: resolution, codec, HDR, Dolby Vision, HDR10+ wordmark, Atmos, 3D, with the right values for the file | #282, #332 | works; no HDR, Dolby Vision or Atmos file | works; no HDR, Dolby Vision or Atmos file | unpolished #415: audio chip shows "und" |
+| BRW-33 | Media chips: resolution, codec, HDR, Dolby Vision, HDR10+ wordmark, Atmos, 3D, with the right values for the file | #282, #332 | works; no HDR, Dolby Vision or Atmos file | works; no HDR, Dolby Vision or Atmos file | works: an undetermined audio language ("und") is left out of the chip (#415); no HDR, Dolby Vision or Atmos file |
 | BRW-34 | Watched toggle updates the page and the server (check another client) | | unpolished #397: watched state hard to see | works | works |
 | BRW-35 | Favourite toggle updates the page, the Favorites tab and the server | | works | works | works |
 | BRW-36 | Long-press on title, overview, genres, people and similar text copies it | ce.33 (#42) | works | works | n/a |

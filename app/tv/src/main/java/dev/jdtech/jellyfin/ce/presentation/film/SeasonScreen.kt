@@ -613,10 +613,7 @@ private fun technicalChips(episode: FindroidEpisode?, metadata: VideoMetadata?):
         metadata?.videoCodecs?.firstOrNull()?.let { add(it.raw) }
         metadata?.displayProfiles?.filter { it != DisplayProfile.SDR }?.forEach { add(it.raw) }
         audio?.let { stream ->
-            val language =
-                stream.language
-                    .takeIf { it.isNotBlank() }
-                    ?.let { code -> Locale.forLanguageTag(code).displayLanguage.ifBlank { code } }
+            val language = audioLanguageName(stream.language)
             val format =
                 listOfNotNull(
                         audioCodecName(stream.codec),
@@ -636,6 +633,23 @@ private fun resolutionName(height: Int): String =
         height >= 700 -> "720p"
         else -> "${height}p"
     }
+
+/**
+ * The name of an audio track's language in the app's language, or null when the track has none:
+ * no code, "und" (undetermined, #415) or a code without a name. The server sends three-letter
+ * codes ("nld"), which [Locale] only names by their two-letter form ("nl").
+ */
+internal fun audioLanguageName(code: String, locale: Locale = Locale.getDefault()): String? {
+    val tag = code.trim().lowercase()
+    if (tag.isEmpty() || tag == "und") return null
+    val language = twoLetterLanguages[tag] ?: tag
+    return Locale.forLanguageTag(language).getDisplayLanguage(locale).ifBlank { null }
+}
+
+/** ISO 639-2 codes to their ISO 639-1 form, e.g. "nld" to "nl". */
+private val twoLetterLanguages: Map<String, String> by lazy {
+    Locale.getISOLanguages().associateBy { Locale.forLanguageTag(it).isO3Language }
+}
 
 private fun audioCodecName(codec: String): String? =
     when (codec.lowercase()) {
