@@ -617,7 +617,7 @@ All rows are TV only.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | unpolished #387: rotation closes the search results | unpolished #435: Season list loses scroll and scrim; broken #387 at 8 inch: rotation closes the search | n/a |
+| LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | works | unpolished #435: Season list loses scroll and scrim; broken #387 at 8 inch: rotation closes the search | n/a |
 | LIF-02 | Background and return keeps the screen and scroll position; pages reload only when stale | #268 | works | works | works |
 | LIF-03 | Process death (`am kill` in the background) restores the screen without a crash | #353 | works (#371): the restored library loads, on top and under a movie page | works; broken #371 at 8 inch and fold: library spins after `am kill` | works |
 | LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | broken #429: episode buttons cut off at 600 dp; works at 8 inch and fold | n/a |
