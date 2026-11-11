@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -8,16 +9,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ErrorState
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
@@ -61,6 +62,7 @@ import dev.jdtech.jellyfin.presentation.film.components.TopContentScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
+import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.launch
 
@@ -106,7 +108,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreenLayout(
+internal fun HomeScreenLayout(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
     baseUrl: String? = null,
@@ -124,7 +126,17 @@ private fun HomeScreenLayout(
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
-    val contentPaddingTop = safePadding.top + 88.dp
+    val scrimHeight = safePadding.top + 88.dp
+
+    // #392: a failed load with rows on screen says so in a card under the header, as My media and
+    // Library do, so the header keeps its width and the server name its room. With nothing on
+    // screen the list shows ErrorState instead.
+    val showErrorCard = state.error != null && !state.isEmpty
+    val contentPaddingTop by
+        animateDpAsState(
+            targetValue = if (showErrorCard) safePadding.top + 144.dp else scrimHeight,
+            label = "content_padding",
+        )
 
     var showErrorDialog by rememberSaveable { mutableStateOf(false) }
     val showServerSelectionSheetState = rememberModalBottomSheetState()
@@ -132,8 +144,6 @@ private fun HomeScreenLayout(
 
     val profileSheetState = rememberModalBottomSheetState()
     var showProfileBottomSheet by remember { mutableStateOf(false) }
-
-    val listState = rememberLazyListState()
 
     // A switch to another user dips the rows to dark and brings the new ones up (VISION §6), so it
     // reads as a change of person rather than a reload. One list, so the scroll state stays shared.
@@ -155,13 +165,7 @@ private fun HomeScreenLayout(
     // above it. That would leave the carousel out of view, so stay at the top instead.
     // CE (#142): the rows in the order the user chose, hidden ones left out.
     val rows = remember(state) { state.orderedRows() }
-    val firstItemKey = rows.firstOrNull()?.id
-    DisposableEffect(firstItemKey) {
-        if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
-            listState.requestScrollToItem(0)
-        }
-        onDispose {}
-    }
+    val listState = rememberLazyListStateAtStart(firstKey = rows.firstOrNull()?.id)
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
         PullToRefreshBox(isRefreshing = state.isLoading, onRefresh = { onAction(HomeAction.OnRetryClick) }) {
@@ -222,7 +226,21 @@ private fun HomeScreenLayout(
                     }
                 }
             }
-            TopContentScrim(height = contentPaddingTop)
+            TopContentScrim(height = scrimHeight)
+        }
+
+        if (showErrorCard) {
+            ErrorCard(
+                onShowStacktrace = { showErrorDialog = true },
+                onRetryClick = { onAction(HomeAction.OnRetryClick) },
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            start = paddingStart,
+                            top = safePadding.top + 80.dp,
+                            end = paddingEnd,
+                        ),
+            )
         }
 
         if (state.error != null && showErrorDialog) {
@@ -236,11 +254,7 @@ private fun HomeScreenLayout(
 
     HomeHeader(
         serverName = state.server?.name ?: "",
-        isLoading = state.isLoading,
-        isError = state.error != null,
         onServerClick = { showServerSelectionBottomSheet = true },
-        onErrorClick = { showErrorDialog = true },
-        onRetryClick = { onAction(HomeAction.OnRetryClick) },
         onSearchClick = { onAction(HomeAction.OnSearchClick) },
         onUserClick = { showProfileBottomSheet = true },
         user = state.user,
