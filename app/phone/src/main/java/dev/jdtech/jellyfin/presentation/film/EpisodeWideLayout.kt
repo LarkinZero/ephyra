@@ -113,7 +113,7 @@ fun EpisodeWideLayout(
 
 /**
  * The scrolling part of [EpisodeWideLayout] (hero, cast) and its download quality dialog, without
- * the top bar. The Season list-detail (4-design.md ง7) uses it as its detail pane, where the
+ * the top bar. The Season list-detail (4-design.md ยง7) uses it as its detail pane, where the
  * page's single top bar sits over the list.
  */
 @Composable

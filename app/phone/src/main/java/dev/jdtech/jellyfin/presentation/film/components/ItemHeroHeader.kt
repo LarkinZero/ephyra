@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -80,8 +81,15 @@ fun ItemHeroHeader(
         val windowHeight =
             with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
         val heroHeight = Layout.heroHeight(maxWidth, windowHeight)
+        // The form follows the room this header has (a Season detail pane, a split-screen
+        // half), not the window's width class (#429).
+        val innerWidth = maxWidth - safePadding.start - safePadding.end - margin * 2
+        val stacked = heroStacked(innerWidth, heroPosterWidth(item, widthClass), margin)
+        val posterWidth =
+            if (stacked) minOf(heroPosterWidth(item, widthClass), innerWidth)
+            else heroPosterWidth(item, widthClass)
         // The poster hangs half its height over the backdrop's bottom edge.
-        val posterOverlap = heroPosterHeight(item, widthClass) / 2
+        val posterOverlap = heroPosterHeight(item, posterWidth) / 2
 
         Box(modifier = Modifier.fillMaxWidth().height(heroHeight).clipToBounds()) {
             HeroBackdrop(
@@ -100,27 +108,55 @@ fun ItemHeroHeader(
                 drawTopScrimOverArt()
             }
         }
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(
-                        start = safePadding.start + margin,
-                        top = heroHeight - posterOverlap,
-                        end = safePadding.end + margin,
-                    ),
-            horizontalArrangement = Arrangement.spacedBy(margin),
-        ) {
-            HeroPoster(item = item, widthClass = widthClass)
-            Column(modifier = Modifier.weight(1f, fill = false).widthIn(max = Layout.textMaxWidth)) {
-                Spacer(Modifier.height(posterOverlap + MaterialTheme.spacings.medium))
-                CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.colorScheme.onBackground
+        val headerPadding =
+            Modifier.fillMaxWidth()
+                .padding(
+                    start = safePadding.start + margin,
+                    top = heroHeight - posterOverlap,
+                    end = safePadding.end + margin,
+                )
+        if (stacked) {
+            // Too narrow for a column beside the poster: the text goes below it.
+            Column(modifier = headerPadding) {
+                HeroPoster(item = item, posterWidth = posterWidth)
+                Column(modifier = Modifier.widthIn(max = Layout.textMaxWidth)) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    HeroText(title = title, content = content)
+                }
+            }
+        } else {
+            Row(modifier = headerPadding, horizontalArrangement = Arrangement.spacedBy(margin)) {
+                HeroPoster(item = item, posterWidth = posterWidth)
+                Column(
+                    modifier = Modifier.weight(1f, fill = false).widthIn(max = Layout.textMaxWidth)
                 ) {
-                    title()
-                    content()
+                    Spacer(Modifier.height(posterOverlap + MaterialTheme.spacings.medium))
+                    HeroText(title = title, content = content)
                 }
             }
         }
+    }
+}
+
+/** The narrowest text column beside the poster; below it the header stacks (4-design.md §6). */
+internal val HeroMinColumnWidth: Dp = 360.dp
+
+/**
+ * True when a hero header [innerWidth] wide (inside its margins) has less than
+ * [HeroMinColumnWidth] beside a poster [posterWidth] wide and the [gap] after it, so the text
+ * column goes below the poster instead of beside it (#429).
+ */
+internal fun heroStacked(innerWidth: Dp, posterWidth: Dp, gap: Dp): Boolean =
+    innerWidth - posterWidth - gap < HeroMinColumnWidth
+
+@Composable
+private fun ColumnScope.HeroText(
+    title: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+        title()
+        content()
     }
 }
 
@@ -206,12 +242,11 @@ private fun heroTitleStyle(widthClass: WidthClass): TextStyle =
 private fun heroPosterWidth(item: FindroidItem, widthClass: WidthClass): Dp =
     Layout.posterInHeader(widthClass) * if (item is FindroidEpisode) 1.6f else 1f
 
-private fun heroPosterHeight(item: FindroidItem, widthClass: WidthClass): Dp =
-    heroPosterWidth(item, widthClass) / if (item is FindroidEpisode) 1.77f else 0.66f
+private fun heroPosterHeight(item: FindroidItem, posterWidth: Dp): Dp =
+    posterWidth / if (item is FindroidEpisode) 1.77f else 0.66f
 
 @Composable
-private fun HeroPoster(item: FindroidItem, widthClass: WidthClass) {
-    val posterWidth = heroPosterWidth(item, widthClass)
+private fun HeroPoster(item: FindroidItem, posterWidth: Dp) {
     if (item is FindroidEpisode) {
         ItemPoster(
             item = item,
