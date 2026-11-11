@@ -110,4 +110,5 @@
         <item quantity="few">%d nevizionate</item>
         <item quantity="other">%d nevizionate</item>
     </plurals>
+    <string name="ce_delete_download_message">Sigur vrei să ștergi această descărcare de pe dispozitivul tău?</string>
 </resources>

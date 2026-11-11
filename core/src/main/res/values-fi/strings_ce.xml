@@ -106,4 +106,5 @@
         <item quantity="one">%d katsomatta</item>
         <item quantity="other">%d katsomatta</item>
     </plurals>
+    <string name="ce_delete_download_message">Haluatko varmasti poistaa tämän latauksen laitteeltasi?</string>
 </resources>

@@ -106,4 +106,5 @@
         <item quantity="one">%d nem látott</item>
         <item quantity="other">%d nem látott</item>
     </plurals>
+    <string name="ce_delete_download_message">Biztosan törölni szeretnéd a letöltést az eszközről?</string>
 </resources>

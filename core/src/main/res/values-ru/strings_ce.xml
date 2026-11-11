@@ -114,4 +114,5 @@
         <item quantity="many">%d непросмотренных</item>
         <item quantity="other">%d непросмотренных</item>
     </plurals>
+    <string name="ce_delete_download_message">Вы уверены, что хотите удалить эту загрузку со своего устройства?</string>
 </resources>

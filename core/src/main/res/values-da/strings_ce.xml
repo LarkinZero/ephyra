@@ -106,4 +106,5 @@
         <item quantity="one">%d ikke set</item>
         <item quantity="other">%d ikke set</item>
     </plurals>
+    <string name="ce_delete_download_message">Er du sikker på, at du vil slette denne download fra din enhed?</string>
 </resources>
