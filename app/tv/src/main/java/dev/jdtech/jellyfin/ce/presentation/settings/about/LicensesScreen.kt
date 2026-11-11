@@ -131,7 +131,6 @@ internal fun LicensesLayout(
 
 internal fun licenseRowTag(uniqueId: String) = "ce_license_row_$uniqueId"
 
-
 @Composable
 private fun LibraryRow(library: Library) {
     Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default)) {
