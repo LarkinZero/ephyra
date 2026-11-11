@@ -29,13 +29,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -47,15 +51,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Button
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
+import dev.jdtech.jellyfin.ce.ui.components.TvTextDialog
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.NoBringIntoView
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
+import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedBorder
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.rememberFocusPosition
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -185,13 +193,19 @@ internal fun PersonScreenLayout(
                                 top = TvSafeArea.vertical,
                                 bottom = MaterialTheme.spacings.large,
                             ),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
+                        // CE (#508): medium under the header, so the first row fits under it.
+                        // The sections add the rest of large between them.
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         item(key = "header") {
+                            // CE (#508): a fixed height, so the whole first row (card, title and
+                            // year) fits on screen under it. The biography gets the lines that fit
+                            // beside the photo and opens in full on OK.
                             Row(
                                 modifier =
                                     Modifier.fillMaxWidth()
+                                        .height(PersonHeaderHeight)
                                         .padding(horizontal = TvSafeArea.horizontal),
                                 horizontalArrangement =
                                     Arrangement.spacedBy(MaterialTheme.spacings.large),
@@ -200,7 +214,7 @@ internal fun PersonScreenLayout(
                                 var failed by remember(imageUri) { mutableStateOf(false) }
                                 Box(
                                     modifier =
-                                        Modifier.height(240.dp)
+                                        Modifier.height(PersonHeaderHeight)
                                             .aspectRatio(0.66f)
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -239,18 +253,16 @@ internal fun PersonScreenLayout(
                                     Text(
                                         text = person.name,
                                         style = MaterialTheme.typography.displayMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                     if (person.overview.isNotBlank()) {
-                                        Text(
-                                            text = person.overview,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            maxLines = 6,
-                                            overflow = TextOverflow.Ellipsis,
-                                            color =
-                                                MaterialTheme.colorScheme.onBackground.copy(
-                                                    alpha = 0.8f
-                                                ),
-                                            modifier = Modifier.fillMaxWidth(0.9f),
+                                        PersonBiography(
+                                            name = person.name,
+                                            biography = person.overview,
+                                            modifier =
+                                                Modifier.weight(1f, fill = false)
+                                                    .fillMaxWidth(0.9f),
                                         )
                                     }
                                 }
@@ -272,7 +284,16 @@ internal fun PersonScreenLayout(
                         itemsIndexed(sections, key = { _, section -> section.id }) {
                             sectionIndex,
                             section ->
-                            Column {
+                            Column(
+                                modifier =
+                                    Modifier.padding(
+                                        top =
+                                            if (sectionIndex == 0) 0.dp
+                                            else
+                                                MaterialTheme.spacings.large -
+                                                    MaterialTheme.spacings.medium
+                                    )
+                            ) {
                                 Text(
                                     text = stringResource(section.titleRes),
                                     style = MaterialTheme.typography.headlineMedium,
@@ -300,6 +321,9 @@ internal fun PersonScreenLayout(
                                                 item = item,
                                                 direction = Direction.VERTICAL,
                                                 showYear = true,
+                                                // CE (#508): one line, as on Home (#423), so
+                                                // the first row fits under the header.
+                                                titleMaxLines = 1,
                                                 onClick = { onItemClick(item) },
                                                 modifier =
                                                     Modifier.focusPosition(
@@ -334,6 +358,74 @@ internal fun PersonScreenLayout(
         }
     }
 }
+
+/** The header's height, and the photo's: low enough for the first row to fit under it (#508). */
+private val PersonHeaderHeight = 128.dp
+
+internal const val PERSON_BIOGRAPHY_TAG = "ce_person_biography"
+
+/**
+ * The biography beside the photo, cut to the lines that fit (#508). Only when it is cut, it takes
+ * focus with the Ephyra ring and OK opens the full text in a [TvTextDialog]; Back from the dialog
+ * puts focus on it again.
+ */
+@Composable
+private fun PersonBiography(name: String, biography: String, modifier: Modifier = Modifier) {
+    var cut by remember(biography) { mutableStateOf(false) }
+    var open by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val scope = rememberCoroutineScope()
+    val text =
+        @Composable {
+            Text(
+                text = biography,
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                onTextLayout = { cut = it.hasVisualOverflow },
+            )
+        }
+    if (cut) {
+        Surface(
+            onClick = { open = true },
+            shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
+            colors =
+                ClickableSurfaceDefaults.colors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    focusedContainerColor = Color.Transparent,
+                    focusedContentColor = MaterialTheme.colorScheme.onBackground,
+                    pressedContainerColor = Color.Transparent,
+                    pressedContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
+            border = ClickableSurfaceDefaults.border(focusedBorder = ephyraFocusedBorder()),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
+            modifier = modifier.focusRequester(focusRequester).testTag(PERSON_BIOGRAPHY_TAG),
+        ) {
+            text()
+        }
+    } else {
+        Box(modifier = modifier.testTag(PERSON_BIOGRAPHY_TAG)) { text() }
+    }
+    if (open) {
+        TvTextDialog(
+            title = name,
+            text = biography,
+            onDismiss = {
+                open = false
+                // The dialog's window has to go before focus can come back to the page.
+                scope.launch {
+                    repeat(BIOGRAPHY_FOCUS_ATTEMPTS) {
+                        withFrameNanos {}
+                        if (focusRequester.requestFocus()) return@launch
+                    }
+                }
+            },
+        )
+    }
+}
+
+private const val BIOGRAPHY_FOCUS_ATTEMPTS = 10
 
 @Preview(device = "id:tv_1080p")
 @Composable
