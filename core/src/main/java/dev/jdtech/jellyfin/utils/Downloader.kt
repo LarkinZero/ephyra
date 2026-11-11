@@ -56,6 +56,8 @@ interface Downloader {
         val bytesDownloaded: Long,
         /** Total bytes for the download, or -1 if unknown. */
         val totalBytes: Long,
+        /** The HTTP status the server failed the download with, or null (#383). */
+        val httpStatus: Int? = null,
     )
 
     suspend fun getProgress(downloadId: Long?): Progress

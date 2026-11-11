@@ -97,4 +97,5 @@
     <string name="item_included_in">Incluido en</string>
     <string name="item_more_like_this">Más como esto</string>
     <string name="ce_session_revoked">%1$s cerró tu sesión. Vuelve a iniciar sesión para continuar.</string>
+    <string name="ce_download_error_server">El servidor rechazó la descarga (HTTP %1$d)</string>
 </resources>

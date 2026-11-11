@@ -97,4 +97,5 @@
     <string name="item_included_in">Incluso in</string>
     <string name="item_more_like_this">Altri simili</string>
     <string name="ce_session_revoked">%1$s ti ha disconnesso. Accedi di nuovo per continuare.</string>
+    <string name="ce_download_error_server">Il server ha rifiutato il download (HTTP %1$d)</string>
 </resources>

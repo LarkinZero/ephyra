@@ -94,4 +94,5 @@
     <string name="item_included_in">收錄於</string>
     <string name="item_more_like_this">更多類似內容</string>
     <string name="ce_session_revoked">%1$s 已將你登出。請重新登入以繼續。</string>
+    <string name="ce_download_error_server">伺服器拒絕了下載 (HTTP %1$d)</string>
 </resources>

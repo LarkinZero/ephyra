@@ -97,4 +97,5 @@
     <string name="item_included_in">Включено в</string>
     <string name="item_more_like_this">Още подобни</string>
     <string name="ce_session_revoked">%1$s ви отписа. Влезте отново, за да продължите.</string>
+    <string name="ce_download_error_server">Сървърът отказа изтеглянето (HTTP %1$d)</string>
 </resources>

@@ -94,4 +94,5 @@
     <string name="item_included_in">Dahil olduğu</string>
     <string name="item_more_like_this">Buna benzer</string>
     <string name="ce_session_revoked">%1$s oturumunuzu kapattı. Devam etmek için yeniden oturum açın.</string>
+    <string name="ce_download_error_server">Sunucu indirmeyi reddetti (HTTP %1$d)</string>
 </resources>

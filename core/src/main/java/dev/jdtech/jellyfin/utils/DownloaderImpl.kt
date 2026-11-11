@@ -442,7 +442,13 @@ class DownloaderImpl(
                 }
             else -> -1
         }
-        return Downloader.Progress(snapshot.status, progress, snapshot.bytesDownloaded, snapshot.totalBytes)
+        return Downloader.Progress(
+            snapshot.status,
+            progress,
+            snapshot.bytesDownloaded,
+            snapshot.totalBytes,
+            snapshot.httpStatus,
+        )
     }
 
     override suspend fun getProgress(downloadIds: List<Long>): Map<Long, Downloader.Progress> {
@@ -464,7 +470,13 @@ class DownloaderImpl(
                         }
                     else -> -1
                 }
-                result[id] = Downloader.Progress(snapshot.status, progress, snapshot.bytesDownloaded, snapshot.totalBytes)
+                result[id] = Downloader.Progress(
+                    snapshot.status,
+                    progress,
+                    snapshot.bytesDownloaded,
+                    snapshot.totalBytes,
+                    snapshot.httpStatus,
+                )
             }
         }
         return result
