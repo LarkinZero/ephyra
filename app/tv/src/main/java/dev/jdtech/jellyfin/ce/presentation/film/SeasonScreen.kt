@@ -66,6 +66,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
+import dev.jdtech.jellyfin.ce.ui.components.TvOverviewText
 import dev.jdtech.jellyfin.ce.ui.focus.EphyraFocusScale
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
@@ -486,11 +487,11 @@ private fun EpisodeDetails(
             color = Color.White.copy(alpha = .8f),
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-        Text(
+        // CE (#545): a cut overview takes focus and opens in full on OK.
+        TvOverviewText(
+            title = episode.name,
             text = episode.overview,
-            style = MaterialTheme.typography.bodyMedium,
             maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.width(640.dp),
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))

@@ -46,7 +46,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
@@ -60,6 +59,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.PersonCard
 import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
+import dev.jdtech.jellyfin.ce.ui.components.TvOverviewText
 import dev.jdtech.jellyfin.ce.ui.focus.NoBringIntoView
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
@@ -318,11 +318,11 @@ private fun MovieScreenContent(
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
                             TvTagline(movie.tagline)
-                            Text(
+                            // CE (#545): a cut overview takes focus and opens in full on OK.
+                            TvOverviewText(
+                                title = movie.name,
                                 text = movie.overview,
-                                style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 4,
-                                overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.width(640.dp),
                             )
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
