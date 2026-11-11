@@ -131,6 +131,8 @@ internal fun LicensesLayout(
 
 internal fun licenseRowTag(uniqueId: String) = "ce_license_row_$uniqueId"
 
+internal const val LICENSE_TEXT_TAG = "ce_license_text"
+
 @Composable
 private fun LibraryRow(library: Library) {
     Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default)) {
@@ -166,12 +168,11 @@ fun LicenseScreen(uniqueId: String) {
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    // #540: the focus ring (VISION §6), drawn inside the box's edge; no halo on a text this large.
+    val ring = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent
 
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
-                .padding(start = TvSafeArea.horizontal, top = TvSafeArea.vertical, end = TvSafeArea.horizontal)
-    ) {
+    // #539: the text box ends inside the bottom safe area too.
+    Column(modifier = Modifier.fillMaxSize().padding(TvSafeArea.paddingValues)) {
         Text(text = library?.name.orEmpty(), style = MaterialTheme.typography.displaySmall)
         Text(
             text = library?.licenses?.joinToString(", ") { it.name }.orEmpty(),
@@ -188,11 +189,9 @@ fun LicenseScreen(uniqueId: String) {
             modifier =
                 Modifier.padding(vertical = MaterialTheme.spacings.medium)
                     .fillMaxSize()
-                    .border(
-                        BorderStroke(2.dp, if (isFocused) Color.White else Color.Transparent),
-                        RoundedCornerShape(10.dp),
-                    )
+                    .border(BorderStroke(3.dp, ring), RoundedCornerShape(10.dp))
                     .focusRequester(focusRequester)
+                    .testTag(LICENSE_TEXT_TAG)
                     .onPreviewKeyEvent { event ->
                         if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                         val step =

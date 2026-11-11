@@ -184,7 +184,7 @@ Libraries, search, favourites and the item pages.
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | works for person cards: the person icon without a photo since #396; season fallback not checked | works: a season without a poster shows the show's, a show without any keeps the placeholder (#416); failing image not provoked |
 | BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | works (#414): four-digit year, "Jan 18, 1940" |
 | BRW-42 | Theme music on the show page (setting on): plays softly, fades out on leaving, on Play and when the screensaver starts, stays quiet when another app plays audio | #141 | n/a | n/a | not tested: no theme songs on the demo server |
-| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring) |
+| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring; #540 fixed: so do Retry, the licence text, the About buttons and the login buttons) |
 
 ### Wide windows
 
@@ -387,7 +387,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-92 | About shows the app version and install, server and device information | #223, #211 | works | works | works |
-| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened) |
+| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened; #540 fixed: the licence text shows the cyan ring and ends inside the safe area) |
 | SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | works | broken #385: "Could not build device profile" | n/a |
 | SET-95 | Device profile screen: what the device can decode | #211 | n/a | n/a | works |
 | SET-96 | Report a problem and source code: links on phone, a QR code on TV | #223 | works | works | works |
@@ -608,7 +608,7 @@ All rows are TV only.
 | TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
-| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; the drawer's icons still sit in the left margin; 4K not run |
+| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; #540 and #539: the focused About buttons, the licence text and the login screen's server button too; the drawer's icons still sit in the left margin; 4K not run |
 | TVS-14 | The 32-bit (`armeabi-v7a`) APK installs and starts on the Xiaomi box **[device]** | ADR 0006, #359 | n/a | n/a | not tested: emulator |
 | TVS-15 | Pressing Home and coming back to the app returns to the same screen and focus | | n/a | n/a | works |
 | TVS-16 | D-pad latency on Home and in the player feels immediate **[device]** | #359 | n/a | n/a | not tested: emulator |
