@@ -41,6 +41,7 @@ class SeasonListStateTest {
 
     private var bottomPadding by mutableStateOf(0.dp)
     private var itemHeight by mutableStateOf(100.dp)
+    private var itemCount by mutableStateOf(30)
 
     private fun LazyListState.position() = firstVisibleItemIndex to firstVisibleItemScrollOffset
 
@@ -133,21 +134,47 @@ class SeasonListStateTest {
         assertEquals(7 to 0, state.position())
     }
 
+    @Test
+    fun `a position the season no longer has is given up and saving goes on`() {
+        val tester = StateRestorationTester(rule)
+        lateinit var state: LazyListState
+        tester.setContent {
+            state = rememberSeasonListState()
+            EpisodeList(state)
+        }
+        rule.runOnIdle { runBlocking { state.scrollToItem(20) } }
+        rule.waitForIdle()
+
+        // The season comes back with 5 episodes (offline, only the downloaded ones): item 20 is
+        // gone. The list stays usable where it is.
+        itemCount = 5
+        restore(tester)
+        rule.runOnIdle { runBlocking { state.scrollToItem(0, px(50)) } }
+        rule.waitForIdle()
+        assertEquals(0 to px(50), state.position())
+
+        // That scroll was saved: with all 30 back, the list opens there, not at item 20.
+        itemCount = 30
+        restore(tester)
+        assertEquals(0 to px(50), state.position())
+    }
+
     @Composable
     private fun EpisodeList(state: LazyListState) {
         // Read once: like an activity, a composition never sees the next rotation's size.
         val rowHeight = remember { itemHeight }
+        val rows = remember { itemCount }
         Box(Modifier.height(400.dp)) {
             LazyColumn(state = state, contentPadding = PaddingValues(bottom = bottomPadding)) {
-                items(30) { Spacer(Modifier.fillMaxWidth().height(rowHeight)) }
+                items(rows) { Spacer(Modifier.fillMaxWidth().height(rowHeight)) }
             }
         }
     }
 
-    /** A rotation: the activity's saved state restored, then half a second of frames. */
+    /** A rotation: the activity's saved state restored, then three seconds of frames. */
     private fun restore(tester: StateRestorationTester) {
         tester.emulateSavedInstanceStateRestore()
-        rule.mainClock.advanceTimeBy(1_000)
+        rule.mainClock.advanceTimeBy(3_000)
         rule.waitForIdle()
     }
 

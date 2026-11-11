@@ -107,6 +107,7 @@ import dev.jdtech.jellyfin.utils.copyOnLongClick
 import java.util.UUID
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jellyfin.sdk.model.api.BaseItemKind
 
 /** The list pane takes 40 % of the window, at least 360 dp and at most 480 dp (4-design.md §7). */
@@ -138,7 +139,8 @@ internal fun defaultSelectedEpisode(episodes: List<FindroidEpisode>): FindroidEp
  * the list moves after a restore has settled. Once per restore it is applied again over the next
  * frames until it holds; that stops as soon as anything else moves the list (the user's scroll,
  * or the list-detail scrolling the selected episode into view), and never runs on an ordinary
- * recomposition.
+ * recomposition. A position the list can no longer reach, because the season has fewer episodes
+ * now, is given up, and the list's own position is saved from then on.
  */
 @Composable
 internal fun rememberSeasonListState(): LazyListState {
@@ -146,10 +148,11 @@ internal fun rememberSeasonListState(): LazyListState {
     var savedIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedOffset by rememberSaveable { mutableIntStateOf(0) }
     LaunchedEffect(state) {
-        restorePosition(state, target = savedIndex to savedOffset)
-        // From here on, where the list is now is where the user left it.
+        val settled = restorePosition(state, target = savedIndex to savedOffset)
+        // From here on, where the list is now is where the user left it. Only a list still
+        // clamped short of the saved position keeps that position until it moves.
         snapshotFlow { state.firstVisibleItemIndex to state.firstVisibleItemScrollOffset }
-            .drop(1)
+            .drop(if (settled) 0 else 1)
             .collect { (index, offset) ->
                 savedIndex = index
                 savedOffset = offset
@@ -161,26 +164,39 @@ internal fun rememberSeasonListState(): LazyListState {
 /** Frames to wait for the window insets after a restore: about half a second. */
 private const val RESTORE_FRAMES = 30
 
+/** How long to wait for the list to hold the saved item before giving the position up. */
+private const val RESTORE_ITEMS_TIMEOUT_MS = 2_000L
+
 /**
  * Scrolls [state] to [target] once its items are laid out, and again on each of the next frames
  * while the list is still short of it, unless something else moved the list in between.
+ *
+ * Gives up without scrolling when the list does not hold the target item within about two
+ * seconds: the season may have fewer episodes than when the position was saved (offline, a
+ * removed download, a library change), and the list stays where it is.
+ *
+ * Returns whether the list's position is now the one to keep: false only when the list is still
+ * short of a target it holds, clamped by its layout (the other orientation's shorter list).
  */
-internal suspend fun restorePosition(state: LazyListState, target: Pair<Int, Int>) {
-    if (target == 0 to 0) return
+internal suspend fun restorePosition(state: LazyListState, target: Pair<Int, Int>): Boolean {
+    if (target == 0 to 0) return true
     fun position() = state.firstVisibleItemIndex to state.firstVisibleItemScrollOffset
     // The first layout with the target item in it.
-    snapshotFlow { state.layoutInfo.totalItemsCount }.first { it > target.first }
+    withTimeoutOrNull(RESTORE_ITEMS_TIMEOUT_MS) {
+        snapshotFlow { state.layoutInfo.totalItemsCount }.first { it > target.first }
+    } ?: return true
     var last = position()
     repeat(RESTORE_FRAMES) { frame ->
-        if (last == target) return
+        if (last == target) return true
         if (frame > 0) {
             withFrameNanos {}
             // Moved by someone else since: leave it there.
-            if (state.isScrollInProgress || position() != last) return
+            if (state.isScrollInProgress || position() != last) return true
         }
         state.scrollToItem(target.first, target.second)
         last = position()
     }
+    return last == target
 }
 
 /**
