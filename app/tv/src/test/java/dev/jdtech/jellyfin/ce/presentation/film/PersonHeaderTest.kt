@@ -18,7 +18,9 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.components.TV_TEXT_DIALOG_TAG
 import dev.jdtech.jellyfin.ce.ui.components.TV_TEXT_DIALOG_TEXT_TAG
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyPersonDetail
@@ -136,6 +138,34 @@ class PersonHeaderTest {
         rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertDoesNotExist()
         rule.onNode(biography).assertIsFocused()
     }
+
+    /**
+     * The dialog is centred, so a height within the screen less the safe area above and below
+     * keeps all of it inside the safe area.
+     */
+    private fun assertDialogFitsSafeArea(fontScale: Float) {
+        setPerson(biography = longBiography.repeat(3), fontScale = fontScale)
+        press(Key.DirectionUp)
+        press(Key.DirectionCenter)
+
+        val dialog = rule.onNodeWithTag(TV_TEXT_DIALOG_TAG).getUnclippedBoundsInRoot()
+        assertTrue(
+            "dialog is ${dialog.height} tall at font scale $fontScale",
+            dialog.height <= 540.dp - TvSafeArea.vertical * 2,
+        )
+        // The text still scrolls to the end inside it.
+        rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertIsFocused()
+        val scrollBefore = scrollPosition()
+        pressInDialog(Key.DirectionDown)
+        assertTrue("Down didn't scroll the text", scrollPosition() > scrollBefore)
+    }
+
+    @Test
+    fun `the dialog fits inside the safe area`() = assertDialogFitsSafeArea(fontScale = 1f)
+
+    @Test
+    fun `the dialog fits inside the safe area at font scale 1_3`() =
+        assertDialogFitsSafeArea(fontScale = 1.3f)
 
     @Test
     fun `a biography that fits doesn't take focus`() {

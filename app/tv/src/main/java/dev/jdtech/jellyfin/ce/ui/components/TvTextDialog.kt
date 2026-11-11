@@ -37,6 +37,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
+import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlinx.coroutines.launch
@@ -53,7 +54,12 @@ fun TvTextDialog(title: String, text: String, onDismiss: () -> Unit) {
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            modifier = Modifier.width(720.dp),
+            // Inside the TV safe area at any font scale; the text takes what the title leaves. Wide
+            // enough to cover a focus ring on the page behind it (the person page's biography).
+            modifier =
+                Modifier.width(800.dp)
+                    .heightIn(max = TvTextDialogMaxHeight)
+                    .testTag(TV_TEXT_DIALOG_TAG),
             shape = RoundedCornerShape(12.dp),
             colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
@@ -76,7 +82,7 @@ fun TvTextDialog(title: String, text: String, onDismiss: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier =
-                        Modifier.heightIn(max = 400.dp)
+                        Modifier.weight(1f, fill = false)
                             .onSizeChanged { viewportHeight = it.height }
                             .focusRequester(focusRequester)
                             .onPreviewKeyEvent { event ->
@@ -104,6 +110,10 @@ fun TvTextDialog(title: String, text: String, onDismiss: () -> Unit) {
 }
 
 internal const val TV_TEXT_DIALOG_TEXT_TAG = "ce_tv_text_dialog_text"
+internal const val TV_TEXT_DIALOG_TAG = "ce_tv_text_dialog"
+
+/** A 1080p TV's height (540 dp) without the safe area above and below. */
+private val TvTextDialogMaxHeight = 540.dp - TvSafeArea.vertical * 2
 
 @Preview(device = "id:tv_1080p")
 @Composable
