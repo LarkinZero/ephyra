@@ -32,6 +32,7 @@ import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.keyboardFocusRing
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 
 private val scrimColorStops =
@@ -42,11 +43,16 @@ private val scrimColorStops =
     )
 
 @Composable
-fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
+fun HomeCarouselItem(
+    item: FindroidItem,
+    onAction: (HomeAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier =
-            Modifier
+            modifier
                 .aspectRatio(1.77f)
+                .keyboardFocusRing(MaterialTheme.shapes.large)
                 .clip(MaterialTheme.shapes.large)
                 .copyOnLongClick(
                     text = item.name,

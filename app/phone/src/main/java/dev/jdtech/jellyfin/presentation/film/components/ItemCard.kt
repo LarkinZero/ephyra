@@ -30,6 +30,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
+import dev.jdtech.jellyfin.presentation.utils.keyboardFocusRing
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 
 @Composable
@@ -50,6 +51,7 @@ fun ItemCard(
         modifier =
             modifier
                 .width(width)
+                .keyboardFocusRing(MaterialTheme.shapes.small)
                 .clip(MaterialTheme.shapes.small)
                 .copyOnLongClick(item.name, onClick = { onClick(item) })
     ) {
