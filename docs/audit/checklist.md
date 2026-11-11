@@ -62,7 +62,7 @@ variant. An empty cell is work still to do.
 | SUP-04 | Add server by hand: an unreachable or non-Jellyfin address shows an error in the screen, no crash | ce.1 | works | unpolished #443: error stays while a new address is typed | works |
 | SUP-05 | Adding a server that is already saved, through another address, adds the address and does not create a second server | `SetupRepositoryImpl` | works | broken #425: re-adding the saved server drops the session (401 until restart) | works |
 | SUP-06 | Login with username and password lands on Home; the server's login disclaimer, if set, is shown | `LoginViewModel` | unpolished #375: disclaimer shows raw `<br/>` | unpolished #375: disclaimer shows raw `<br/>` | unpolished #375, #423: raw `<br/>`, runs into the overscan |
-| SUP-07 | Wrong password shows "wrong username or password", not a generic error | ce.1 | works | works | works |
+| SUP-07 | Wrong password shows "wrong username or password", not a generic error | ce.1 | works (#388): a later Login opens empty, without the old password or error | works | works |
 | SUP-08 | Quick Connect: the code shows, approving it on the server logs in; pressing it again cancels. The button is hidden when the server has Quick Connect off | ce.1, `LoginViewModel` | broken #382: code stays after cancel | broken #382: code stays after cancel | unpolished #382: code stays after cancel |
 | SUP-09 | Public users of the server are listed on the Users screen; picking one opens Login with the name filled in | `UsersViewModel` | works | works | works |
 | SUP-10 | Login on TV with the on-screen keyboard and the remote only | #355 | n/a | n/a | works |
@@ -72,7 +72,7 @@ variant. An empty cell is work still to do.
 | SUP-14 | Remove a server (long-press): it disappears, and its logins are signed out on the server (dashboard) | #334 | works | works | works; server-side sign-out not observable (no user signed in) |
 | SUP-15 | Remove a user (long-press or the remove button): the session ends on the server; removing the current user returns to setup | #336 | works | works | works |
 | SUP-16 | The app's session leaves the server's dashboard when the app goes to the background or is closed, and comes back on return | #336, `ServerSessionKeeper` | works | works | works |
-| SUP-17 | Revoked token: sign the device out from the dashboard; the app shows a toast and goes to user selection instead of failing silently | #334 | works | works | works |
+| SUP-17 | Revoked token: sign the device out from the dashboard; the app shows a toast and goes to user selection instead of failing silently | #334 | works (#388): Login from user selection opens empty | works | works |
 | SUP-18 | The dashboard lists the client as Ephyra (Ephyra Beta for staging) with the device name | #172 | unpolished #386: server sees version 1.2.0 | unpolished #386: server sees version 1.2.0 | unpolished #386: server sees version 1.2.0 |
 | SUP-19 | Killing the app halfway through setup and starting it again opens the right step (Servers or Users) | `NavigationRoot` | works | works | works |
 | SUP-20 | Stable and beta installed side by side: logging in on one does not log out the other | #98 | not tested: debug APK only | not tested: debug APK only | not tested: debug APK only |
