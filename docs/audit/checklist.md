@@ -474,7 +474,7 @@ detail.
 | PLY-59 | Swipes do not fire in the system gesture area, also in split-screen and freeform | #55, #91 | not tested: not reached in time | not tested: not reached in time | as phone: not tested: not reached in time | as phone: not tested: not reached in time | n/a | n/a |
 | PLY-60 | Lock: blocks gestures and controls, keeps the orientation, unlock button works | `PlayerActivity` | works | works | works | works | n/a | n/a |
 | PLY-61 | Orientation: phone-sized windows play in landscape; tablets keep the orientation they are held in | #289 | works | works | works | works | n/a | n/a |
-| PLY-62 | Controls in a narrow window (split-screen): Next and Back stay visible, the rest scrolls | #101 | not tested: not reached in time | not tested: not reached in time | unpolished #452, #455: title cut to "S1...", once the seek bar sat under the taskbar | unpolished #452: title cut to "S1...", white status-bar strip in light theme | n/a | n/a |
+| PLY-62 | Controls in a narrow window (split-screen): Next and Back stay visible, the rest scrolls | #101 | not tested: not reached in time | not tested: not reached in time | unpolished #452: title cut to "S1..."; since #455 the controls stay clear of the status bar and the taskbar (7 of 7 split entries, 2 of them with the bars over the window) | unpolished #452: title cut to "S1...", white status-bar strip in light theme; since #455 the controls stay clear of the bars (5 of 5 split entries, 1 with the bars over the window). Software rendering: mpv sometimes hangs in `surfaceChanged` on a split resize, on `main` too |
 | PLY-63 | Rotating during playback keeps position and play state | | works | works | works | works | n/a | n/a |
 
 ### Keys
@@ -588,7 +588,7 @@ Use a debug build with `files/fake_segments.txt` where the server has no segment
 | PLY-131 | Roomier controls on an expanded window; they resize when the window does | #301, #313 | n/a | n/a | works | works | n/a | n/a |
 | PLY-132 | Episode side sheet: lists the season's episodes, switches episode without leaving the player; Back closes it | #314 | n/a | n/a | unpolished #456: control icons show through the sheet header | works | n/a | n/a |
 | PLY-133 | Tabletop posture on a foldable: video above the fold, controls below | #313 | n/a | n/a | works | not tested: fold pass on ExoPlayer only | n/a | n/a |
-| PLY-134 | Playback survives a fold, an unfold and a window resize | test matrix | n/a | n/a | unpolished #455: taskbar stays over the seek bar after unfolding | works for a resize; fold not tested | n/a | n/a |
+| PLY-134 | Playback survives a fold, an unfold and a window resize | test matrix | n/a | n/a | works for split-screen, a resize and rotation (#455: the controls stay clear of the bars); fold and unfold not tested since #455: no foldable AVD, the unfold fix (hide the bars again on a configuration change) is from the code only | works for a resize; fold and unfold not tested, the #455 unfold fix is from the code only. Software rendering: mpv sometimes hangs in `surfaceChanged` on a split resize, on `main` too |
 
 ## 9. TV system integration
 

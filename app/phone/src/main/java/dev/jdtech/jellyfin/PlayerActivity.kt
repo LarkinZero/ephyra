@@ -281,6 +281,16 @@ class PlayerActivity : BasePlayerActivity() {
             applyPlayerDimens()
             updateEpisodesButton()
         }
+        // CE (#455): a fold, an unfold or a resize can bring the system bars back; until now they
+        // were hidden again only on resume and when the controls hide.
+        if (!isInPictureInPictureMode) hideSystemUI()
+    }
+
+    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
+        // CE (#455): as in onConfigurationChanged. In split-screen some bars stay up anyway, and
+        // configureInsets keeps the controls clear of them.
+        if (!isInPictureInPictureMode) hideSystemUI()
     }
 
     /**
