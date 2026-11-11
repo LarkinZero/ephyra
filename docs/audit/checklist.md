@@ -113,7 +113,7 @@ variant. An empty cell is work still to do.
 | HOM-08 | Latest row per library | | works | works | works |
 | HOM-09 | The order and visibility set in Home rows (SET-08) show on Home, and are kept per server and user | #142 | works (#431): Home follows a change made within a minute of its last load, without a pull | works; unpolished #431 at 8 inch: shows only after a pull to refresh | works |
 | HOM-10 | Home cache on: a cold start shows the rows of the last visit at once, then updates them | #251, #270 | works | works; not tested at 8 inch: cache and network not told apart | works |
-| HOM-11 | Pull to refresh reloads the rows; the spinner stays until the reload is done | ce.1 | unpolished #392: server name cut while the header changes; one spinner (the pull indicator) since #391 | works | n/a |
+| HOM-11 | Pull to refresh reloads the rows; the spinner stays until the reload is done | ce.1 | works since #391 and #392: one spinner, the pull indicator, on a pull, a cold start and a server pick; the header keeps its width and the server name | works | n/a |
 | HOM-12 | TV rows refresh in the background without reshuffling; focus comes back to the same card | #132 | n/a | n/a | works |
 | HOM-13 | When one row fails to load, the others still show | 1.2.0-ce.4 (#114) | not tested: cannot make one row fail on the demo server | not tested: cannot make one row fail on the demo server | not tested: cannot make one row fail on the demo server |
 | HOM-14 | Home reflects what was just watched after leaving the player (progress, Next Up) | #95 | unpolished #393: new item half off screen | unpolished #393: new item off screen to the left; not tested at 8 inch | works |
@@ -239,7 +239,7 @@ Phone and tablet only, except OFF-12: TV has no offline mode (ADR 0007).
 |---|---|---|---|---|---|
 | OFF-01 | Offline mode on (Settings): the app restarts, shows only Home and Downloads, and an "Offline" label | `SettingsViewModel`, `NavigationRoot` | works | works | n/a |
 | OFF-02 | Starting the app with no network turns offline mode on by itself, without a crash | ce.27, ce.28 | works | works | n/a |
-| OFF-03 | Turning the network off while the app is open: the app stays usable and says what failed, no crash | #353 | unpolished #392: failed refresh squeezes the header | broken #427: My media blank, stays blank when the network returns | n/a |
+| OFF-03 | Turning the network off while the app is open: the app stays usable and says what failed, no crash | #353 | works since #392 (server cut off with a proxy, not the network): a failed refresh shows the error card under the header, whose details give the reason in words with Retry, Share and Close; the header keeps its width | broken #427: My media blank, stays blank when the network returns | n/a |
 | OFF-04 | Offline Home and item pages show the downloaded items | | works | unpolished #428, #426: offline Home shows items that are not downloaded | n/a |
 | OFF-05 | A downloaded item plays offline, and its position is kept locally | | works | works | n/a |
 | OFF-06 | Back online: the position, watched state and favourites changed offline reach the server (at the next app start with network) | `SyncWorker` | works; watched and favourites not tried | works | n/a |
@@ -620,7 +620,7 @@ All rows are TV only.
 | LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | works | broken #387 at 8 inch: rotation closes the search; the Season list keeps its position and scrim since #435 | n/a |
 | LIF-02 | Background and return keeps the screen and scroll position; pages reload only when stale | #268 | works | works | works |
 | LIF-03 | Process death (`am kill` in the background) restores the screen without a crash | #353 | works (#371): the restored library loads, on top and under a movie page | works; broken #371 at 8 inch and fold: library spins after `am kill` | works |
-| LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | episode and movie pages work at 600 dp since #429: the episode's still goes above the text, a movie's last button wraps to a second line; works at 8 inch and fold | n/a |
+| LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | works since #392: in a half-height split-screen window the server name ends in an ellipsis instead of being clipped | episode and movie pages work at 600 dp since #429: the episode's still goes above the text, a movie's last button wraps to a second line; works at 8 inch and fold | n/a |
 | LIF-05 | Free-form window resize: layouts follow the width | #288 | n/a | works | n/a |
 | LIF-06 | Fold and unfold keeps the screen and state | test matrix | n/a | works on the fold since #429: the Season detail pane stacks the still above the text at the unfolded 841 dp width (checked as a 841 dp window on the 10.5 inch emulator); the half-opened posture is not tested on a device, the pane follows its own width and a unit test covers a ~420 dp pane; 10.5 and 8 inch are not foldables | n/a |
 | LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | unpolished #423: Home card titles run off the screen at 1.3 |

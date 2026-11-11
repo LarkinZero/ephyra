@@ -1,14 +1,11 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -43,10 +40,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 @Composable
 fun HomeHeader(
     serverName: String,
-    isError: Boolean,
     onServerClick: () -> Unit,
-    onErrorClick: () -> Unit,
-    onRetryClick: () -> Unit,
     onSearchClick: () -> Unit,
     onUserClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -81,7 +75,6 @@ fun HomeHeader(
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.animateContentSize(),
                 )
             }
         }
@@ -114,42 +107,6 @@ fun HomeHeader(
                     }
                 }
             }
-            AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
-                Surface(
-                    onClick = onErrorClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.errorContainer,
-                ) {
-                    Box {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_alert_circle),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.align(Alignment.Center),
-                        )
-                    }
-                }
-            }
-
-            // #391: no spinner here; the pull-to-refresh indicator shows every load.
-            AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
-                Surface(
-                    onClick = onRetryClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Box {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                            contentDescription = null,
-                            modifier = Modifier.align(Alignment.Center),
-                        )
-                    }
-                }
-            }
-
             if (!isOfflineMode) {
                 Surface(
                     onClick = onSearchClick,
@@ -209,26 +166,7 @@ private fun HomeHeaderPreview() {
     FindroidTheme {
         HomeHeader(
             serverName = "Jellyfin",
-            isError = false,
             onServerClick = {},
-            onErrorClick = {},
-            onRetryClick = {},
-            onSearchClick = {},
-            onUserClick = {},
-        )
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun HomeHeaderErrorPreview() {
-    FindroidTheme {
-        HomeHeader(
-            serverName = "Jellyfin",
-            isError = true,
-            onServerClick = {},
-            onErrorClick = {},
-            onRetryClick = {},
             onSearchClick = {},
             onUserClick = {},
         )

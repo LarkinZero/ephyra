@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,6 +52,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ErrorState
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
@@ -124,7 +127,17 @@ internal fun HomeScreenLayout(
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
-    val contentPaddingTop = safePadding.top + 88.dp
+    val scrimHeight = safePadding.top + 88.dp
+
+    // #392: a failed load with rows on screen says so in a card under the header, as My media and
+    // Library do, so the header keeps its width and the server name its room. With nothing on
+    // screen the list shows ErrorState instead.
+    val showErrorCard = state.error != null && !state.isEmpty
+    val contentPaddingTop by
+        animateDpAsState(
+            targetValue = if (showErrorCard) safePadding.top + 144.dp else scrimHeight,
+            label = "content_padding",
+        )
 
     var showErrorDialog by rememberSaveable { mutableStateOf(false) }
     val showServerSelectionSheetState = rememberModalBottomSheetState()
@@ -222,7 +235,21 @@ internal fun HomeScreenLayout(
                     }
                 }
             }
-            TopContentScrim(height = contentPaddingTop)
+            TopContentScrim(height = scrimHeight)
+        }
+
+        if (showErrorCard) {
+            ErrorCard(
+                onShowStacktrace = { showErrorDialog = true },
+                onRetryClick = { onAction(HomeAction.OnRetryClick) },
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            start = paddingStart,
+                            top = safePadding.top + 80.dp,
+                            end = paddingEnd,
+                        ),
+            )
         }
 
         if (state.error != null && showErrorDialog) {
@@ -236,10 +263,7 @@ internal fun HomeScreenLayout(
 
     HomeHeader(
         serverName = state.server?.name ?: "",
-        isError = state.error != null,
         onServerClick = { showServerSelectionBottomSheet = true },
-        onErrorClick = { showErrorDialog = true },
-        onRetryClick = { onAction(HomeAction.OnRetryClick) },
         onSearchClick = { onAction(HomeAction.OnSearchClick) },
         onUserClick = { showProfileBottomSheet = true },
         user = state.user,
