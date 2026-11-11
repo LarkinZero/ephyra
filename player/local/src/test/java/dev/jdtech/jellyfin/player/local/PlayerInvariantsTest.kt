@@ -108,4 +108,22 @@ class PlayerInvariantsTest {
         val seconds = timeout!!.groupValues[1].toInt()
         assertTrue("network-timeout must stay between 20 and 45 s (#460), is $seconds", seconds in 20..45)
     }
+
+    @Test
+    fun `mpv reports a failed load at END_FILE without waiting for an error line`() {
+        // #446: libmpv can deliver END_FILE before the error lines that explain it. Requiring an
+        // error line first left the player black and BUFFERING without an error.
+        val mpvPlayer = source("mpv/MPVPlayer.kt")
+        val endFile =
+            Regex("""MpvEvent\.MPV_EVENT_END_FILE -> \{[\s\S]*?\n {16}\}""").find(mpvPlayer)
+        assertTrue("MPVPlayer's END_FILE branch not found", endFile != null)
+        assertTrue(
+            "END_FILE must ask MpvLoadState whether the load failed (#446)",
+            endFile!!.value.contains("loadState.endFile()"),
+        )
+        assertFalse(
+            "END_FILE must not require an error line before reporting (#446)",
+            endFile.value.contains("error != null"),
+        )
+    }
 }

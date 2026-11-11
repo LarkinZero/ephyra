@@ -99,15 +99,18 @@ class MPVPlayer(
 
     /**
      * mpv's END_FILE carries a reason, but the JNI layer only passes the event id. A file that
-     * fails to open logs an error first and never reaches FILE_LOADED, so that is the signal.
-     * Log messages come from the same mpv event loop as the events, so posting keeps their order.
+     * never reaches FILE_LOADED failed to open; its error line can come before or after END_FILE
+     * (#446, see [MpvLoadState]).
      */
     private val logObserver =
         object : MPVLib.LogObserver {
             override fun logMessage(prefix: String, level: Int, text: String) {
                 if (level <= MPVLib.MpvLogLevel.MPV_LOG_LEVEL_ERROR) {
                     post {
-                        lastLoadError = "$prefix: ${text.trim()}"
+                        val message = "$prefix: ${text.trim()}"
+                        if (loadState.errorLogged(message)) {
+                            Timber.w("mpv, after the failed load: $message")
+                        }
                         streamBreak.onErrorLog(prefix, text, SystemClock.elapsedRealtime())
                     }
                 }
@@ -409,17 +412,8 @@ class MPVPlayer(
     private var notifiedAvailableCommands: Commands = Commands.EMPTY
     private var playerError: PlaybackException? = null
 
-    /** Whether mpv got as far as FILE_LOADED for the file it started last. */
-    private var fileLoaded = false
-
-    /**
-     * Set when this player replaces, removes or stops mpv's current file, so the END_FILE that
-     * follows is not taken for a failure. Cleared when mpv starts the next file.
-     */
-    private var endFileExpected = false
-
-    /** The last error mpv logged since it started the current file. */
-    private var lastLoadError: String? = null
+    /** CE (#446): whether an END_FILE is a failed load. */
+    private val loadState = MpvLoadState()
 
     // mpv events
 
@@ -583,9 +577,7 @@ class MPVPlayer(
         post {
             when (eventId) {
                 MpvEvent.MPV_EVENT_START_FILE -> {
-                    fileLoaded = false
-                    endFileExpected = false
-                    lastLoadError = null
+                    loadState.startFile()
                     streamBreak.reset()
                     if (!isPlayerReady) {
                         for (command in initialCommands) {
@@ -594,7 +586,7 @@ class MPVPlayer(
                     }
                 }
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
-                    fileLoaded = true
+                    loadState.fileLoaded()
                     isSeekable = mpvLib.getPropertyBoolean("seekable") == true
                     currentDurationMs =
                         (mpvLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
@@ -640,9 +632,11 @@ class MPVPlayer(
                     }
                 }
                 MpvEvent.MPV_EVENT_END_FILE -> {
-                    val error = lastLoadError
-                    lastLoadError = null
-                    if (!fileLoaded && !endFileExpected && error != null) onLoadError(error)
+                    Timber.d(
+                        "mpv END_FILE: fileLoaded=${loadState.fileLoaded}, " +
+                            "endFileExpected=${loadState.endFileExpected}"
+                    )
+                    loadState.endFile()?.let { onLoadError(it.message) }
                 }
                 else -> Unit
             }
@@ -654,10 +648,12 @@ class MPVPlayer(
      * playWhenReady kept. mpv moves on to the next playlist entry by itself after a failure, so it
      * is stopped here; prepare() loads the playlist again.
      */
-    private fun onLoadError(message: String) {
-        Timber.e("mpv could not open the file: $message")
+    private fun onLoadError(message: String?) {
+        // #446: without an error line yet the message stays null, so the UI shows its own
+        // (localized) text instead of an English sentence from here.
+        Timber.e("mpv could not open the file: ${message ?: "no error logged before END_FILE"}")
         val errorCode =
-            if (message.contains("recognize file format")) {
+            if (message?.contains("recognize file format") == true) {
                 PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
             } else {
                 PlaybackException.ERROR_CODE_IO_UNSPECIFIED
@@ -687,7 +683,7 @@ class MPVPlayer(
     /** Stops mpv on its current file and reports [error], then IDLE. */
     private fun failPlayback(error: PlaybackException) {
         playerError = error
-        endFileExpected = true
+        loadState.expectEndFile()
         mpvLib.command(arrayOf("stop", "keep-playlist"))
         listeners.queueEvent(EVENT_PLAYER_ERROR) { listener ->
             listener.onPlayerErrorChanged(error)
@@ -948,7 +944,7 @@ class MPVPlayer(
      *   [.getCurrentWindowIndex] and [.getCurrentPosition].
      */
     override fun setMediaItems(mediaItems: MutableList<MediaItem>, resetPosition: Boolean) {
-        endFileExpected = true
+        loadState.expectEndFile()
         mpvLib.command(arrayOf("playlist-clear"))
         mpvLib.command(arrayOf("playlist-remove", "current"))
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
@@ -973,7 +969,7 @@ class MPVPlayer(
         startWindowIndex: Int,
         startPositionMs: Long,
     ) {
-        endFileExpected = true
+        loadState.expectEndFile()
         mpvLib.command(arrayOf("playlist-clear"))
         mpvLib.command(arrayOf("playlist-remove", "current"))
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
@@ -1054,7 +1050,7 @@ class MPVPlayer(
         val end = toIndex.coerceAtMost(internalMediaItems.size)
         if (fromIndex < 0 || fromIndex >= end) return
         val removesCurrent = currentMediaItemIndex in fromIndex until end
-        if (removesCurrent) endFileExpected = true
+        if (removesCurrent) loadState.expectEndFile()
         // From the end, so the indexes of the entries still to remove don't move.
         for (index in end - 1 downTo fromIndex) {
             mpvLib.command(arrayOf("playlist-remove", "$index"))
@@ -1160,7 +1156,7 @@ class MPVPlayer(
                 listener.onPlayerErrorChanged(null)
             }
         }
-        endFileExpected = true
+        loadState.expectEndFile()
         startPassedToLoadMs = null
         internalMediaItems.forEachIndexed { index, mediaItem ->
             val uri = "${mediaItem.localConfiguration?.uri}"
@@ -1445,7 +1441,7 @@ class MPVPlayer(
             // duplicate
             // external subtitle entries.
             if (currentMediaItemIndex != index) {
-                endFileExpected = true
+                loadState.expectEndFile()
                 mpvLib.command(arrayOf("playlist-play-index", "$index"))
             }
             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
@@ -1490,7 +1486,7 @@ class MPVPlayer(
     }
 
     override fun stop() {
-        endFileExpected = true
+        loadState.expectEndFile()
         mpvLib.command(arrayOf("stop", "keep-playlist"))
     }
 
