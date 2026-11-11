@@ -15,7 +15,8 @@ import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.NetworkConnectivity
-import dev.jdtech.jellyfin.utils.isOfflineModeActive
+import dev.jdtech.jellyfin.utils.UiOfflineDecision
+import dev.jdtech.jellyfin.utils.useOfflineRepository
 import javax.inject.Singleton
 
 @Module
@@ -78,9 +79,10 @@ object RepositoryModule {
         jellyfinRepositoryOfflineImpl: JellyfinRepositoryOfflineImpl,
         appPreferences: AppPreferences,
         networkConnectivity: NetworkConnectivity,
+        uiOfflineDecision: UiOfflineDecision,
     ): JellyfinRepository {
 
-        return if (isOfflineModeActive(appPreferences, networkConnectivity)) {
+        return if (useOfflineRepository(uiOfflineDecision, appPreferences, networkConnectivity)) {
             jellyfinRepositoryOfflineImpl
         } else {
             jellyfinRepositoryImpl
