@@ -113,12 +113,15 @@ class ArtworkState internal constructor(internal val sources: List<ArtworkSource
     }
 }
 
+/** The artwork of [item] at [placement]; none while there is no item (loading, an error). */
 @Composable
-fun rememberArtworkState(item: FindroidItem, placement: ArtworkPlacement): ArtworkState {
+fun rememberArtworkState(item: FindroidItem?, placement: ArtworkPlacement): ArtworkState {
     val context = LocalContext.current
-    return remember(item.id, item.images, placement) {
+    return remember(item?.id, item?.images, placement) {
         ArtworkState(
-            artworkSources(item, placement).map { it.copy(uri = it.uri.resolveIn(context)) }
+            item?.let { artworkSources(it, placement) }.orEmpty().map {
+                it.copy(uri = it.uri.resolveIn(context))
+            }
         )
     }
 }

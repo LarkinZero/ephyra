@@ -57,6 +57,7 @@ import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeCard
@@ -68,6 +69,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
+import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -229,6 +231,8 @@ private fun SeasonScreenLayout(
             onAction(SeasonAction.DeleteEpisodeDownload(episode))
         }
     }
+    // CE (#437): the artwork under the top bar, if any; shared by the header and the bar.
+    val artwork = rememberArtworkState(state.season, ArtworkPlacement.Header)
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.season?.let { season ->
@@ -242,6 +246,7 @@ private fun SeasonScreenLayout(
                     ItemHeader(
                         item = season,
                         lazyListState = lazyListState,
+                        artwork = artwork,
                         content = {
                             Row(
                                 modifier =
@@ -399,11 +404,15 @@ private fun SeasonScreenLayout(
             )
         }
 
-        LightStatusBarOverArtwork(state.season != null, rememberTopBarBackgroundAlpha(lazyListState))
+        LightStatusBarOverArtwork(
+            artwork.hasArtwork,
+            rememberTopBarBackgroundAlpha(lazyListState),
+        )
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,
             backgroundAlpha = rememberTopBarBackgroundAlpha(lazyListState),
+            overArtwork = artwork.hasArtwork,
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
         ) {

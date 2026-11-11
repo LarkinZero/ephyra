@@ -220,6 +220,8 @@ internal fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> 
             hasBackButton = true,
             hasHomeButton = true,
             backgroundAlpha = rememberTopBarBackgroundAlpha(scrollState),
+            // CE (#437): no artwork behind the bar; the photo starts below it.
+            overArtwork = false,
             onBackClick = { onAction(PersonAction.NavigateBack) },
             onHomeClick = { onAction(PersonAction.NavigateHome) },
         )

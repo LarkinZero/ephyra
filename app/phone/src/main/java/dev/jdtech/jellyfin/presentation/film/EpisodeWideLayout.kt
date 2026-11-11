@@ -36,6 +36,8 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
+import dev.jdtech.jellyfin.presentation.film.components.ArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.HeroChips
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
@@ -47,6 +49,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
+import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -71,6 +74,8 @@ fun EpisodeWideLayout(
 ) {
     val scrollState = rememberScrollState()
     val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
+    // CE (#437): the artwork under the top bar, if any; shared by the header and the bar.
+    val artwork = rememberArtworkState(state.episode, ArtworkPlacement.Hero)
 
     Box(modifier = Modifier.fillMaxSize()) {
         EpisodeWideContent(
@@ -80,16 +85,18 @@ fun EpisodeWideLayout(
             onDownloaderAction = onDownloaderAction,
             onMediaInfoClick = onMediaInfoClick,
             scrollState = scrollState,
+            artwork = artwork,
         )
 
         LightStatusBarOverArtwork(
-            hasArtwork = state.episode != null,
+            hasArtwork = artwork.hasArtwork,
             topBarBackgroundAlpha = topBarBackgroundAlpha,
         )
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,
             backgroundAlpha = topBarBackgroundAlpha,
+            overArtwork = artwork.hasArtwork,
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
             onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
         ) {
@@ -130,6 +137,7 @@ fun EpisodeWideContent(
     onMediaInfoClick: (() -> Unit)?,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
+    artwork: ArtworkState = rememberArtworkState(state.episode, ArtworkPlacement.Hero),
 ) {
     val widthClass = currentWidthClass()
     val safePadding = rememberSafePadding()
@@ -146,6 +154,7 @@ fun EpisodeWideContent(
                     item = episode,
                     scrollState = scrollState,
                     widthClass = widthClass,
+                    artwork = artwork,
                     title = {
                         val episodeNumberText =
                             stringResource(id = CoreR.string.episode_number, episode.indexNumber)

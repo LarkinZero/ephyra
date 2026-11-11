@@ -34,7 +34,9 @@ private val BackgroundFadeEnd = 180.dp
 
 /**
  * [backgroundAlpha] fades in a solid background behind the buttons, so scrolled content doesn't
- * run through them. See [rememberTopBarBackgroundAlpha].
+ * run through them. See [rememberTopBarBackgroundAlpha]. [overArtwork] is false when there is no
+ * artwork under the bar (a page without one, loading, an error): then the bar has no dark scrim
+ * (#437).
  */
 @Composable
 fun ItemTopBar(
@@ -43,6 +45,7 @@ fun ItemTopBar(
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     backgroundAlpha: () -> Float = { 0f },
+    overArtwork: Boolean = true,
     content: @Composable (RowScope.() -> Unit) = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -50,15 +53,17 @@ fun ItemTopBar(
 
     Box(modifier = Modifier.fillMaxWidth()) {
         // Keeps the status bar readable on top of artwork.
-        Box(
-            modifier =
-                Modifier.matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent)
+        if (overArtwork) {
+            Box(
+                modifier =
+                    Modifier.matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent)
+                            )
                         )
-                    )
-        )
+            )
+        }
         Box(
             modifier =
                 Modifier.matchParentSize()

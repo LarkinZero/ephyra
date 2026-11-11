@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.presentation.film
 import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,7 +37,9 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,8 +54,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -81,6 +86,8 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
+import dev.jdtech.jellyfin.presentation.film.components.ArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
@@ -94,6 +101,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
+import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -231,6 +239,8 @@ fun SeasonListDetail(
     LaunchedEffect(selected) {
         if (selected != null && selected != selectedEpisodeId) onSelectEpisode(selected)
     }
+    // CE (#437): whether the detail pane's artwork is under the status bar, for its icons.
+    var detailOverArtwork by remember { mutableStateOf(false) }
 
     SeasonWideLayout(
         state = state,
@@ -240,10 +250,12 @@ fun SeasonListDetail(
         onAction = onAction,
         onDownloadSeason = onDownloadSeason,
         onDeleteSeasonDownloads = onDeleteSeasonDownloads,
+        detailOverArtwork = { detailOverArtwork },
         detailPane = { episodeId ->
             SeasonEpisodeDetailPane(
                 episodeId = episodeId,
                 navigateToPerson = navigateToPerson,
+                onOverArtworkChange = { detailOverArtwork = it },
                 onEpisodeChanged = { episode ->
                     // Watched and favourite change in the detail pane only; the list shows the
                     // watched tick and the season its own state, so they are loaded again.
@@ -276,6 +288,7 @@ fun SeasonWideLayout(
     onDeleteSeasonDownloads: () -> Unit,
     detailPane: @Composable (episodeId: UUID) -> Unit,
     lazyListState: LazyListState = rememberLazyListState(),
+    detailOverArtwork: () -> Boolean = { false },
 ) {
     val context = LocalContext.current
     val safePadding = rememberSafePadding()
@@ -286,6 +299,8 @@ fun SeasonWideLayout(
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
 
     val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(lazyListState)
+    // CE (#437): the artwork under the top bar, if any; shared by the header and the bar.
+    val artwork = rememberArtworkState(state.season, ArtworkPlacement.Header)
 
     var seasonQualityDialogOpen by remember { mutableStateOf(false) }
     var episodeQualityTarget by remember { mutableStateOf<FindroidEpisode?>(null) }
@@ -373,6 +388,7 @@ fun SeasonWideLayout(
                             item {
                                 SeasonListHeader(
                                     season = season,
+                                    artwork = artwork,
                                     lazyListState = lazyListState,
                                     paddingStart = paddingStart,
                                     paddingEnd = paddingEnd,
@@ -490,13 +506,19 @@ fun SeasonWideLayout(
                 )
             }
 
-        LightStatusBarOverArtwork(state.season != null, topBarBackgroundAlpha)
+        // The status bar spans both panes and has one icon colour: light icons only while both
+        // panes show artwork under it.
+        LightStatusBarOverArtwork(
+            hasArtwork = artwork.hasArtwork && detailOverArtwork(),
+            topBarBackgroundAlpha = topBarBackgroundAlpha,
+        )
         // One top bar for the page, over the list pane: the detail pane has no back or home.
         Box(modifier = Modifier.width(listWidth)) {
             ItemTopBar(
                 hasBackButton = true,
                 hasHomeButton = true,
                 backgroundAlpha = topBarBackgroundAlpha,
+                overArtwork = artwork.hasArtwork,
                 onBackClick = { onAction(SeasonAction.OnBackClick) },
                 onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             ) {
@@ -553,6 +575,7 @@ fun SeasonWideLayout(
 @Composable
 private fun SeasonListHeader(
     season: FindroidSeason,
+    artwork: ArtworkState,
     lazyListState: LazyListState,
     paddingStart: Dp,
     paddingEnd: Dp,
@@ -560,6 +583,7 @@ private fun SeasonListHeader(
     ItemHeader(
         item = season,
         lazyListState = lazyListState,
+        artwork = artwork,
         content = {
             Row(
                 modifier =
@@ -699,6 +723,7 @@ internal fun CompactEpisodeRow(
 private fun SeasonEpisodeDetailPane(
     episodeId: UUID,
     navigateToPerson: (personId: UUID) -> Unit,
+    onOverArtworkChange: (Boolean) -> Unit,
     onEpisodeChanged: (FindroidEpisode) -> Unit,
     onDownloadChanged: () -> Unit,
 ) {
@@ -756,6 +781,20 @@ private fun SeasonEpisodeDetailPane(
         )
     }
 
+    // CE (#437): this pane's artwork is under the status bar until its band has faded in.
+    val scrollState = rememberScrollState()
+    val topBarBackgroundAlpha = rememberTopBarBackgroundAlpha(scrollState)
+    val artwork = rememberArtworkState(state.episode, ArtworkPlacement.Hero)
+    val overArtwork by
+        remember(artwork, topBarBackgroundAlpha) {
+            derivedStateOf { artwork.hasArtwork && topBarBackgroundAlpha() < 0.5f }
+        }
+    val currentOnOverArtworkChange by rememberUpdatedState(onOverArtworkChange)
+    DisposableEffect(overArtwork) {
+        currentOnOverArtworkChange(overArtwork)
+        onDispose { currentOnOverArtworkChange(false) }
+    }
+
     EpisodeWideContent(
         state = state,
         downloaderState = { downloaderState.value },
@@ -776,7 +815,26 @@ private fun SeasonEpisodeDetailPane(
             viewModel.onAction(action)
         },
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
-        scrollState = rememberScrollState(),
+        scrollState = scrollState,
+        artwork = artwork,
+    )
+    DetailPaneStatusBarBackground(alpha = topBarBackgroundAlpha)
+}
+
+/**
+ * CE (#437): the detail pane has no top bar of its own (the page's is over the list), so this
+ * band keeps the scrolled episode from running under the status bar. It fades in as the list's
+ * top bar does.
+ */
+@Composable
+private fun DetailPaneStatusBarBackground(alpha: () -> Float) {
+    val background = MaterialTheme.colorScheme.background
+    Box(
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(rememberSafePadding().top + MaterialTheme.spacings.medium)
+                .graphicsLayer { this.alpha = alpha() }
+                .background(Brush.verticalGradient(0.7f to background, 1f to Color.Transparent))
     )
 }
 
