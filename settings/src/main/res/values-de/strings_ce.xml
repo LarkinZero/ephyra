@@ -182,4 +182,14 @@
     <string name="ce_pref_detail_credits_summary">Unter der Beschreibung auf Film- und Serienseiten</string>
     <string name="ce_media_segments_auto_skip_pip">Nur im Bild-in-Bild-Modus</string>
     <string name="ce_media_segments_auto_skip_always">Immer</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d Folge</item>
+        <item quantity="other">%d Folgen</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+    <string name="ce_number_no_limit">Unbegrenzt</string>
+    <string name="ce_number_off">Aus</string>
 </resources>

@@ -182,4 +182,12 @@
     <string name="ce_pref_detail_credits_summary">喺電影同劇集頁面嘅簡介下面</string>
     <string name="ce_media_segments_auto_skip_pip">只限畫中畫模式</string>
     <string name="ce_media_segments_auto_skip_always">一律</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="other">%d 集</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="other">%d 日</item>
+    </plurals>
+    <string name="ce_number_no_limit">冇上限</string>
+    <string name="ce_number_off">關閉</string>
 </resources>

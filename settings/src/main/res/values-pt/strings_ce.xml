@@ -182,4 +182,14 @@
     <string name="ce_pref_detail_credits_summary">Por baixo da sinopse nas páginas de filmes e séries</string>
     <string name="ce_media_segments_auto_skip_pip">Apenas em imagem em imagem</string>
     <string name="ce_media_segments_auto_skip_always">Sempre</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d episódio</item>
+        <item quantity="other">%d episódios</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d dia</item>
+        <item quantity="other">%d dias</item>
+    </plurals>
+    <string name="ce_number_no_limit">Sem limite</string>
+    <string name="ce_number_off">Desativado</string>
 </resources>

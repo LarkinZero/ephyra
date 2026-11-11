@@ -182,4 +182,18 @@
     <string name="ce_pref_detail_credits_summary">Pod popisem na stránkách filmů a seriálů</string>
     <string name="ce_media_segments_auto_skip_pip">Pouze v režimu obraz v obraze</string>
     <string name="ce_media_segments_auto_skip_always">Vždy</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d epizoda</item>
+        <item quantity="few">%d epizody</item>
+        <item quantity="many">%d epizody</item>
+        <item quantity="other">%d epizod</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d den</item>
+        <item quantity="few">%d dny</item>
+        <item quantity="many">%d dne</item>
+        <item quantity="other">%d dní</item>
+    </plurals>
+    <string name="ce_number_no_limit">Bez omezení</string>
+    <string name="ce_number_off">Vypnuto</string>
 </resources>

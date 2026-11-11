@@ -182,4 +182,18 @@
     <string name="ce_pref_detail_credits_summary">Под описанием на страницах фильмов и сериалов</string>
     <string name="ce_media_segments_auto_skip_pip">Только в режиме «картинка в картинке»</string>
     <string name="ce_media_segments_auto_skip_always">Всегда</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d серия</item>
+        <item quantity="few">%d серии</item>
+        <item quantity="many">%d серий</item>
+        <item quantity="other">%d серии</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <string name="ce_number_no_limit">Без ограничений</string>
+    <string name="ce_number_off">Выкл.</string>
 </resources>

@@ -182,4 +182,14 @@
     <string name="ce_pref_detail_credits_summary">Film və serial səhifələrində icmalın altında</string>
     <string name="ce_media_segments_auto_skip_pip">Yalnız şəkil içində şəkil rejimində</string>
     <string name="ce_media_segments_auto_skip_always">Həmişə</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d seriya</item>
+        <item quantity="other">%d seriya</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d gün</item>
+        <item quantity="other">%d gün</item>
+    </plurals>
+    <string name="ce_number_no_limit">Limitsiz</string>
+    <string name="ce_number_off">Söndürülüb</string>
 </resources>

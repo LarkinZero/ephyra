@@ -182,4 +182,14 @@
     <string name="ce_pref_detail_credits_summary">Kirjelduse all filmide ja sarjade lehtedel</string>
     <string name="ce_media_segments_auto_skip_pip">Ainult pilt-pildis-režiimis</string>
     <string name="ce_media_segments_auto_skip_always">Alati</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d episood</item>
+        <item quantity="other">%d episoodi</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d päev</item>
+        <item quantity="other">%d päeva</item>
+    </plurals>
+    <string name="ce_number_no_limit">Piiranguta</string>
+    <string name="ce_number_off">Väljas</string>
 </resources>
