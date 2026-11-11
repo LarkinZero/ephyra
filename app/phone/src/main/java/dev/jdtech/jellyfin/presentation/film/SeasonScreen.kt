@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
@@ -99,6 +100,8 @@ fun SeasonScreen(
     // CE: the episode selected in the expanded list-detail. Kept here, above the width branch, so
     // a rotation to the single-column page and back keeps it (docs/tablet/4-design.md §7).
     var selectedEpisodeId by rememberSaveable { mutableStateOf(initialEpisodeId) }
+    // CE (#435): one episode list position for both layouts, kept here for the same reason.
+    val episodeListState = rememberSeasonListState()
 
     ReloadOnResume(shouldReload = { viewModel.shouldReload(seasonId, downloadsOnly, stopEventFollows = true) }) {
         viewModel.loadSeason(seasonId = seasonId, downloadsOnly = downloadsOnly, seriesId = seriesId)
@@ -157,6 +160,7 @@ fun SeasonScreen(
             state = state,
             selectedEpisodeId = selectedEpisodeId,
             onSelectEpisode = { selectedEpisodeId = it },
+            lazyListState = episodeListState,
             onAction = onAction,
             onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
             onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
@@ -173,6 +177,7 @@ fun SeasonScreen(
         onAction = onAction,
         onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
         onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
+        lazyListState = episodeListState,
     )
 }
 
@@ -182,6 +187,7 @@ private fun SeasonScreenLayout(
     onAction: (SeasonAction) -> Unit,
     onDownloadSeason: (maxBitrate: Int?) -> Unit,
     onDeleteSeasonDownloads: () -> Unit,
+    lazyListState: LazyListState = rememberLazyListState(),
 ) {
     val context = LocalContext.current
     val safePadding = rememberSafePadding()
@@ -189,8 +195,6 @@ private fun SeasonScreenLayout(
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
     val paddingEnd = safePadding.end + MaterialTheme.spacings.default
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
-
-    val lazyListState = rememberLazyListState()
 
     var seasonQualityDialogOpen by remember { mutableStateOf(false) }
     var episodeQualityTarget by remember { mutableStateOf<FindroidEpisode?>(null) }
