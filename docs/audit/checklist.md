@@ -387,7 +387,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-92 | About shows the app version and install, server and device information | #223, #211 | works | works | works |
-| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works |
+| SET-93 | Licences list and each licence's text (TV scrolls with the D-pad) | #211, #364 | works (#384 fixed: a tap opens the licence text in a dialog) | unpolished: "View license" opens the browser, not the text | works (#424 fixed: Back from a licence puts focus on the library that was opened) |
 | SET-94 | Export device profile: share or copy the JSON | ce.31 (#23) | works | broken #385: "Could not build device profile" | n/a |
 | SET-95 | Device profile screen: what the device can decode | #211 | n/a | n/a | works |
 | SET-96 | Report a problem and source code: links on phone, a QR code on TV | #223 | works | works | works |
