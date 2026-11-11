@@ -14,6 +14,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -78,6 +79,9 @@ class LoginViewModel @Inject constructor(private val repository: SetupRepository
     private fun quickConnect() {
         if (quickConnectJob?.isActive == true) {
             quickConnectJob?.cancel()
+            quickConnectJob = null
+            // CE (#382): the code goes with the polling, so the button never shows a dead code.
+            _state.update { it.copy(quickConnectCode = null) }
             return
         }
         quickConnectJob =
