@@ -131,6 +131,8 @@ Compact and medium: today's page (header, then the episode list capped at `textM
 
 Already two-column at 600 dp+ (image left, text right). Only the tokens change: the image is `posterInHeader × 1.6` tall instead of a fixed 320 dp, and the credit rows use `cardVertical`.
 
+- **Below the top bar** (#436): the image sits at the start margin, where the back and home buttons are, so the two-column page starts below the top bar (the status bar plus 64 dp) instead of under it. The name and biography column is capped at `textMaxWidth`. The compact page keeps its centred image between the buttons.
+
 ## 9. Player
 
 The player is the second biggest gap after the item pages. It is View/XML (`PlayerActivity`); the changes below are deliberately possible without rewriting it in Compose, because a rewrite is its own project.
