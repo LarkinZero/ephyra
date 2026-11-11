@@ -42,9 +42,11 @@ constructor(val application: Application, private val database: ServerDatabaseDa
 
     fun deleteAddress(addressId: UUID) {
         viewModelScope.launch(Dispatchers.IO) {
+            _state.emit(_state.value.copy(error = null))
             val currentAddress = database.getServerCurrentAddress(currentServerId)
             if (addressId == currentAddress?.id) {
-                Timber.e("You cannot delete the current address")
+                // CE (#390): say why instead of dropping the removal without a word.
+                setError(SetupR.string.ce_server_address_in_use)
                 return@launch
             }
             database.deleteServerAddress(addressId)
@@ -81,6 +83,8 @@ constructor(val application: Application, private val database: ServerDatabaseDa
                 val existingAddresses =
                     database.getServerWithAddresses(currentServerId).addresses
                 if (existingAddresses.any { it.address == match.address }) {
+                    // CE (#390): the dialog has closed, so say why nothing was added.
+                    setError(SetupR.string.ce_server_address_already_added)
                     return@launch
                 }
 

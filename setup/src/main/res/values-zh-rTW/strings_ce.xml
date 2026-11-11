@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">圖案已設定</string>
     <string name="ce_profile_pattern_removed">圖案已移除</string>
     <string name="ce_profile_pattern_grid">解鎖圖案，3 × 3 點的格線</string>
+    <string name="ce_server_address_in_use">此位址正在使用中，無法移除</string>
+    <string name="ce_server_address_already_added">此位址已新增</string>
 </resources>

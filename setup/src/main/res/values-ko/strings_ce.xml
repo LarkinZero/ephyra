@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">패턴을 설정했습니다</string>
     <string name="ce_profile_pattern_removed">패턴을 삭제했습니다</string>
     <string name="ce_profile_pattern_grid">잠금 해제 패턴, 3×3 점 격자</string>
+    <string name="ce_server_address_in_use">이 주소는 사용 중이므로 제거할 수 없습니다</string>
+    <string name="ce_server_address_already_added">이 주소는 이미 추가되어 있습니다</string>
 </resources>

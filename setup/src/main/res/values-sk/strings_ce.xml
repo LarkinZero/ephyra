@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Vzor nastavený</string>
     <string name="ce_profile_pattern_removed">Vzor odstránený</string>
     <string name="ce_profile_pattern_grid">Vzor na odomknutie, mriežka 3 × 3 bodov</string>
+    <string name="ce_server_address_in_use">Táto adresa sa používa a nedá sa odstrániť</string>
+    <string name="ce_server_address_already_added">Táto adresa už je pridaná</string>
 </resources>

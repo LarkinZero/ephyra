@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Gesto nastaveno</string>
     <string name="ce_profile_pattern_removed">Gesto odebráno</string>
     <string name="ce_profile_pattern_grid">Gesto pro odemknutí, mřížka 3 × 3 bodů</string>
+    <string name="ce_server_address_in_use">Tato adresa se používá a nelze ji odebrat</string>
+    <string name="ce_server_address_already_added">Tato adresa už je přidaná</string>
 </resources>

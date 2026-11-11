@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Patró establert</string>
     <string name="ce_profile_pattern_removed">Patró eliminat</string>
     <string name="ce_profile_pattern_grid">Patró de desbloqueig, una graella de 3 per 3 punts</string>
+    <string name="ce_server_address_in_use">Aquesta adreça està en ús i no es pot eliminar</string>
+    <string name="ce_server_address_already_added">Aquesta adreça ja s\'ha afegit</string>
 </resources>

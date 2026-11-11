@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Naxış təyin edildi</string>
     <string name="ce_profile_pattern_removed">Naxış silindi</string>
     <string name="ce_profile_pattern_grid">Kilid açma naxışı, 3 × 3 nöqtədən ibarət şəbəkə</string>
+    <string name="ce_server_address_in_use">Bu ünvan istifadədədir və silinə bilməz</string>
+    <string name="ce_server_address_already_added">Bu ünvan artıq əlavə edilib</string>
 </resources>

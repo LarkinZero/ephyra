@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Mönster angivet</string>
     <string name="ce_profile_pattern_removed">Mönster borttaget</string>
     <string name="ce_profile_pattern_grid">Upplåsningsmönster, ett rutnät med 3 gånger 3 punkter</string>
+    <string name="ce_server_address_in_use">Den här adressen används och kan inte tas bort</string>
+    <string name="ce_server_address_already_added">Den här adressen har redan lagts till</string>
 </resources>

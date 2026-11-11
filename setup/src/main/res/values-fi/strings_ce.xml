@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Kuvio asetettu</string>
     <string name="ce_profile_pattern_removed">Kuvio poistettu</string>
     <string name="ce_profile_pattern_grid">Avauskuvio, 3 × 3 pisteen ruudukko</string>
+    <string name="ce_server_address_in_use">Tämä osoite on käytössä, eikä sitä voi poistaa</string>
+    <string name="ce_server_address_already_added">Tämä osoite on jo lisätty</string>
 </resources>

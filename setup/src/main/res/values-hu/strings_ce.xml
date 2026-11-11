@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Minta beállítva</string>
     <string name="ce_profile_pattern_removed">Minta eltávolítva</string>
     <string name="ce_profile_pattern_grid">Feloldási minta, 3 × 3 pontból álló rács</string>
+    <string name="ce_server_address_in_use">Ez a cím használatban van, ezért nem távolítható el</string>
+    <string name="ce_server_address_already_added">Ez a cím már hozzá van adva</string>
 </resources>

@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Pola disetel</string>
     <string name="ce_profile_pattern_removed">Pola dihapus</string>
     <string name="ce_profile_pattern_grid">Pola buka kunci, kisi 3 × 3 titik</string>
+    <string name="ce_server_address_in_use">Alamat ini sedang digunakan dan tidak dapat dihapus</string>
+    <string name="ce_server_address_already_added">Alamat ini sudah ditambahkan</string>
 </resources>

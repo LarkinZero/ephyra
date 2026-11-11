@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Schéma défini</string>
     <string name="ce_profile_pattern_removed">Schéma supprimé</string>
     <string name="ce_profile_pattern_grid">Schéma de déverrouillage, une grille de 3 points sur 3</string>
+    <string name="ce_server_address_in_use">Cette adresse est utilisée et ne peut pas être supprimée</string>
+    <string name="ce_server_address_already_added">Cette adresse a déjà été ajoutée</string>
 </resources>

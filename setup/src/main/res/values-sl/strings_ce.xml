@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Vzorec nastavljen</string>
     <string name="ce_profile_pattern_removed">Vzorec odstranjen</string>
     <string name="ce_profile_pattern_grid">Vzorec za odklepanje, mreža 3 × 3 pik</string>
+    <string name="ce_server_address_in_use">Ta naslov je v uporabi in ga ni mogoče odstraniti</string>
+    <string name="ce_server_address_already_added">Ta naslov je že dodan</string>
 </resources>

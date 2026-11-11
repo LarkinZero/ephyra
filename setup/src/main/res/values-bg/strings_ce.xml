@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">Фигурата е зададена</string>
     <string name="ce_profile_pattern_removed">Фигурата е премахната</string>
     <string name="ce_profile_pattern_grid">Фигура за отключване, мрежа от 3 на 3 точки</string>
+    <string name="ce_server_address_in_use">Този адрес се използва и не може да бъде премахнат</string>
+    <string name="ce_server_address_already_added">Този адрес вече е добавен</string>
 </resources>

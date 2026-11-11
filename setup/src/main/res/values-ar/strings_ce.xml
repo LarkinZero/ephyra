@@ -50,4 +50,6 @@
     <string name="ce_profile_pattern_saved">تم تعيين النمط</string>
     <string name="ce_profile_pattern_removed">تمت إزالة النمط</string>
     <string name="ce_profile_pattern_grid">نمط فتح القفل، شبكة من 3 × 3 نقاط</string>
+    <string name="ce_server_address_in_use">هذا العنوان قيد الاستخدام ولا يمكن إزالته</string>
+    <string name="ce_server_address_already_added">هذا العنوان مضاف بالفعل</string>
 </resources>
