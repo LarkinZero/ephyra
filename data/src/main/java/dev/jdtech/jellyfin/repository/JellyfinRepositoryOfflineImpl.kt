@@ -47,6 +47,7 @@ class JellyfinRepositoryOfflineImpl(
     private val jellyfinApi: JellyfinApi,
     private val database: ServerDatabaseDao,
     private val appPreferences: AppPreferences,
+    private val syncRequester: UserDataSyncRequester = UserDataSyncRequester.NONE,
 ) : JellyfinRepository {
 
     companion object {
@@ -458,7 +459,7 @@ class JellyfinRepositoryOfflineImpl(
         withContext(Dispatchers.IO) {
             database.setPlaybackPositionTicks(itemId, currentUserId, userData.positionTicks)
             database.setPlayed(currentUserId, itemId, userData.played)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
     }
 
@@ -469,21 +470,21 @@ class JellyfinRepositoryOfflineImpl(
     ) {
         withContext(Dispatchers.IO) {
             database.setPlaybackPositionTicks(itemId, currentUserId, positionTicks)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
     }
 
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             database.setFavorite(currentUserId, itemId, true)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
     }
 
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             database.setFavorite(currentUserId, itemId, false)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
     }
 
@@ -491,15 +492,23 @@ class JellyfinRepositoryOfflineImpl(
         withContext(Dispatchers.IO) {
             database.setPlayed(currentUserId, itemId, true)
             database.setPlaybackPositionTicks(itemId, currentUserId, 0)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
     }
 
     override suspend fun markAsUnplayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
             database.setPlayed(currentUserId, itemId, false)
-            database.setUserDataToBeSynced(currentUserId, itemId, true)
+            markToBeSynced(itemId)
         }
+    }
+
+    /**
+     * Marks the item's user data to be sent to the server later and asks for a sync. The request
+     * is only made when the mark is new, so a run of failed progress reports asks once.
+     */
+    private suspend fun markToBeSynced(itemId: UUID) {
+        if (database.markUserDataToBeSynced(currentUserId, itemId) > 0) syncRequester.request()
     }
 
     override fun getBaseUrl(): String {

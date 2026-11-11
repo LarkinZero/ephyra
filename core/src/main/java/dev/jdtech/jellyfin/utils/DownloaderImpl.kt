@@ -311,7 +311,12 @@ class DownloaderImpl(
                     smartQueued = smartQueued,
                 )
             )
-            database.insertUserData(item.toFindroidUserDataDto(jellyfinRepository.getUserId()))
+            // Progress from an earlier download of this item that has not reached the server yet
+            // is newer than what the server sent with the item: keep it.
+            val userId = jellyfinRepository.getUserId()
+            if (database.getUserDataToBeSynced(userId, item.id) == null) {
+                database.insertUserData(item.toFindroidUserDataDto(userId))
+            }
 
             val resolvedStorageIndex = dirs.indexOf(storageLocation)
             downloadExternalMediaStreams(item, source, resolvedStorageIndex, allowMetered, allowRoaming)
@@ -424,7 +429,9 @@ class DownloaderImpl(
         }
         database.deleteMediaStreamsBySourceId(source.id)
 
-        database.deleteUserData(item.id)
+        // Progress watched offline that has not reached the server yet outlives the download:
+        // the sync sends it and then removes the row (#281).
+        database.deleteSyncedUserData(item.id)
 
         File(context.filesDir, "trickplay/${item.id}").deleteRecursively()
         File(context.filesDir, "images/${item.id}").deleteRecursively()

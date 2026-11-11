@@ -14,6 +14,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.ApiClient
+import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.extensions.userDataApi
 import org.jellyfin.sdk.model.api.UpdateUserItemDataDto
 import timber.log.Timber
@@ -49,6 +50,11 @@ constructor(
 
                     val api = apiFor(serverAddress.address, user.accessToken, user.id)
                     if (!syncUserData(api, user.id, pending)) hadFailures = true
+                    // A write that failed while this run was sending keeps its row marked, and
+                    // asking for a sync during a run does nothing: run again for those rows.
+                    if (database.getAllUserDataToBeSynced(server.id, user.id).isNotEmpty()) {
+                        hadFailures = true
+                    }
                 }
             }
 
@@ -107,7 +113,26 @@ constructor(
                         ),
                 )
 
-                database.setUserDataToBeSynced(userId, userData.itemId, false)
+                database.clearUserDataToBeSynced(
+                    userId = userId,
+                    itemId = userData.itemId,
+                    played = userData.played,
+                    favorite = userData.favorite,
+                    playbackPositionTicks = userData.playbackPositionTicks,
+                )
+                // A row kept only for this sync, because its download was deleted first.
+                database.deleteUserDataIfOrphaned(userId, userData.itemId)
+            } catch (e: InvalidStatusException) {
+                if (e.status == HTTP_NOT_FOUND) {
+                    // The item is gone from the server: there is nothing to send, ever. Without
+                    // this the row of a deleted download would be retried for good.
+                    Timber.w("Item ${userData.itemId} is gone from the server, dropping its sync")
+                    database.setUserDataToBeSynced(userId, userData.itemId, false)
+                    database.deleteUserDataIfOrphaned(userId, userData.itemId)
+                } else {
+                    Timber.e(e, "Failed to sync user data")
+                    allOk = false
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to sync user data")
                 allOk = false
@@ -116,3 +141,5 @@ constructor(
         return allOk
     }
 }
+
+private const val HTTP_NOT_FOUND = 404

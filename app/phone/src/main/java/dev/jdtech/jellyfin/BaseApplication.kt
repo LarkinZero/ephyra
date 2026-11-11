@@ -4,12 +4,9 @@ import android.app.Application
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.BackoffPolicy
 import androidx.work.Configuration
-import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -32,7 +29,7 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.JellyfinImageSizeInterceptor
 import dev.jdtech.jellyfin.work.MpvCleanupWorker
 import dev.jdtech.jellyfin.work.OrphanSweepWorker
-import dev.jdtech.jellyfin.work.SyncWorker
+import dev.jdtech.jellyfin.work.UserDataSync
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
@@ -54,6 +51,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
     @Inject lateinit var downloadQueue: DownloadQueue
 
     @Inject lateinit var smartDownloads: SmartDownloads
+
+    @Inject lateinit var userDataSync: UserDataSync
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
@@ -95,7 +94,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
             // CE (#250): WorkManager is set up here, off the main thread, rather than in onCreate.
             val workManager = WorkManager.getInstance(applicationContext)
 
-            scheduleUserDataSync(workManager)
+            // CE (#250): leave the first seconds to the Home screen's own requests.
+            userDataSync.request(initialDelaySeconds = SYNC_INITIAL_DELAY_SECONDS)
 
             if (!appPreferences.getValue(appPreferences.mpvMigrated)) {
                 scheduleMpvCleanup(workManager)
@@ -146,25 +146,6 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
             }
             .crossfade(true)
             .build()
-    }
-
-    private fun scheduleUserDataSync(workManager: WorkManager) {
-        val constraints =
-            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-
-        val syncWorkRequest =
-            OneTimeWorkRequestBuilder<SyncWorker>()
-                .setConstraints(constraints)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
-                // CE (#250): leave the first seconds to the Home screen's own requests.
-                .setInitialDelay(SYNC_INITIAL_DELAY_SECONDS, TimeUnit.SECONDS)
-                .build()
-
-        workManager.enqueueUniqueWork(
-            uniqueWorkName = "syncUserData",
-            existingWorkPolicy = ExistingWorkPolicy.KEEP,
-            request = syncWorkRequest,
-        )
     }
 
     private fun scheduleMpvCleanup(workManager: WorkManager) {

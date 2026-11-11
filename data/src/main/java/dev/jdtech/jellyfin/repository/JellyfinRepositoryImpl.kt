@@ -72,6 +72,7 @@ class JellyfinRepositoryImpl(
     private val database: ServerDatabaseDao,
     private val appPreferences: AppPreferences,
     private val deviceProfileBuilder: DeviceProfileBuilder,
+    private val syncRequester: UserDataSyncRequester = UserDataSyncRequester.NONE,
 ) : JellyfinRepository {
     private val currentUserId: UUID
         get() = jellyfinApi.userId
@@ -764,7 +765,7 @@ class JellyfinRepositoryImpl(
                 )
             } catch (_: Exception) {
                 // Nothing local changed without user data, so there is nothing to sync later.
-                if (userData != null) database.setUserDataToBeSynced(currentUserId, itemId, true)
+                if (userData != null) markToBeSynced(itemId)
             }
         }
     }
@@ -791,7 +792,7 @@ class JellyfinRepositoryImpl(
                     )
                 )
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                markToBeSynced(itemId)
             }
         }
     }
@@ -802,7 +803,7 @@ class JellyfinRepositoryImpl(
             try {
                 jellyfinApi.userDataApi.markFavoriteItem(itemId)
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                markToBeSynced(itemId)
             }
         }
     }
@@ -813,7 +814,7 @@ class JellyfinRepositoryImpl(
             try {
                 jellyfinApi.userDataApi.unmarkFavoriteItem(itemId)
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                markToBeSynced(itemId)
             }
         }
     }
@@ -824,7 +825,7 @@ class JellyfinRepositoryImpl(
             try {
                 jellyfinApi.userDataApi.markPlayedItem(itemId)
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                markToBeSynced(itemId)
             }
         }
     }
@@ -835,9 +836,17 @@ class JellyfinRepositoryImpl(
             try {
                 jellyfinApi.userDataApi.markUnplayedItem(itemId)
             } catch (_: Exception) {
-                database.setUserDataToBeSynced(currentUserId, itemId, true)
+                markToBeSynced(itemId)
             }
         }
+    }
+
+    /**
+     * Marks the item's user data to be sent to the server later and asks for a sync. The request
+     * is only made when the mark is new, so a run of failed progress reports asks once.
+     */
+    private suspend fun markToBeSynced(itemId: UUID) {
+        if (database.markUserDataToBeSynced(currentUserId, itemId) > 0) syncRequester.request()
     }
 
     override fun getBaseUrl() = jellyfinApi.api.baseUrl.orEmpty()
