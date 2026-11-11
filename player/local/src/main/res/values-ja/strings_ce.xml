@@ -25,4 +25,5 @@
         <item quantity="other">%d 秒後に開始</item>
     </plurals>
     <string name="ce_track_forced">強制</string>
+    <string name="ce_player_connection_lost">接続が切れました。ネットワークが戻ると再生を続けます。</string>
 </resources>

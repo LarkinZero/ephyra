@@ -27,4 +27,5 @@
         <item quantity="other">Starter om %d sekunder</item>
     </plurals>
     <string name="ce_track_forced">Tvungne</string>
+    <string name="ce_player_connection_lost">Forbindelsen blev afbrudt. Afspilningen fortsætter, når netværket er tilbage.</string>
 </resources>

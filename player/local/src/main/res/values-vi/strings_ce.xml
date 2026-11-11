@@ -25,4 +25,5 @@
         <item quantity="other">Bắt đầu sau %d giây</item>
     </plurals>
     <string name="ce_track_forced">Bắt buộc</string>
+    <string name="ce_player_connection_lost">Mất kết nối. Phát lại sẽ tiếp tục khi mạng trở lại.</string>
 </resources>

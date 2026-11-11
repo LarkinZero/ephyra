@@ -27,4 +27,5 @@
         <item quantity="other">Започва след %d секунди</item>
     </plurals>
     <string name="ce_track_forced">Принудителни</string>
+    <string name="ce_player_connection_lost">Връзката е прекъсната. Възпроизвеждането ще продължи, когато мрежата се върне.</string>
 </resources>

@@ -601,6 +601,21 @@ fun TvPlayerScreen(
         }
     }
 
+    // CE (#450): after a lost connection the player loads again by itself; the error goes with
+    // it once playback is back.
+    DisposableEffect(player) {
+        val recoveryListener =
+            object : androidx.media3.common.Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == androidx.media3.common.Player.STATE_READY) {
+                        playbackError = null
+                    }
+                }
+            }
+        player.addListener(recoveryListener)
+        onDispose { player.removeListener(recoveryListener) }
+    }
+
     playbackError?.let { error ->
         PlaybackErrorDialog(
             message = error.message?.takeIf { it.isNotBlank() } ?: error.errorCodeName,

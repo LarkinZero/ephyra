@@ -27,4 +27,5 @@
         <item quantity="other">Begint over %d seconden</item>
     </plurals>
     <string name="ce_track_forced">Geforceerd</string>
+    <string name="ce_player_connection_lost">Verbinding verbroken. Het afspelen gaat verder zodra het netwerk terug is.</string>
 </resources>

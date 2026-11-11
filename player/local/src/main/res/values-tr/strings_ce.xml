@@ -27,4 +27,5 @@
         <item quantity="other">%d saniye içinde başlıyor</item>
     </plurals>
     <string name="ce_track_forced">Zorunlu</string>
+    <string name="ce_player_connection_lost">Bağlantı kesildi. Ağ geri geldiğinde oynatma devam edecek.</string>
 </resources>

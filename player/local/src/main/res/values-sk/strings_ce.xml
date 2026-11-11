@@ -31,4 +31,5 @@
         <item quantity="other">Začne o %d sekúnd</item>
     </plurals>
     <string name="ce_track_forced">Vynútené</string>
+    <string name="ce_player_connection_lost">Pripojenie sa stratilo. Prehrávanie bude pokračovať, keď sa sieť vráti.</string>
 </resources>

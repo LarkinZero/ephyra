@@ -632,6 +632,13 @@ class PlayerActivity : BasePlayerActivity() {
                             seriesNameTextView.text = currentItemSeriesName
                             seriesNameTextView.isVisible = currentItemSeriesName != null
 
+                            // CE (#450): waiting for the network, with the controls up so Play
+                            // (retry now) is at hand.
+                            if (waitingForNetwork && !binding.connectionLost.isVisible) {
+                                binding.playerView.showController()
+                            }
+                            binding.connectionLost.isVisible = waitingForNetwork
+
                             // Media segment (#271)
                             currentSegment?.let { segment ->
                                 skipSegmentButton.text = getString(currentSkipButtonStringRes)
@@ -725,6 +732,8 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             is PlayerEvents.PlayerError -> {
+                                // CE (#450): shown as the waiting state, not as an error.
+                                if (event.waitingForNetwork) return@collect
                                 // Logged in PlayerViewModel. Without this the player sat there
                                 // without a word after a stream failed to open (#306).
                                 Toast.makeText(
