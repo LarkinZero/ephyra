@@ -98,4 +98,5 @@
     <string name="item_more_like_this">Sarnased</string>
     <string name="ce_session_revoked">%1$s logis sind välja. Jätkamiseks logi uuesti sisse.</string>
     <string name="ce_download_error_server">Server keeldus allalaadimisest (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Server vastas veaga (HTTP %1$d). Proovi hiljem uuesti.</string>
 </resources>

@@ -104,4 +104,5 @@
     <string name="item_more_like_this">Więcej podobnych</string>
     <string name="ce_session_revoked">%1$s wylogował cię. Zaloguj się ponownie, aby kontynuować.</string>
     <string name="ce_download_error_server">Serwer odrzucił pobieranie (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Serwer odpowiedział błędem (HTTP %1$d). Spróbuj ponownie później.</string>
 </resources>

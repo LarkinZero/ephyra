@@ -98,4 +98,5 @@
     <string name="item_more_like_this">Dans le même genre</string>
     <string name="ce_session_revoked">%1$s vous a déconnecté. Reconnectez-vous pour continuer.</string>
     <string name="ce_download_error_server">Le serveur a refusé le téléchargement (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Le serveur a répondu par une erreur (HTTP %1$d). Réessayez plus tard.</string>
 </resources>

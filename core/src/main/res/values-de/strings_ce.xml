@@ -98,4 +98,5 @@
     <string name="item_more_like_this">Mehr wie dieses</string>
     <string name="ce_session_revoked">%1$s hat dich abgemeldet. Melde dich erneut an, um fortzufahren.</string>
     <string name="ce_download_error_server">Der Server hat den Download abgelehnt (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Der Server hat mit einem Fehler geantwortet (HTTP %1$d). Versuche es später erneut.</string>
 </resources>

@@ -117,7 +117,7 @@ variant. An empty cell is work still to do.
 | HOM-12 | TV rows refresh in the background without reshuffling; focus comes back to the same card | #132 | n/a | n/a | works |
 | HOM-13 | When one row fails to load, the others still show | 1.2.0-ce.4 (#114) | not tested: cannot make one row fail on the demo server | not tested: cannot make one row fail on the demo server | not tested: cannot make one row fail on the demo server |
 | HOM-14 | Home reflects what was just watched after leaving the player (progress, Next Up) | #95 | unpolished #393: new item half off screen | unpolished #393: new item off screen to the left; not tested at 8 inch | works |
-| HOM-15 | Empty Home and a failed load show a message with Retry | #95 | works; empty Home not reachable | not tested: empty Home needs own server | broken #405: blank Home, no message or Retry |
+| HOM-15 | Empty Home and a failed load show a message with Retry | #95 | works after #377: the error button opens "Error loading data" with the reason in plain words ("Can't reach the Jellyfin server") and Retry, Share, Close, no stack trace (Share sends it); also My media and Library; empty Home not reachable | not tested: empty Home needs own server | broken #405: blank Home, no message or Retry |
 | HOM-16 | Home header: server name opens the server switcher with "Manage servers"; Search opens search | `HomeHeader` | unpolished #394: Back from search lands on My media | works | n/a |
 | HOM-17 | Long-press on a card copies the item's name | ce.33, `ClipboardUtils` | works | works | n/a |
 | HOM-18 | Home does not open partly scrolled when the carousel loads last | #95 | works | works | n/a |
@@ -178,7 +178,7 @@ Libraries, search, favourites and the item pages.
 | BRW-34 | Watched toggle updates the page and the server (check another client) | | unpolished #397: watched state hard to see | works | works |
 | BRW-35 | Favourite toggle updates the page, the Favorites tab and the server | | works | works | works |
 | BRW-36 | Long-press on title, overview, genres, people and similar text copies it | ce.33 (#42) | works | works | n/a |
-| BRW-37 | A page whose load fails (server off mid-load) shows an error with Retry instead of spinning | #95 | works | works; not tested at 8 inch | broken #405: page spins, no error or Retry |
+| BRW-37 | A page whose load fails (server off mid-load) shows an error with Retry instead of spinning | #95 | works after #377: its details dialog gives the reason in plain words with Retry, no stack trace | works; not tested at 8 inch | broken #405: page spins, no error or Retry |
 | BRW-38 | Movie, show, season and episode pages show new progress after leaving the player | #95 | works | works; not tested at 8 inch (player) | works |
 | BRW-39 | Status-bar icons stay readable over the backdrop | #291, #297 | works | works | n/a |
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | unpolished #396: blank person cards; season fallback not checked | unpolished #416: season without a poster shows a placeholder |

@@ -98,4 +98,5 @@
     <string name="item_more_like_this">Mer som detta</string>
     <string name="ce_session_revoked">%1$s loggade ut dig. Logga in igen för att fortsätta.</string>
     <string name="ce_download_error_server">Servern nekade nedladdningen (HTTP %1$d)</string>
+    <string name="ce_error_server_status">Servern svarade med ett fel (HTTP %1$d). Försök igen senare.</string>
 </resources>

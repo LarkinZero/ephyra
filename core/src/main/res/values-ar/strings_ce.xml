@@ -110,4 +110,5 @@
     <string name="item_more_like_this">المزيد من هذا القبيل</string>
     <string name="ce_session_revoked">سجّل %1$s خروجك. سجّل الدخول مرة أخرى للمتابعة.</string>
     <string name="ce_download_error_server">رفض الخادم التنزيل (HTTP %1$d)</string>
+    <string name="ce_error_server_status">ردّ الخادم بخطأ (HTTP %1$d). حاول مرة أخرى لاحقًا.</string>
 </resources>
