@@ -180,4 +180,14 @@
     <string name="ce_pref_detail_similar_summary">媒体库中的类似作品</string>
     <string name="ce_pref_detail_credits">导演和编剧</string>
     <string name="ce_pref_detail_credits_summary">显示在电影和剧集页面的简介下方</string>
+    <string name="ce_media_segments_auto_skip_pip">仅在画中画模式下</string>
+    <string name="ce_media_segments_auto_skip_always">始终</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="other">%d 集</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="other">%d 天</item>
+    </plurals>
+    <string name="ce_number_no_limit">无限制</string>
+    <string name="ce_number_off">关闭</string>
 </resources>

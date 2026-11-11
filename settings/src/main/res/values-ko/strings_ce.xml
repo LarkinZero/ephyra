@@ -180,4 +180,14 @@
     <string name="ce_pref_detail_similar_summary">라이브러리의 비슷한 타이틀</string>
     <string name="ce_pref_detail_credits">감독 및 작가</string>
     <string name="ce_pref_detail_credits_summary">영화 및 시리즈 페이지의 줄거리 아래에 표시</string>
+    <string name="ce_media_segments_auto_skip_pip">PIP 모드에서만</string>
+    <string name="ce_media_segments_auto_skip_always">항상</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="other">에피소드 %d개</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="other">%d일</item>
+    </plurals>
+    <string name="ce_number_no_limit">제한 없음</string>
+    <string name="ce_number_off">사용 안 함</string>
 </resources>

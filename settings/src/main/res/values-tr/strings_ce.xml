@@ -180,4 +180,16 @@
     <string name="ce_pref_detail_similar_summary">Kitaplığınızdaki benzer yapımlar</string>
     <string name="ce_pref_detail_credits">Yönetmen ve yazarlar</string>
     <string name="ce_pref_detail_credits_summary">Film ve dizi sayfalarında özetin altında</string>
+    <string name="ce_media_segments_auto_skip_pip">Yalnızca resim içinde resim modunda</string>
+    <string name="ce_media_segments_auto_skip_always">Her zaman</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d bölüm</item>
+        <item quantity="other">%d bölüm</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d gün</item>
+        <item quantity="other">%d gün</item>
+    </plurals>
+    <string name="ce_number_no_limit">Sınır yok</string>
+    <string name="ce_number_off">Kapalı</string>
 </resources>

@@ -180,4 +180,16 @@
     <string name="ce_pref_detail_similar_summary">Títols similars de la teva biblioteca</string>
     <string name="ce_pref_detail_credits">Director i guionistes</string>
     <string name="ce_pref_detail_credits_summary">Sota la sinopsi a les pàgines de pel·lícules i sèries</string>
+    <string name="ce_media_segments_auto_skip_pip">Només en imatge sobre imatge</string>
+    <string name="ce_media_segments_auto_skip_always">Sempre</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d episodi</item>
+        <item quantity="other">%d episodis</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d dia</item>
+        <item quantity="other">%d dies</item>
+    </plurals>
+    <string name="ce_number_no_limit">Sense límit</string>
+    <string name="ce_number_off">Desactivat</string>
 </resources>

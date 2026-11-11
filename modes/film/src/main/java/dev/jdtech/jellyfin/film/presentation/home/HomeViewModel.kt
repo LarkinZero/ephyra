@@ -51,7 +51,7 @@ constructor(
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
 
-    private val uiTextContinueWatching = UiText.StringResource(FilmR.string.continue_watching)
+    private val uiTextContinueWatching = UiText.StringResource(FilmR.string.ce_continue_watching)
     private val uiTextNextUp = UiText.StringResource(FilmR.string.next_up)
 
     companion object {

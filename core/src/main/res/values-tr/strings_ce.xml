@@ -102,4 +102,5 @@
     <plurals name="ce_unwatched_count">
         <item quantity="other">%d izlenmemiş</item>
     </plurals>
+    <string name="ce_delete_download_message">Bu indirileni cihazınızdan silmek istediğinizden emin misiniz?</string>
 </resources>

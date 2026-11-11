@@ -180,4 +180,14 @@
     <string name="ce_pref_detail_similar_summary">ライブラリ内の似たタイトル</string>
     <string name="ce_pref_detail_credits">監督と脚本</string>
     <string name="ce_pref_detail_credits_summary">映画と番組のページのあらすじの下に表示</string>
+    <string name="ce_media_segments_auto_skip_pip">ピクチャー イン ピクチャーのときのみ</string>
+    <string name="ce_media_segments_auto_skip_always">常に</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="other">%d エピソード</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="other">%d日</item>
+    </plurals>
+    <string name="ce_number_no_limit">制限なし</string>
+    <string name="ce_number_off">オフ</string>
 </resources>

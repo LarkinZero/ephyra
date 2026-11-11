@@ -298,4 +298,18 @@
     <string name="ce_pref_detail_similar_summary">Similar titles from your library</string>
     <string name="ce_pref_detail_credits">Director and writers</string>
     <string name="ce_pref_detail_credits_summary">Under the overview on movie and show pages</string>
+    <string name="ce_media_segments_auto_skip_pip">Only in picture-in-picture</string>
+    <string name="ce_media_segments_auto_skip_always">Always</string>
+    <string name="ce_player_backend_exoplayer" translatable="false">ExoPlayer</string>
+    <string name="ce_player_backend_mpv" translatable="false">mpv</string>
+    <plurals name="ce_episodes_count">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="ce_days_count">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="ce_number_no_limit">No limit</string>
+    <string name="ce_number_off">Off</string>
 </resources>

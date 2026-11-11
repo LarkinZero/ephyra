@@ -106,4 +106,5 @@
         <item quantity="one">%d ungesehen</item>
         <item quantity="other">%d ungesehen</item>
     </plurals>
+    <string name="ce_delete_download_message">Möchten Sie diesen Download wirklich von Ihrem Gerät löschen?</string>
 </resources>

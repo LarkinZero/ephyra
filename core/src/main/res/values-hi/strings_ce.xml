@@ -106,4 +106,5 @@
         <item quantity="one">%d अनदेखा</item>
         <item quantity="other">%d अनदेखे</item>
     </plurals>
+    <string name="ce_delete_download_message">क्या आप वाकई इस डाउनलोड को अपने डिवाइस से हटाना चाहते हैं?</string>
 </resources>

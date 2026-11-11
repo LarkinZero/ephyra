@@ -236,6 +236,8 @@ class SettingsViewModel @Inject constructor(
                                                     backendPreference =
                                                         appPreferences.homeNextUpMaxDays,
                                                     suffixRes = R.string.home_next_up_max_days_suffix,
+                                                    suffixPluralsRes = R.plurals.ce_days_count,
+                                                    zeroLabelRes = R.string.ce_number_no_limit,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.pref_tv_watch_next,
@@ -500,7 +502,7 @@ class SettingsViewModel @Inject constructor(
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.pref_player_backend,
                                                     backendPreference = appPreferences.playerBackend,
-                                                    options = R.array.player_backends,
+                                                    options = R.array.player_backend_names,
                                                     optionValues = R.array.player_backends
                                                 ),
                                                 PreferenceSwitch(
@@ -875,6 +877,8 @@ class SettingsViewModel @Inject constructor(
                                                     backendPreference =
                                                         appPreferences.stillWatchingAfterEpisodes,
                                                     suffixRes = R.string.episodes,
+                                                    suffixPluralsRes = R.plurals.ce_episodes_count,
+                                                    zeroLabelRes = R.string.ce_number_off,
                                                 ),
                                                 PreferenceIntInput(
                                                     nameStringResource =
@@ -888,6 +892,7 @@ class SettingsViewModel @Inject constructor(
                                                     backendPreference =
                                                         appPreferences.stillWatchingAfterMinutes,
                                                     suffixRes = R.string.minutes,
+                                                    zeroLabelRes = R.string.ce_number_off,
                                                 ),
                                                 PreferenceIntInput(
                                                     nameStringResource =
@@ -1056,6 +1061,7 @@ class SettingsViewModel @Inject constructor(
                                                     backendPreference =
                                                         appPreferences.smartDownloadsKeepReady,
                                                     suffixRes = R.string.episodes,
+                                                    suffixPluralsRes = R.plurals.ce_episodes_count,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =

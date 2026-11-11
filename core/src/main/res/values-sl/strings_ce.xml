@@ -114,4 +114,5 @@
         <item quantity="few">%d neogledani</item>
         <item quantity="other">%d neogledanih</item>
     </plurals>
+    <string name="ce_delete_download_message">Ali res želite izbrisati ta prenos iz naprave?</string>
 </resources>

@@ -57,7 +57,7 @@ class HomeCache @Inject constructor(@ApplicationContext context: Context) {
                         json.optJSONObject("suggestions")?.let { obj ->
                             HomeItem.Suggestions(UUID.fromString(obj.getString("id")), items(obj))
                         },
-                    resume = json.optJSONObject("resume")?.let { section(it, FilmR.string.continue_watching) },
+                    resume = json.optJSONObject("resume")?.let { section(it, FilmR.string.ce_continue_watching) },
                     nextUp = json.optJSONObject("nextUp")?.let { section(it, FilmR.string.next_up) },
                     views =
                         json.getJSONArray("views").objects().map { obj ->

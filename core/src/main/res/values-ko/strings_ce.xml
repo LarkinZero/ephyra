@@ -102,4 +102,5 @@
     <plurals name="ce_unwatched_count">
         <item quantity="other">%d개 안 봄</item>
     </plurals>
+    <string name="ce_delete_download_message">이 기기에서 다운로드한 항목을 삭제하시겠습니까?</string>
 </resources>

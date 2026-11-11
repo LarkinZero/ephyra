@@ -35,6 +35,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -69,6 +70,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferencePermission
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
+import dev.jdtech.jellyfin.settings.presentation.models.numberInputText
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsAction
 import kotlin.math.abs
 
@@ -251,8 +253,7 @@ private fun TvSettingsPreference(
         is PreferenceIntInput ->
             TvSettingsRow(
                 preference = preference,
-                summary =
-                    inputValue(preference.value.toLong(), preference.prefixRes, preference.suffixRes),
+                summary = inputValue(preference),
                 iconSlot = iconSlot,
                 modifier = modifier,
             ) {
@@ -363,7 +364,7 @@ private fun TvSettingsDetails(preference: Preference?, onAction: (SettingsAction
             TvSettingsNumber(
                 preference = preference,
                 value = preference.value.toLong(),
-                text = inputValue(preference.value.toLong(), preference.prefixRes, preference.suffixRes),
+                text = inputValue(preference),
                 inMilliseconds = preference.suffixRes == SettingsR.string.ms,
                 onChange = {
                     onAction(SettingsAction.OnUpdate(preference.copy(value = it.toInt())))
@@ -466,14 +467,37 @@ private fun selectedOptions(preference: PreferenceMultiSelect): String {
 }
 
 @Composable
-private fun inputValue(value: Long, prefixRes: Int?, suffixRes: Int?): String =
-    listOfNotNull(
-            prefixRes?.let { stringResource(it) },
-            value.takeIf { it >= 0 }?.toString(),
-            suffixRes?.let { stringResource(it) },
+private fun inputValue(preference: PreferenceIntInput): String =
+    inputValue(
+        value = preference.value.toLong(),
+        prefixRes = preference.prefixRes,
+        suffixRes = preference.suffixRes,
+        suffixPluralsRes = preference.suffixPluralsRes,
+        zeroLabelRes = preference.zeroLabelRes,
+    )
+
+@Composable
+private fun inputValue(
+    value: Long,
+    prefixRes: Int?,
+    suffixRes: Int?,
+    suffixPluralsRes: Int? = null,
+    zeroLabelRes: Int? = null,
+): String {
+    val resources = LocalResources.current
+    return numberInputText(
+            value = value,
+            prefixRes = prefixRes,
+            suffixRes = suffixRes,
+            string = resources::getString,
+            quantityString = { id, quantity ->
+                resources.getQuantityString(id, quantity, quantity)
+            },
+            suffixPluralsRes = suffixPluralsRes,
+            zeroLabelRes = zeroLabelRes,
         )
-        .joinToString(" ")
         .ifEmpty { stringResource(CoreR.string.not_set) }
+}
 
 /** The steps of a number setting: 1 and 10, or 1 and 10 seconds for a value in milliseconds. */
 internal fun numberSteps(inMilliseconds: Boolean): List<Long> =
