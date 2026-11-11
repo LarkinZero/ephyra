@@ -124,6 +124,8 @@ constructor(
                 coroutineScope {
                     // The user image only feeds the avatar: it must not hold the rows back.
                     val avatar = server?.let { s -> async { refreshUserImage(s.id) } }
+                    // CE (#543): neither does the server's name.
+                    val name = server?.let { s -> async { refreshServerName(s) } }
                     val results =
                         awaitAll(
                             async {
@@ -144,6 +146,7 @@ constructor(
                             async { logFailure("views") { loadViews(stored, legacy) } },
                         )
                     avatar?.await()
+                    name?.await()
                     results
                 }
             val error = errorIfAllFailed(rows)
@@ -168,6 +171,19 @@ constructor(
             database.getServerCurrentUser(serverId)?.let { user ->
                 _state.update { it.copy(user = user) }
             }
+        }
+    }
+
+    /**
+     * CE (#543): a server renamed on the server is renamed here too, on the next load. Offline, or
+     * when the server does not answer, the stored name stays.
+     */
+    private suspend fun refreshServerName(server: Server) {
+        if (repository is JellyfinRepositoryOfflineImpl) return
+        logFailure("server name") {
+            val renamed = server.renamedTo(repository.getPublicSystemInfo()) ?: return@logFailure
+            database.updateServer(renamed)
+            _state.update { if (it.server?.id == renamed.id) it.copy(server = renamed) else it }
         }
     }
 
