@@ -41,7 +41,6 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -359,11 +358,22 @@ fun MainScreenLayout(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Scrollable navigation list: Search, Home, Favorites, and each Library
+                // Scrollable navigation list: Search, Home, Favorites, and each Library. Moving
+                // into it lands on the shown destination (ADR 0002), not on the item that had focus
+                // last: Back from a library goes Home without passing the drawer, and a restorer
+                // then sent Back and Left on Home to that library (#411). A request for one item
+                // (Enter) gets that item.
                 LazyColumn(
                     modifier =
                         Modifier.weight(1f)
-                            .focusRestorer()
+                            .focusProperties {
+                                onEnter = {
+                                    if (requestedFocusDirection != FocusDirection.Enter) {
+                                        drawerRequester(activeDestinationKey).tryRequestFocus()
+                                    }
+                                }
+                            }
+                            .focusGroup()
                             .focusProperties { down = settingsFocusRequester },
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {

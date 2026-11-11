@@ -104,7 +104,7 @@ variant. An empty cell is work still to do.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | HOM-01 | Suggestions carousel: pages through items, pauses while scrolling, opens the item on tap | #266 | works | unpolished #433: blank card for an item without a backdrop; unpolished #438 at 8 inch and fold: one page fewer | n/a |
-| HOM-02 | TV hero: the focused card's backdrop, logo or title, info line and overview | 1.2.0-ce.5 (#132) | n/a | n/a | unpolished #410: no overview for Continue Watching, Next Up and Latest cards |
+| HOM-02 | TV hero: the focused card's backdrop, logo or title, info line and overview | 1.2.0-ce.5 (#132) | n/a | n/a | works (#410): Continue Watching, Next Up and Latest cards show their overview too |
 | HOM-03 | TV hero title: a long title is fitted, not cut off | #346 | n/a | n/a | works |
 | HOM-04 | TV hero backdrop for an episode: falls back to the show's, the season's or the episode's picture instead of staying empty | #348 | n/a | n/a | works |
 | HOM-05 | Suggestions row (TV) | 1.2.0-ce.5 | n/a | n/a | works |
@@ -133,7 +133,7 @@ Libraries, search, favourites and the item pages.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | BRW-01 | Bottom bar with Home, Favorites, Media and Downloads; on an expanded window a navigation rail instead | #188, #288 | works | works | n/a |
-| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | unpolished #411: Back opens the drawer on the last library |
+| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | works (#411): after a library, Back and Left on Home open the drawer on Home |
 | BRW-03 | TV: switching drawer destinations does not shift the layout or make focus jump | #190 | n/a | n/a | works |
 | BRW-04 | TV: Back from a page puts focus on the card that opened it (library, show, season) | #124, ADR 0003 | n/a | n/a | works |
 | BRW-05 | Screen transitions and the predictive back preview animate without a snap at the end | #234, 1.1.0-ce.4 | not tested: a snap is not visible in screenshots | not tested: a snap is not visible in screenshots | n/a |
