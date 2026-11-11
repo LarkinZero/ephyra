@@ -608,7 +608,7 @@ All rows are TV only.
 | TVS-10 | Screensaver settings (from the system's screensaver settings): source, interval, clock | #140 | n/a | n/a | works: label on the left, value on the right of each row (#422) |
 | TVS-11 | Screensaver with no user logged in: a plain screen, no crash | `ScreensaverService` | n/a | n/a | works |
 | TVS-12 | The Ephyra banner and app name in the Android TV launcher | #171, #172 | n/a | n/a | works |
-| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | #423 fixed: Home, the library counter and the login screen keep inside the safe area at 1080p; #540 and #539: the focused About buttons, the licence text and the login screen's server button too; the drawer's icons still sit in the left margin; 4K not run |
+| TVS-13 | Every screen keeps clear of the TV safe area; nothing clipped by overscan at 1080p and 4K; text readable from the couch | #127, #355 | n/a | n/a | works: #423 fixed Home, the library counter and the login screen at 1080p; #540 the focused About buttons, the licence text and the login screen's server button; #539 the drawer's icons, avatar and labels (from 48 dp, collapsed and expanded), checked on the 4K AVD with its 1920×1080 size override (960×540 dp, as a 1080p TV) |
 | TVS-14 | The 32-bit (`armeabi-v7a`) APK installs and starts on the Xiaomi box **[device]** | ADR 0006, #359 | n/a | n/a | not tested: emulator |
 | TVS-15 | Pressing Home and coming back to the app returns to the same screen and focus | | n/a | n/a | works |
 | TVS-16 | D-pad latency on Home and in the player feels immediate **[device]** | #359 | n/a | n/a | not tested: emulator |
