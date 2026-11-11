@@ -90,6 +90,9 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
         // CE (#334): keep the session list on the server in step with the app.
         serverSessionKeeper.start()
 
+        // CE (#552): send progress watched offline as soon as the server can be reached again.
+        userDataSync.start()
+
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             // CE (#250): WorkManager is set up here, off the main thread, rather than in onCreate.
             val workManager = WorkManager.getInstance(applicationContext)

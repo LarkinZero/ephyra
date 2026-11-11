@@ -11,6 +11,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.SmartDownloads
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidUserDataDto
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.ApiClient
@@ -122,6 +123,8 @@ constructor(
                 )
                 // A row kept only for this sync, because its download was deleted first.
                 database.deleteUserDataIfOrphaned(userId, userData.itemId)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: InvalidStatusException) {
                 if (e.status == HTTP_NOT_FOUND) {
                     // The item is gone from the server: there is nothing to send, ever. Without
@@ -134,8 +137,10 @@ constructor(
                     allOk = false
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to sync user data")
-                allOk = false
+                // The server was not reached: the other rows would fail the same way, each after
+                // its own timeout.
+                Timber.e(e, "Failed to sync user data, leaving the rest for the next run")
+                return false
             }
         }
         return allOk

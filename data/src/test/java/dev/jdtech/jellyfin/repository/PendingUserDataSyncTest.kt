@@ -17,6 +17,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -135,6 +136,7 @@ class PendingUserDataSyncTest {
         database.deleteSyncedUserData(movieId)
 
         assertEquals(600_000_000L, pending().single().playbackPositionTicks)
+        assertTrue(database.hasUserDataToBeSynced())
     }
 
     @Test
@@ -202,6 +204,7 @@ class PendingUserDataSyncTest {
         database.insertUserData(userData(showId, 0L, toBeSynced = true))
 
         assertTrue(pending().isEmpty())
+        assertFalse(database.hasUserDataToBeSynced())
     }
 
     private companion object {

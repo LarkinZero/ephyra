@@ -398,6 +398,13 @@ interface ServerDatabaseDao {
     )
     suspend fun setUserDataToBeSynced(userId: UUID, itemId: UUID, toBeSynced: Boolean)
 
+    /** Whether any movie or episode row, stored or not, still has to reach the server. */
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM userdata WHERE toBeSynced = 1 " +
+            "AND itemId NOT IN (SELECT id FROM seasons) AND itemId NOT IN (SELECT id FROM shows))"
+    )
+    suspend fun hasUserDataToBeSynced(): Boolean
+
     /**
      * Marks a row as still to be sent to the server. Returns 1 when this call marked it, 0 when it
      * was marked already or there is no row (the item is not stored).
