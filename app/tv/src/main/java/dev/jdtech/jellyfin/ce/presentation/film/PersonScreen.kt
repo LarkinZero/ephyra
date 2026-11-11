@@ -49,6 +49,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
@@ -156,27 +157,11 @@ internal fun PersonScreenLayout(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             error != null && person == null -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center).padding(TvSafeArea.horizontal),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                ) {
-                    Text(
-                        text =
-                            error.localizedMessage.orEmpty().ifBlank {
-                                stringResource(CoreR.string.error_loading_data_body)
-                            },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                    Button(
-                        onClick = onRetryClick,
-                        modifier = Modifier.focusPosition(focusPosition, 0, 0),
-                    ) {
-                        Text(text = stringResource(CoreR.string.retry))
-                    }
-                }
+                TvLoadError(
+                    error = error,
+                    onRetry = onRetryClick,
+                    modifier = Modifier.align(Alignment.Center),
+                )
             }
             person != null -> {
                 LazyColumn(

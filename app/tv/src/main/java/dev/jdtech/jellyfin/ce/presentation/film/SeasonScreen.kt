@@ -64,6 +64,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
+import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
 import dev.jdtech.jellyfin.ce.ui.focus.EphyraFocusScale
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
@@ -80,6 +81,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
+import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.DisplayProfile
@@ -176,8 +178,22 @@ fun SeasonScreen(
             }
     }
 
+    // #405: opened from an episode, the season is only known once that episode has loaded, so
+    // until then the episode's load is the one that can fail. Derived, so an episode load that
+    // works doesn't recompose the page (#257).
+    val episodeError by remember { derivedStateOf { episodeState.value.error } }
+    val loadError = state.error ?: episodeError?.takeIf { currentSeasonId == null }
+
     SeasonScreenLayout(
         state = state,
+        loadError = loadError,
+        onRetry = {
+            if (currentSeasonId == null) {
+                episodeViewModel.onAction(EpisodeAction.OnRetryClick)
+            } else {
+                seasonViewModel.onAction(SeasonAction.OnRetryClick)
+            }
+        },
         // While another season loads, the old one stays on screen, so focus stays on its chip.
         episodes = state.episodes,
         selection = selection,
@@ -224,6 +240,8 @@ private fun nextUp(episodes: List<FindroidEpisode>): FindroidEpisode? =
 @OptIn(ExperimentalTvMaterial3Api::class)
 private fun SeasonScreenLayout(
     state: SeasonState,
+    loadError: Throwable?,
+    onRetry: () -> Unit,
     episodes: List<FindroidEpisode>,
     selection: EpisodeSelection,
     episodeState: () -> EpisodeState,
@@ -249,7 +267,15 @@ private fun SeasonScreenLayout(
         val season = state.season
         // No episodes is the only case without a selected one.
         if (season == null || episodes.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            if (loadError != null) {
+                TvLoadError(
+                    error = loadError,
+                    onRetry = onRetry,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            } else {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
             return@Box
         }
 
@@ -711,6 +737,8 @@ private fun SeasonScreenLayoutPreview() {
     FindroidTheme {
         SeasonScreenLayout(
             state = SeasonState(season = dummySeason, episodes = dummyEpisodes),
+            loadError = null,
+            onRetry = {},
             episodes = dummyEpisodes,
             selection = remember { EpisodeSelection(dummyEpisodes.first().id.toString()) },
             episodeState = {
