@@ -55,4 +55,22 @@ class TvBufferingIndicatorTest {
     fun `an ended item does not show it`() {
         assertFalse(shown(state = Player.STATE_ENDED))
     }
+
+    @Test
+    fun `while buffering to play, the button shows Pause, so a press pauses`() {
+        assertFalse(showsPlayButton(playWhenReady = true, playbackState = Player.STATE_BUFFERING))
+    }
+
+    @Test
+    fun `playing shows Pause, paused shows Play`() {
+        assertFalse(showsPlayButton(playWhenReady = true, playbackState = Player.STATE_READY))
+        assertTrue(showsPlayButton(playWhenReady = false, playbackState = Player.STATE_READY))
+        assertTrue(showsPlayButton(playWhenReady = false, playbackState = Player.STATE_BUFFERING))
+    }
+
+    @Test
+    fun `an idle or ended player shows Play`() {
+        assertTrue(showsPlayButton(playWhenReady = true, playbackState = Player.STATE_IDLE))
+        assertTrue(showsPlayButton(playWhenReady = true, playbackState = Player.STATE_ENDED))
+    }
 }

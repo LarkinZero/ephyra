@@ -75,3 +75,12 @@ internal fun TvBufferingIndicator(shown: Boolean, modifier: Modifier = Modifier)
 // A D-pad seek within ExoPlayer's buffer still buffers for up to about a second (0.8–0.95 s on the
 // TV emulator), an mpv seek within its cache about 0.2 s; only a wait longer than that shows it.
 internal const val BUFFERING_SHOW_DELAY_MS = 1_000L
+
+/**
+ * CE (#486): the play/pause button shows Play unless the player means to play. While it buffers it
+ * means to play (`isPlaying` is false then), so the button shows Pause and pauses.
+ */
+internal fun showsPlayButton(playWhenReady: Boolean, playbackState: Int): Boolean =
+    !playWhenReady ||
+        playbackState == Player.STATE_IDLE ||
+        playbackState == Player.STATE_ENDED

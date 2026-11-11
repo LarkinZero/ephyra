@@ -255,8 +255,9 @@ fun TvPlayerScreen(
     }
 
     var seekIndicator by remember { mutableStateOf<SeekIndicator?>(null) }
-    // CE (#486): the player's state, for the buffering indicator.
+    // CE (#486): the player's state, for the buffering indicator and the play/pause button.
     var playerState by remember { mutableIntStateOf(player.playbackState) }
+    var playerPlayWhenReady by remember { mutableStateOf(player.playWhenReady) }
     var pendingSeekMs by remember { mutableStateOf<Long?>(null) }
     var dialog by remember { mutableStateOf<PlayerDialog?>(null) }
     var queueOpen by remember { mutableStateOf(false) }
@@ -357,8 +358,10 @@ fun TvPlayerScreen(
                 player.seekTo(positionMs)
             }
 
+            // #486: on what the player means to do, so a press during buffering pauses.
             override fun togglePlayPause() {
-                if (player.isPlaying) player.pause() else player.play()
+                if (showsPlayButton(player.playWhenReady, player.playbackState)) player.play()
+                else player.pause()
                 showControls()
             }
 
@@ -591,7 +594,7 @@ fun TvPlayerScreen(
                     queueFocus = queueFocus,
                     positionMs = positionMs,
                     durationMs = durationMs,
-                    isPlaying = isPlaying,
+                    showPause = !showsPlayButton(playerPlayWhenReady, playerState),
                     pendingSeekMs = pendingSeekMs,
                     trickplay = uiState.currentTrickplay,
                     seekSettings = seekSettings,
@@ -626,9 +629,14 @@ fun TvPlayerScreen(
                         playbackError = null
                     }
                 }
+
+                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                    playerPlayWhenReady = playWhenReady
+                }
             }
         player.addListener(recoveryListener)
         playerState = player.playbackState
+        playerPlayWhenReady = player.playWhenReady
         onDispose { player.removeListener(recoveryListener) }
     }
 
@@ -746,7 +754,7 @@ private fun PlayerControls(
     queueFocus: FocusRequester,
     positionMs: () -> Long,
     durationMs: Long,
-    isPlaying: Boolean,
+    showPause: Boolean,
     pendingSeekMs: Long?,
     trickplay: Trickplay?,
     seekSettings: TvSeekSettings,
@@ -864,7 +872,7 @@ private fun PlayerControls(
                     onFocus = onInteraction,
                 )
                 ControlButton(
-                    icon = if (isPlaying) CoreR.drawable.ic_pause else CoreR.drawable.ic_play,
+                    icon = if (showPause) CoreR.drawable.ic_pause else CoreR.drawable.ic_play,
                     contentDescription = null,
                     focusRequester = playPauseFocus,
                     onClick = callbacks.onPlayPause,
