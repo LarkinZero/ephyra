@@ -68,6 +68,7 @@ Unchanged in structure; this is the part that already works.
 - **Media**: library cards keep their 160 / 240 / 320 dp breakpoints. The search bar is capped at `textMaxWidth` and aligned to the start at medium and expanded (T9); expanded is the only width that actually hits the cap.
 - **Grids** (Library, Collection, Favorites, search results): `gridMinCell` per width class, minimum 2 columns stays. Section headers in `CollectionGrid` use `maxLineSpan`. Nothing centred: a feed uses the width.
 - **Downloads**: at expanded the download rows become a two-column `LazyVerticalGrid(GridCells.Adaptive(minSize = 480.dp))`; a row never exceeds 720 dp. Favorites and Downloads put the title in the same place (T11): title first, actions in the top bar.
+- **Downloads, full-width items** (#434): the storage summary, the Downloading group and the section headers span the grid but are capped at 720 dp, aligned to the start with the columns below, not centred. A downloaded show's episode list is capped at 720 dp too.
 - **Dialogs and sheets**: M3 caps `AlertDialog` at 560 dp and `ModalBottomSheet` at 640 dp already (T13 is fine as is). The rule is: never pass `fillMaxWidth` to a dialog or sheet container, and `SortByDialog`'s `heightIn(max = 540.dp)` becomes `min(540 dp, window height − 96 dp)` so it fits a compact-height window.
 
 ## 6. Item pages (Movie, Show, Episode)
@@ -173,7 +174,7 @@ Tier 2 items that cost little and make the app usable on a Chromebook or with a 
 | Movie / Show / Episode | header + column | hero + poster 160 + column | hero + poster 200 + column, rows full width |
 | Season | header + list | header + list ≤ 720 dp | list-detail 40/60 |
 | Person | column | row (exists) | row (exists) |
-| Settings / setup | as today (640 / 480 caps) | same | same |
+| Settings / setup | as today (640 / 480 caps); Server addresses, opened from Servers, takes the setup cap (480) | same | same |
 | Player | sensor landscape, half-screen gestures | free orientation, half-screen gestures | free orientation, edge gestures, roomier controls, episode side sheet |
 | Compact height (phone landscape) | | item pages and Season use the compact layout | |
 
