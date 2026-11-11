@@ -394,6 +394,9 @@ class JellyfinRepositoryImpl(
                     limit = 12,
                     mediaTypes = listOf(MediaType.VIDEO),
                     includeItemTypes = listOf(BaseItemKind.MOVIE, BaseItemKind.EPISODE),
+                    // The TV hero shows it, and Jellyfin leaves it out of Resume, Latest and Next
+                    // Up unless asked (#410).
+                    fields = listOf(ItemFields.OVERVIEW),
                     imageTypeLimit = 1,
                     enableImageTypes = ROW_IMAGE_TYPES,
                     enableTotalRecordCount = false,
@@ -409,6 +412,7 @@ class JellyfinRepositoryImpl(
                 .getLatestMedia(
                     currentUserId,
                     parentId = parentId,
+                    fields = listOf(ItemFields.OVERVIEW),
                     limit = 16,
                     imageTypeLimit = 1,
                     enableImageTypes = ROW_IMAGE_TYPES,
@@ -437,6 +441,7 @@ class JellyfinRepositoryImpl(
                     currentUserId,
                     limit = 24,
                     seriesId = seriesId,
+                    fields = listOf(ItemFields.OVERVIEW),
                     imageTypeLimit = 1,
                     enableImageTypes = ROW_IMAGE_TYPES,
                     nextUpDateCutoff =
