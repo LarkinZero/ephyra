@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.ce.presentation.film
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,6 +54,7 @@ import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
 import dev.jdtech.jellyfin.ce.ui.focus.FocusPosition
+import dev.jdtech.jellyfin.ce.ui.focus.NoBringIntoView
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.rememberFocusPosition
@@ -334,17 +334,6 @@ internal fun PersonScreenLayout(
         }
     }
 }
-
-/** Never scrolls to show a focused child: for a list that scrolls itself. */
-@OptIn(ExperimentalFoundationApi::class)
-private val NoBringIntoView =
-    object : BringIntoViewSpec {
-        override fun calculateScrollDistance(
-            offset: Float,
-            size: Float,
-            containerSize: Float,
-        ): Float = 0f
-    }
 
 @Preview(device = "id:tv_1080p")
 @Composable
