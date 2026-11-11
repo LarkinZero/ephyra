@@ -111,7 +111,7 @@ variant. An empty cell is work still to do.
 | HOM-06 | Continue Watching row: the right items, with progress; opens the item | | works | works | works |
 | HOM-07 | Next Up row: the next episode of shows in progress | | works | works | works |
 | HOM-08 | Latest row per library | | works | works | works |
-| HOM-09 | The order and visibility set in Home rows (SET-08) show on Home, and are kept per server and user | #142 | works | works; unpolished #431 at 8 inch: shows only after a pull to refresh | works |
+| HOM-09 | The order and visibility set in Home rows (SET-08) show on Home, and are kept per server and user | #142 | works (#431): Home follows a change made within a minute of its last load, without a pull | works; unpolished #431 at 8 inch: shows only after a pull to refresh | works |
 | HOM-10 | Home cache on: a cold start shows the rows of the last visit at once, then updates them | #251, #270 | works | works; not tested at 8 inch: cache and network not told apart | works |
 | HOM-11 | Pull to refresh reloads the rows; the spinner stays until the reload is done | ce.1 | unpolished #391, #392: two spinners, server name cut | works | n/a |
 | HOM-12 | TV rows refresh in the background without reshuffling; focus comes back to the same card | #132 | n/a | n/a | works |
