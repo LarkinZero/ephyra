@@ -149,7 +149,7 @@ Libraries, search, favourites and the item pages.
 | BRW-10 | TV library: A–Z jump bar when sorted by name, position counter, year under each title, a title card for items without artwork | #135 | n/a | n/a | works |
 | BRW-11 | Collections (box sets) open and list their items; an episode in a collection opens in its season on TV | #129 | not tested: no collections on the demo server | not tested: no collections on the demo server | not tested: no collections on the demo server |
 | BRW-12 | A folder library can be browsed folder by folder | `navigateToItem` | not tested: no folder library on the demo server | not tested: no folder library on the demo server | not tested: no folder library on the demo server |
-| BRW-13 | Search: results appear after typing stops, "No results" does not flash while typing, a failed search shows Retry | 1.2.0-ce.4, #95 | works | works; failed search not tested at 8 inch | unpolished #417: failed search shows raw text, no Retry |
+| BRW-13 | Search: results appear after typing stops, "No results" does not flash while typing, a failed search shows Retry | 1.2.0-ce.4, #95 | works | works; failed search not tested at 8 inch | works (#417 fixed: a failed search says why in plain words, with Retry) |
 | BRW-14 | TV search with the on-screen keyboard; results grouped as movies, shows, episodes, collections | #128 | n/a | n/a | works |
 | BRW-15 | Ctrl+F on a hardware keyboard opens search on the Media tab | #310 | works | works | n/a |
 | BRW-16 | Favorites tab lists favourite movies and shows; an empty state when there are none | #188 | works | works | works |
@@ -184,7 +184,7 @@ Libraries, search, favourites and the item pages.
 | BRW-40 | A failing image moves on to the next one; a season without a poster uses the show's | #94 | not tested: no failing image to provoke | unpolished #396: blank person cards; season fallback not checked | works: a season without a poster shows the show's, a show without any keeps the placeholder (#416); failing image not provoked |
 | BRW-41 | Dates follow the app language; premiere dates are not a day early in timezones west of UTC | #141, ce.1 | works; timezone not tested | works; timezone not tested | unpolished #414: two-digit years |
 | BRW-42 | Theme music on the show page (setting on): plays softly, fades out on leaving, on Play and when the screensaver starts, stays quiet when another app plays audio | #141 | n/a | n/a | not tested: no theme songs on the demo server |
-| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | unpolished #418: sort dialog focus is a faint band |
+| BRW-43 | The Bioluminescence look: Ephyra palette, Outfit for titles, violet for favourite, watched and rating, pill buttons; TV pages fade to the surface colour and the focus ring is cyan | #224 to #242 | works | works | works (#418 fixed: the sort dialog's options and order buttons show the focus ring) |
 
 ### Wide windows
 

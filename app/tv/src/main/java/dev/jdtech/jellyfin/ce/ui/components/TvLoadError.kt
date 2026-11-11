@@ -26,9 +26,17 @@ internal const val TV_LOAD_ERROR_RETRY_TAG = "ce_tv_load_error_retry"
 /**
  * CE (#405): a page that failed to load, with the reason in plain words (#377) and Retry. Retry
  * takes focus each time the error appears, also after a Retry that failed again.
+ *
+ * [takeFocus] false leaves focus where it is, for a screen where the user may still be typing when
+ * the error comes in (search, #417). Retry is then reached with the D-pad.
  */
 @Composable
-fun TvLoadError(error: Throwable, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun TvLoadError(
+    error: Throwable,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    takeFocus: Boolean = true,
+) {
     val focusPosition = rememberFocusPosition()
     val reason = LoadErrorText.reason(error).asString()
     val text =
@@ -56,5 +64,5 @@ fun TvLoadError(error: Throwable, onRetry: () -> Unit, modifier: Modifier = Modi
             Text(text = stringResource(CoreR.string.retry))
         }
     }
-    RestoreFocus(position = focusPosition, ready = true)
+    if (takeFocus) RestoreFocus(position = focusPosition, ready = true)
 }
