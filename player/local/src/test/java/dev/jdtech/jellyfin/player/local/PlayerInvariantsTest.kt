@@ -96,4 +96,16 @@ class PlayerInvariantsTest {
             mpvPlayer.contains("streamBreak.onErrorLog("),
         )
     }
+
+    @Test
+    fun `mpv sets a network timeout`() {
+        // #460: with mpv's default of 60 s a stalled read blocked recovery for over a minute
+        // after the network came back. 10 s used up ffmpeg's reconnects during a longer stall.
+        val mpvPlayer = source("mpv/MPVPlayer.kt")
+        val timeout =
+            Regex("""setOptionString\("network-timeout", "(\d+)"\)""").find(mpvPlayer)
+        assertTrue("MPVPlayer must set network-timeout (#460)", timeout != null)
+        val seconds = timeout!!.groupValues[1].toInt()
+        assertTrue("network-timeout must stay between 20 and 45 s (#460), is $seconds", seconds in 20..45)
+    }
 }
