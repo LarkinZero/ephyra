@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,14 +24,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.lifecycle.viewmodel.ViewModelStoreProvider
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
+import androidx.lifecycle.viewmodel.navigation3.ViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -152,11 +157,10 @@ fun NavigationRoot(
     if (appliedSetupMode.setupComplete != setupComplete) {
         if (setupComplete) {
             // Setup completed: discard the setup flow and land on Home.
-            navigator.navigateHome()
+            resetMainToHome(navigator, navigationState, entryDecorators)
         } else {
             // Setup became incomplete: restart the setup flow at the appropriate screen.
-            setupBackStack.clear()
-            setupBackStack.add(setupStartRoute)
+            restartSetup(setupBackStack, setupStartRoute, entryDecorators)
         }
         appliedSetupMode.setupComplete = setupComplete
     }
@@ -219,6 +223,36 @@ fun NavigationRoot(
 internal fun rememberSearchExpanded(): MutableState<Boolean> =
     rememberSaveable { mutableStateOf(false) }
 
+/*
+ * #388: a mode switch resets the stack of the incoming mode while its display is not shown, so nav3
+ * never pops the entries the reset drops. Their saved state and ViewModels are discarded here
+ * instead, or a later entry with the same key (a Login screen) gets them back.
+ */
+
+/** Resets the main stacks to their roots and Home. The roots keep their state. */
+internal fun resetMainToHome(
+    navigator: Navigator,
+    navigationState: NavigationState,
+    entryDecorators: ModeEntryDecorators,
+) {
+    val before = navigationState.backStacks.values.flatMap { it.toList() }
+    navigator.navigateHome()
+    val after = navigationState.backStacks.values.flatMapTo(HashSet()) { it.toList() }
+    entryDecorators.discardMain(before.filterNot { it in after })
+}
+
+/** Restarts the setup flow at [startRoute], with none of the previous flow's state. */
+internal fun restartSetup(
+    backStack: NavBackStack<NavKey>,
+    startRoute: NavKey,
+    entryDecorators: ModeEntryDecorators,
+) {
+    val before = backStack.toList()
+    backStack.clear()
+    backStack.add(startRoute)
+    entryDecorators.discardSetup(before)
+}
+
 /**
  * Remembers the setup mode that the back stacks were last reconciled for. Deliberately not
  * observable state: it is written during composition, which must not schedule recompositions.
@@ -227,9 +261,45 @@ private class AppliedSetupMode(var setupComplete: Boolean)
 
 /** The entry decorators of the main and the setup [NavDisplay]. */
 internal class ModeEntryDecorators(
-    val main: List<NavEntryDecorator<NavKey>>,
-    val setup: List<NavEntryDecorator<NavKey>>,
-)
+    private val mainState: EntryState,
+    private val setupState: EntryState,
+) {
+    val main: List<NavEntryDecorator<NavKey>> = mainState.decorators
+    val setup: List<NavEntryDecorator<NavKey>> = setupState.decorators
+
+    /** Discards the saved state and ViewModels of [keys], dropped from the main stacks. */
+    fun discardMain(keys: Collection<NavKey>) = mainState.discard(keys)
+
+    /** Discards the saved state and ViewModels of [keys], dropped from the setup stack. */
+    fun discardSetup(keys: Collection<NavKey>) = setupState.discard(keys)
+}
+
+/**
+ * The per-entry saved state and ViewModel stores of one [NavDisplay], and the decorators that
+ * provide them to its entries.
+ */
+internal class EntryState(
+    private val saveableStateHolder: SaveableStateHolder,
+    private val viewModelStoreProvider: ViewModelStoreProvider,
+) {
+    val decorators: List<NavEntryDecorator<NavKey>> =
+        listOf(
+            SaveableStateHolderNavEntryDecorator(saveableStateHolder),
+            ViewModelStoreNavEntryDecorator(viewModelStoreProvider),
+        )
+
+    /**
+     * Does for [keys] what nav3 does when an entry is popped: removes its saved state and clears
+     * its ViewModels. Only for entries that are not shown. A key without state is ignored.
+     */
+    fun discard(keys: Collection<NavKey>) {
+        keys.forEach { key ->
+            val contentKey = entryContentKey(key)
+            saveableStateHolder.removeState(contentKey)
+            viewModelStoreProvider.clearKey(contentKey)
+        }
+    }
+}
 
 /**
  * The entry decorators hold the per-entry SavedState and ViewModel stores. They are hoisted to
@@ -242,17 +312,27 @@ internal class ModeEntryDecorators(
  */
 @Composable
 internal fun rememberModeEntryDecorators(): ModeEntryDecorators {
-    val main = rememberEntryDecorators()
-    val setup = rememberEntryDecorators()
-    return remember(main, setup) { ModeEntryDecorators(main = main, setup = setup) }
+    val main = rememberEntryState()
+    val setup = rememberEntryState()
+    return remember(main, setup) { ModeEntryDecorators(mainState = main, setupState = setup) }
 }
 
+/**
+ * The content key nav3 gives the entry of [key]: the entries here keep the default of `entry<T>`,
+ * which is the default of [NavEntry]. The saved state and ViewModel stores are keyed on it.
+ */
+internal fun entryContentKey(key: NavKey): Any = NavEntry(key) {}.contentKey
+
+/**
+ * The same holder and provider that nav3's `rememberSaveableStateHolderNavEntryDecorator` and
+ * `rememberViewModelStoreNavEntryDecorator` create, kept so [EntryState.discard] can reach them.
+ */
 @Composable
-private fun rememberEntryDecorators(): List<NavEntryDecorator<NavKey>> {
-    val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
-    val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
-    return remember(saveableStateHolderDecorator, viewModelStoreDecorator) {
-        listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
+private fun rememberEntryState(): EntryState {
+    val saveableStateHolder = rememberSaveableStateHolder()
+    val viewModelStoreProvider = rememberViewModelStoreProvider()
+    return remember(saveableStateHolder, viewModelStoreProvider) {
+        EntryState(saveableStateHolder, viewModelStoreProvider)
     }
 }
 
