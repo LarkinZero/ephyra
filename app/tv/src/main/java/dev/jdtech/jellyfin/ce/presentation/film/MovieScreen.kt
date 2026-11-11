@@ -1,8 +1,11 @@
 package dev.jdtech.jellyfin.ce.presentation.film
 
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +23,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +60,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.ce.ui.PersonCard
 import dev.jdtech.jellyfin.ce.ui.components.TvLoadError
+import dev.jdtech.jellyfin.ce.ui.focus.NoBringIntoView
 import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
@@ -129,8 +134,24 @@ fun MovieScreen(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit) {
+    // CE (#514): the page scrolls itself when a row gets focus, so moving along the buttons leaves
+    // the title on screen. The rows and the version dialog keep the default.
+    val rowSpec = LocalBringIntoViewSpec.current
+    CompositionLocalProvider(LocalBringIntoViewSpec provides NoBringIntoView) {
+        MovieScreenContent(state = state, onAction = onAction, rowSpec = rowSpec)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun MovieScreenContent(
+    state: MovieState,
+    onAction: (MovieAction) -> Unit,
+    rowSpec: BringIntoViewSpec,
+) {
     val configuration = LocalConfiguration.current
     val locale = configuration.locales.get(0)
 
@@ -148,7 +169,10 @@ internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Uni
     var versionDialogStartFromBeginning by remember { mutableStateOf<Boolean?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        state.movie?.let { movie ->
+        // CE (#544): an if, not movie?.let { } ?: run { }. That let ended with the version
+        // dialog's ?.let, null while the dialog is closed, so the spinner showed over the page.
+        val movie = state.movie
+        if (movie != null) {
             val versions = remember(movie.sources) { movie.getVersions() }
             val inProgress = movie.playbackPositionTicks > 0 && !movie.played
             val relatedRows =
@@ -211,7 +235,8 @@ internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Uni
                     contentPadding =
                         PaddingValues(top = 112.dp, bottom = MaterialTheme.spacings.large),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                    userScrollEnabled = false,
+                    // CE (#514): no userScrollEnabled = false. Without user scrolling, Down from
+                    // the buttons can't reach the cast row while that row is below the screen.
                 ) {
                     item {
                         Column(
@@ -474,32 +499,36 @@ internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Uni
 
                     if (state.actors.isNotEmpty()) {
                         item {
-                            LazyRow(
-                                horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.default),
-                                contentPadding =
-                                    PaddingValues(horizontal = MaterialTheme.spacings.default * 2),
-                                modifier =
-                                    Modifier.focusRestorer().onFocusChanged {
-                                        if (it.hasFocus) scrollToRow(ROW_CAST)
-                                    },
-                            ) {
-                                itemsIndexed(state.actors, key = { _, actor -> actor.id }) {
-                                    index,
-                                    actor ->
-                                    PersonCard(
-                                        person = actor,
-                                        onClick = {
-                                            onAction(MovieAction.NavigateToPerson(actor.id))
+                            CompositionLocalProvider(LocalBringIntoViewSpec provides rowSpec) {
+                                LazyRow(
+                                    horizontalArrangement =
+                                        Arrangement.spacedBy(MaterialTheme.spacings.default),
+                                    contentPadding =
+                                        PaddingValues(
+                                            horizontal = MaterialTheme.spacings.default * 2
+                                        ),
+                                    modifier =
+                                        Modifier.focusRestorer().onFocusChanged {
+                                            if (it.hasFocus) scrollToRow(ROW_CAST)
                                         },
-                                        modifier =
-                                            Modifier.focusPosition(
-                                                focusPosition,
-                                                ROW_CAST,
-                                                index,
-                                                actor.id.toString(),
-                                            ),
-                                    )
+                                ) {
+                                    itemsIndexed(state.actors, key = { _, actor -> actor.id }) {
+                                        index,
+                                        actor ->
+                                        PersonCard(
+                                            person = actor,
+                                            onClick = {
+                                                onAction(MovieAction.NavigateToPerson(actor.id))
+                                            },
+                                            modifier =
+                                                Modifier.focusPosition(
+                                                    focusPosition,
+                                                    ROW_CAST,
+                                                    index,
+                                                    actor.id.toString(),
+                                                ),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -514,6 +543,7 @@ internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Uni
                                 direction = related.direction,
                                 focusPosition = focusPosition,
                                 row = related.row,
+                                rowSpec = rowSpec,
                                 onFocused = { scrollToRow(lazyIndexOf(related.row)) },
                                 onClick = { item ->
                                     onAction(
@@ -548,33 +578,34 @@ internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Uni
             }
 
             versionDialogStartFromBeginning?.let { startFromBeginning ->
-                VersionDialog(
-                    versions = versions,
-                    onSelect = { mediaSourceId ->
-                        versionDialogStartFromBeginning = null
-                        onAction(
-                            MovieAction.Play(
-                                startFromBeginning = startFromBeginning,
-                                mediaSourceId = mediaSourceId,
+                CompositionLocalProvider(LocalBringIntoViewSpec provides rowSpec) {
+                    VersionDialog(
+                        versions = versions,
+                        onSelect = { mediaSourceId ->
+                            versionDialogStartFromBeginning = null
+                            onAction(
+                                MovieAction.Play(
+                                    startFromBeginning = startFromBeginning,
+                                    mediaSourceId = mediaSourceId,
+                                )
                             )
-                        )
-                    },
-                    onDismiss = { versionDialogStartFromBeginning = null },
-                )
-            }
-        }
-            ?: run {
-                val error = state.error
-                if (error != null) {
-                    TvLoadError(
-                        error = error,
-                        onRetry = { onAction(MovieAction.OnRetryClick) },
-                        modifier = Modifier.align(Alignment.Center),
+                        },
+                        onDismiss = { versionDialogStartFromBeginning = null },
                     )
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
+        } else {
+            val error = state.error
+            if (error != null) {
+                TvLoadError(
+                    error = error,
+                    onRetry = { onAction(MovieAction.OnRetryClick) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            } else {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
     }
 }
 

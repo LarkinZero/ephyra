@@ -42,6 +42,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -217,7 +218,7 @@ fun SeasonScreen(
  * season chips or the other cards. Saved, so a restored page focuses the same episode.
  */
 @Stable
-private class EpisodeSelection(initialId: String?) {
+internal class EpisodeSelection(initialId: String?) {
     /** The focused episode's ID, or null for [nextUp]. */
     var id by mutableStateOf(initialId)
 
@@ -238,7 +239,7 @@ private fun nextUp(episodes: List<FindroidEpisode>): FindroidEpisode? =
 
 @Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
-private fun SeasonScreenLayout(
+internal fun SeasonScreenLayout(
     state: SeasonState,
     loadError: Throwable?,
     onRetry: () -> Unit,
@@ -265,8 +266,10 @@ private fun SeasonScreenLayout(
 
     Box(modifier = Modifier.fillMaxSize()) {
         val season = state.season
-        // No episodes is the only case without a selected one.
-        if (season == null || episodes.isEmpty()) {
+        // No episodes is the only case without a selected one. CE (#505): a season that has
+        // loaded without episodes shows the page, with a line where the episodes would be.
+        val emptyLoaded = episodes.isEmpty() && !state.isLoading && loadError == null
+        if (season == null || (episodes.isEmpty() && !emptyLoaded)) {
             if (loadError != null) {
                 TvLoadError(
                     error = loadError,
@@ -328,6 +331,17 @@ private fun SeasonScreenLayout(
                 }
             }
 
+            if (emptyLoaded) {
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth().testTag(SEASON_EMPTY_TAG),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(CoreR.string.nothing_here_yet),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                }
+            }
             EpisodeDetails(
                 selected = selected,
                 episodeState = episodeState,
@@ -371,7 +385,14 @@ private fun SeasonScreenLayout(
             }
         }
 
-        RestoreFocus(position = focusPosition, ready = episodes.isNotEmpty()) { position ->
+        RestoreFocus(position = focusPosition, ready = episodes.isNotEmpty() || emptyLoaded) {
+            position ->
+            // CE (#505): without episodes, the season's own chip is what can take focus.
+            if (episodes.isEmpty()) {
+                val seasons = state.seriesSeasons.ifEmpty { listOf(season) }
+                val index = seasons.indexOfFirst { it.id == season.id }.coerceAtLeast(0)
+                position.save(ROW_SEASONS, index, season.id.toString())
+            }
             // First visit: no episode was focused yet, so point the default at the selected one.
             if (position.row == ROW_EPISODES && position.key == null) {
                 selected.value?.let { position.save(ROW_EPISODES, 0, it.id.toString()) }
@@ -737,6 +758,8 @@ private fun Modifier.focusRequesterIf(condition: Boolean, requester: FocusReques
 private suspend fun LazyListState.scrollIntoView(index: Int) {
     if (layoutInfo.visibleItemsInfo.none { it.index == index }) scrollToItem(index)
 }
+
+internal const val SEASON_EMPTY_TAG = "ce_season_empty"
 
 private const val ROW_SEASONS = 0
 private const val ROW_BUTTONS = 1
