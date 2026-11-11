@@ -73,7 +73,7 @@ variant. An empty cell is work still to do.
 | SUP-15 | Remove a user (long-press or the remove button): the session ends on the server; removing the current user returns to setup | #336 | works | works | works |
 | SUP-16 | The app's session leaves the server's dashboard when the app goes to the background or is closed, and comes back on return | #336, `ServerSessionKeeper` | works | works | works |
 | SUP-17 | Revoked token: sign the device out from the dashboard; the app shows a toast and goes to user selection instead of failing silently | #334 | works (#388): Login from user selection opens empty | works | works |
-| SUP-18 | The dashboard lists the client as Ephyra (Ephyra Beta for staging) with the device name | #172 | unpolished #386: server sees version 1.2.0 | unpolished #386: server sees version 1.2.0 | unpolished #386: server sees version 1.2.0 |
+| SUP-18 | The dashboard lists the client as Ephyra (Ephyra Beta for staging) with the device name | #172 | works | unpolished #386: server sees version 1.2.0 | unpolished #386: server sees version 1.2.0 |
 | SUP-19 | Killing the app halfway through setup and starting it again opens the right step (Servers or Users) | `NavigationRoot` | works | works | works |
 | SUP-20 | Stable and beta installed side by side: logging in on one does not log out the other | #98 | not tested: debug APK only | not tested: debug APK only | not tested: debug APK only |
 
