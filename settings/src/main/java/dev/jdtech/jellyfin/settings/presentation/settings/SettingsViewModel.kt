@@ -11,7 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import dev.jdtech.jellyfin.settings.domain.Constants
+import dev.jdtech.jellyfin.settings.domain.bounded
 import dev.jdtech.jellyfin.settings.domain.models.PermissionDefinitions
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
 import dev.jdtech.jellyfin.settings.presentation.enums.AppVariant
@@ -1334,9 +1334,13 @@ class SettingsViewModel @Inject constructor(
                                                             preference.dependencies.all {
                                                                 appPreferences.getValue(it)
                                                             },
+                                                    // CE (#559): shown as the app uses it.
                                                     value =
-                                                        appPreferences.getValue(
-                                                            preference.backendPreference
+                                                        appPreferences.bounded(
+                                                            preference.backendPreference,
+                                                            appPreferences.getValue(
+                                                                preference.backendPreference
+                                                            ),
                                                         ),
                                                 )
                                             }
@@ -1405,19 +1409,10 @@ class SettingsViewModel @Inject constructor(
                     is PreferenceIntInput ->
                         appPreferences.setValue(
                             action.preference.backendPreference,
-                            if (action.preference.backendPreference == appPreferences.subtitleFontScale) {
-                                action.preference.value.coerceIn(
-                                    Constants.SubtitleStyle.FONT_SCALE_MIN,
-                                    Constants.SubtitleStyle.FONT_SCALE_MAX,
-                                )
-                            } else if (
-                                action.preference.backendPreference ==
-                                    appPreferences.smartDownloadsKeepReady
-                            ) {
-                                action.preference.value.coerceAtLeast(1)
-                            } else {
-                                action.preference.value
-                            },
+                            appPreferences.bounded(
+                                action.preference.backendPreference,
+                                action.preference.value,
+                            ),
                         )
                     is PreferenceLongInput ->
                         appPreferences.setValue(
