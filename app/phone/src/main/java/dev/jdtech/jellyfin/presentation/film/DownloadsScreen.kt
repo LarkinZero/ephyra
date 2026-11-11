@@ -78,6 +78,7 @@ import dev.jdtech.jellyfin.film.presentation.downloads.ActiveDownload
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadSortOrder
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsState
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
+import dev.jdtech.jellyfin.film.presentation.downloads.queueCounts
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -415,7 +416,23 @@ private fun LazyGridScope.downloadingSection(
             queueItems
                 .filter { it.progress.status == DownloadStatus.DOWNLOADING }
                 .sumOf { it.bytesPerSecond }
-        val title = "${stringResource(CoreR.string.downloads_downloading)} · ${queueItems.size}"
+        // CE (#546): "Downloading" counts only what is still on its way, the failed ones apart.
+        val counts = queueItems.queueCounts()
+        val failed =
+            if (counts.failed > 0) {
+                pluralStringResource(
+                    CoreR.plurals.ce_downloads_failed_count,
+                    counts.failed,
+                    counts.failed,
+                )
+            } else null
+        val downloading = "${stringResource(CoreR.string.downloads_downloading)} · ${counts.active}"
+        val title =
+            when {
+                failed == null -> downloading
+                counts.active == 0 -> failed
+                else -> "$downloading · $failed"
+            }
         RowWidth(modifier = Modifier.animateItem()) { capped ->
             SectionHeader(
                 title = title,

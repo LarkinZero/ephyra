@@ -115,4 +115,10 @@
         <item quantity="other">%d neogledanih</item>
     </plurals>
     <string name="ce_delete_download_message">Ali res želite izbrisati ta prenos iz naprave?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">Neuspešno: %d</item>
+        <item quantity="two">Neuspešno: %d</item>
+        <item quantity="few">Neuspešno: %d</item>
+        <item quantity="other">Neuspešno: %d</item>
+    </plurals>
 </resources>

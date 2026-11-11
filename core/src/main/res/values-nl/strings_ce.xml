@@ -107,4 +107,8 @@
         <item quantity="other">%d niet bekeken</item>
     </plurals>
     <string name="ce_delete_download_message">Weet je zeker dat je deze download van je apparaat wilt verwijderen?</string>
+    <plurals name="ce_downloads_failed_count">
+        <item quantity="one">%d mislukt</item>
+        <item quantity="other">%d mislukt</item>
+    </plurals>
 </resources>
