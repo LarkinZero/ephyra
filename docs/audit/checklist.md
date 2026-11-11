@@ -540,7 +540,7 @@ Use a debug build with `files/fake_segments.txt` where the server has no segment
 | ID | Feature: what to do, and what "works" means | Source | Phone Exo | Phone mpv | Tablet Exo | Tablet mpv | TV Exo | TV mpv |
 |---|---|---|---|---|---|---|---|---|
 | PLY-100 | PiP button: the video goes into a PiP window and keeps playing | | works | works | works | works | n/a | n/a |
-| PLY-101 | PiP gesture on: going Home while playing enters PiP | `playerPipGesture` | broken #447: Home enters PiP after one use of the PiP button | broken #447: Home enters PiP after one use of the PiP button | broken #447: Home enters PiP after one use of the PiP button | broken #447: Home enters PiP after one use of the PiP button | n/a | n/a |
+| PLY-101 | PiP gesture on: going Home while playing enters PiP | `playerPipGesture` | works | works | broken #447: Home enters PiP after one use of the PiP button | broken #447: Home enters PiP after one use of the PiP button | n/a | n/a |
 | PLY-102 | In PiP the controls, skip button and Up next card are hidden; zoom is off and comes back after | `PlayerActivity` | works; zoom not tested | works | works | works | n/a | n/a |
 | PLY-103 | Closing the PiP window stops playback (with background audio on, audio goes on) | #79 | works | works | as phone: works | as phone: works | n/a | n/a |
 | PLY-104 | Background audio on: audio goes on with the screen off and the app in the background; lock-screen artwork and controls work | #36, #80 | works; lock screen not checked | not tested: background audio off for the mpv pass | as phone: works; lock screen not checked | as phone: not tested: background audio off for the mpv pass | n/a | n/a |

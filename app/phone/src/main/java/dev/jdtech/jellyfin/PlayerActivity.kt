@@ -1093,7 +1093,11 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun pipParams(
-        enableAutoEnter: Boolean = viewModel.player.isPlaying
+        enableAutoEnter: Boolean =
+            pipAutoEnterEnabled(
+                gestureEnabled = appPreferences.getValue(appPreferences.playerPipGesture),
+                isPlaying = viewModel.player.isPlaying,
+            )
     ): PictureInPictureParams {
         val displayAspectRatio = Rational(binding.playerView.width, binding.playerView.height)
 
