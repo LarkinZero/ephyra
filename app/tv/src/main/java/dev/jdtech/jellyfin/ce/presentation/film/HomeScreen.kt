@@ -204,7 +204,7 @@ private fun HomeState.rows(): List<HomeRow> =
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomeScreenLayout(
+internal fun HomeScreenLayout(
     state: HomeState,
     refreshed: Boolean,
     onAction: (HomeAction) -> Unit,
@@ -277,11 +277,15 @@ private fun HomeScreenLayout(
             Spacer(modifier = Modifier.height(HERO_HEIGHT))
             // The focused row moves up to just below the hero. The rows inside keep the default.
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowAtTop) {
+                // #423: the list ends at the safe area instead of padding its content, so the row
+                // below the focused one doesn't show its title in the bottom margin.
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(bottom = TvSafeArea.vertical),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                    modifier = Modifier.fillMaxSize().testTag("ce_home_rows"),
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(bottom = TvSafeArea.vertical)
+                            .testTag("ce_home_rows"),
                 ) {
                     rows.forEachIndexed { rowIndex, row ->
                         item(key = row.key) {
@@ -369,6 +373,8 @@ private fun HomeRowContent(
                     item = item,
                     direction = row.direction,
                     showSeriesName = row.direction == Direction.VERTICAL,
+                    // #423: a row of posters with two title lines runs into the bottom safe area.
+                    titleMaxLines = 1,
                     onClick = { onAction(HomeAction.OnItemClick(it)) },
                     modifier =
                         Modifier.focusPosition(focusPosition, rowIndex, column, item.id.toString())

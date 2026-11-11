@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -23,12 +25,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -44,6 +48,7 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Text
+import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -53,6 +58,7 @@ import dev.jdtech.jellyfin.setup.presentation.login.LoginEvent
 import dev.jdtech.jellyfin.setup.presentation.login.LoginState
 import dev.jdtech.jellyfin.setup.presentation.login.LoginViewModel
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -100,16 +106,26 @@ private fun LoginScreenLayout(
     val focusRequester = remember { FocusRequester() }
     val doLogin = { onAction(LoginAction.OnLoginClick(username, password)) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // CE (#423): everything inside the TV safe area. The form scrolls when it doesn't fit (a long
+    // server disclaimer, a large font), and the last button scrolls to the end, so the disclaimer
+    // below it can be read.
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    val scrollToEndOnFocus =
+        Modifier.onFocusChanged {
+            if (it.isFocused) scope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
+        }
+
+    Box(modifier = Modifier.fillMaxSize().padding(TvSafeArea.paddingValues)) {
         IconButton(
             onClick = { onAction(LoginAction.OnChangeServerClick) },
-            modifier = Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.small),
+            modifier = Modifier.align(Alignment.TopEnd),
         ) {
             Icon(painter = painterResource(R.drawable.ic_server), contentDescription = null)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+            modifier = Modifier.fillMaxWidth().align(Alignment.Center).verticalScroll(scrollState),
         ) {
             Text(
                 text = stringResource(id = dev.jdtech.jellyfin.setup.R.string.login),
@@ -197,7 +213,9 @@ private fun LoginScreenLayout(
                 Button(
                     onClick = { doLogin() },
                     enabled = !state.isLoading,
-                    modifier = Modifier.width(360.dp),
+                    modifier =
+                        Modifier.width(360.dp)
+                            .then(if (state.quickConnectEnabled) Modifier else scrollToEndOnFocus),
                 ) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (state.isLoading) {
@@ -239,7 +257,7 @@ private fun LoginScreenLayout(
                     Box {
                         OutlinedButton(
                             onClick = { onAction(LoginAction.OnQuickConnectClick) },
-                            modifier = Modifier.width(360.dp),
+                            modifier = Modifier.width(360.dp).then(scrollToEndOnFocus),
                         ) {
                             Box(modifier = Modifier.fillMaxWidth()) {
                                 if (state.quickConnectCode != null) {
