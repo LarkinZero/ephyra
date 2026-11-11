@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -58,7 +59,11 @@ const val MEDIA_INFO_SHEET_TAG = "media_info_sheet"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaInfoSheet(sources: List<FindroidSource>, onDismissRequest: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        // Opens at its full height: half a landscape window shows the title and little else.
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
         MediaInfoContent(sources = sources, modifier = Modifier.testTag(MEDIA_INFO_SHEET_TAG))
     }
 }
