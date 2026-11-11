@@ -144,4 +144,19 @@ class PlayerInvariantsTest {
             screen.contains("repeatOnLifecycle(Lifecycle.State.STARTED)"),
         )
     }
+
+    @Test
+    fun `the TV player takes the key-up of an OK that showed the controls`() {
+        // #459: the OK-up reached the Play/Pause button, focused by then, and toggled playback.
+        // app/tv's own tests (TvPlayerKeyHandlerTest) are not part of the root task.
+        val file = File("../../app/tv/src/main/java/dev/jdtech/jellyfin/ce/presentation/player/TvPlayerKeyHandler.kt")
+        assertTrue("missing ${file.absolutePath}", file.isFile)
+        val handler = file.readText()
+        val onKeyUp = Regex("""private fun onKeyUp\(keyCode: Int\): Boolean \{[\s\S]*?\n    \}""").find(handler)
+        assertTrue("TvPlayerKeyHandler.onKeyUp not found", onKeyUp != null)
+        assertTrue(
+            "onKeyUp must take the up of the OK whose down showed the controls (#459)",
+            onKeyUp!!.value.contains("okDown == keyCode"),
+        )
+    }
 }

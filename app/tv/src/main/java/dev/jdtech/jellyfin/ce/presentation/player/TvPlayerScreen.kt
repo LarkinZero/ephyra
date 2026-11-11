@@ -384,6 +384,8 @@ fun TvPlayerScreen(
         }
     }
     val keyHandler = remember { TvPlayerKeyHandler(controls, { seekSettings }) }
+    // #459: an OK-up after a dialog or the queue opened or closed is not the handler's.
+    LaunchedEffect(dialog, queueOpen) { keyHandler.forgetOkPress() }
     // #257: built once, so PlayerControls gets the same callbacks on every recomposition.
     val callbacks = remember {
         PlayerControlsCallbacks(

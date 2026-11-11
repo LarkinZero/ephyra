@@ -488,7 +488,7 @@ detail.
 | PLY-68 | Hardware keyboard: Tab focuses the controls, then arrows and Space act on the focused one | #310 | works | works | unpolished #449: focus faint or invisible | not tested: same code as ExoPlayer | n/a | n/a |
 | PLY-69 | Mouse: moving shows the controls, the wheel seeks | #310 | not tested: no mouse on the emulator | not tested: no mouse on the emulator | not tested: no mouse on the emulator | not tested: no mouse on the emulator | n/a | n/a |
 | PLY-70 | TV, controls hidden: Left/Right seek at once with an indicator; holding speeds up | #124, `TvPlayerKeyHandler` | n/a | n/a | n/a | n/a | works | works |
-| PLY-71 | TV: OK shows the controls; with "OK pauses" on it also pauses | #126 | n/a | n/a | n/a | n/a | broken #459: OK that shows the controls also pauses; "OK pauses" has no effect | broken #459: OK that shows the controls also pauses; "OK pauses" has no effect |
+| PLY-71 | TV: OK shows the controls; with "OK pauses" on it also pauses | #126 | n/a | n/a | n/a | n/a | works (#459): 150 ms presses, "OK pauses" off 0 of 10 paused, on 10 of 10 stayed paused | works (#459): as TV Exo |
 | PLY-72 | TV: Back hides the controls (closes the queue row first), then leaves the player | #124 | n/a | n/a | n/a | n/a | works; Back with the queue open not tried | works; Back with the queue open not tried |
 | PLY-73 | TV remote keys Stop (leaves), Captions (subtitle dialog), Audio track (audio dialog) | `TvPlayerKeyHandler` | n/a | n/a | n/a | n/a | works | works |
 | PLY-74 | TV: the skip button and the Up next card take focus while the controls are hidden; OK presses, Back cancels the card | #271, #272 | n/a | n/a | n/a | n/a | works | works for the Up next card; the skip button not tried |
