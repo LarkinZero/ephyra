@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">Sunucu indirmeyi reddetti (HTTP %1$d)</string>
     <string name="ce_error_server_status">Sunucu bir hatayla yanıt verdi (HTTP %1$d). Daha sonra tekrar deneyin.</string>
     <string name="ce_media_info">Medya bilgisi</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">İzlendi</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d izlenmemiş</item>
+    </plurals>
 </resources>

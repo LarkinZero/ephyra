@@ -103,4 +103,11 @@
     <string name="ce_download_error_server">Server sťahovanie odmietol (HTTP %1$d)</string>
     <string name="ce_error_server_status">Server odpovedal chybou (HTTP %1$d). Skúste to neskôr.</string>
     <string name="ce_media_info">Informácie o médiu</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Pozreté</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d nepozretý</item>
+        <item quantity="few">%d nepozreté</item>
+        <item quantity="other">%d nepozretých</item>
+    </plurals>
 </resources>

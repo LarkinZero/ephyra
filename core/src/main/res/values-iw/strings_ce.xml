@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">השרת דחה את ההורדה (HTTP %1$d)</string>
     <string name="ce_error_server_status">השרת השיב בשגיאה (HTTP %1$d). יש לנסות שוב מאוחר יותר.</string>
     <string name="ce_media_info">פרטי מדיה</string>
+    <string name="ce_home_profile">פרופיל</string>
+    <string name="ce_watched">נצפה</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d שלא נצפה</item>
+        <item quantity="other">%d שלא נצפו</item>
+    </plurals>
 </resources>

@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">伺服器拒絕了下載 (HTTP %1$d)</string>
     <string name="ce_error_server_status">伺服器回應了錯誤 (HTTP %1$d)。請稍後再試。</string>
     <string name="ce_media_info">媒體資訊</string>
+    <string name="ce_home_profile">個人檔案</string>
+    <string name="ce_watched">已觀看</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d 個未觀看</item>
+    </plurals>
 </resources>

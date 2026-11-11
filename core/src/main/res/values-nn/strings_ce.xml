@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Tenaren avviste nedlastinga (HTTP %1$d)</string>
     <string name="ce_error_server_status">Tenaren svarte med ein feil (HTTP %1$d). Prøv igjen seinare.</string>
     <string name="ce_media_info">Medieinformasjon</string>
+    <string name="ce_home_profile">Profil</string>
+    <string name="ce_watched">Sett</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d ikkje sett</item>
+        <item quantity="other">%d ikkje sette</item>
+    </plurals>
 </resources>

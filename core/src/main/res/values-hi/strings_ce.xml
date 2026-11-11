@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">सर्वर ने डाउनलोड अस्वीकार कर दिया (HTTP %1$d)</string>
     <string name="ce_error_server_status">सर्वर ने त्रुटि के साथ जवाब दिया (HTTP %1$d)। बाद में फिर से कोशिश करें।</string>
     <string name="ce_media_info">मीडिया जानकारी</string>
+    <string name="ce_home_profile">प्रोफ़ाइल</string>
+    <string name="ce_watched">देखा गया</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d अनदेखा</item>
+        <item quantity="other">%d अनदेखे</item>
+    </plurals>
 </resources>

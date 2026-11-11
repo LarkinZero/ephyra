@@ -212,4 +212,12 @@
     <string name="item_included_in">Included in</string>
     <string name="item_more_like_this">More like this</string>
     <string name="ce_media_info">Media info</string>
+    <!-- CE (#441): what a screen reader says for the Home profile button, the watched tick and
+         the unwatched count on a card. -->
+    <string name="ce_home_profile">Profile</string>
+    <string name="ce_watched">Watched</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d unwatched</item>
+        <item quantity="other">%d unwatched</item>
+    </plurals>
 </resources>

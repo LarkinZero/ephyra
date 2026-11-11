@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">Сървърът отказа изтеглянето (HTTP %1$d)</string>
     <string name="ce_error_server_status">Сървърът отговори с грешка (HTTP %1$d). Опитайте отново по-късно.</string>
     <string name="ce_media_info">Информация за медията</string>
+    <string name="ce_home_profile">Профил</string>
+    <string name="ce_watched">Гледано</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d негледан</item>
+        <item quantity="other">%d негледани</item>
+    </plurals>
 </resources>

@@ -100,4 +100,10 @@
     <string name="ce_download_error_server">De server heeft de download geweigerd (HTTP %1$d)</string>
     <string name="ce_error_server_status">De server gaf een fout terug (HTTP %1$d). Probeer het later opnieuw.</string>
     <string name="ce_media_info">Media-info</string>
+    <string name="ce_home_profile">Profiel</string>
+    <string name="ce_watched">Bekeken</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d niet bekeken</item>
+        <item quantity="other">%d niet bekeken</item>
+    </plurals>
 </resources>

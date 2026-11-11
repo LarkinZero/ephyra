@@ -97,4 +97,9 @@
     <string name="ce_download_error_server">服务器拒绝了下载 (HTTP %1$d)</string>
     <string name="ce_error_server_status">服务器返回了错误 (HTTP %1$d)。请稍后再试。</string>
     <string name="ce_media_info">媒体信息</string>
+    <string name="ce_home_profile">个人资料</string>
+    <string name="ce_watched">已观看</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="other">%d 个未观看</item>
+    </plurals>
 </resources>

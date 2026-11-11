@@ -106,4 +106,12 @@
     <string name="ce_download_error_server">Сервер відхилив завантаження (HTTP %1$d)</string>
     <string name="ce_error_server_status">Сервер відповів помилкою (HTTP %1$d). Спробуйте пізніше.</string>
     <string name="ce_media_info">Відомості про медіа</string>
+    <string name="ce_home_profile">Профіль</string>
+    <string name="ce_watched">Переглянуто</string>
+    <plurals name="ce_unwatched_count">
+        <item quantity="one">%d непереглянутий</item>
+        <item quantity="few">%d непереглянуті</item>
+        <item quantity="many">%d непереглянутих</item>
+        <item quantity="other">%d непереглянутих</item>
+    </plurals>
 </resources>
