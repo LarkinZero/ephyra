@@ -133,7 +133,7 @@ Libraries, search, favourites and the item pages.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | BRW-01 | Bottom bar with Home, Favorites, Media and Downloads; on an expanded window a navigation rail instead | #188, #288 | works | works | n/a |
-| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | works (#411): after a library, Back and Left on Home open the drawer on Home |
+| BRW-02 | TV drawer: face, Search, Home, Favorites, one entry per library, Settings; Back goes Home, then opens the drawer, then leaves | ADR 0002, `MainScreen` | n/a | n/a | works (#411): after a library, Back and Left on Home open the drawer on Home; #533 fixed: Back from Settings or the face puts focus on that drawer item, also after Home's refresh |
 | BRW-03 | TV: switching drawer destinations does not shift the layout or make focus jump | #190 | n/a | n/a | works |
 | BRW-04 | TV: Back from a page puts focus on the card that opened it (library, show, season) | #124, ADR 0003 | n/a | n/a | works |
 | BRW-05 | Screen transitions and the predictive back preview animate without a snap at the end | #234, 1.1.0-ce.4 | not tested: a snap is not visible in screenshots | not tested: a snap is not visible in screenshots | n/a |

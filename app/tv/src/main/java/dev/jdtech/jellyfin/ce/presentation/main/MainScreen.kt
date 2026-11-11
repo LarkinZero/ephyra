@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.ce.presentation.main
 
 import android.app.Activity
+import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +43,12 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -64,6 +72,7 @@ import dev.jdtech.jellyfin.ce.presentation.film.SearchScreen
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.ce.ui.TvSafeArea
 import dev.jdtech.jellyfin.ce.ui.components.UserAvatar
+import dev.jdtech.jellyfin.ce.ui.focus.LocalRestoreFocusSuppressed
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedBorder
 import dev.jdtech.jellyfin.ce.ui.tvSafeAreaPadding
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -263,11 +272,16 @@ fun MainScreenLayout(
     // The drawer item that opened another route (profile or settings). This screen leaves the
     // composition while that route is shown, so the effect below runs again on the way back.
     var returnFocusTo by rememberSaveable { mutableStateOf<String?>(null) }
+    // #533: while the drawer holds focus, the content's focus restore leaves it there. Otherwise
+    // Home, done refreshing after Back from Settings, took focus from the Settings item.
+    val drawerFocus = remember { DrawerFocus() }
+    val restoreSuppressed: () -> Boolean = remember(drawerFocus) { { drawerFocus.holds } }
 
     LaunchedEffect(Unit) {
         val item = returnFocusTo ?: return@LaunchedEffect
         returnFocusTo = null
         val requester = if (item == ITEM_PROFILE) profileFocusRequester else settingsFocusRequester
+        drawerFocus.hold()
         requestFocusWhenReady(requester)
     }
 
@@ -281,6 +295,8 @@ fun MainScreenLayout(
         coroutineScope.launch {
             withFrameNanos {}
             if (!contentFocusRequester.tryRequestFocus()) {
+                // The destination takes focus from the drawer once it has loaded (#533).
+                drawerFocus.release()
                 fallback?.tryRequestFocus()
             }
         }
@@ -300,12 +316,14 @@ fun MainScreenLayout(
         when {
             !isHome && isDrawerOpen -> {
                 activeDestinationKey = DESTINATION_HOME
+                drawerFocus.hold()
                 homeFocusRequester.tryRequestFocus()
             }
             !isHome -> showDestination(DESTINATION_HOME, fallback = homeFocusRequester)
             !isDrawerOpen -> {
                 coroutineScope.launch {
                     drawerState.setValue(DrawerValue.Open)
+                    drawerFocus.hold()
                     homeFocusRequester.tryRequestFocus()
                 }
             }
@@ -329,6 +347,7 @@ fun MainScreenLayout(
                             }
                         }
                         .focusGroup()
+                        .onFocusChanged { drawerFocus.onFocusChanged(it.hasFocus) }
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(vertical = TvSafeArea.vertical, horizontal = 12.dp)
                         .testTag("main_drawer_content"),
@@ -555,7 +574,14 @@ fun MainScreenLayout(
                 }
             }
         },
-        modifier = modifier.fillMaxSize(),
+        // #533: a D-pad move is the user's; see [DrawerFocus].
+        modifier =
+            modifier.fillMaxSize().onPreviewKeyEvent {
+                if (it.type == KeyEventType.KeyDown && it.key in DirectionKeys) {
+                    drawerFocus.onDirectionKey()
+                }
+                false
+            },
     ) {
         Box(
             modifier =
@@ -572,22 +598,24 @@ fun MainScreenLayout(
                     .focusGroup()
         ) {
             saveableStateHolder.SaveableStateProvider(activeDestinationKey) {
-                when {
-                    activeDestinationKey == DESTINATION_HOME -> {
-                        homeContent()
-                    }
-                    activeDestinationKey == DESTINATION_SEARCH -> {
-                        searchContent()
-                    }
-                    activeDestinationKey == DESTINATION_FAVORITES -> {
-                        favoritesContent()
-                    }
-                    activeDestinationKey.startsWith("library:") -> {
-                        val libraryIdString = activeDestinationKey.removePrefix("library:")
-                        val library =
-                            libraries.firstOrNull { it.id.toString() == libraryIdString }
-                        if (library != null) {
-                            libraryContent(library)
+                CompositionLocalProvider(LocalRestoreFocusSuppressed provides restoreSuppressed) {
+                    when {
+                        activeDestinationKey == DESTINATION_HOME -> {
+                            homeContent()
+                        }
+                        activeDestinationKey == DESTINATION_SEARCH -> {
+                            searchContent()
+                        }
+                        activeDestinationKey == DESTINATION_FAVORITES -> {
+                            favoritesContent()
+                        }
+                        activeDestinationKey.startsWith("library:") -> {
+                            val libraryIdString = activeDestinationKey.removePrefix("library:")
+                            val library =
+                                libraries.firstOrNull { it.id.toString() == libraryIdString }
+                            if (library != null) {
+                                libraryContent(library)
+                            }
                         }
                     }
                 }
@@ -611,6 +639,57 @@ private fun ephyraDrawerItemBorder(): NavigationDrawerItemBorder {
         pressedSelectedBorder = ring,
     )
 }
+
+private val DirectionKeys =
+    setOf(Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown)
+
+/**
+ * #533: whether the drawer holds focus, so the content must not take it. It holds focus that Main
+ * put there (Back from Settings or the profile, Back on Home) or that the user moved there with the
+ * D-pad. It does not hold focus that only landed there because the focused element of the content
+ * went away, such as Retry while a page reloads: the page takes it back once it is there. Plain
+ * fields, so a focus change recomposes nothing.
+ */
+private class DrawerFocus {
+    private var requested = false
+
+    var holds = false
+        private set
+
+    private var hasFocus = false
+    private var directionKeyAt: Long? = null
+
+    /** Main is about to put focus on a drawer item, or moves it inside the drawer. */
+    fun hold() {
+        if (hasFocus) holds = true else requested = true
+    }
+
+    fun onDirectionKey() {
+        directionKeyAt = SystemClock.uptimeMillis()
+        // Moving inside the drawer: the user is there.
+        if (hasFocus) holds = true
+    }
+
+    fun onFocusChanged(focused: Boolean) {
+        if (focused && !hasFocus) {
+            val keyAt = directionKeyAt
+            val byKey = keyAt != null && SystemClock.uptimeMillis() - keyAt < DIRECTION_KEY_MS
+            holds = requested || byKey
+            requested = false
+        }
+        if (!focused) holds = false
+        hasFocus = focused
+    }
+
+    /** Focus waits in the drawer for a destination that is still loading. */
+    fun release() {
+        holds = false
+        requested = false
+    }
+}
+
+/** How long after a D-pad key a focus change still counts as its result. */
+private const val DIRECTION_KEY_MS = 500L
 
 /** Requests focus, or returns false when [this] is not attached or nothing can take focus. */
 private fun FocusRequester.tryRequestFocus(): Boolean =
