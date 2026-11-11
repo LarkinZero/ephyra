@@ -78,14 +78,10 @@ fun LibraryScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    var initialLoad by rememberSaveable { mutableStateOf(true) }
-
     LaunchedEffect(true) {
         viewModel.setup(parentId = libraryId, libraryType = libraryType)
-        if (initialLoad) {
-            viewModel.loadItems()
-            initialLoad = false
-        }
+        // CE (#371): the ViewModel decides, a saved flag would skip the load after process death.
+        viewModel.loadItemsIfNeeded()
     }
 
     LibraryScreenLayout(
