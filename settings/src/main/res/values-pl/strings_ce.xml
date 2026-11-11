@@ -196,4 +196,6 @@
     </plurals>
     <string name="ce_number_no_limit">Bez limitu</string>
     <string name="ce_number_off">Wyłączone</string>
+    <string name="ce_pref_player_keep_landscape">Utrzymuj odtwarzacz w poziomie</string>
+    <string name="ce_pref_player_keep_landscape_summary">Odtwarzaj filmy w poziomie, nawet gdy obrócisz tablet pionowo</string>
 </resources>

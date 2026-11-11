@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Geen limiet</string>
     <string name="ce_number_off">Uit</string>
+    <string name="ce_pref_player_keep_landscape">Speler liggend houden</string>
+    <string name="ce_pref_player_keep_landscape_summary">Video\'s liggend afspelen, ook als je de tablet rechtop draait</string>
 </resources>

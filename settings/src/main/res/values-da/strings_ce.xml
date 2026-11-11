@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Ingen grænse</string>
     <string name="ce_number_off">Fra</string>
+    <string name="ce_pref_player_keep_landscape">Hold afspilleren i liggende format</string>
+    <string name="ce_pref_player_keep_landscape_summary">Afspil videoer i liggende format, også når du vender tabletten på højkant</string>
 </resources>

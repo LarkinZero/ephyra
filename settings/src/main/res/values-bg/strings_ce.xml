@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Без ограничение</string>
     <string name="ce_number_off">Изключено</string>
+    <string name="ce_pref_player_keep_landscape">Плейърът да остава хоризонтален</string>
+    <string name="ce_pref_player_keep_landscape_summary">Видеоклиповете се възпроизвеждат хоризонтално, дори когато обърнете таблета вертикално</string>
 </resources>

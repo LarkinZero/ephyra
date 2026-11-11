@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.PictureInPictureParams
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -84,9 +83,6 @@ import timber.log.Timber
 
 var isControlsLocked: Boolean = false
 
-/** Below this many dp a window is compact width (Material window size classes). */
-private const val COMPACT_WIDTH_DP = 600
-
 @AndroidEntryPoint
 class PlayerActivity : BasePlayerActivity() {
 
@@ -136,16 +132,15 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     /**
-     * CE (R6, T7): the orientation the player asks for while the controls are not locked. Phones
-     * keep the forced landscape; tablets and unfolded foldables play in whatever orientation they
-     * are held. Set by [updatePlayerOrientation].
+     * CE (#363): a fold is half-opened (tabletop or book posture), in either orientation. Set from
+     * [WindowInfoTracker]; [playerOrientation] then leaves the window free to turn.
      */
-    private var playerOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+    private var foldHalfOpened = false
 
     /**
-     * Picks [playerOrientation] from the window the player gets when it fills the screen: forced
-     * landscape when that window is compact width (< 600 dp) held in portrait, i.e. its shorter
-     * side is under 600 dp; otherwise unspecified.
+     * CE (R6, T7, #363): asks for the orientation [playerOrientation] picks, from the window the
+     * player gets when it fills the screen, the "Keep the player in landscape" setting, the window
+     * mode, the fold and the lock.
      *
      * The shorter side and not the current width, because a phone held in landscape is wider than
      * 600 dp and must still lock. The maximum window and not the current one, because a requested
@@ -156,11 +151,18 @@ class PlayerActivity : BasePlayerActivity() {
     private fun updatePlayerOrientation() {
         val bounds = WindowMetricsCalculator.getOrCreate().computeMaximumWindowMetrics(this).bounds
         val shorterSideDp = minOf(bounds.width(), bounds.height()) / resources.displayMetrics.density
-        playerOrientation =
-            if (shorterSideDp < COMPACT_WIDTH_DP) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        if (!isControlsLocked && requestedOrientation != playerOrientation) {
-            requestedOrientation = playerOrientation
+        val orientation =
+            playerOrientation(
+                shorterSideDp = shorterSideDp,
+                keepLandscape = appPreferences.getValue(appPreferences.playerKeepLandscape),
+                locked = isControlsLocked,
+                multiWindow = isInMultiWindowMode,
+                pictureInPicture = isInPictureInPictureMode,
+                foldHalfOpened = foldHalfOpened,
+                sdkInt = Build.VERSION.SDK_INT,
+            )
+        if (requestedOrientation != orientation) {
+            requestedOrientation = orientation
         }
     }
 
@@ -293,6 +295,8 @@ class PlayerActivity : BasePlayerActivity() {
         // CE (#455): as in onConfigurationChanged. In split-screen some bars stay up anyway, and
         // configureInsets keeps the controls clear of them.
         if (!isInPictureInPictureMode) hideSystemUI()
+        // CE (#363): split-screen and freeform windows are left free to turn.
+        updatePlayerOrientation()
     }
 
     /**
@@ -610,16 +614,30 @@ class PlayerActivity : BasePlayerActivity() {
                     WindowInfoTracker.getOrCreate(this@PlayerActivity)
                         .windowLayoutInfo(this@PlayerActivity)
                         .collect { layoutInfo ->
+                            val folds =
+                                layoutInfo.displayFeatures.filterIsInstance<FoldingFeature>()
                             tabletopFold =
-                                layoutInfo.displayFeatures
-                                    .filterIsInstance<FoldingFeature>()
+                                folds
                                     .firstOrNull {
                                         it.state == FoldingFeature.State.HALF_OPENED &&
                                             it.orientation == FoldingFeature.Orientation.HORIZONTAL
                                     }
                                     ?.bounds
                             applyTabletopLayout()
+                            // CE (#363): any orientation, see playerOrientation.
+                            foldHalfOpened =
+                                folds.any { it.state == FoldingFeature.State.HALF_OPENED }
+                            updatePlayerOrientation()
                         }
+                }
+
+                // CE (#363): the setting can change while the player is open in the background or
+                // in picture-in-picture. observe() sends the current value first, so coming back
+                // to the player applies a change made meanwhile.
+                launch {
+                    appPreferences.observe(appPreferences.playerKeepLandscape).collect {
+                        updatePlayerOrientation()
+                    }
                 }
 
                 launch {
@@ -853,8 +871,9 @@ class PlayerActivity : BasePlayerActivity() {
             closeEpisodeSheet(animate = false)
             exoPlayerControlView.visibility = View.GONE
             lockedLayout.visibility = View.VISIBLE
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
             isControlsLocked = true
+            // SCREEN_ORIENTATION_LOCKED: the current orientation, whatever it is.
+            updatePlayerOrientation()
             updateUpNextCardAllowed()
             parkFocusOnPlayerView()
         }
@@ -862,8 +881,8 @@ class PlayerActivity : BasePlayerActivity() {
         unlockButton.setOnClickListener {
             exoPlayerControlView.visibility = View.VISIBLE
             lockedLayout.visibility = View.GONE
-            requestedOrientation = playerOrientation
             isControlsLocked = false
+            updatePlayerOrientation()
             updateUpNextCardAllowed()
             parkFocusOnPlayerView()
         }
@@ -1345,6 +1364,8 @@ class PlayerActivity : BasePlayerActivity() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.isInPictureInPictureMode = isInPictureInPictureMode
+        // CE (#363): free in picture-in-picture; the setting applies again on the way back.
+        updatePlayerOrientation()
         updateUpNextCardAllowed()
         applyTabletopLayout()
         updateEpisodesButton()

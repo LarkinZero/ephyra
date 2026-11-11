@@ -63,6 +63,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
     val playerBackgroundAudio = Preference("pref_player_background_audio", false)
 
+    // CE (#363): a wide window (tablet, unfolded foldable) plays in landscape, as up to v2.1.
+    // Off: it follows the device (R6). See KeepPlayerLandscape for where it applies.
+    val playerKeepLandscape = Preference("pref_player_keep_landscape", false)
+
     // Maximum streaming bitrate in bits per second; the server transcodes
     // anything above it. 0 means no cap (original quality). Set from the
     // player's quality selector.
