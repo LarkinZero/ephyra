@@ -261,7 +261,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-01 | Every setting changed below is still set after `am force-stop` and a new start | | works | works | works |
-| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | unpolished #420: ms values step by 1 and 10; Left and Back from the details pane return to the row that opened it (#419) |
+| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | works: Left and Back from the details pane return to the row that opened it (#419); ms values step by 1 and 10 s (#420) |
 | SET-03 | Settings that make no sense on TV (gestures, PiP, downloads, theme) are not shown on TV | #133 | n/a | n/a | works; leftover: empty "Advanced" heading (#421) |
 
 ### Offline and language
@@ -346,7 +346,7 @@ is shown, saved and kept.
 | SET-59 | Media segments: Commercial action | #271 | works | works | works |
 | SET-60 | Skip button duration (seconds) | #271 | works | works | works |
 | SET-61 | Auto-skip: always or only in picture-in-picture | #271 | unpolished #399: options in lower case | unpolished #399: raw lower-case values | n/a |
-| SET-62 | Next episode threshold (ms) | `playerMediaSegmentsNextEpisodeThreshold` | works | works | unpolished #420: steps of 1 and 10 ms |
+| SET-62 | Next episode threshold (ms) | `playerMediaSegmentsNextEpisodeThreshold` | works | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-63 | Trickplay | #134 | works | works | works |
 | SET-64 | Trickplay while seeking with the gesture (needs Trickplay) | `playerGesturesSeekTrickplay` | works | works | n/a |
 | SET-65 | Play next episode automatically: server setting, always, never | #66 | works | works | works |
@@ -372,9 +372,9 @@ is shown, saved and kept.
 | SET-80 | Smart Downloads | #116 | works | works | n/a |
 | SET-81 | Episodes to keep ready (at least 1) | #116 | unpolished #400: "1 episodes" | unpolished #400: "1 episodes" | n/a |
 | SET-82 | Transcode Dolby Vision downloads | ce.30 | works | works | n/a |
-| SET-83 | Request timeout | `requestTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
-| SET-84 | Connect timeout | `connectTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
-| SET-85 | Socket timeout | `socketTimeout` | not tested: effect not observable (value kept) | works | unpolished #420: steps of 1 and 10 ms |
+| SET-83 | Request timeout | `requestTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
+| SET-84 | Connect timeout | `connectTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
+| SET-85 | Socket timeout | `socketTimeout` | not tested: effect not observable (value kept) | works | works: steps of 1 and 10 s, never below 0 (#420) |
 | SET-86 | Image cache on or off | `imageCache` | not tested: effect not observable (value kept) | works | works |
 | SET-87 | Image cache size (MB; TV defaults to 100) | #155 | works | works | works |
 | SET-88 | Load artwork at display size (on by default) | #254, #294 | not tested: effect not observable (value kept) | works | works |
