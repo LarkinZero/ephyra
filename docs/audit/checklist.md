@@ -168,7 +168,7 @@ Libraries, search, favourites and the item pages.
 | BRW-24 | Episode page with play, restart, watched, favourite and links to its season and show (TV: the episode inside its season page) | `EpisodeScreen`, #130 | unpolished #395: no link to the show | unpolished #395: no link to the show in portrait; works at 8 inch and fold | works |
 | BRW-25 | Person page lists the person's movies and shows, which open | #136 | works | unpolished #436: back and home buttons on the photo | works: opens at the top with name and biography (#407); the first row's cards are partly below the edge |
 | BRW-26 | Cast and crew row (actors with roles, directors, writers; an actor with several roles is one card) opens the person | #64, #136 | works; unpolished #396: blank cards without a photo | works | works |
-| BRW-27 | Critic score, tagline, studios or networks | #332 | works | works | unpolished #413: Studios column squeezed |
+| BRW-27 | Critic score, tagline, studios or networks | #332 | works | works | works: a long Writers list wraps onto its own line and Studios stays readable (#413) |
 | BRW-28 | Air schedule of a running show ("Airs Thu 21:00", "Airs daily") | #332 | not tested: no running show on the demo server | not tested: no running show on the demo server | not tested: no running show on the demo server |
 | BRW-29 | Watch count and last played date | #332 | works | works | works |
 | BRW-30 | Links to IMDb, TMDB, TVDB and Trakt open in the browser; hidden offline | #332 | works | works | n/a |
