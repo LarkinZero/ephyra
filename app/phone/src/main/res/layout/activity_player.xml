@@ -14,15 +14,16 @@
         app:animation_enabled="false"
         app:show_buffering="always" />
 
-    <!-- CE (#450): the connection was lost; playback goes on by itself when it is back. Below
-         the centre controls, so Play (retry now) stays free; touches pass through. -->
+    <!-- CE (#450): the connection was lost; playback goes on by itself when it is back. Between
+         the title row and the centre controls (85dp above the centre), so it covers no control and
+         Play (retry now) stays free; touches pass through. -->
     <LinearLayout
         android:id="@+id/connection_lost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginBottom="85dp"
         android:background="@drawable/overlay_background"
         android:gravity="center_vertical"
         android:orientation="horizontal"
