@@ -45,6 +45,7 @@ import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
 import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.useDockedSearch
 
 @Composable
 fun MediaScreen(
@@ -134,12 +135,14 @@ private fun MediaScreenLayout(
             expanded = searchExpanded,
             onExpand = onSearchExpand,
             onAction = onSearchAction,
-            // Capped to a readable width while collapsed; the expanded results fill the window.
+            // Capped to a readable width while collapsed; the expanded results fill the content
+            // area (the window on a phone, the room beside the rail when docked, #439).
             modifier =
                 if (searchExpanded) Modifier.fillMaxWidth()
                 else Modifier.widthIn(max = Layout.textMaxWidth),
             paddingStart = paddingStart,
             paddingEnd = paddingEnd,
+            docked = useDockedSearch(),
         )
         LazyVerticalGrid(
             columns = GridCellsAdaptiveWithMinColumns(minSize = minColumnSize, minColumns = 2),

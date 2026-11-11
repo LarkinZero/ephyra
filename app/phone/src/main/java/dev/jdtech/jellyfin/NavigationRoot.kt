@@ -78,6 +78,7 @@ import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.useDockedSearch
 import dev.jdtech.jellyfin.setup.presentation.permission.PermissionAction
 import dev.jdtech.jellyfin.setup.presentation.permission.PermissionViewModel
 import java.util.UUID
@@ -357,7 +358,10 @@ private fun MainNavigation(
 
     val topLevelRoute = navigationState.topLevelRoute
     val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
-    val showBottomBar = atTabRoot && topLevelRoute in tabRoutes && !searchExpanded.value
+    // #439: on a window with room the open search is docked beside the rail, which stays.
+    val dockedSearch = useDockedSearch()
+    val showBottomBar =
+        atTabRoot && topLevelRoute in tabRoutes && (!searchExpanded.value || dockedSearch)
 
     LaunchedEffect(topLevelRoute, tabRoutes) {
         if (topLevelRoute !in tabRoutes) {
