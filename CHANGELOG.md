@@ -13,6 +13,70 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.4.1] — 2026-11-11
+
+A release of fixes, from a full run-through of the app on phone, tablet and TV. Playback copes
+better with a lost or stalled connection, above all on mpv. Downloads are only offered where the
+server allows them and say why one was refused. Artwork you have already seen is shown from the
+cache instead of being checked with the server again. And the detail pages are tidier: the file
+details moved behind an info chip, and the credits are off until you ask for them.
+
+### Changed
+- Movie and episode pages: an info chip at the end of the badge row opens a Media info sheet
+  with the file, its video, audio and subtitle tracks, and each version when there are several.
+  It replaces the "Display Extra Info" setting and the lines of text it put on the page (#510).
+- Movie and show pages: genres are one line under the overview, and the director, writers and
+  studios a small table. That table is now off by default: turn on "Director and writers" and
+  "Studios and networks" in Settings → Interface → Detail pages to see it, on TV too (#510).
+
+### Fixed
+- Artwork: posters older than a year were checked with the server every time they were shown,
+  and stayed grey when the server could not be reached. They now come from the cache (#370).
+- Player: a lost connection on mpv is reported as an error, instead of closing the player,
+  marking the item watched or starting the next episode (#445).
+- Player: a stalled stream on mpv recovers or reports an error after 30 seconds, instead of
+  freezing for good (#460).
+- Player: a stream that fails to open on mpv is reported, and picking another episode in the
+  player works again (#446, #453).
+- Player: the phone player closes when nothing could be loaded, instead of staying black (#374).
+- Player: an episode whose download has not finished is streamed instead of failing (#454).
+- Player: the stop is reported to the server for an item you leave while it is still loading
+  (#461).
+- Player: the "still watching?" countdown shows the time really left (#367).
+- Player: keyboard focus is visible on the controls, and Space no longer presses a control the
+  keyboard did not choose (#448, #449).
+- Player: auto-enter picture-in-picture stays off when the PiP home gesture is off (#447).
+- Playback through a server on a sub-path: the address and the transcode path are joined with
+  one slash (#444).
+- Downloads: Download is only offered where the server allows it, and a refused download says
+  why (#373, #383).
+- Downloads: the notification permission is asked for when a download starts (#372).
+- Downloads: a cancelled download that was not running is removed (#426).
+- Home: a failed load is explained in plain words instead of a stack trace, and a change to the
+  Home rows shows without a pull to refresh (#377, #431).
+- My media: an error with Retry when the network drops, loading again when it returns; the
+  search stays open after a rotation or theme switch; Tab skips the closed search bar (#427,
+  #387, #430).
+- Library: it loads again after the app was killed in the background (#371).
+- Detail pages: a cast card's name and role open the person, as its picture does (#389).
+- Tablet: an episode's still is stacked above its text in a narrow pane, and the buttons wrap
+  (#429).
+- Setup: the server address is trimmed before connecting, adding a saved server again keeps its
+  user signed in, Login opens empty after a sign-out, and a cancelled Quick Connect code is
+  cleared (#404, #425, #388, #382).
+- Profiles: removing the current user in Settings no longer crashes the app (#381).
+- Settings: the licence text opens on the phone, and the device profile can be exported on
+  Android 11 and later (#384, #385).
+- The app tells the server its real version (#386).
+- TV: an error with Retry when Home or an item page fails to load, instead of a blank page or an
+  endless spinner (#405).
+- TV: the person page opens at the top, with the name and the whole biography (#407).
+- TV: playback progress is reported from the TV player, and the OK press that shows the player
+  controls no longer also acts on them (#458, #459).
+
+### Maintenance
+- Migration tests for every released database schema (#380).
+
 ## [v2.4.0] — 2026-11-10
 
 A fix for Android 10 and 11 first: the player crashed there as soon as you pressed a volume key
@@ -731,6 +795,7 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.4.1]: https://github.com/midasvo/ephyra/releases/tag/v2.4.1
 [v2.4.0]: https://github.com/midasvo/ephyra/releases/tag/v2.4.0
 [v2.3.0]: https://github.com/midasvo/ephyra/releases/tag/v2.3.0
 [v2.2.0]: https://github.com/midasvo/ephyra/releases/tag/v2.2.0
