@@ -1,7 +1,10 @@
 package dev.jdtech.jellyfin.ce.presentation.film
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -108,6 +112,7 @@ internal data class PersonMediaSection(
 
 internal fun personMediaCardTag(id: UUID) = "ce_person_media_card_$id"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PersonScreenLayout(
     state: PersonState,
@@ -140,7 +145,13 @@ internal fun PersonScreenLayout(
         }
 
     val listState = rememberLazyListState()
+    // The header (item 0) has nothing to focus: the first section scrolls to it, so the name and
+    // biography stay on screen (#407). The other sections scroll to their own row.
+    val lazyIndexOf: (Int) -> Int = { sectionIndex ->
+        if (sectionIndex == 0) 0 else 1 + sectionIndex
+    }
     val scope = rememberCoroutineScope()
+    val rowSpec = LocalBringIntoViewSpec.current
     val scrollToRow: (Int) -> Unit = { row ->
         scope.launch {
             withFrameNanos {}
@@ -164,133 +175,143 @@ internal fun PersonScreenLayout(
                 )
             }
             person != null -> {
-                LazyColumn(
-                    state = listState,
-                    contentPadding =
-                        PaddingValues(
-                            top = TvSafeArea.vertical,
-                            bottom = MaterialTheme.spacings.large,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    item(key = "header") {
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth().padding(horizontal = TvSafeArea.horizontal),
-                            horizontalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.large),
-                        ) {
-                            val imageUri = person.images.primary
-                            var failed by remember(imageUri) { mutableStateOf(false) }
-                            Box(
-                                modifier =
-                                    Modifier.height(240.dp)
-                                        .aspectRatio(0.66f)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (imageUri == null || failed) {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_user),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(64.dp),
-                                        tint =
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                alpha = 0.6f
-                                            ),
-                                    )
-                                } else {
-                                    AsyncImage(
-                                        model = imageUri,
-                                        contentDescription =
-                                            stringResource(
-                                                CoreR.string.person_image_description,
-                                                person.name,
-                                            ),
-                                        contentScale = ContentScale.Crop,
-                                        onError = { failed = true },
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.small),
-                            ) {
-                                Text(
-                                    text = person.name,
-                                    style = MaterialTheme.typography.displayMedium,
-                                )
-                                if (person.overview.isNotBlank()) {
-                                    Text(
-                                        text = person.overview,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        maxLines = 6,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color =
-                                            MaterialTheme.colorScheme.onBackground.copy(
-                                                alpha = 0.8f
-                                            ),
-                                        modifier = Modifier.fillMaxWidth(0.9f),
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if (sections.isEmpty()) {
-                        item(key = "empty_focus_target") {
-                            Box(
+                // The page scrolls itself when a section gets focus. Without this, moving along the
+                // first row would also scroll the header off (#407). The rows keep the default.
+                CompositionLocalProvider(LocalBringIntoViewSpec provides NoBringIntoView) {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding =
+                            PaddingValues(
+                                top = TvSafeArea.vertical,
+                                bottom = MaterialTheme.spacings.large,
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        item(key = "header") {
+                            Row(
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .height(1.dp)
-                                        .focusPosition(focusPosition, 0, 0)
-                                        .focusable()
-                            )
-                        }
-                    }
-
-                    itemsIndexed(sections, key = { _, section -> section.id }) {
-                        sectionIndex,
-                        section ->
-                        Column {
-                            Text(
-                                text = stringResource(section.titleRes),
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.padding(horizontal = TvSafeArea.horizontal),
-                            )
-                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-                            LazyRow(
+                                        .padding(horizontal = TvSafeArea.horizontal),
                                 horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.default),
-                                contentPadding =
-                                    PaddingValues(horizontal = TvSafeArea.horizontal),
-                                modifier =
-                                    Modifier.focusRestorer().onFocusChanged {
-                                        if (it.hasFocus) scrollToRow(1 + sectionIndex)
-                                    },
+                                    Arrangement.spacedBy(MaterialTheme.spacings.large),
                             ) {
-                                itemsIndexed(section.items, key = { _, item -> item.id }) {
-                                    columnIndex,
-                                    item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        showYear = true,
-                                        onClick = { onItemClick(item) },
-                                        modifier =
-                                            Modifier.focusPosition(
-                                                    focusPosition,
-                                                    row = sectionIndex,
-                                                    column = columnIndex,
-                                                    key = item.id.toString(),
-                                                )
-                                                .testTag(personMediaCardTag(item.id)),
+                                val imageUri = person.images.primary
+                                var failed by remember(imageUri) { mutableStateOf(false) }
+                                Box(
+                                    modifier =
+                                        Modifier.height(240.dp)
+                                            .aspectRatio(0.66f)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (imageUri == null || failed) {
+                                        Icon(
+                                            painter = painterResource(CoreR.drawable.ic_user),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(64.dp),
+                                            tint =
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.6f
+                                                ),
+                                        )
+                                    } else {
+                                        AsyncImage(
+                                            model = imageUri,
+                                            contentDescription =
+                                                stringResource(
+                                                    CoreR.string.person_image_description,
+                                                    person.name,
+                                                ),
+                                            contentScale = ContentScale.Crop,
+                                            onError = { failed = true },
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement =
+                                        Arrangement.spacedBy(MaterialTheme.spacings.small),
+                                ) {
+                                    Text(
+                                        text = person.name,
+                                        style = MaterialTheme.typography.displayMedium,
                                     )
+                                    if (person.overview.isNotBlank()) {
+                                        Text(
+                                            text = person.overview,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 6,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color =
+                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                    alpha = 0.8f
+                                                ),
+                                            modifier = Modifier.fillMaxWidth(0.9f),
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (sections.isEmpty()) {
+                            item(key = "empty_focus_target") {
+                                Box(
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .height(1.dp)
+                                            .focusPosition(focusPosition, 0, 0)
+                                            .focusable()
+                                )
+                            }
+                        }
+
+                        itemsIndexed(sections, key = { _, section -> section.id }) {
+                            sectionIndex,
+                            section ->
+                            Column {
+                                Text(
+                                    text = stringResource(section.titleRes),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    modifier =
+                                        Modifier.padding(horizontal = TvSafeArea.horizontal),
+                                )
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
+                                CompositionLocalProvider(LocalBringIntoViewSpec provides rowSpec) {
+                                    LazyRow(
+                                        horizontalArrangement =
+                                            Arrangement.spacedBy(MaterialTheme.spacings.default),
+                                        contentPadding =
+                                            PaddingValues(horizontal = TvSafeArea.horizontal),
+                                        modifier =
+                                            Modifier.focusRestorer().onFocusChanged {
+                                                if (it.hasFocus) {
+                                                    scrollToRow(lazyIndexOf(sectionIndex))
+                                                }
+                                            },
+                                    ) {
+                                        itemsIndexed(section.items, key = { _, item -> item.id }) {
+                                            columnIndex,
+                                            item ->
+                                            ItemCard(
+                                                item = item,
+                                                direction = Direction.VERTICAL,
+                                                showYear = true,
+                                                onClick = { onItemClick(item) },
+                                                modifier =
+                                                    Modifier.focusPosition(
+                                                            focusPosition,
+                                                            row = sectionIndex,
+                                                            column = columnIndex,
+                                                            key = item.id.toString(),
+                                                        )
+                                                        .testTag(personMediaCardTag(item.id)),
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -307,12 +328,23 @@ internal fun PersonScreenLayout(
                     position.resolve(sectionIndex, section.items.size) { i ->
                         section.items.getOrNull(i)?.id?.toString()
                     }
-                    listState.scrollToItem(1 + position.row)
+                    listState.scrollToItem(lazyIndexOf(position.row))
                 }
             }
         }
     }
 }
+
+/** Never scrolls to show a focused child: for a list that scrolls itself. */
+@OptIn(ExperimentalFoundationApi::class)
+private val NoBringIntoView =
+    object : BringIntoViewSpec {
+        override fun calculateScrollDistance(
+            offset: Float,
+            size: Float,
+            containerSize: Float,
+        ): Float = 0f
+    }
 
 @Preview(device = "id:tv_1080p")
 @Composable
