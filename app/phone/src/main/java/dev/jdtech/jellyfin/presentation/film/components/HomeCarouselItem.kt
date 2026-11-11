@@ -1,29 +1,25 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
-import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
@@ -53,20 +49,29 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
                     onClick = { onAction(HomeAction.OnItemClick(item)) }
                 )
     ) {
-        AsyncImage(
-            model = item.images.backdrop,
-            placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
-            contentDescription = stringResource(CoreR.string.image_description_backdrop, item.name),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(
-            modifier =
-                Modifier.fillMaxSize().drawWithCache {
-                    val brush = Brush.verticalGradient(colorStops = scrimColorStops)
-                    onDrawBehind { drawRect(brush = brush) }
-                }
-        )
+        // CE (#433): the poster stands in for a missing backdrop. With neither, the card is plain
+        // and its text takes the theme's colours instead of white over a scrim.
+        val artwork = rememberArtworkState(item, ArtworkPlacement.Carousel)
+        if (artwork.hasArtwork) {
+            ArtworkBackdrop(
+                state = artwork,
+                contentDescription =
+                    stringResource(CoreR.string.image_description_backdrop, item.name),
+                modifier = Modifier.fillMaxSize(),
+            )
+            Spacer(
+                modifier =
+                    Modifier.fillMaxSize().drawWithCache {
+                        val brush = Brush.verticalGradient(colorStops = scrimColorStops)
+                        onDrawBehind { drawRect(brush = brush) }
+                    }
+            )
+        } else {
+            Spacer(
+                modifier =
+                    Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer)
+            )
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             modifier =
@@ -84,7 +89,9 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
                 }
             Text(
                 text = genres.joinToString(),
-                color = Color.LightGray,
+                color =
+                    if (artwork.hasArtwork) Color.LightGray
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
@@ -92,7 +99,7 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
             Text(
                 text = item.name,
                 modifier = Modifier,
-                color = Color.White,
+                color = if (artwork.hasArtwork) Color.White else MaterialTheme.colorScheme.onSurface,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
                 style = MaterialTheme.typography.titleLarge,

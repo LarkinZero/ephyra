@@ -100,7 +100,7 @@ internal fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> 
     // CE (#436): beside the text the photo starts at the start margin, under the back and home
     // buttons, so the wide page starts below the top bar. The compact page centres the photo
     // between them and keeps its place.
-    val contentTop = if (wide) safePadding.top + TopBarButtonsHeight else paddingTop
+    val contentTop = if (wide) safePadding.top + Layout.topBarHeight else paddingTop
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.person?.let { person ->
@@ -225,9 +225,6 @@ internal fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> 
         )
     }
 }
-
-/** The height of [ItemTopBar]'s buttons with their padding: 8 dp + 48 dp + 8 dp. */
-private val TopBarButtonsHeight = 64.dp
 
 @Composable
 private fun PersonImage(
