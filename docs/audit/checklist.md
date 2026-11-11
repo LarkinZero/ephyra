@@ -261,7 +261,7 @@ is shown, saved and kept.
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | SET-01 | Every setting changed below is still set after `am force-stop` and a new start | | works | works | works |
-| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | unpolished #419, #420: Left lands on the wrong row, ms values step by 1 and 10 |
+| SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | unpolished #420: ms values step by 1 and 10; Left and Back from the details pane return to the row that opened it (#419) |
 | SET-03 | Settings that make no sense on TV (gestures, PiP, downloads, theme) are not shown on TV | #133 | n/a | n/a | works; leftover: empty "Advanced" heading (#421) |
 
 ### Offline and language

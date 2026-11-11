@@ -1,6 +1,8 @@
 package dev.jdtech.jellyfin.ce.presentation.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,9 +26,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -76,6 +81,7 @@ import dev.jdtech.jellyfin.settings.presentation.settings.SettingsAction
  *
  * Focus comes back to the row it left from, after a visit to a category or to another screen.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TvSettingsLayout(
     title: String,
@@ -85,6 +91,7 @@ fun TvSettingsLayout(
 ) {
     val focusPosition = rememberFocusPosition()
     var focused by remember { mutableStateOf<Preference?>(null) }
+    var paneFocused by remember { mutableStateOf(false) }
     // A reload hands out new copies of the preferences: show the current one, by name.
     val shown =
         focused?.let { old ->
@@ -117,7 +124,14 @@ fun TvSettingsLayout(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                 contentPadding = PaddingValues(bottom = TvSafeArea.vertical),
-                modifier = Modifier.weight(LIST_WEIGHT),
+                // Left from the details pane goes back to the row it belongs to, not to the row
+                // that happens to be level with the focused option (#419).
+                modifier =
+                    Modifier.weight(LIST_WEIGHT)
+                        .focusProperties {
+                            enter = { focusPosition.currentRequester() ?: FocusRequester.Default }
+                        }
+                        .focusGroup(),
             ) {
                 itemsIndexed(groups) { index, group ->
                     TvSettingsGroup(
@@ -134,12 +148,20 @@ fun TvSettingsLayout(
                     )
                 }
             }
-            Box(modifier = Modifier.weight(1f - LIST_WEIGHT)) {
+            Box(
+                modifier =
+                    Modifier.weight(1f - LIST_WEIGHT).onFocusChanged {
+                        paneFocused = it.hasFocus
+                    }
+            ) {
                 TvSettingsDetails(preference = shown, onAction = onAction)
             }
         }
     }
     RestoreFocus(position = focusPosition, ready = groups.isNotEmpty())
+    // Back in the details pane returns to the row that opened it, like a dialog (ADR 0003). From a
+    // row, Back leaves the page.
+    BackHandler(enabled = paneFocused) { focusPosition.requestFocus() }
 }
 
 /** A group: its name, then its rows on one panel, so it reads as one thing. */
