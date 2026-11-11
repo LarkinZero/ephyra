@@ -569,6 +569,7 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playerView.subtitleView?.applySubtitleStyle(appPreferences)
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
+        val seriesNameTextView = binding.playerView.findViewById<TextView>(R.id.video_series_name)
 
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
@@ -627,6 +628,9 @@ class PlayerActivity : BasePlayerActivity() {
                         uiState.apply {
                             // Title
                             videoNameTextView.text = currentItemTitle
+                            // CE (#452): the series name on its own line above.
+                            seriesNameTextView.text = currentItemSeriesName
+                            seriesNameTextView.isVisible = currentItemSeriesName != null
 
                             // Media segment (#271)
                             currentSegment?.let { segment ->

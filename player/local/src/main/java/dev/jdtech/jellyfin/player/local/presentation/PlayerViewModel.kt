@@ -65,6 +65,7 @@ import dev.jdtech.jellyfin.player.local.domain.autoPlayNextFollowsServer
 import dev.jdtech.jellyfin.player.local.domain.buildMediaSourceFactory
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
+import dev.jdtech.jellyfin.player.local.domain.playerTitle
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
@@ -205,6 +206,8 @@ constructor(
         val stillWatchingEndsAtMs: Long = 0L,
         /** CE (#131): the item in the player, for the TV overlay (series name, episode line). */
         val currentItem: PlayerItem? = null,
+        /** CE (#452): the series of the item, the phone player's line above [currentItemTitle]. */
+        val currentItemSeriesName: String? = null,
     )
 
     private val _queue = MutableStateFlow<List<FindroidItem>>(emptyList())
@@ -946,20 +949,13 @@ constructor(
                 items
                     .first { it.itemId.toString() == player.currentMediaItem?.mediaId }
                     .let { item ->
-                        val itemTitle =
-                            if (item.parentIndexNumber != null && item.indexNumber != null) {
-                                if (item.indexNumberEnd == null) {
-                                    "S${item.parentIndexNumber}:E${item.indexNumber} - ${item.name}"
-                                } else {
-                                    "S${item.parentIndexNumber}:E${item.indexNumber}-${item.indexNumberEnd} - ${item.name}"
-                                }
-                            } else {
-                                item.name
-                            }
+                        // CE (#452): the series name is a line of its own above this.
+                        val itemTitle = playerTitle(item)
                         _uiState.update {
                             it.copy(
                                 currentItemId = item.itemId,
-                                currentItemTitle = itemTitle,
+                                currentItemTitle = itemTitle.title,
+                                currentItemSeriesName = itemTitle.seriesName,
                                 currentItem = item,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
