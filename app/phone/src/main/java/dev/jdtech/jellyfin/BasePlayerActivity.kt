@@ -100,12 +100,16 @@ abstract class BasePlayerActivity : AppCompatActivity() {
 
     protected fun configureInsets(playerControls: View) {
         playerControls.setOnApplyWindowInsetsListener { _, windowInsets ->
-            val cutout = windowInsets.displayCutout
+            // CE (#455): the visible system bars too, not only the cutout.
+            val insets =
+                playerControlsInsets(
+                    WindowInsetsCompat.toWindowInsetsCompat(windowInsets, playerControls)
+                )
             playerControls.updatePadding(
-                left = cutout?.safeInsetLeft ?: 0,
-                top = cutout?.safeInsetTop ?: 0,
-                right = cutout?.safeInsetRight ?: 0,
-                bottom = cutout?.safeInsetBottom ?: 0,
+                left = insets.left,
+                top = insets.top,
+                right = insets.right,
+                bottom = insets.bottom,
             )
             return@setOnApplyWindowInsetsListener windowInsets
         }
