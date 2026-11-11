@@ -2074,7 +2074,9 @@ class MPVPlayer(
                     .setLabel(json.optNullableString("title"))
                     .setLanguage(json.optNullableString("lang"))
                     .setSelectionFlags(
-                        if (json.optBoolean("default")) C.SELECTION_FLAG_DEFAULT else 0
+                        (if (json.optBoolean("default")) C.SELECTION_FLAG_DEFAULT else 0) or
+                            // CE (#451): the track dialog marks forced subtitles, as on ExoPlayer.
+                            (if (json.optBoolean("forced")) C.SELECTION_FLAG_FORCED else 0)
                     )
                     .setCodecs(json.optNullableString("codec"))
                     .build()

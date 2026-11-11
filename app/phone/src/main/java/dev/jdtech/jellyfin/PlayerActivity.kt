@@ -569,6 +569,7 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playerView.subtitleView?.applySubtitleStyle(appPreferences)
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
+        val seriesNameTextView = binding.playerView.findViewById<TextView>(R.id.video_series_name)
 
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
@@ -627,6 +628,16 @@ class PlayerActivity : BasePlayerActivity() {
                         uiState.apply {
                             // Title
                             videoNameTextView.text = currentItemTitle
+                            // CE (#452): the series name on its own line above.
+                            seriesNameTextView.text = currentItemSeriesName
+                            seriesNameTextView.isVisible = currentItemSeriesName != null
+
+                            // CE (#450): waiting for the network, with the controls up so Play
+                            // (retry now) is at hand.
+                            if (waitingForNetwork && !binding.connectionLost.isVisible) {
+                                binding.playerView.showController()
+                            }
+                            binding.connectionLost.isVisible = waitingForNetwork
 
                             // Media segment (#271)
                             currentSegment?.let { segment ->
@@ -721,6 +732,8 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             is PlayerEvents.PlayerError -> {
+                                // CE (#450): shown as the waiting state, not as an error.
+                                if (event.waitingForNetwork) return@collect
                                 // Logged in PlayerViewModel. Without this the player sat there
                                 // without a word after a stream failed to open (#306).
                                 Toast.makeText(

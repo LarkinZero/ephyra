@@ -1,6 +1,8 @@
 package dev.jdtech.jellyfin.ce.presentation.main
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainReturnLoadsTest {
@@ -54,6 +56,18 @@ class MainReturnLoadsTest {
                 nowNanos = now,
             )
         assertEquals(LibrariesLoad.SILENT, loads.libraries)
+    }
+
+    // #513: a start without the server leaves the drawer without libraries until Retry.
+    @Test
+    fun `retry on Home loads the libraries when there are none`() {
+        assertTrue(reloadsLibrariesOnRetry(hasLibraries = false, librariesLoading = false))
+    }
+
+    @Test
+    fun `retry on Home leaves libraries that are there or loading`() {
+        assertFalse(reloadsLibrariesOnRetry(hasLibraries = true, librariesLoading = false))
+        assertFalse(reloadsLibrariesOnRetry(hasLibraries = false, librariesLoading = true))
     }
 
     @Test

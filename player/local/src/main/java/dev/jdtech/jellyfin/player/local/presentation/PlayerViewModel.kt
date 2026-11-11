@@ -9,6 +9,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.SystemClock
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.Uri
 import android.view.Window
 import dev.jdtech.jellyfin.player.local.domain.DisplayRefreshRateManager
@@ -46,6 +50,7 @@ import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.domain.AudioDecoderFallback
 import dev.jdtech.jellyfin.player.local.domain.DebugSegments
+import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery
 import dev.jdtech.jellyfin.player.local.domain.PlaylistManager
 import dev.jdtech.jellyfin.player.local.domain.SegmentDecision
 import dev.jdtech.jellyfin.player.local.domain.SegmentTracker
@@ -65,6 +70,7 @@ import dev.jdtech.jellyfin.player.local.domain.autoPlayNextFollowsServer
 import dev.jdtech.jellyfin.player.local.domain.buildMediaSourceFactory
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
+import dev.jdtech.jellyfin.player.local.domain.playerTitle
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
@@ -205,6 +211,13 @@ constructor(
         val stillWatchingEndsAtMs: Long = 0L,
         /** CE (#131): the item in the player, for the TV overlay (series name, episode line). */
         val currentItem: PlayerItem? = null,
+        /** CE (#452): the series of the item, the phone player's line above [currentItemTitle]. */
+        val currentItemSeriesName: String? = null,
+        /**
+         * CE (#450): the connection was lost; the player loads again by itself when the network is
+         * back. The phone player shows a spinner and a line saying so.
+         */
+        val waitingForNetwork: Boolean = false,
     )
 
     private val _queue = MutableStateFlow<List<FindroidItem>>(emptyList())
@@ -221,6 +234,12 @@ constructor(
      */
     private val sleepTimer = SleepTimer()
     private var sleepTimerJob: Job? = null
+
+    /** CE (#450): waiting for the network after the connection was lost. */
+    private val networkRecovery = NetworkRecovery { SystemClock.elapsedRealtime() }
+    private var lastNetworkError: PlaybackException? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var networkRetryJob: Job? = null
 
     /** The item the sleep timer stopped at the end of, until playback resumes. */
     private var sleepTimerEndedItemId: String? = null
@@ -729,6 +748,8 @@ constructor(
     }
 
     private fun releasePlayer() {
+        // CE (#450): nothing loads again once the player is closing.
+        endNetworkWait()
         displayRefreshRateManager.reset()
         // Take the exact position, then clear the snapshot so a transition fired while releasing
         // cannot report the same item a second time.
@@ -920,6 +941,8 @@ constructor(
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
         displayRefreshRateManager.onMediaItemTransition()
         loggedDisplayFrameRate = null
+        // CE (#450): another item: no reload of the one that lost its connection.
+        if (networkRecovery.isWaiting) endNetworkWait()
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
 
         // Every item change goes through here, whatever caused it, so this is where the item being
@@ -946,20 +969,13 @@ constructor(
                 items
                     .first { it.itemId.toString() == player.currentMediaItem?.mediaId }
                     .let { item ->
-                        val itemTitle =
-                            if (item.parentIndexNumber != null && item.indexNumber != null) {
-                                if (item.indexNumberEnd == null) {
-                                    "S${item.parentIndexNumber}:E${item.indexNumber} - ${item.name}"
-                                } else {
-                                    "S${item.parentIndexNumber}:E${item.indexNumber}-${item.indexNumberEnd} - ${item.name}"
-                                }
-                            } else {
-                                item.name
-                            }
+                        // CE (#452): the series name is a line of its own above this.
+                        val itemTitle = playerTitle(item)
                         _uiState.update {
                             it.copy(
                                 currentItemId = item.itemId,
-                                currentItemTitle = itemTitle,
+                                currentItemTitle = itemTitle.title,
+                                currentItemSeriesName = itemTitle.seriesName,
                                 currentItem = item,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
@@ -1385,7 +1401,124 @@ constructor(
             player.prepare()
             return
         }
+        // CE (#450): a lost connection waits for the network and loads again by itself.
+        val mediaId = player.currentMediaItem?.mediaId
+        val canPrepare = player.isCommandAvailable(Player.COMMAND_PREPARE)
+        when (networkRecovery.onError(error.errorCode, mediaId, canPrepare)) {
+            NetworkRecovery.OnError.WAIT -> {
+                Timber.w("Connection lost, waiting for the network")
+                lastNetworkError = error
+                waitForNetwork()
+                eventsChannel.trySend(
+                    PlayerEvents.PlayerError(error, nothingLoaded = false, waitingForNetwork = true)
+                )
+                return
+            }
+            NetworkRecovery.OnError.KEEP_WAITING -> {
+                lastNetworkError = error
+                return
+            }
+            NetworkRecovery.OnError.GIVE_UP -> {
+                Timber.w("The network did not come back in time, giving up")
+                endNetworkWait()
+            }
+            NetworkRecovery.OnError.SHOW_ERROR -> endNetworkWait()
+        }
         eventsChannel.trySend(PlayerEvents.PlayerError.fromPlayer(error, player.currentMediaItem))
+    }
+
+    /**
+     * CE (#450): show the waiting state and load again when a network with internet access comes
+     * back ([ConnectivityManager.NetworkCallback]) and every [NetworkRecovery.RETRY_INTERVAL_MS]
+     * while one is up. The callback is registered only while waiting.
+     */
+    private fun waitForNetwork() {
+        _uiState.update { it.copy(waitingForNetwork = true) }
+        val connectivityManager = application.getSystemService(ConnectivityManager::class.java)
+        if (networkCallback == null && connectivityManager != null) {
+            val callback =
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        viewModelScope.launch(Dispatchers.Main) {
+                            retryAfterNetworkLoss(onlyWhenOnline = false)
+                        }
+                    }
+                }
+            try {
+                connectivityManager.registerNetworkCallback(
+                    NetworkRequest.Builder()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build(),
+                    callback,
+                )
+                networkCallback = callback
+                Timber.d("Watching the network")
+            } catch (e: RuntimeException) {
+                // Too many callbacks or no permission: the timer below still retries.
+                Timber.w(e, "Could not watch the network")
+            }
+        }
+        if (networkRetryJob == null) {
+            networkRetryJob =
+                viewModelScope.launch {
+                    while (true) {
+                        delay(NetworkRecovery.RETRY_INTERVAL_MS)
+                        retryAfterNetworkLoss(onlyWhenOnline = true)
+                    }
+                }
+        }
+    }
+
+    private fun retryAfterNetworkLoss(onlyWhenOnline: Boolean) {
+        when (networkRecovery.check(player.currentMediaItem?.mediaId)) {
+            NetworkRecovery.Check.RETRY -> {
+                if (onlyWhenOnline && !isOnline()) return
+                if (player.playbackState != Player.STATE_IDLE) return
+                // Keeps the position, and playWhenReady: paused while waiting stays paused.
+                Timber.d("Loading again after the connection was lost")
+                player.prepare()
+            }
+            NetworkRecovery.Check.GIVE_UP -> {
+                Timber.w("The network did not come back in time, giving up")
+                val error = lastNetworkError
+                endNetworkWait()
+                error?.let {
+                    eventsChannel.trySend(PlayerEvents.PlayerError.fromPlayer(it, player.currentMediaItem))
+                }
+            }
+            NetworkRecovery.Check.STOPPED -> endNetworkWait()
+        }
+    }
+
+    private fun isOnline(): Boolean {
+        val connectivityManager =
+            application.getSystemService(ConnectivityManager::class.java) ?: return false
+        val network = connectivityManager.activeNetwork ?: return false
+        return connectivityManager
+            .getNetworkCapabilities(network)
+            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
+
+    /** CE (#450): stop waiting for the network: unregister, stop the timer, hide the state. */
+    private fun endNetworkWait() {
+        networkRecovery.stop()
+        lastNetworkError = null
+        networkRetryJob?.cancel()
+        networkRetryJob = null
+        networkCallback?.let { callback ->
+            try {
+                application
+                    .getSystemService(ConnectivityManager::class.java)
+                    ?.unregisterNetworkCallback(callback)
+                Timber.d("Stopped watching the network")
+            } catch (e: IllegalArgumentException) {
+                Timber.w(e, "Network callback was not registered")
+            }
+        }
+        networkCallback = null
+        if (_uiState.value.waitingForNetwork) {
+            _uiState.update { it.copy(waitingForNetwork = false) }
+        }
     }
 
     override fun onPlaybackStateChanged(state: Int) {
@@ -1399,6 +1532,8 @@ constructor(
             }
             ExoPlayer.STATE_READY -> {
                 stateString = "ExoPlayer.STATE_READY     -"
+                // CE (#450): loaded again after the connection was lost.
+                if (networkRecovery.isWaiting) endNetworkWait()
                 _uiState.update { it.copy(fileLoaded = true) }
                 runDeferredWork()
             }
@@ -1981,9 +2116,15 @@ sealed interface PlayerEvents {
     /**
      * Playback failed. [nothingLoaded] is true when the player has no item at all, so nothing will
      * ever play: the phone player closes then (#374). With an item loaded, Play retries.
+     * [waitingForNetwork]: the connection was lost and the player loads again by itself when it is
+     * back (#450); the phone player shows that from [PlayerViewModel.UiState.waitingForNetwork]
+     * instead of an error.
      */
-    data class PlayerError(val error: PlaybackException, val nothingLoaded: Boolean) :
-        PlayerEvents {
+    data class PlayerError(
+        val error: PlaybackException,
+        val nothingLoaded: Boolean,
+        val waitingForNetwork: Boolean = false,
+    ) : PlayerEvents {
         companion object {
             /** The item to start with could not be loaded ([failure] is null without an item). */
             fun startFailed(failure: Exception?) =
