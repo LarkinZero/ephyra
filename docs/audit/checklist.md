@@ -68,7 +68,7 @@ variant. An empty cell is work still to do.
 | SUP-10 | Login on TV with the on-screen keyboard and the remote only | #355 | n/a | n/a | works |
 | SUP-11 | The keyboard does not cover the text field; the screen resizes around it | 1.2.0-ce.0 | works | works | n/a |
 | SUP-12 | A second server: add it, switch between the two from the Servers screen, each keeps its own users | `ServersScreen` | not tested: needs own server (second server) | not tested: needs own server (second server) | not tested: needs own server (second server) |
-| SUP-13 | Server addresses (long-press a server, Addresses): add an address of the same server, delete one; the address in use cannot be deleted | `ServerAddressesScreen` | unpolished #390: no feedback on a refused removal or a duplicate address | unpolished #390, #434: no feedback, list not width-capped | n/a |
+| SUP-13 | Server addresses (long-press a server, Addresses): add an address of the same server, delete one; the address in use cannot be deleted | `ServerAddressesScreen` | unpolished #390: no feedback on a refused removal or a duplicate address | unpolished #390: no feedback; the list is capped at 480 dp like Servers since #434 | n/a |
 | SUP-14 | Remove a server (long-press): it disappears, and its logins are signed out on the server (dashboard) | #334 | works | works | works; server-side sign-out not observable (no user signed in) |
 | SUP-15 | Remove a user (long-press or the remove button): the session ends on the server; removing the current user returns to setup | #336 | works | works | works |
 | SUP-16 | The app's session leaves the server's dashboard when the app goes to the background or is closed, and comes back on return | #336, `ServerSessionKeeper` | works | works | works |
@@ -217,19 +217,19 @@ download setting (ADR 0007, `SettingsViewModel`).
 | DLD-12 | With mobile data off, a download on mobile data waits and says "Waiting for network" **[device]** | 1.2.0-ce.1 | not tested: emulator | not tested: emulator | n/a |
 | DLD-13 | Subtitles are saved as separate files, image-based ones (PGS, VobSub) included, and show when the download plays offline | #60, #75 | not tested: no subtitles on the demo episodes | not tested: no subtitles on the demo episodes | n/a |
 | DLD-14 | Downloads screen: storage summary bar (movies, shows, other, free), red under 10 % free, tap opens the download settings | 1.2.0-ce.1, #246 | works; red under 10 % not reached | works; red under 10 % not reached | n/a |
-| DLD-15 | Downloading section: one status line per row (size, time left), the header shows count and speed, the estimate settles | #111, 1.2.0-ce.1 | works | unpolished #434: rows span the full width; speed and time left not seen | n/a |
+| DLD-15 | Downloading section: one status line per row (size, time left), the header shows count and speed, the estimate settles | #111, 1.2.0-ce.1 | works | works: rows capped at 720 dp at the start since #434; speed and time left shown | n/a |
 | DLD-16 | A finished download gets a check mark, a haptic tick, and moves into Movies or TV Shows | 1.2.0-ce.1 | works; haptic not observable | works; haptic not observable | n/a |
 | DLD-17 | Sort by recently downloaded, name and size | 1.2.0-ce.1 | not tested: only one download | not tested: only one download | n/a |
 | DLD-18 | Multi-select ("Select" or long-press), remove all selected; Back leaves selection | 1.2.0-ce.1 | works; Remove not run | works; Remove not run | n/a |
 | DLD-19 | The play button on a movie or episode's artwork resumes from the downloaded copy | 1.2.0-ce.1 | not tested: player rows are #356 | works | n/a |
-| DLD-20 | Downloaded show page: episodes by season with sizes, swipe to remove, "Remove all downloads" | #81, #84 | works | unpolished #434: page spans the full width | n/a |
+| DLD-20 | Downloaded show page: episodes by season with sizes, swipe to remove, "Remove all downloads" | #81, #84 | works | works: the list is capped at 720 dp since #434 | n/a |
 | DLD-21 | Cancel or remove on the Downloads screen shows Undo; undoing a cancel loses no progress; the removal finishes if the screen is left | #82, #84, #94 | works | broken #426: Undo does not restore the row, cancelled downloads come back | n/a |
 | DLD-22 | Delete from an item page asks to confirm; one tap on an episode's check mark removes its download at once, with an Undo snackbar | #94 | works | not tested: the download was kept for the offline rows | n/a |
 | DLD-23 | Empty Downloads screen explains what goes there and links to the library | 1.2.0-ce.1 | works | not tested: the download was kept for the offline rows | n/a |
 | DLD-24 | Smart Downloads on: after watching an episode, the set number of next unwatched episodes are downloaded, across seasons | #116, #119 | not tested: needs an episode watched to the end | not tested: needs the player and working transcodes | n/a |
 | DLD-25 | Smart Downloads removes the episodes it downloaded itself once watched, and leaves the ones downloaded by hand | #116, #119 | not tested: needs an episode watched to the end | not tested: needs the player and working transcodes | n/a |
 | DLD-26 | A Dolby Vision file is downloaded as a transcode when "Transcode Dolby Vision" is on, and plays offline | ce.30, #60 | not tested: no Dolby Vision file | not tested: no Dolby Vision file | n/a |
-| DLD-27 | Downloads screen in two columns on an expanded window | #288 | n/a | unpolished #434: Downloading section and show page are one full-width column | n/a |
+| DLD-27 | Downloads screen in two columns on an expanded window | #288 | n/a | works: the storage summary and the Downloading section span the grid capped at 720 dp, at the start, since #434 | n/a |
 
 ## 6. Offline mode
 
@@ -277,7 +277,7 @@ is shown, saved and kept.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| SET-08 | Home rows: show or hide each row and move it up or down; Home follows (HOM-09) | #142 | works | unpolished #434: Home rows page not width-capped | works |
+| SET-08 | Home rows: show or hide each row and move it up or down; Home follows (HOM-09) | #142 | works | works: capped at 640 dp since #434 | works |
 | SET-09 | Theme: System, Light, Dark; applies at once | `theme` | works | works | n/a |
 | SET-10 | Dynamic colours (Android 12+, off by default): wallpaper colours replace the Ephyra palette | #225 | works | works | n/a |
 | SET-11 | Theme music on the show page (off by default; effect: BRW-42) | #141 | n/a | n/a | works; effect not testable (no theme songs) |
@@ -305,7 +305,7 @@ is shown, saved and kept.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| SET-26 | Subtitle style screen with a live preview (phone); a plain list on TV | #24, `SubtitleStyleScreen` | works | unpolished #434: preview spans the full width | works |
+| SET-26 | Subtitle style screen with a live preview (phone); a plain list on TV | #24, `SubtitleStyleScreen` | works | works: the preview is capped at 640 dp like its list since #434 | works |
 | SET-27 | Text colour (player effect: PLY-44) | #24 | works | works | works |
 | SET-28 | Background colour | #24 | works | works | works |
 | SET-29 | Edge type (outline, shadow, none...) | #24 | works | works | works |
@@ -363,7 +363,7 @@ is shown, saved and kept.
 |---|---|---|---|---|---|
 | SET-72 | Users opens the user list (PRF-05) | | works | works | works |
 | SET-73 | Ask who is watching on start (effect: PRF-06) | #245 | not tested: needs more than one user | works for the switch; effect not tested (one user) | works for the toggle; effect not tested (one user) |
-| SET-74 | Profile lock (phone) / Profile PIN (TV) opens the lock settings: set, change, remove, lock at start | #299, #330 | works | unpolished #434: Profile lock page not width-capped | works |
+| SET-74 | Profile lock (phone) / Profile PIN (TV) opens the lock settings: set, change, remove, lock at start | #299, #330 | works | works: capped at 640 dp since #434 | works |
 | SET-75 | Servers opens the server list (SUP-12) | | works | works | works |
 | SET-76 | Download over mobile data | `downloadOverMobileData` | works | works | n/a |
 | SET-77 | Download when roaming (needs mobile data on) | `downloadWhenRoaming` | works | works | n/a |

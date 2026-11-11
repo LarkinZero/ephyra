@@ -1,5 +1,7 @@
 package dev.jdtech.jellyfin.presentation.settings
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -22,12 +24,15 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
+import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryDetailMode
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.utils.Layout
+import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.settings.R as SettingsR
 
 /** CE (#211): the open-source library list, which used to fill most of the About screen. */
@@ -59,14 +64,19 @@ fun LicensesScreen(navigateBack: () -> Unit) {
     ) { innerPadding ->
         // CE (#384): a tap opens the licence text in a dialog. The library's default (Inline) only
         // shows buttons, and its "View license" opens the licence's web page instead of the text.
-        LibrariesContainer(
-            libraries = libraries,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = innerPadding,
-            detailMode = LibraryDetailMode.Dialog,
-            licenseDialogBody = { library, modifier -> LicenseDialogBody(library, modifier) },
-            licenseDialogConfirmText = stringResource(CoreR.string.close),
-        )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // CE (#434): the settings cap (4-design.md §12) as side padding of the list, so the
+            // margins still scroll it.
+            val side = ((maxWidth - Layout.settingsMaxWidth) / 2).coerceAtLeast(0.dp)
+            LibrariesContainer(
+                libraries = libraries,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = innerPadding + PaddingValues(horizontal = side),
+                detailMode = LibraryDetailMode.Dialog,
+                licenseDialogBody = { library, modifier -> LicenseDialogBody(library, modifier) },
+                licenseDialogConfirmText = stringResource(CoreR.string.close),
+            )
+        }
     }
 }
 
