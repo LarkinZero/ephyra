@@ -77,7 +77,9 @@ constructor(private val repository: SetupRepository, private val appPreferences:
     fun onAction(action: AddServerAction) {
         when (action) {
             is AddServerAction.OnConnectClick -> {
-                connectToServer(address = action.address)
+                // CE (#404): the TV screen passes the field as typed; spaces around the address
+                // made the SDK reject it with "Server not found".
+                connectToServer(address = action.address.trim())
             }
             else -> Unit
         }

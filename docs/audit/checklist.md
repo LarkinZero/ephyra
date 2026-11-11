@@ -58,7 +58,7 @@ variant. An empty cell is work still to do.
 |---|---|---|---|---|---|
 | SUP-01 | Fresh install opens the Welcome screen; Continue goes to the permission screen (Android 17+) or Servers. The phone's jellyfish logo swims and reacts to tap and drag | #227, `WelcomeScreen` | works | works | works |
 | SUP-02 | Add server: servers on the local network are discovered and listed; picking one connects | `AddServerViewModel` | not tested: no Jellyfin server on the emulator's network | not tested: no Jellyfin server on the emulator's network | not tested: no Jellyfin server on the emulator's network |
-| SUP-03 | Add server by hand: a bare host (no scheme, no port) and an address with spaces around it both connect | ce.26, ce.1, `SetupRepositoryImpl` | works | works | broken #404: an address with spaces around it fails |
+| SUP-03 | Add server by hand: a bare host (no scheme, no port) and an address with spaces around it both connect | ce.26, ce.1, `SetupRepositoryImpl` | works | works | works: `AddServerViewModel` trims the address (#404) |
 | SUP-04 | Add server by hand: an unreachable or non-Jellyfin address shows an error in the screen, no crash | ce.1 | works | unpolished #443: error stays while a new address is typed | works |
 | SUP-05 | Adding a server that is already saved, through another address, adds the address and does not create a second server | `SetupRepositoryImpl` | works | broken #425: re-adding the saved server drops the session (401 until restart) | works |
 | SUP-06 | Login with username and password lands on Home; the server's login disclaimer, if set, is shown | `LoginViewModel` | unpolished #375: disclaimer shows raw `<br/>` | unpolished #375: disclaimer shows raw `<br/>` | unpolished #375, #423: raw `<br/>`, runs into the overscan |
