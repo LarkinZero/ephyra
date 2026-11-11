@@ -67,6 +67,7 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.getVersions
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.utils.AfterFirstFrame
@@ -85,7 +86,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MovieScreen(
     movieId: UUID,
-    navigateToPlayer: (itemId: UUID, mediaSourceId: String?) -> Unit,
+    navigateToPlayer: (itemId: UUID, mediaSourceId: String?, startFromBeginning: Boolean) -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToItem: (item: FindroidItem) -> Unit = {},
     viewModel: MovieViewModel = hiltViewModel(),
@@ -107,7 +108,7 @@ fun MovieScreen(
         onAction = { action ->
             when (action) {
                 is MovieAction.Play -> {
-                    navigateToPlayer(movieId, action.mediaSourceId)
+                    navigateToPlayer(movieId, action.mediaSourceId, action.startFromBeginning)
                 }
                 is MovieAction.PlayTrailer -> {
                     try {
@@ -119,7 +120,7 @@ fun MovieScreen(
                 is MovieAction.NavigateToPerson -> {
                     navigateToPerson(action.personId)
                 }
-                is MovieAction.PlayExtra -> navigateToPlayer(action.extraId, null)
+                is MovieAction.PlayExtra -> navigateToPlayer(action.extraId, null, false)
                 is MovieAction.NavigateToItem -> navigateToItem(action.item)
                 else -> Unit
             }
@@ -129,7 +130,7 @@ fun MovieScreen(
 }
 
 @Composable
-private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit) {
+internal fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit) {
     val configuration = LocalConfiguration.current
     val locale = configuration.locales.get(0)
 
@@ -143,11 +144,13 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
         }
     }
 
-    var versionDialogOpen by remember { mutableStateOf(false) }
+    // Null while closed; otherwise whether the chosen version starts from the beginning.
+    var versionDialogStartFromBeginning by remember { mutableStateOf<Boolean?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
             val versions = remember(movie.sources) { movie.getVersions() }
+            val inProgress = movie.playbackPositionTicks > 0 && !movie.played
             val relatedRows =
                 remember(state.related) {
                     listOf(
@@ -247,6 +250,17 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                         ),
                                     style = MaterialTheme.typography.labelMedium,
                                 )
+                                // CE (#412): how much is left of a movie that is partly watched.
+                                if (inProgress) {
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                CoreR.string.runtime_minutes_left,
+                                                minutesLeft(movie),
+                                            ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
                                 movie.officialRating?.let {
                                     Text(text = it, style = MaterialTheme.typography.labelMedium)
                                 }
@@ -292,20 +306,23 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                     Arrangement.spacedBy(MaterialTheme.spacings.medium),
                                 modifier = Modifier.focusRestorer().focusGroup(),
                             ) {
-                                val hasTrailer = movie.trailer != null
-                                val trailerCol = if (hasTrailer) 1 else -1
-                                val playedCol = if (hasTrailer) 2 else 1
-                                val favoriteCol = if (hasTrailer) 3 else 2
+                                // CE (#412): fixed columns, as on the season page. A button that
+                                // is gone on return (Restart after the end) falls back to Play.
+                                val trailerCol = 2
+                                val playedCol = 3
+                                val favoriteCol = 4
+                                // A version dialog remembers whether it was opened to restart.
+                                val play = { startFromBeginning: Boolean ->
+                                    if (versions.size > 1) {
+                                        versionDialogStartFromBeginning = startFromBeginning
+                                    } else {
+                                        onAction(MovieAction.Play(startFromBeginning))
+                                    }
+                                }
 
                                 Button(
                                     border = ephyraButtonBorder(),
-                                    onClick = {
-                                        if (versions.size > 1) {
-                                            versionDialogOpen = true
-                                        } else {
-                                            onAction(MovieAction.Play(startFromBeginning = false))
-                                        }
-                                    },
+                                    onClick = { play(false) },
                                     modifier =
                                         Modifier.focusPosition(focusPosition, ROW_BUTTONS, 0),
                                 ) {
@@ -314,7 +331,30 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                         contentDescription = null,
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = stringResource(id = CoreR.string.play))
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                id =
+                                                    if (inProgress) CoreR.string.resume
+                                                    else CoreR.string.play
+                                            )
+                                    )
+                                }
+                                if (inProgress) {
+                                    Button(
+                                        border = ephyraButtonBorder(),
+                                        onClick = { play(true) },
+                                        modifier =
+                                            Modifier.focusPosition(focusPosition, ROW_BUTTONS, 1),
+                                    ) {
+                                        Icon(
+                                            painter =
+                                                painterResource(id = CoreR.drawable.ic_rotate_ccw),
+                                            contentDescription = null,
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(text = stringResource(id = CoreR.string.restart))
+                                    }
                                 }
                                 movie.trailer?.let { trailerUri ->
                                     Button(
@@ -507,14 +547,19 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                 listState.scrollToItem(lazyIndexOf(position.row))
             }
 
-            if (versionDialogOpen) {
+            versionDialogStartFromBeginning?.let { startFromBeginning ->
                 VersionDialog(
                     versions = versions,
                     onSelect = { mediaSourceId ->
-                        versionDialogOpen = false
-                        onAction(MovieAction.Play(mediaSourceId = mediaSourceId))
+                        versionDialogStartFromBeginning = null
+                        onAction(
+                            MovieAction.Play(
+                                startFromBeginning = startFromBeginning,
+                                mediaSourceId = mediaSourceId,
+                            )
+                        )
                     },
-                    onDismiss = { versionDialogOpen = false },
+                    onDismiss = { versionDialogStartFromBeginning = null },
                 )
             }
         }
@@ -532,6 +577,12 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
             }
     }
 }
+
+/** Whole minutes left of a partly watched movie, at least 1, as the season page counts them. */
+private fun minutesLeft(movie: FindroidMovie): Long =
+    ((movie.runtimeTicks - movie.playbackPositionTicks) / TICKS_PER_MINUTE).coerceAtLeast(1)
+
+private const val TICKS_PER_MINUTE = 600_000_000L
 
 private const val ROW_BUTTONS = 0
 private const val ROW_CAST = 1
