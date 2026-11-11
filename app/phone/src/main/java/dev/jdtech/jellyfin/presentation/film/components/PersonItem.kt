@@ -31,6 +31,7 @@ fun PersonItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
+    // The whole card is one click target: the name and role must not take the tap (#389).
     Column(
         modifier =
             modifier
@@ -51,14 +52,12 @@ fun PersonItem(
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(
             text = person.name,
-            modifier = Modifier.copyOnLongClick(person.name),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodyMedium,
         )
         Text(
             text = person.role,
-            modifier = Modifier.copyOnLongClick(person.role),
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
