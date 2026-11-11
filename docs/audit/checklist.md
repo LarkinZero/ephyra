@@ -192,7 +192,7 @@ Libraries, search, favourites and the item pages.
 |---|---|---|---|---|---|
 | BRW-44 | Movie, show and episode pages use the hero layout: poster beside the text over a full-width backdrop | #291 | n/a | unpolished #433, #432: empty hero without a backdrop, landscape crop 3.6:1 (3.2:1 at 8 inch, 2.6:1 on the fold) | n/a |
 | BRW-45 | Title and text of the hero sit under the backdrop, readable over bright artwork | #339 | n/a | works | n/a |
-| BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | unpolished #435: rotation loses the list scroll and scrim; detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
+| BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | works: rotation keeps the selected episode, the list position and the top bar's background since #435 (from an episode link see #517); detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
 | BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | unpolished #439: search opens full width; unpolished #438 at 8 inch and fold: one carousel page fewer | n/a |
 | BRW-48 | Tab on a hardware keyboard reaches every control on Home, Media and an item page | #310, test matrix | unpolished #398: no focus indicator on the carousel | unpolished #398: no focus on Home cards, same at 8 inch and fold, plus #442 at 8 inch; My media works since #430: Tab goes rail, search bar, Movies, Shows at 1280, 800 and 1024 dp, Enter or typing opens the search, Esc closes it | n/a |
 
@@ -617,7 +617,7 @@ All rows are TV only.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | works | unpolished #435: Season list loses scroll and scrim; broken #387 at 8 inch: rotation closes the search | n/a |
+| LIF-01 | Rotation on every screen keeps the screen, its input and its scroll position | #353 | works | broken #387 at 8 inch: rotation closes the search; the Season list keeps its position and scrim since #435 | n/a |
 | LIF-02 | Background and return keeps the screen and scroll position; pages reload only when stale | #268 | works | works | works |
 | LIF-03 | Process death (`am kill` in the background) restores the screen without a crash | #353 | works (#371): the restored library loads, on top and under a movie page | works; broken #371 at 8 inch and fold: library spins after `am kill` | works |
 | LIF-04 | Split-screen at 600 dp: every screen stays usable | #288, test matrix | unpolished #392: server name clipped in split-screen | episode and movie pages work at 600 dp since #429: the episode's still goes above the text, a movie's last button wraps to a second line; works at 8 inch and fold | n/a |
