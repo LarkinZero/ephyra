@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
@@ -108,7 +110,10 @@ import dev.jdtech.jellyfin.utils.applySubtitleStyle
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
 private enum class PlayerDialog {
     AUDIO,
@@ -219,6 +224,25 @@ fun TvPlayerScreen(
         val observer = LifecycleEventObserver { _, event -> lifecycle = event }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // #458: progress reports to the server, as the phone player sends them: every
+    // TvProgressReports.INTERVAL_MS while the screen is shown and started, at once when playback
+    // pauses, and on ON_PAUSE (in the PlayerView's update below). Nothing posts after Home or
+    // after the screen is left.
+    val progressReports = remember {
+        TvProgressReports(send = viewModel::updatePlaybackProgress, isPlaying = { player.isPlaying })
+    }
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                progressReports.report()
+                val playing = isPlaying
+                withTimeoutOrNull(TvProgressReports.INTERVAL_MS) {
+                    if (playing) snapshotFlow { isPlaying }.first { !it } else awaitCancellation()
+                }
+            }
+        }
     }
 
     // Drives the skip button and auto-skip for media segments, as PlayerActivity does on phone.
@@ -417,6 +441,7 @@ fun TvPlayerScreen(
                     Lifecycle.Event.ON_PAUSE -> {
                         it.onPause()
                         it.player?.pause()
+                        progressReports.report()
                     }
                     Lifecycle.Event.ON_RESUME -> it.onResume()
                     else -> Unit

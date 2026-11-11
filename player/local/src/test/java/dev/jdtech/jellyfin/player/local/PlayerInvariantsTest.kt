@@ -126,4 +126,22 @@ class PlayerInvariantsTest {
             endFile.value.contains("error != null"),
         )
     }
+
+    @Test
+    fun `the TV player reports progress`() {
+        // #458: the TV player only reported start and stop, never progress, so a crash or a
+        // force-stop resumed from the previous stop. app/tv's own tests are not part of the root
+        // testDebugUnitTest task, so this checks its source from here.
+        val file = File("../../app/tv/src/main/java/dev/jdtech/jellyfin/ce/presentation/player/TvPlayerScreen.kt")
+        assertTrue("missing ${file.absolutePath}", file.isFile)
+        val screen = file.readText()
+        assertTrue(
+            "TvPlayerScreen must send progress through TvProgressReports (#458)",
+            screen.contains("TvProgressReports(send = viewModel::updatePlaybackProgress"),
+        )
+        assertTrue(
+            "TvPlayerScreen must report only while started (#458)",
+            screen.contains("repeatOnLifecycle(Lifecycle.State.STARTED)"),
+        )
+    }
 }
