@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.ce.presentation.player
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.SystemClock
 import android.text.format.DateFormat
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -94,6 +95,7 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
 import dev.jdtech.jellyfin.player.local.R as PlayerR
+import dev.jdtech.jellyfin.player.local.domain.StillWatchingTracker
 import dev.jdtech.jellyfin.player.local.domain.getTrackNames
 import dev.jdtech.jellyfin.player.local.presentation.PlayerAction
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
@@ -652,7 +654,7 @@ fun TvPlayerScreen(
     // player sat paused with nothing on screen.
     if (uiState.showStillWatching) {
         StillWatchingDialog(
-            timeoutSeconds = uiState.stillWatchingTimeoutSeconds,
+            endsAtMs = uiState.stillWatchingEndsAtMs,
             onContinue = viewModel::acknowledgeStillWatching,
             onStop = viewModel::dismissStillWatching,
         )
@@ -1186,17 +1188,27 @@ private fun PlaybackErrorDialog(message: String, onExit: () -> Unit) {
     }
 }
 
+/** The seconds the still-watching prompt has left before [endsAtMs], never below 1. */
+private fun stillWatchingSecondsLeft(endsAtMs: Long): Int =
+    StillWatchingTracker.secondsLeft(endsAtMs, SystemClock.elapsedRealtime()).coerceAtLeast(1)
+
 /**
  * "Are you still watching?", with the phone dialog's strings. The ViewModel owns the timeout and
  * closes the prompt itself; the countdown here only shows it. Back counts as Stop.
  */
 @Composable
-private fun StillWatchingDialog(timeoutSeconds: Int, onContinue: () -> Unit, onStop: () -> Unit) {
+private fun StillWatchingDialog(endsAtMs: Long, onContinue: () -> Unit, onStop: () -> Unit) {
+    // CE (#477): counts to the ViewModel's deadline, as the phone dialog does (#367). A count of
+    // its own started at the full timeout when the prompt had fired while the app was away. It
+    // stops at 1: the ViewModel closes the prompt at the deadline.
     val remaining by
-        produceState(timeoutSeconds) {
-            while (value > 1) {
-                delay(1_000L)
-                value--
+        produceState(stillWatchingSecondsLeft(endsAtMs), endsAtMs) {
+            while (true) {
+                value = stillWatchingSecondsLeft(endsAtMs)
+                val leftMs = endsAtMs - SystemClock.elapsedRealtime()
+                if (leftMs <= 1_000L) break
+                // To the next whole second before the deadline.
+                delay((leftMs - 1L) % 1_000L + 1L)
             }
         }
     Dialog(onDismissRequest = onStop) {
