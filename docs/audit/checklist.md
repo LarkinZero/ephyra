@@ -89,14 +89,14 @@ variant. An empty cell is work still to do.
 | PRF-06 | "Ask who is watching" on: with more than one saved user, the user list shows once per app start, not again on rotation | #245, `askUserOnStart` | not tested: needs more than one saved user | not tested: needs more than one saved user | not tested: needs more than one saved user |
 | PRF-07 | Set a 4 to 6 digit PIN (Settings → Profile lock / Profile PIN); the lock badge shows on the face | #299 | works | works | works |
 | PRF-08 | Change the PIN: the new one works, the old one no longer does | #299, #329 | works | works | works |
-| PRF-09 | Remove the PIN: no prompt any more | #299 | works | works | unpolished #408: lock badge stays until a restart |
+| PRF-09 | Remove the PIN: no prompt any more | #299 | works | works | works (#408): the drawer face's lock badge goes with Remove PIN and comes with Set PIN, without a restart |
 | PRF-10 | Set a pattern of at least 4 dots instead of a PIN; a mismatch on confirm is reported; the pattern replaces the PIN | #330 | works | works | n/a |
 | PRF-11 | Lock at start on: a cold start into the locked profile asks the PIN or pattern before Home | #299, `ProfilePinGateScreen` | works | works | works |
 | PRF-12 | Wrong PIN or pattern shakes and clears; "Other profile" on the gate goes to the user list | #299 | works | works | works |
 | PRF-13 | Switching to a locked profile asks its PIN or pattern; Cancel stays on the current profile | #299, `UsersViewModel` | works | not tested: needs a second profile | works |
 | PRF-14 | An unlocked profile stays unlocked until another profile is picked or the process ends (`am kill` locks it again) | `ProfileLock` | works | works | works |
 | PRF-15 | The PIN prompt stays usable with the keyboard up | #329 | works | works | n/a |
-| PRF-16 | TV PIN pad: digits, delete and OK with the D-pad, the remote's number keys type directly, OK needs at least 4 digits | #299, `TvPinPad` | n/a | n/a | unpolished #409: OK after the number keys adds a digit |
+| PRF-16 | TV PIN pad: digits, delete and OK with the D-pad, the remote's number keys type directly, OK needs at least 4 digits | #299, `TvPinPad` | n/a | n/a | works (#409): a number key moves focus to OK, so OK after the number keys submits |
 | PRF-17 | The PIN is stored on the device only: the same user on another device or app is not asked | #299 | not tested: needs a second device | not tested: needs a second device | not tested: needs a second device |
 
 ## 3. Home

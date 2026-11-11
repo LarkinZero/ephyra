@@ -108,23 +108,23 @@ fun MainScreen(
     val mainState by mainViewModel.state.collectAsState()
     val mediaState by mediaViewModel.state.collectAsState()
 
-    // Runs on every return to this screen (#257). A user or server switch comes back here with
-    // the same ViewModels, so the server and user load again only when the loaded user isn't the
-    // one signed in now. The libraries load as before the first time; after that they refresh in
-    // the background, keeping the list on screen, when the user changed or the last load is older
-    // than LIBRARIES_REFRESH_NANOS, so a library added on the server still shows up.
+    // Runs on every return to this screen (#257); see [loadsOnReturn] for what loads.
     val context = LocalContext.current
     LaunchedEffect(true) {
         val loadedUser = (mainViewModel.uiState.value as? MainViewModel.UiState.Normal)?.user?.id
-        val sameUser =
-            loadedUser != null && loadedUser == JellyfinApi.getInstance(context).userId
-        if (!sameUser) mainViewModel.loadServerAndUser()
-        val loadedAt = mediaViewModel.librariesLoadedAtNanos
-        when {
-            loadedAt == null || mediaViewModel.state.value.libraries.isEmpty() ->
-                mediaViewModel.loadData()
-            !sameUser || System.nanoTime() - loadedAt > LIBRARIES_REFRESH_NANOS ->
-                mediaViewModel.loadData(silent = true)
+        val loads =
+            loadsOnReturn(
+                sameUser =
+                    loadedUser != null && loadedUser == JellyfinApi.getInstance(context).userId,
+                librariesLoadedAtNanos = mediaViewModel.librariesLoadedAtNanos,
+                hasLibraries = mediaViewModel.state.value.libraries.isNotEmpty(),
+                nowNanos = System.nanoTime(),
+            )
+        if (loads.user) mainViewModel.loadServerAndUser()
+        when (loads.libraries) {
+            LibrariesLoad.FULL -> mediaViewModel.loadData()
+            LibrariesLoad.SILENT -> mediaViewModel.loadData(silent = true)
+            LibrariesLoad.NONE -> Unit
         }
     }
 
@@ -186,7 +186,42 @@ const val DESTINATION_FAVORITES = "favorites"
 fun libraryDestinationKey(libraryId: UUID): String = "library:$libraryId"
 
 /** How old the drawer's libraries may get before a return to Main refreshes them (#257). */
-private const val LIBRARIES_REFRESH_NANOS = 5 * 60 * 1_000_000_000L
+internal const val LIBRARIES_REFRESH_NANOS = 5 * 60 * 1_000_000_000L
+
+internal enum class LibrariesLoad {
+    NONE,
+    FULL,
+    SILENT,
+}
+
+internal data class ReturnLoads(val user: Boolean, val libraries: LibrariesLoad)
+
+/**
+ * What Main loads when it is shown again (#257). A user or server switch comes back here with the
+ * same ViewModels.
+ * - The server and user load every time: a cheap database read, and the user's row can change on
+ *   the screens Main opens, such as a PIN set or removed in Settings, which the drawer's face shows
+ *   with its lock badge (#408). An unchanged user does not recompose anything.
+ * - The libraries load in full the first time. After that they refresh in the background, keeping
+ *   the list on screen, when the user changed or the last load is older than
+ *   [LIBRARIES_REFRESH_NANOS], so a library added on the server still shows up.
+ */
+internal fun loadsOnReturn(
+    sameUser: Boolean,
+    librariesLoadedAtNanos: Long?,
+    hasLibraries: Boolean,
+    nowNanos: Long,
+): ReturnLoads =
+    ReturnLoads(
+        user = true,
+        libraries =
+            when {
+                librariesLoadedAtNanos == null || !hasLibraries -> LibrariesLoad.FULL
+                !sameUser || nowNanos - librariesLoadedAtNanos > LIBRARIES_REFRESH_NANOS ->
+                    LibrariesLoad.SILENT
+                else -> LibrariesLoad.NONE
+            },
+    )
 
 private const val ITEM_PROFILE = "profile"
 private const val ITEM_SETTINGS = "settings"
