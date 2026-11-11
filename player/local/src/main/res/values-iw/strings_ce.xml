@@ -28,4 +28,6 @@
         <item quantity="two">מתחיל בעוד %d שניות</item>
         <item quantity="other">מתחיל בעוד %d שניות</item>
     </plurals>
+    <string name="ce_track_forced">מאולצות</string>
+    <string name="ce_player_connection_lost">החיבור אבד. ההפעלה תימשך כשהרשת תחזור.</string>
 </resources>
