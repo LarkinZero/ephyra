@@ -103,7 +103,7 @@ variant. An empty cell is work still to do.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| HOM-01 | Suggestions carousel: pages through items, pauses while scrolling, opens the item on tap | #266 | works | unpolished #433: blank card for an item without a backdrop; pages by width class since #438: 2 at 8 inch and fold portrait, 3 on the fold landscape | n/a |
+| HOM-01 | Suggestions carousel: pages through items, pauses while scrolling, opens the item on tap | #266 | works | works: an item without a backdrop shows its poster blurred, or its title on a plain card, since #433; pages by width class since #438: 2 at 8 inch and fold portrait, 3 on the fold landscape | n/a |
 | HOM-02 | TV hero: the focused card's backdrop, logo or title, info line and overview | 1.2.0-ce.5 (#132) | n/a | n/a | works (#410): Continue Watching, Next Up and Latest cards show their overview too |
 | HOM-03 | TV hero title: a long title is fitted, not cut off | #346 | n/a | n/a | works |
 | HOM-04 | TV hero backdrop for an episode: falls back to the show's, the season's or the episode's picture instead of staying empty | #348 | n/a | n/a | works |
@@ -190,7 +190,7 @@ Libraries, search, favourites and the item pages.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| BRW-44 | Movie, show and episode pages use the hero layout: poster beside the text over a full-width backdrop | #291 | n/a | unpolished #433, #432: empty hero without a backdrop, landscape crop 3.6:1 (3.2:1 at 8 inch, 2.6:1 on the fold) | n/a |
+| BRW-44 | Movie, show and episode pages use the hero layout: poster beside the text over a full-width backdrop | #291 | n/a | works without a backdrop since #433 (the poster blurred, or a shorter hero without any image); unpolished #432: landscape crop 3.6:1 (3.2:1 at 8 inch, 2.6:1 on the fold) | n/a |
 | BRW-45 | Title and text of the hero sit under the backdrop, readable over bright artwork | #339 | n/a | works | n/a |
 | BRW-46 | Season as list and detail side by side; rotating keeps the selected episode and the scroll position | #297 | n/a | works: rotation keeps the selected episode, the list position and the top bar's background since #435 (from an episode link see #517); detail pane works at 1024, 900 and 841 dp since #429: the still goes above the text and every button is whole | n/a |
 | BRW-47 | Rows, grids and search use wider cards and more columns; text columns are capped at a readable width | #290 | n/a | works: carousel pages follow the width class since #438; search docked since #439: the field stays at most 720 dp at the start with the rail kept, results full width beside it | n/a |
@@ -626,7 +626,7 @@ All rows are TV only.
 | LIF-07 | Font scale 1.3: no text cut off or overlapping | #353 | works | works | works (#423 fixed: Home card titles take one line and stay inside the safe area at 1.3) |
 | LIF-08 | A right-to-left language (Arabic or Hebrew): layouts mirror, nothing overlaps | #353 | unpolished #401: arrows not mirrored, overview clipped | unpolished #401: row arrows not mirrored | works |
 | LIF-09 | CE screens are translated: no English left in a non-English language | #106, #110 | works | unpolished: upstream Player strings untranslated (Dutch); works at 8 inch (Arabic) | unpolished: upstream strings untranslated |
-| LIF-10 | Edge-to-edge: no content under the status bar, navigation bar or floating headers | #94, #357 | works | unpolished #437: no scrim over the Season detail pane, grey band without artwork; works at 8 inch and fold; the person page's back and home buttons are clear of the photo since #436 | n/a |
+| LIF-10 | Edge-to-edge: no content under the status bar, navigation bar or floating headers | #94, #357 | works | works: the Season detail pane has its own band, and no grey band without artwork, since #437; works at 8 inch and fold; the person page's back and home buttons are clear of the photo since #436 | n/a |
 | LIF-11 | Predictive back on Android 16 and 17 | #357 | not tested: Android 14 | not tested: Android 14 | n/a |
 | LIF-12 | Notification permission asked on Android 13+; downloads work without it | ce.32, `MainActivity` | works (#372): asked when a download starts, never on a start, rotation, relaunch, language change or return; the download runs after Allow and after one or two denials, and Allow shows its notification | works; downloads without it not tested | n/a |
 | LIF-13 | Local network permission on Android 17: asked in setup, a one-time prompt for existing users, the app works after a denial and explains why it needs it | 1.2.0-ce.0 | not tested: Android 14 | not tested: Android 14 | not tested: Android 14 |
