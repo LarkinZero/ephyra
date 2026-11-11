@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,7 +43,6 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 @Composable
 fun HomeHeader(
     serverName: String,
-    isLoading: Boolean,
     isError: Boolean,
     onServerClick: () -> Unit,
     onErrorClick: () -> Unit,
@@ -134,29 +132,20 @@ fun HomeHeader(
                 }
             }
 
-            AnimatedVisibility(visible = isLoading || isError, enter = fadeIn(), exit = fadeOut()) {
+            // #391: no spinner here; the pull-to-refresh indicator shows every load.
+            AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
                 Surface(
                     onClick = onRetryClick,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    enabled = !isLoading,
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     Box {
-                        when {
-                            isError -> {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                                    contentDescription = null,
-                                    modifier = Modifier.align(Alignment.Center),
-                                )
-                            }
-                            isLoading -> {
-                                Box(modifier = Modifier.size(32.dp).align(Alignment.Center)) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                            contentDescription = null,
+                            modifier = Modifier.align(Alignment.Center),
+                        )
                     }
                 }
             }
@@ -216,11 +205,10 @@ fun HomeHeader(
 
 @Composable
 @Preview(showBackground = true)
-private fun HomeHeaderLoadingPreview() {
+private fun HomeHeaderPreview() {
     FindroidTheme {
         HomeHeader(
             serverName = "Jellyfin",
-            isLoading = true,
             isError = false,
             onServerClick = {},
             onErrorClick = {},
@@ -237,7 +225,6 @@ private fun HomeHeaderErrorPreview() {
     FindroidTheme {
         HomeHeader(
             serverName = "Jellyfin",
-            isLoading = false,
             isError = true,
             onServerClick = {},
             onErrorClick = {},

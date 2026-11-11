@@ -106,7 +106,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreenLayout(
+internal fun HomeScreenLayout(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
     baseUrl: String? = null,
@@ -236,7 +236,6 @@ private fun HomeScreenLayout(
 
     HomeHeader(
         serverName = state.server?.name ?: "",
-        isLoading = state.isLoading,
         isError = state.error != null,
         onServerClick = { showServerSelectionBottomSheet = true },
         onErrorClick = { showErrorDialog = true },
