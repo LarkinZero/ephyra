@@ -204,7 +204,7 @@ download setting (ADR 0007, `SettingsViewModel`).
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
 | DLD-01 | Download a movie: the quality dialog offers Original and bitrates from 4K 120 Mbps to 360p; the file arrives and plays | 1.2.0-ce.0 (#75) | works; tested on an episode (no movie offers Download) | not tested: no Download on movies (CanDownload false) | n/a |
-| DLD-02 | Download one episode from its page or the season list | | broken #373: offered although CanDownload is false | works | n/a |
+| DLD-02 | Download one episode from its page or the season list | | works after #373: with CanDownload false the episode rows and the show page offer no Download, a downloaded episode keeps Remove; download allowed only in unit tests | works | n/a |
 | DLD-03 | Download a season or a whole show: the season dialog shows what is already downloaded per season | `SeasonSelectionDialog` | works | works | n/a |
 | DLD-04 | A partly downloaded season or show offers both download (the rest) and delete | #94 | works | works | n/a |
 | DLD-05 | A lower-quality download shows progress against the converted size, not the original's | #76 | works | not tested: fixed with #444, not run again on a tablet | n/a |
