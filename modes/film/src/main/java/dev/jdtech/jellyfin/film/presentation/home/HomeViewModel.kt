@@ -71,6 +71,9 @@ constructor(
     private var cachedLibrariesKey: Pair<String?, UUID?>? = null
     private var cacheChecked = false
 
+    /** The repository is chosen when this view model is made, so this holds for its whole life. */
+    private val offline = repository is JellyfinRepositoryOfflineImpl
+
     /**
      * With [silent] the refresh indicator stays hidden, for reloads the user didn't ask for. The
      * returned job ends once every row has loaded, for screens that wait for that (TV Home puts focus
@@ -179,7 +182,7 @@ constructor(
      * when the server does not answer, the stored name stays.
      */
     private suspend fun refreshServerName(server: Server) {
-        if (repository is JellyfinRepositoryOfflineImpl) return
+        if (offline) return
         logFailure("server name") {
             val renamed = server.renamedTo(repository.getPublicSystemInfo()) ?: return@logFailure
             database.updateServer(renamed)
@@ -193,6 +196,8 @@ constructor(
      */
     private suspend fun showCachedRows(serverId: String, userId: UUID?) {
         val cache = homeCache ?: return
+        // CE (#428): offline, the rows are the downloads; the remembered ones can't be opened.
+        if (offline) return
         if (userId == null || cacheChecked || !_state.value.isEmpty) return
         cacheChecked = true
         if (!appPreferences.getValue(appPreferences.homeCache)) {
@@ -221,7 +226,7 @@ constructor(
     private suspend fun saveRows(server: Server?) {
         val cache = homeCache ?: return
         val user = _state.value.user ?: return
-        if (server == null || repository is JellyfinRepositoryOfflineImpl) return
+        if (server == null || offline) return
         if (!appPreferences.getValue(appPreferences.homeCache)) return
         cache.write(server.id, user.id, _state.value)
     }
@@ -365,6 +370,12 @@ constructor(
         _state.update { it.copy(rowOrder = layout.map { row -> row.key }) }
         val shown = layout.filter { it.visible }.mapNotNullTo(mutableSetOf()) { it.libraryId }
         val views = libraries.filter { it.id in shown }
+        if (views.isEmpty()) {
+            // CE (#428): no Latest row to load, so none of the old ones may stay: offline with
+            // nothing downloaded, the rows remembered from an online start would.
+            _state.update { it.copy(views = emptyList()) }
+            return
+        }
 
         val current = _state.value.views
         val results = arrayOfNulls<Result<List<FindroidItem>>>(views.size)
