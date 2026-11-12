@@ -29,6 +29,7 @@ import dev.jdtech.jellyfin.models.toFindroidShow
 import dev.jdtech.jellyfin.models.toFindroidSource
 import dev.jdtech.jellyfin.player.DeviceProfileBuilder
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.utils.VideoQualities
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID
@@ -504,6 +505,10 @@ class JellyfinRepositoryImpl(
             // progressive H.264 transcode) or the user picked a download quality cap
             // (files over the cap transcoded down to it). Everything else stays the
             // original file.
+            // A quality cap pins the transcode to the rung's resolution as well: the
+            // server only honors a lowered bitrate otherwise, and keeps the source
+            // resolution, so "720p" came back as 1080p at 4 Mbps.
+            val resolution = VideoQualities.resolution(maxBitrate)
             val sources = mutableListOf<FindroidSource>()
             sources.addAll(
                 jellyfinApi.mediaInfoApi
@@ -527,7 +532,15 @@ class JellyfinRepositoryImpl(
                     )
                     .content
                     .mediaSources
-                    .map { it.toFindroidSource(this@JellyfinRepositoryImpl, itemId, includePath) }
+                    .map {
+                        it.toFindroidSource(
+                            this@JellyfinRepositoryImpl,
+                            itemId,
+                            includePath,
+                            resolution?.width,
+                            resolution?.height,
+                        )
+                    }
             )
             sources.addAll(database.getSources(itemId).map { it.toFindroidSource(database) })
             sources
@@ -558,6 +571,10 @@ class JellyfinRepositoryImpl(
             // switches it to the variant that carries the HLS fallback.
             val maxBitrate =
                 appPreferences.getValue(appPreferences.playerMaxBitrate).takeIf { it > 0 }
+            // The rung's resolution goes on the transcode URL; without it the server
+            // lowers only the bitrate and keeps the source resolution — see
+            // [VideoQualities].
+            val resolution = VideoQualities.resolution(maxBitrate)
             val transcodeVideoCodec = appPreferences.getValue(appPreferences.playerTranscodeVideoCodec)
             val alwaysTranscode = appPreferences.getValue(appPreferences.playerAlwaysTranscode)
             val deviceProfile =
@@ -593,7 +610,13 @@ class JellyfinRepositoryImpl(
                     .content
                     .mediaSources
                     .map {
-                        it.toFindroidSource(this@JellyfinRepositoryImpl, itemId, includePath = true)
+                        it.toFindroidSource(
+                            this@JellyfinRepositoryImpl,
+                            itemId,
+                            includePath = true,
+                            maxWidth = resolution?.width,
+                            maxHeight = resolution?.height,
+                        )
                     }
             )
             sources.addAll(localSources)

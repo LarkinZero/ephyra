@@ -10,7 +10,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.BasePlayerActivity
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
-import dev.jdtech.jellyfin.presentation.utils.VideoQualities
+import dev.jdtech.jellyfin.utils.VideoQualities
 import java.lang.IllegalStateException
 
 class QualitySelectionDialogFragment : DialogFragment() {

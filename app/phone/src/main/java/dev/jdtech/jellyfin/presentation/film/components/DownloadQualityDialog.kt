@@ -19,8 +19,8 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.VideoQualities
 import dev.jdtech.jellyfin.presentation.utils.LocalNotificationPermissionRequest
+import dev.jdtech.jellyfin.utils.VideoQualities
 
 /**
  * Quality picker shown when starting a download. Tapping an option starts the

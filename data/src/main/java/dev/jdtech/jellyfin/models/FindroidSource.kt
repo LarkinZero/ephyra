@@ -30,6 +30,8 @@ suspend fun MediaSourceInfo.toFindroidSource(
     jellyfinRepository: JellyfinRepository,
     itemId: UUID,
     includePath: Boolean = false,
+    maxWidth: Int? = null,
+    maxHeight: Int? = null,
 ): FindroidSource {
     // When the server decided this source needs transcoding it returns a (relative)
     // transcodingUrl — an HLS manifest on the playback path, a progressive stream
@@ -40,6 +42,7 @@ suspend fun MediaSourceInfo.toFindroidSource(
         when {
             transcodeUrl != null && transcoded ->
                 serverUrl(jellyfinRepository.getBaseUrl(), transcodeUrl)
+                    .withMaxResolution(maxWidth, maxHeight)
             protocol == MediaProtocol.FILE -> {
                 try {
                     if (includePath) jellyfinRepository.getStreamUrl(itemId, id.orEmpty()) else ""
@@ -62,6 +65,18 @@ suspend fun MediaSourceInfo.toFindroidSource(
         container = container,
         bitrate = bitrate,
     )
+}
+
+/**
+ * Pins a transcode to at most [maxWidth]×[maxHeight], keeping the source aspect
+ * ratio. The server honors `MaxWidth`/`MaxHeight` on both the HLS manifest and
+ * the progressive stream, and copies them into the sub-playlists it hands the
+ * player; a lowered bitrate alone makes it keep the source resolution.
+ */
+internal fun String.withMaxResolution(maxWidth: Int?, maxHeight: Int?): String {
+    if (maxWidth == null || maxHeight == null) return this
+    val separator = if ('?' in this) '&' else '?'
+    return "$this$separator" + "MaxWidth=$maxWidth&MaxHeight=$maxHeight"
 }
 
 suspend fun FindroidSourceDto.toFindroidSource(
