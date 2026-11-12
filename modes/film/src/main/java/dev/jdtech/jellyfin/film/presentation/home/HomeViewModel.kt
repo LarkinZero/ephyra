@@ -110,6 +110,10 @@ constructor(
                 val user = logFailure("user") { database.getServerCurrentUser(server.id) }
                 _state.update { it.copy(user = user.getOrNull()) }
                 showCachedRows(server.id, user.getOrNull()?.id)
+                if (offline) {
+                    val none = logFailure("downloads") { nothingDownloaded(database, server.id) }
+                    _state.update { it.copy(nothingDownloaded = none.getOrDefault(false)) }
+                }
             }
             // CE (#142): the rows this user chose for this server, in their order.
             val stored = homeRowsStore.read(HomeRowsProfile.of(server))

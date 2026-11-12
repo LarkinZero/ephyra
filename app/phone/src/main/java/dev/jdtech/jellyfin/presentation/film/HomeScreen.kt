@@ -217,6 +217,14 @@ internal fun HomeScreenLayout(
                                 onRetryClick = { onAction(HomeAction.OnRetryClick) },
                                 modifier = placeholderModifier,
                             )
+                        } else if (state.nothingDownloaded) {
+                            // CE: offline, Home's rows are the downloads.
+                            EmptyState(
+                                icon = CoreR.drawable.ic_download,
+                                title = stringResource(CoreR.string.ce_home_offline_empty_title),
+                                modifier = placeholderModifier,
+                                body = stringResource(CoreR.string.ce_home_offline_empty_body),
+                            )
                         } else {
                             EmptyState(
                                 icon = CoreR.drawable.ic_home,
