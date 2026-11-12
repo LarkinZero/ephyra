@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Limitsiz</string>
     <string name="ce_number_off">Söndürülüb</string>
+    <string name="ce_pref_player_keep_landscape">Pleyeri üfüqi vəziyyətdə saxla</string>
+    <string name="ce_pref_player_keep_landscape_summary">Planşeti şaquli çevirsəniz belə videoları üfüqi vəziyyətdə oynat</string>
 </resources>

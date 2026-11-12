@@ -190,4 +190,6 @@
     </plurals>
     <string name="ce_number_no_limit">제한 없음</string>
     <string name="ce_number_off">사용 안 함</string>
+    <string name="ce_pref_player_keep_landscape">플레이어를 가로 모드로 유지</string>
+    <string name="ce_pref_player_keep_landscape_summary">태블릿을 세로로 돌려도 동영상을 가로 모드로 재생합니다</string>
 </resources>

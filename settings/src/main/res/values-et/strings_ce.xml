@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Piiranguta</string>
     <string name="ce_number_off">Väljas</string>
+    <string name="ce_pref_player_keep_landscape">Hoia mängija rõhtpaigutuses</string>
+    <string name="ce_pref_player_keep_landscape_summary">Esita videoid rõhtpaigutuses ka siis, kui pöörad tahvelarvuti püsti</string>
 </resources>

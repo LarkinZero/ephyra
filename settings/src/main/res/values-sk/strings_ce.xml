@@ -196,4 +196,6 @@
     </plurals>
     <string name="ce_number_no_limit">Bez obmedzenia</string>
     <string name="ce_number_off">Vypnuté</string>
+    <string name="ce_pref_player_keep_landscape">Ponechať prehrávač na šírku</string>
+    <string name="ce_pref_player_keep_landscape_summary">Prehrávať videá na šírku, aj keď tablet otočíte na výšku</string>
 </resources>

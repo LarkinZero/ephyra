@@ -194,4 +194,6 @@
     </plurals>
     <string name="ce_number_no_limit">Fără limită</string>
     <string name="ce_number_off">Dezactivat</string>
+    <string name="ce_pref_player_keep_landscape">Păstrează playerul în modul peisaj</string>
+    <string name="ce_pref_player_keep_landscape_summary">Redă videoclipurile în modul peisaj, chiar și când rotești tableta pe verticală</string>
 </resources>

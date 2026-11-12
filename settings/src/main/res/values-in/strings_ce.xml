@@ -190,4 +190,6 @@
     </plurals>
     <string name="ce_number_no_limit">Tanpa batas</string>
     <string name="ce_number_off">Nonaktif</string>
+    <string name="ce_pref_player_keep_landscape">Pertahankan pemutar dalam lanskap</string>
+    <string name="ce_pref_player_keep_landscape_summary">Putar video dalam lanskap, meskipun tablet diputar tegak</string>
 </resources>
