@@ -347,7 +347,9 @@
                 android:contentDescription="@string/player_controls_skip_forward" />
         </LinearLayout>
 
+        <!-- CE (#523): fades out as one while the episode sheet is open. -->
         <LinearLayout
+            android:id="@+id/seek_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
