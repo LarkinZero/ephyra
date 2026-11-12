@@ -652,8 +652,10 @@ class PlayerActivity : BasePlayerActivity() {
         // touch mode (the back button, with the controls up), play/pause when the controls show,
         // the next control when the focused one hides. Move focus back to the player view, so only
         // a control the user moved to with Tab or the arrows has focus.
-        binding.playerView.viewTreeObserver.addOnTouchModeChangeListener {
+        binding.playerView.isFocusableInTouchMode = true
+        binding.playerView.viewTreeObserver.addOnTouchModeChangeListener { inTouchMode ->
             keyboardFocusChosen = false
+            keepFocusThroughTouchMode(inTouchMode)
         }
         binding.playerView.viewTreeObserver.addOnGlobalFocusChangeListener { _, newFocus ->
             val playerView = binding.playerView
@@ -1206,6 +1208,25 @@ class PlayerActivity : BasePlayerActivity() {
         playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
         playerView.requestFocus()
         playerView.descendantFocusability = focusability
+    }
+
+    /**
+     * CE: the first Space (or arrow, Tab, Enter) after a touch did nothing. That key ends touch
+     * mode, and when nothing has focus, or a group that hands focus on to its children, Android
+     * gives a control focus and drops the key before [onPlayerKey] sees it. So the player view
+     * keeps focus in touch mode (Android moves a control's focus to it, as it is focusable in touch
+     * mode), and for the key that ends touch mode it keeps focus itself, so the key goes on.
+     */
+    private fun keepFocusThroughTouchMode(inTouchMode: Boolean) {
+        val playerView = binding.playerView
+        if (inTouchMode) {
+            if (currentFocus == null) playerView.requestFocus()
+            return
+        }
+        if (currentFocus !== playerView) return
+        val focusability = playerView.descendantFocusability
+        playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
+        playerView.post { playerView.descendantFocusability = focusability }
     }
 
     private fun isArrowKey(keyCode: Int): Boolean =
