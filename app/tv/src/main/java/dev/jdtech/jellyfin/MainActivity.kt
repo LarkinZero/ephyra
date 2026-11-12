@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -11,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.api.JellyfinApi
+import dev.jdtech.jellyfin.ce.ui.focus.DirectionKeyClock
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextLink
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextSync
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -51,6 +53,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // CE: every D-pad key, also one that no focused element sees (cold start, Main's drawer).
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        DirectionKeyClock.onKeyEvent(event)
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onNewIntent(intent: Intent) {
