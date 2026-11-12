@@ -486,13 +486,11 @@ fun TvPlayerScreen(
                         .background(Color.Black.copy(alpha = 0.88f))
                         .padding(20.dp),
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(PlayerR.string.playback_info_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
-                        modifier = Modifier.weight(1f),
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Button(
                         onClick = {
                             viewModel.setPlaybackInfoVisible(false)
@@ -516,12 +514,6 @@ fun TvPlayerScreen(
                         if (index > 0) {
                             Spacer(Modifier.height(MaterialTheme.spacings.small))
                         }
-                        Text(
-                            text = section.title,
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(bottom = 4.dp),
-                        )
                         section.rows.forEach { (label, value) ->
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
