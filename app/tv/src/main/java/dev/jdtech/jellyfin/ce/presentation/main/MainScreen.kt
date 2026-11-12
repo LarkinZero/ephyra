@@ -410,16 +410,18 @@ fun MainScreenLayout(
                         .testTag("main_drawer_content"),
                 horizontalAlignment = Alignment.Start,
             ) {
-                // Profile header: user + server, OK opens user switch
-                NavigationDrawerItem(
-                    selected = false,
+                // Profile header: user + server, OK opens user switch. Two lines, so its own item
+                // (#567).
+                DrawerProfileItem(
+                    userName = user?.name.orEmpty(),
+                    serverName = server?.name,
                     onClick = {
                         returnFocusTo = ITEM_PROFILE
                         navigateToUsers()
                     },
                     leadingContent = {
-                        // The drawer gives leading content a 24 dp box; the 32 dp face overflows it
-                        // evenly (requiredSize centres), so the rail and the item height stay put.
+                        // The 32 dp face overflows the 24 dp box evenly (requiredSize centres), so
+                        // the rail stays put.
                         Crossfade(
                             targetState = user,
                             animationSpec =
@@ -445,29 +447,10 @@ fun MainScreenLayout(
                             }
                         }
                     },
-                    border = ephyraDrawerItemBorder(),
                     modifier =
                         Modifier.focusRequester(profileFocusRequester)
                             .testTag("drawer_item_profile"),
-                ) {
-                    Column(modifier = Modifier.padding(start = 8.dp)) {
-                        Text(
-                            text = user?.name.orEmpty(),
-                            style = MaterialTheme.typography.titleMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        server?.name?.let { serverName ->
-                            Text(
-                                text = serverName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
