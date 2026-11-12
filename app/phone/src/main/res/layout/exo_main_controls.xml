@@ -154,6 +154,22 @@
                     app:tint="@android:color/white" />
 
                 <Space
+                    android:layout_width="16dp"
+                    android:layout_height="0dp" />
+
+                <ImageButton
+                    android:id="@+id/btn_playback_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@drawable/transparent_circle_background"
+                    android:contentDescription="@string/playback_info_title"
+                    android:foreground="@drawable/ephyra_player_focus_ring"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_info"
+                    app:tint="@android:color/white" />
+
+                <Space
                     android:id="@+id/space_quality"
                     android:layout_width="16dp"
                     android:layout_height="0dp" />

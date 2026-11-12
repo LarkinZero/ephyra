@@ -4,6 +4,23 @@
     <string name="select_playback_speed">Select playback speed</string>
     <string name="select_video_quality">Select video quality</string>
     <string name="video_quality_original">Original quality</string>
+    <string name="select_transcode_quality" translatable="false">Select transcode quality</string>
+    <string name="video_quality_no_limit" translatable="false">No bitrate limit (still transcoded)</string>
+    <string name="playback_info_title" translatable="false">Playback info</string>
+    <string name="playback_info_mode" translatable="false">Playback</string>
+    <string name="playback_info_mode_transcode" translatable="false">Transcoding</string>
+    <string name="playback_info_mode_direct_play" translatable="false">Direct play</string>
+    <string name="playback_info_mode_local" translatable="false">Local file</string>
+    <string name="playback_info_video" translatable="false">Video</string>
+    <string name="playback_info_audio" translatable="false">Audio</string>
+    <string name="playback_info_container" translatable="false">Container</string>
+    <string name="playback_info_video_fps" translatable="false">Frame rate</string>
+    <string name="playback_info_stream_bitrate" translatable="false">Stream bitrate</string>
+    <string name="playback_info_transcode_speed" translatable="false">Transcode speed</string>
+    <string name="playback_info_hardware_acceleration" translatable="false">Hardware acceleration</string>
+    <string name="playback_info_transcode_reasons" translatable="false">Transcode reason</string>
+    <string name="playback_info_loading" translatable="false">Collecting playback information…</string>
+    <string name="playback_info_close" translatable="false">Close playback information</string>
     <string name="select_chapter">Chapters</string>
     <string name="player_controls_chapters">Chapters</string>
     <string name="chapter_number">Chapter %1$d</string>

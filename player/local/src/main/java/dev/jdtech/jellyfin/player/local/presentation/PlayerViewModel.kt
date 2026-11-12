@@ -95,6 +95,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -107,6 +108,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.TranscodingInfo
 import timber.log.Timber
 
 /** How long the OS gets to follow the surface frame rate hint before the second log line. */
@@ -139,6 +141,10 @@ constructor(
     val isBackgroundAudioEnabled: Boolean =
         appPreferences.getValue(appPreferences.playerBackgroundAudio)
 
+    /** Whether online playback always requests a server video transcode. */
+    val isAlwaysTranscodeEnabled: Boolean =
+        appPreferences.getValue(appPreferences.playerAlwaysTranscode)
+
     private val _uiState =
         MutableStateFlow(
             UiState(
@@ -154,6 +160,8 @@ constructor(
             )
         )
     val uiState = _uiState.asStateFlow()
+
+    private var playbackInfoJob: Job? = null
 
     /**
      * CE (#126, ADR 0004): position, duration and play state, updated every [PROGRESS_TICK_MS]
@@ -219,6 +227,9 @@ constructor(
          * back. The phone player shows a spinner and a line saying so.
          */
         val waitingForNetwork: Boolean = false,
+        /** Live diagnostics, refreshed only while the information panel is open. */
+        val playbackInfo: PlaybackDebugInfo? = null,
+        val playbackInfoVisible: Boolean = false,
     )
 
     private val _queue = MutableStateFlow<List<FindroidItem>>(emptyList())
@@ -1616,6 +1627,96 @@ constructor(
 
     private fun currentPlayerItem(): PlayerItem? =
         items.firstOrNull { it.itemId.toString() == player.currentMediaItem?.mediaId }
+
+    /** Show a live diagnostics panel and poll Jellyfin only while it is visible. */
+    fun setPlaybackInfoVisible(visible: Boolean) {
+        _uiState.update { it.copy(playbackInfoVisible = visible) }
+        playbackInfoJob?.cancel()
+        playbackInfoJob = null
+        if (!visible) {
+            _uiState.update { it.copy(playbackInfo = null) }
+            return
+        }
+        playbackInfoJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    refreshPlaybackInfoSnapshot()
+                    delay(2_000)
+                }
+            }
+    }
+
+    private suspend fun refreshPlaybackInfoSnapshot() {
+        if (!_uiState.value.playbackInfoVisible) return
+        val item = currentPlayerItem() ?: return
+        val video = selectedFormat(C.TRACK_TYPE_VIDEO)
+        val audio = selectedFormat(C.TRACK_TYPE_AUDIO)
+        val transcode = getTranscodingInfo(item.itemId)
+        val info =
+            PlaybackDebugInfo(
+                playbackMethod =
+                    when {
+                        item.isTranscoded ||
+                            (transcode != null && (!transcode.isVideoDirect || !transcode.isAudioDirect)) ->
+                            PlaybackMethod.TRANSCODE
+                        item.mediaSourceUri.startsWith("file:") || item.mediaSourceUri.startsWith("/") ->
+                            PlaybackMethod.LOCAL_FILE
+                        else -> PlaybackMethod.DIRECT_PLAY
+                    },
+                container = transcode?.container ?: if (item.isTranscoded) "HLS" else null,
+                videoCodec = transcode?.videoCodec ?: video?.let(::formatCodec),
+                videoWidth = transcode?.width?.takeIf { it > 0 } ?: video?.width?.takeIf { it > 0 },
+                videoHeight = transcode?.height?.takeIf { it > 0 } ?: video?.height?.takeIf { it > 0 },
+                videoBitrate = video?.bitrate?.takeIf { it > 0 },
+                videoFrameRate = video?.frameRate?.takeIf { it > 0f && it.isFinite() },
+                audioCodec = transcode?.audioCodec ?: audio?.let(::formatCodec),
+                audioBitrate = audio?.bitrate?.takeIf { it > 0 },
+                audioChannels = audio?.channelCount?.takeIf { it > 0 },
+                audioSampleRate = audio?.sampleRate?.takeIf { it > 0 },
+                streamBitrate = transcode?.bitrate?.takeIf { it > 0 },
+                transcodeFrameRate = transcode?.framerate?.takeIf { it > 0f && it.isFinite() },
+                hardwareAcceleration = transcode?.hardwareAccelerationType?.toString(),
+                transcodeReasons = transcode?.transcodeReasons.orEmpty().map { it.toString() },
+            )
+        _uiState.update { if (it.playbackInfoVisible) it.copy(playbackInfo = info) else it }
+    }
+
+    private fun selectedFormat(trackType: Int): Format? =
+        player.currentTracks.groups
+            .firstOrNull { group ->
+                group.type == trackType && (0 until group.length).any(group::isTrackSelected)
+            }
+            ?.let { group ->
+                (0 until group.length).firstOrNull(group::isTrackSelected)?.let(group::getTrackFormat)
+            }
+
+    private fun formatCodec(format: Format): String? =
+        format.codecs?.takeIf { it.isNotBlank() }
+            ?: format.sampleMimeType?.substringAfterLast('/')
+
+    private suspend fun getTranscodingInfo(itemId: UUID): TranscodingInfo? {
+        val userId = jellyfinApi.userId ?: return null
+        val clientName =
+            application.applicationInfo.loadLabel(application.packageManager).toString()
+        return try {
+            withContext(Dispatchers.IO) {
+                jellyfinApi.sessionApi
+                    .getSessions(activeWithinSeconds = 30)
+                    .content
+                    .firstOrNull { session ->
+                        session.userId == userId &&
+                            session.client == clientName &&
+                            session.nowPlayingItem?.id == itemId
+                    }
+                    ?.transcodingInfo
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.d(e, "Could not refresh Jellyfin transcoding diagnostics")
+            null
+        }
+    }
 
     private fun supportedGroups(trackType: @C.TrackType Int) =
         player.currentTracks.groups.filter { it.type == trackType && it.isSupported }

@@ -20,12 +20,27 @@ class QualitySelectionDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val qualityBitrates = VideoQualities.bitrates
         val qualityTexts = qualityBitrates.map { bitrate ->
-            VideoQualities.label(bitrate) ?: getString(R.string.video_quality_original)
+            VideoQualities.label(bitrate)
+                ?: getString(
+                    if (viewModel.isAlwaysTranscodeEnabled) {
+                        R.string.video_quality_no_limit
+                    } else {
+                        R.string.video_quality_original
+                    },
+                )
         }
 
         return activity?.let { activity ->
             val builder = MaterialAlertDialogBuilder(activity)
-            builder.setTitle(getString(R.string.select_video_quality)).setSingleChoiceItems(
+            val title =
+                getString(
+                    if (viewModel.isAlwaysTranscodeEnabled) {
+                        R.string.select_transcode_quality
+                    } else {
+                        R.string.select_video_quality
+                    },
+                )
+            builder.setTitle(title).setSingleChoiceItems(
                 qualityTexts.toTypedArray(),
                 qualityBitrates.indexOf(viewModel.maxBitrate),
             ) { dialog, which ->

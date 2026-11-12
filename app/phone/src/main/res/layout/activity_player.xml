@@ -14,6 +14,63 @@
         app:animation_enabled="false"
         app:show_buffering="always" />
 
+    <LinearLayout
+        android:id="@+id/playback_info_panel"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/overlay_background"
+        android:clickable="true"
+        android:elevation="12dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/playback_info_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/playback_info_title"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/playback_info_close"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/transparent_circle_background"
+                android:clickable="true"
+                android:contentDescription="@string/playback_info_close"
+                android:focusable="true"
+                android:foreground="@drawable/ephyra_player_focus_ring"
+                android:gravity="center"
+                android:text="×"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/playback_info_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="3dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="@android:color/white"
+            tools:text="Playback: Transcoding\nVideo: hevc · 1920×1080 · 4.5 Mbps\nAudio: aac · 2 ch · 48 kHz\nContainer: ts\nTranscode speed: 86 fps" />
+    </LinearLayout>
+
     <!-- CE (#450): the connection was lost; playback goes on by itself when it is back. Between
          the title row and the centre controls (85dp above the centre), so it covers no control and
          Play (retry now) stays free; touches pass through. -->

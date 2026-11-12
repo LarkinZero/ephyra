@@ -100,6 +100,7 @@ import dev.jdtech.jellyfin.player.local.domain.getTrackNames
 import dev.jdtech.jellyfin.player.local.presentation.PlayerAction
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.player.local.presentation.toRows
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.label
@@ -123,6 +124,7 @@ private enum class PlayerDialog {
     SPEED,
     SLEEP_TIMER,
     CHAPTERS,
+    PLAYBACK_INFO,
 }
 
 private val SPEEDS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
@@ -268,7 +270,12 @@ fun TvPlayerScreen(
     val playPauseFocus = remember { FocusRequester() }
     val queueFocus = remember { FocusRequester() }
     val dialogOpenerFocus = remember { PlayerDialog.entries.associateWith { FocusRequester() } }
+    val playbackInfoCloseFocus = remember { FocusRequester() }
     val upNextFocus = remember { FocusRequester() }
+
+    LaunchedEffect(uiState.playbackInfoVisible) {
+        if (uiState.playbackInfoVisible) focusWhenReady(playbackInfoCloseFocus)
+    }
 
     // CE (#271): the skip button shows on its own, with focus, in its first seconds in a segment,
     // and above the overlay whenever the overlay is shown, as on phone.
@@ -407,7 +414,13 @@ fun TvPlayerScreen(
             onPendingSeekChange = { pendingSeekMs = it },
             onSeek = { player.seekTo(it) },
             onPlayPause = controls::togglePlayPause,
-            onOpenDialog = { dialog = it },
+            onOpenDialog = {
+                if (it == PlayerDialog.PLAYBACK_INFO) {
+                    viewModel.setPlaybackInfoVisible(!viewModel.uiState.value.playbackInfoVisible)
+                } else {
+                    dialog = it
+                }
+            },
             onInteraction = { interactions++ },
         )
     }
@@ -458,6 +471,69 @@ fun TvPlayerScreen(
             },
             modifier = Modifier.fillMaxSize(),
         )
+
+        AnimatedVisibility(
+            visible = uiState.playbackInfoVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.TopEnd).zIndex(2f).padding(top = 64.dp, end = 24.dp),
+        ) {
+            val rows = remember(uiState.playbackInfo, context) { uiState.playbackInfo?.toRows(context) }
+            Column(
+                modifier =
+                    Modifier.width(420.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.Black.copy(alpha = 0.88f))
+                        .padding(20.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(PlayerR.string.playback_info_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Button(
+                        onClick = {
+                            viewModel.setPlaybackInfoVisible(false)
+                            interactions++
+                            dialogOpenerFocus.getValue(PlayerDialog.PLAYBACK_INFO).requestFocus()
+                        },
+                        modifier = Modifier.focusRequester(playbackInfoCloseFocus),
+                    ) {
+                        Text("×")
+                    }
+                }
+                Spacer(Modifier.height(MaterialTheme.spacings.small))
+                if (rows.isNullOrEmpty()) {
+                    Text(
+                        text = stringResource(PlayerR.string.playback_info_loading),
+                        color = Color.White.copy(alpha = 0.78f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                } else {
+                    rows.forEach { (label, value) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            Text(
+                                text = label,
+                                color = Color.White.copy(alpha = 0.72f),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(0.8f),
+                            )
+                            Text(
+                                text = value,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1.2f),
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         TvBufferingIndicator(
             shown =
@@ -734,6 +810,7 @@ fun TvPlayerScreen(
                     },
                     onDismiss = close,
                 )
+            PlayerDialog.PLAYBACK_INFO -> Unit
         }
         // A dialog returns focus to the button that opened it. Opened with a media key while the
         // controls were hidden, there is no such button, and focus goes back to the screen.
@@ -901,6 +978,13 @@ private fun PlayerControls(
                     contentDescription = stringResource(PlayerR.string.select_subtitle_track),
                     focusRequester = dialogOpenerFocus.getValue(PlayerDialog.SUBTITLES),
                     onClick = { onOpenDialog(PlayerDialog.SUBTITLES) },
+                    onFocus = onInteraction,
+                )
+                ControlButton(
+                    icon = CoreR.drawable.ic_info,
+                    contentDescription = stringResource(PlayerR.string.playback_info_title),
+                    focusRequester = dialogOpenerFocus.getValue(PlayerDialog.PLAYBACK_INFO),
+                    onClick = { callbacks.onOpenDialog(PlayerDialog.PLAYBACK_INFO) },
                     onFocus = onInteraction,
                 )
                 ControlButton(

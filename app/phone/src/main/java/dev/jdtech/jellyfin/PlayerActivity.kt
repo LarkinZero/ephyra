@@ -64,6 +64,7 @@ import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.R as PlayerR
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
+import dev.jdtech.jellyfin.player.local.presentation.toRows
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
@@ -703,6 +704,7 @@ class PlayerActivity : BasePlayerActivity() {
         val sleepTimerButton = binding.playerView.findViewById<ImageButton>(R.id.btn_sleep_timer)
         val sleepTimerRemaining = binding.playerView.findViewById<TextView>(R.id.sleep_timer_remaining)
         val qualityButton = binding.playerView.findViewById<ImageButton>(R.id.btn_quality)
+        val playbackInfoButton = binding.playerView.findViewById<ImageButton>(R.id.btn_playback_info)
         val qualitySpace = binding.playerView.findViewById<Space>(R.id.space_quality)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         // CE (#523): the skip button can appear while the episode sheet is open, and never shows
@@ -775,7 +777,6 @@ class PlayerActivity : BasePlayerActivity() {
 
                 launch {
                     viewModel.uiState.collect { uiState ->
-                        Timber.d("$uiState")
                         uiState.apply {
                             // Title
                             videoNameTextView.text = currentItemTitle
@@ -789,6 +790,11 @@ class PlayerActivity : BasePlayerActivity() {
                                 binding.playerView.showController()
                             }
                             binding.connectionLost.isVisible = waitingForNetwork
+                            binding.playbackInfoPanel.isVisible = playbackInfoVisible
+                            binding.playbackInfoContent.text =
+                                playbackInfo?.toRows(this@PlayerActivity)?.joinToString("\n") {
+                                    (label, value) -> "$label: $value"
+                                } ?: getString(PlayerR.string.playback_info_loading)
 
                             // Media segment (#271)
                             currentSegment?.let { segment ->
@@ -1000,6 +1006,7 @@ class PlayerActivity : BasePlayerActivity() {
 
         lockButton.setOnClickListener {
             closeEpisodeSheet(animate = false)
+            viewModel.setPlaybackInfoVisible(false)
             exoPlayerControlView.visibility = View.GONE
             lockedLayout.visibility = View.VISIBLE
             isControlsLocked = true
@@ -1042,6 +1049,13 @@ class PlayerActivity : BasePlayerActivity() {
             QualitySelectionDialogFragment()
                 .show(supportFragmentManager, "qualityselectiondialog")
         }
+
+        playbackInfoButton.setOnClickListener {
+            val visible = !viewModel.uiState.value.playbackInfoVisible
+            viewModel.setPlaybackInfoVisible(visible)
+            if (visible) binding.playerView.showController()
+        }
+        binding.playbackInfoClose.setOnClickListener { viewModel.setPlaybackInfoVisible(false) }
 
         chaptersButton.setOnClickListener {
             ChapterListDialogFragment()
@@ -1560,6 +1574,7 @@ class PlayerActivity : BasePlayerActivity() {
         updateEpisodesButton()
         when (isInPictureInPictureMode) {
             true -> {
+                viewModel.setPlaybackInfoVisible(false)
                 binding.playerView.useController = false
                 skipSegmentButton.isVisible = false
 
