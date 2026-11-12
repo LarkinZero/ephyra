@@ -72,6 +72,11 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // player's quality selector.
     val playerMaxBitrate = Preference("pref_player_max_bitrate", 0)
 
+    // Online HLS transcode target. HEVC saves bandwidth when supported by the server/client.
+    val playerTranscodeVideoCodec = Preference("pref_player_transcode_video_codec", "h264")
+    // Ask Jellyfin to transcode every online item, even when the device could direct-play it.
+    val playerAlwaysTranscode = Preference("pref_player_always_transcode", false)
+
     // Platform audio decoders that failed during playback on this device, see
     // AudioDecoderFallback. Not a user setting.
     val playerBrokenAudioDecoders =

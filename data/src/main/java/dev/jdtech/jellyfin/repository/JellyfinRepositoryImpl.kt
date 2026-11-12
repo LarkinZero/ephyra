@@ -558,17 +558,21 @@ class JellyfinRepositoryImpl(
             // switches it to the variant that carries the HLS fallback.
             val maxBitrate =
                 appPreferences.getValue(appPreferences.playerMaxBitrate).takeIf { it > 0 }
+            val transcodeVideoCodec = appPreferences.getValue(appPreferences.playerTranscodeVideoCodec)
+            val alwaysTranscode = appPreferences.getValue(appPreferences.playerAlwaysTranscode)
             val deviceProfile =
                 when {
+                    alwaysTranscode -> deviceProfileBuilder.getTranscodeOnlyProfile(transcodeVideoCodec)
                     useDirectPlay && maxBitrate != null ->
-                        deviceProfileBuilder.getDirectPlayTranscodeFallbackProfile()
+                        deviceProfileBuilder.getDirectPlayTranscodeFallbackProfile(transcodeVideoCodec)
                     useDirectPlay -> deviceProfileBuilder.getDirectPlayProfile()
                     else ->
                         deviceProfileBuilder.getDeviceProfile(
                             appPreferences.getValue(appPreferences.playerDirectPlayDolbyVision),
+                            transcodeVideoCodec,
                         )
                 }
-            val enableTranscoding = !useDirectPlay || maxBitrate != null
+            val enableTranscoding = alwaysTranscode || !useDirectPlay || maxBitrate != null
             val sources = mutableListOf<FindroidSource>()
             sources.addAll(
                 jellyfinApi.mediaInfoApi
@@ -580,7 +584,8 @@ class JellyfinRepositoryImpl(
                             maxStreamingBitrate = maxBitrate
                                 ?: deviceProfile.maxStreamingBitrate,
                             enableTranscoding = enableTranscoding,
-                            allowVideoStreamCopy = true,
+                            enableDirectPlay = !alwaysTranscode,
+                            allowVideoStreamCopy = !alwaysTranscode,
                             allowAudioStreamCopy = true,
                             autoOpenLiveStream = enableTranscoding,
                         ),

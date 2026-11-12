@@ -517,6 +517,18 @@ class SettingsViewModel @Inject constructor(
                                                     options = R.array.player_backend_names,
                                                     optionValues = R.array.player_backends
                                                 ),
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.pref_player_transcode_video_codec,
+                                                    descriptionStringRes = R.string.pref_player_transcode_video_codec_summary,
+                                                    backendPreference = appPreferences.playerTranscodeVideoCodec,
+                                                    options = R.array.transcode_video_codec_names,
+                                                    optionValues = R.array.transcode_video_codecs,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.pref_player_always_transcode,
+                                                    descriptionStringRes = R.string.pref_player_always_transcode_summary,
+                                                    backendPreference = appPreferences.playerAlwaysTranscode,
+                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.pref_player_direct_play_dovi,

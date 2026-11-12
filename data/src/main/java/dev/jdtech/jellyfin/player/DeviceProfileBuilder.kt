@@ -74,8 +74,9 @@ class DeviceProfileBuilder(context: Context) {
      * direct-play get a server-side transcode. With [directPlayDolbyVision] off
      * that includes all Dolby Vision, whatever the decoders advertise.
      */
-    fun getDeviceProfile(directPlayDolbyVision: Boolean): DeviceProfile =
+    fun getDeviceProfile(directPlayDolbyVision: Boolean, videoCodec: String = "h264"): DeviceProfile =
         buildDeviceProfile(probedCodecs, directPlayDolbyVision && displaySupportsDolbyVision())
+            .copy(transcodingProfiles = transcodingProfiles(videoCodec))
 
     /**
      * A DV decoder only helps on a display that takes DV: a TV box can have the
@@ -103,8 +104,15 @@ class DeviceProfileBuilder(context: Context) {
      * Without them the plain direct-play profile leaves the server no way to
      * honor a bitrate limit and playback info returns no usable source.
      */
-    fun getDirectPlayTranscodeFallbackProfile(): DeviceProfile =
-        buildDirectPlayProfile().copy(transcodingProfiles = TRANSCODING_PROFILES)
+    fun getDirectPlayTranscodeFallbackProfile(videoCodec: String = "h264"): DeviceProfile =
+        buildDirectPlayProfile().copy(transcodingProfiles = transcodingProfiles(videoCodec))
+
+    /** Profile used when direct play is disabled by the user's always-transcode setting. */
+    fun getTranscodeOnlyProfile(videoCodec: String = "h264"): DeviceProfile =
+        buildDirectPlayProfile().copy(
+            directPlayProfiles = emptyList(),
+            transcodingProfiles = transcodingProfiles(videoCodec),
+        )
 
     /**
      * Profile for the downloader. With [transcodeDolbyVision] off this is just the
@@ -337,11 +345,11 @@ class DeviceProfileBuilder(context: Context) {
         private const val MAX_STATIC_BITRATE = 100_000_000
         private const val MAX_MUSIC_TRANSCODING_BITRATE = 384_000
 
-        private val TRANSCODING_PROFILES = listOf(
+        private fun transcodingProfiles(videoCodec: String) = listOf(
             TranscodingProfile(
                 type = DlnaProfileType.VIDEO,
                 container = "ts",
-                videoCodec = "h264",
+                videoCodec = videoCodec,
                 audioCodec = "mp1,mp2,mp3,aac,ac3,eac3,dts,mlp,truehd",
                 protocol = MediaStreamProtocol.HLS,
                 conditions = emptyList(),
@@ -444,7 +452,7 @@ class DeviceProfileBuilder(context: Context) {
             return DeviceProfile(
                 name = "Ephyra Device Profile",
                 directPlayProfiles = directPlayProfiles,
-                transcodingProfiles = TRANSCODING_PROFILES,
+                transcodingProfiles = transcodingProfiles("h264"),
                 containerProfiles = containerProfiles,
                 codecProfiles = codecProfiles,
                 subtitleProfiles = subtitleProfiles(),

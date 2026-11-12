@@ -98,4 +98,8 @@
     <string name="media_segments_type_outro">片尾</string>
     <string name="media_segments_type_intro">片头</string>
     <string name="pref_player_media_segments_skip_button_duration">显示跳过按钮</string>
+    <string name="pref_player_transcode_video_codec">转码视频编码</string>
+    <string name="pref_player_transcode_video_codec_summary">选择服务器转码时使用的视频格式。HEVC 需要服务器和播放器均支持。</string>
+    <string name="pref_player_always_transcode">始终转码播放</string>
+    <string name="pref_player_always_transcode_summary">在线播放时始终请求服务器转码，即使文件本可直接播放。</string>
 </resources>
