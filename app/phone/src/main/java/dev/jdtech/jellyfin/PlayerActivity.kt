@@ -769,11 +769,9 @@ class PlayerActivity : BasePlayerActivity() {
                                     )
                                 }
 
-                                if (appPreferences.getValue(appPreferences.playerPipGesture)) {
-                                    try {
-                                        setPictureInPictureParams(pipParams(event.isPlaying))
-                                    } catch (_: IllegalArgumentException) {}
-                                }
+                                // CE (#480): also with the gesture off, so auto-enter follows a
+                                // setting changed while the player was open.
+                                updatePipParams(event.isPlaying, playStateChanged = true)
                             }
                             is PlayerEvents.PlayerError -> {
                                 // CE (#450): shown as the waiting state, not as an error.
@@ -1249,9 +1247,12 @@ class PlayerActivity : BasePlayerActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        // CE (#568): the media notification's intent carries no item. It only brings the player
+        // back, which goes on with what it plays, as onCreate does for it.
+        val itemIdExtra = intent.extras?.getString("itemId") ?: return
         setIntent(intent)
 
-        val itemId = UUID.fromString(intent.extras!!.getString("itemId"))
+        val itemId = UUID.fromString(itemIdExtra)
         val itemKind = intent.extras!!.getString("itemKind")
         val startFromBeginning = intent.extras!!.getBoolean("startFromBeginning")
         val mediaSourceId = intent.extras!!.getString("mediaSourceId")
@@ -1287,13 +1288,7 @@ class PlayerActivity : BasePlayerActivity() {
         finish()
     }
 
-    private fun pipParams(
-        enableAutoEnter: Boolean =
-            pipAutoEnterEnabled(
-                gestureEnabled = appPreferences.getValue(appPreferences.playerPipGesture),
-                isPlaying = viewModel.player.isPlaying,
-            )
-    ): PictureInPictureParams {
+    private fun pipParams(enableAutoEnter: Boolean): PictureInPictureParams {
         val displayAspectRatio = Rational(binding.playerView.width, binding.playerView.height)
 
         // videoSize is VideoSize.UNKNOWN (0x0) until the file is loaded, which would yield a NaN
@@ -1347,19 +1342,61 @@ class PlayerActivity : BasePlayerActivity() {
         return builder.build()
     }
 
+    /** CE (#480): auto-enter in the PiP params last given to the system; none given means off. */
+    private var pipAutoEnterSet = false
+
+    /**
+     * CE (#480): give the system the PiP params for the current setting and play state. It keeps
+     * the last params set (also the PiP button's), so this runs on every play/pause change and
+     * whenever the player returns, from PiP or from Settings, whatever the gesture setting.
+     *
+     * Building the params reads the video size, which on mpv waits for its core and can hold up
+     * the main thread while mpv sets up its output again (an ANR on a return). So they are only
+     * built again when auto-enter changes, or on a play/pause change with the gesture on, as
+     * before.
+     */
+    private fun updatePipParams(
+        isPlaying: Boolean = viewModel.player.isPlaying,
+        playStateChanged: Boolean = false,
+    ) {
+        if (!isPipSupported) return
+        val gestureEnabled = appPreferences.getValue(appPreferences.playerPipGesture)
+        val autoEnter = pipAutoEnterEnabled(gestureEnabled, isPlaying)
+        if (!pipParamsNeedUpdate(pipAutoEnterSet, autoEnter, playStateChanged && gestureEnabled)) {
+            return
+        }
+        try {
+            setPictureInPictureParams(pipParams(autoEnter))
+            pipAutoEnterSet = autoEnter
+        } catch (_: IllegalArgumentException) {}
+    }
+
     private fun pictureInPicture() {
         if (!isPipSupported) {
             return
         }
 
         try {
-            enterPictureInPictureMode(pipParams())
+            val autoEnter =
+                pipAutoEnterEnabled(
+                    gestureEnabled = appPreferences.getValue(appPreferences.playerPipGesture),
+                    isPlaying = viewModel.player.isPlaying,
+                )
+            enterPictureInPictureMode(pipParams(autoEnter))
+            pipAutoEnterSet = autoEnter
         } catch (_: IllegalArgumentException) {}
     }
 
     override fun onStart() {
         super.onStart()
         viewModel.setVideoEnabled(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // CE (#480): the PiP home gesture may have changed in Settings while the player was in PiP
+        // or in the background. After super, which may have given back playWhenReady.
+        updatePipParams()
     }
 
     override fun onStop() {

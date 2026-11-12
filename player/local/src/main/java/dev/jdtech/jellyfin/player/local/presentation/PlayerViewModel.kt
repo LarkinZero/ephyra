@@ -68,6 +68,7 @@ import dev.jdtech.jellyfin.player.local.domain.UpNextCountdown
 import dev.jdtech.jellyfin.player.local.domain.UpNextDecision
 import dev.jdtech.jellyfin.player.local.domain.autoPlayNextFollowsServer
 import dev.jdtech.jellyfin.player.local.domain.buildMediaSourceFactory
+import dev.jdtech.jellyfin.player.local.domain.isNewEndOfItem
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
 import dev.jdtech.jellyfin.player.local.domain.playerTitle
@@ -1087,14 +1088,19 @@ constructor(
         }
     }
 
+    /**
+     * CE (#477): the playWhenReady of the last [onPlayWhenReadyChanged], so a repeated end of item
+     * report while already paused at the end is not taken as a new end. Starts as playing, so the
+     * first end of a session always counts.
+     */
+    private var lastPlayWhenReady = true
+
     override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+        val wasPlayWhenReady = lastPlayWhenReady
+        lastPlayWhenReady = playWhenReady
         // End of the current item: transition to the next one, or close the player if autoplay is
         // off. On an advance, the stop for the finished item is reported by onMediaItemTransition.
-        if (
-            !playWhenReady &&
-                reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM &&
-                player.playbackState == ExoPlayer.STATE_READY
-        ) {
+        if (isNewEndOfItem(wasPlayWhenReady, playWhenReady, reason, player.playbackState)) {
             // Dispatched (not immediate) so the advance runs after this listener callback returns,
             // as it did when a network call came first.
             viewModelScope.launch(Dispatchers.Main) {
