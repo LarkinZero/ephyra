@@ -119,8 +119,10 @@ interface Downloader {
      *   - completed sources whose file has been deleted externally
      *   - active .download sources whose engine task is gone and file is missing
      *   - orphan .download files not referenced by any DB source row
+     *   - finished files, image and trickplay folders no row refers to, once they are a day
+     *     old (a database reset, #379), and empty download folders
      *
-     * Run on app startup before restoring active downloads.
+     * Runs once a day (OrphanSweepWorker).
      */
     suspend fun sweepOrphans()
 

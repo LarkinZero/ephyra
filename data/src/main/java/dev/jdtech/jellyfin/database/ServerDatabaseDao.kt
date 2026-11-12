@@ -292,6 +292,13 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM episodes WHERE seasonId = :seasonId ORDER BY indexNumber ASC")
     suspend fun getEpisodesBySeasonId(seasonId: UUID): List<FindroidEpisodeDto>
 
+    /** CE (#379): every stored item of every server and user, which may own downloaded artwork. */
+    @Query(
+        "SELECT id FROM movies UNION SELECT id FROM shows UNION SELECT id FROM seasons " +
+            "UNION SELECT id FROM episodes"
+    )
+    suspend fun getAllItemIds(): List<UUID>
+
     /**
      * CE (#252): per season of [seriesId], how many episodes are stored and how many of them are
      * downloaded, in one query. Downloaded means what `FindroidItem.isDownloaded()` means: a LOCAL

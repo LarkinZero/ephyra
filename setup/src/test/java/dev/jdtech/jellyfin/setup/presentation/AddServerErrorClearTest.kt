@@ -6,6 +6,7 @@ import dev.jdtech.jellyfin.models.ExceptionUiText
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.setup.R as SetupR
+import dev.jdtech.jellyfin.setup.domain.FakeLocalNetworkAccess
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerAction
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerViewModel
@@ -68,7 +69,7 @@ class AddServerErrorClearTest {
 
     @Test
     fun `typing in the address field clears the error of the address that was tried`() = runTest {
-        val viewModel = AddServerViewModel(repository, appPreferences)
+        val viewModel = AddServerViewModel(repository, appPreferences, FakeLocalNetworkAccess())
 
         viewModel.onAction(AddServerAction.OnConnectClick("10.0.2.2:9"))
         assertSame(notFound, viewModel.state.value.error?.single())
@@ -79,7 +80,7 @@ class AddServerErrorClearTest {
 
     @Test
     fun `a change in the field without an error leaves the state alone`() = runTest {
-        val viewModel = AddServerViewModel(repository, appPreferences)
+        val viewModel = AddServerViewModel(repository, appPreferences, FakeLocalNetworkAccess())
         val before = viewModel.state.value
 
         viewModel.onAction(AddServerAction.OnAddressChange)

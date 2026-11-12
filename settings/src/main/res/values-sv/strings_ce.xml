@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Ingen gräns</string>
     <string name="ce_number_off">Av</string>
+    <string name="ce_pref_player_keep_landscape">Håll spelaren i liggande läge</string>
+    <string name="ce_pref_player_keep_landscape_summary">Spela upp videor i liggande läge, även när du vänder surfplattan stående</string>
 </resources>

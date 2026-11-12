@@ -190,4 +190,6 @@
     </plurals>
     <string name="ce_number_no_limit">冇上限</string>
     <string name="ce_number_off">關閉</string>
+    <string name="ce_pref_player_keep_landscape">播放器保持橫向</string>
+    <string name="ce_pref_player_keep_landscape_summary">就算將平板電腦轉直，影片都係橫向播放</string>
 </resources>

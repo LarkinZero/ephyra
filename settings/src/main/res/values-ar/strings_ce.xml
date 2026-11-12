@@ -200,4 +200,6 @@
     </plurals>
     <string name="ce_number_no_limit">بلا حد</string>
     <string name="ce_number_off">إيقاف</string>
+    <string name="ce_pref_player_keep_landscape">إبقاء المشغّل بالوضع الأفقي</string>
+    <string name="ce_pref_player_keep_landscape_summary">تشغيل الفيديوهات بالوضع الأفقي حتى عند تدوير الجهاز اللوحي عموديًا</string>
 </resources>

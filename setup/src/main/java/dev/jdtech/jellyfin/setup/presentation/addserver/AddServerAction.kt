@@ -8,4 +8,7 @@ sealed interface AddServerAction {
     data object OnAddressChange : AddServerAction
 
     data object OnBackClick : AddServerAction
+
+    // CE (#376): the screen came to the front; local network access may have changed.
+    data object OnResume : AddServerAction
 }

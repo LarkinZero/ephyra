@@ -9,6 +9,7 @@ import dev.jdtech.jellyfin.models.ServerAddress
 import dev.jdtech.jellyfin.models.ServerWithAddresses
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.setup.R as SetupR
+import dev.jdtech.jellyfin.setup.domain.FakeLocalNetworkAccess
 import dev.jdtech.jellyfin.setup.presentation.addresses.ServerAddressesAction
 import dev.jdtech.jellyfin.setup.presentation.addresses.ServerAddressesViewModel
 import java.lang.reflect.Proxy
@@ -72,6 +73,7 @@ class ServerAddressesFeedbackTest {
             }
         } as ServerDatabaseDao
 
+    private val localNetworkAccess = FakeLocalNetworkAccess()
     private lateinit var viewModel: ServerAddressesViewModel
 
     @Before
@@ -80,7 +82,7 @@ class ServerAddressesFeedbackTest {
         val application = RuntimeEnvironment.getApplication()
         // The SDK names the device after it; Robolectric has none.
         Settings.Secure.putString(application.contentResolver, Settings.Secure.ANDROID_ID, "test")
-        viewModel = ServerAddressesViewModel(application, database)
+        viewModel = ServerAddressesViewModel(application, database, localNetworkAccess)
         viewModel.loadAddresses(serverId)
     }
 
@@ -135,5 +137,38 @@ class ServerAddressesFeedbackTest {
         } finally {
             server.stop(0)
         }
+    }
+
+    // CE (#376): nothing listens on these, so the SDK finds no server either way.
+    @Test
+    fun `a local address that fails while access is denied names the permission`() = runBlocking {
+        localNetworkAccess.denied = true
+
+        viewModel.onAction(ServerAddressesAction.AddAddress("http://[fd00::1]:9"))
+
+        val error = withTimeout(60_000) { viewModel.state.first { it.error != null } }.error!!
+        val message = error.single() as UiText.StringResource
+        assertEquals(SetupR.string.ce_add_server_error_local_network, message.resId)
+    }
+
+    @Test
+    fun `an address that is not local keeps server not found while access is denied`() =
+        runBlocking {
+            localNetworkAccess.denied = true
+
+            viewModel.onAction(ServerAddressesAction.AddAddress("http://127.0.0.1:9"))
+
+            val error = withTimeout(60_000) { viewModel.state.first { it.error != null } }.error!!
+            val message = error.single() as UiText.StringResource
+            assertEquals(SetupR.string.add_server_error_not_found, message.resId)
+        }
+
+    @Test
+    fun `a local address that fails with access granted keeps server not found`() = runBlocking {
+        viewModel.onAction(ServerAddressesAction.AddAddress("http://[fd00::1]:9"))
+
+        val error = withTimeout(60_000) { viewModel.state.first { it.error != null } }.error!!
+        val message = error.single() as UiText.StringResource
+        assertEquals(SetupR.string.add_server_error_not_found, message.resId)
     }
 }

@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Unbegrenzt</string>
     <string name="ce_number_off">Aus</string>
+    <string name="ce_pref_player_keep_landscape">Player im Querformat halten</string>
+    <string name="ce_pref_player_keep_landscape_summary">Videos im Querformat abspielen, auch wenn du das Tablet hochkant drehst</string>
 </resources>

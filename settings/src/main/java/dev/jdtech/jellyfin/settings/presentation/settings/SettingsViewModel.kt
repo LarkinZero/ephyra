@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.settings.domain.KeepPlayerLandscape
 import dev.jdtech.jellyfin.settings.domain.bounded
 import dev.jdtech.jellyfin.settings.domain.models.PermissionDefinitions
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
@@ -75,6 +76,17 @@ class SettingsViewModel @Inject constructor(
                     )
                 )
         )
+
+    /**
+     * CE (#363): only where the player can get a wide window. Worked out once: a foldable shows
+     * it folded or not (its hinge sensor), so folding does not change the answer.
+     */
+    private val keepLandscapeDeviceTypes =
+        if (appVariant == AppVariant.PHONE && KeepPlayerLandscape.isShown(context)) {
+            listOf(DeviceType.PHONE)
+        } else {
+            emptyList()
+        }
 
     private val topLevelPreferences =
         listOf(
@@ -521,6 +533,15 @@ class SettingsViewModel @Inject constructor(
                                                     supportedDeviceTypes = listOf(DeviceType.TV),
                                                     backendPreference =
                                                         appPreferences.playerTvMatchRefreshRate,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_player_keep_landscape,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_player_keep_landscape_summary,
+                                                    supportedDeviceTypes = keepLandscapeDeviceTypes,
+                                                    backendPreference =
+                                                        appPreferences.playerKeepLandscape,
                                                 ),
                                                 PreferenceCategory(
                                                     nameStringResource = R.string.mpv_options,

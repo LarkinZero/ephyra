@@ -194,4 +194,6 @@
     </plurals>
     <string name="ce_number_no_limit">ללא הגבלה</string>
     <string name="ce_number_off">כבוי</string>
+    <string name="ce_pref_player_keep_landscape">להשאיר את הנגן לרוחב</string>
+    <string name="ce_pref_player_keep_landscape_summary">להפעיל סרטונים לרוחב, גם כשמסובבים את הטאבלט לאורך</string>
 </resources>

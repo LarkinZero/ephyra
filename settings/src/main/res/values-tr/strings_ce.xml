@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Sınır yok</string>
     <string name="ce_number_off">Kapalı</string>
+    <string name="ce_pref_player_keep_landscape">Oynatıcıyı yatay tut</string>
+    <string name="ce_pref_player_keep_landscape_summary">Tableti dik çevirseniz bile videoları yatay oynat</string>
 </resources>

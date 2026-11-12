@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Nessun limite</string>
     <string name="ce_number_off">Disattivato</string>
+    <string name="ce_pref_player_keep_landscape">Mantieni il lettore in orizzontale</string>
+    <string name="ce_pref_player_keep_landscape_summary">Riproduci i video in orizzontale, anche quando giri il tablet in verticale</string>
 </resources>

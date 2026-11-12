@@ -1,5 +1,8 @@
 package dev.jdtech.jellyfin.presentation.setup.addserver
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,18 +45,23 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.setup.components.DiscoveredServerItem
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.settings.domain.models.PermissionDefinitions
 import dev.jdtech.jellyfin.setup.R as SetupR
+import dev.jdtech.jellyfin.setup.domain.shouldOpenSettingsAfterRefusal
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerAction
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerEvent
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerState
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerViewModel
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
+import dev.jdtech.jellyfin.utils.openAppSettings
+import dev.jdtech.jellyfin.utils.shouldShowPermissionRationale
 
 @Composable
 fun AddServerScreen(
@@ -63,6 +72,33 @@ fun AddServerScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.discoverServers() }
+
+    // CE (#376): local network access may have changed in the dialog or the system settings.
+    LifecycleResumeEffect(Unit) {
+        viewModel.onAction(AddServerAction.OnResume)
+        onPauseOrDispose {}
+    }
+
+    // CE (#376): the request behind the notice's button. The system shows no dialog once the
+    // permission was denied twice; only then the button opens the system settings.
+    val context = LocalContext.current
+    val permission = PermissionDefinitions.localNetwork
+    var rationaleBefore by rememberSaveable { mutableStateOf(false) }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val activity = context as? Activity
+            if (granted) {
+                viewModel.onAction(AddServerAction.OnResume)
+            } else if (
+                activity != null &&
+                    shouldOpenSettingsAfterRefusal(
+                        rationaleBefore = rationaleBefore,
+                        rationaleAfter = shouldShowPermissionRationale(activity, permission),
+                    )
+            ) {
+                openAppSettings(context)
+            }
+        }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -79,11 +115,21 @@ fun AddServerScreen(
             }
             viewModel.onAction(action)
         },
+        onAllowLocalNetworkClick = {
+            rationaleBefore =
+                (context as? Activity)?.let { shouldShowPermissionRationale(it, permission) }
+                    ?: false
+            launcher.launch(permission.id)
+        },
     )
 }
 
 @Composable
-private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAction) -> Unit) {
+private fun AddServerScreenLayout(
+    state: AddServerState,
+    onAction: (AddServerAction) -> Unit,
+    onAllowLocalNetworkClick: () -> Unit = {},
+) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
@@ -127,6 +173,25 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                             modifier = Modifier.animateItem(),
                         )
                     }
+                }
+            }
+            // CE (#376): where the discovered servers would be, say why there are none.
+            if (state.localNetworkDenied) {
+                Text(
+                    text =
+                        stringResource(SetupR.string.ce_local_network_denied) +
+                            (state.localNetworkSettingName?.let {
+                                " " +
+                                    stringResource(SetupR.string.ce_local_network_denied_where, it)
+                            } ?: ""),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(
+                    onClick = onAllowLocalNetworkClick,
+                    modifier = Modifier.align(Alignment.End),
+                ) {
+                    Text(text = stringResource(SetupR.string.ce_local_network_allow))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -186,4 +251,19 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
 @Composable
 private fun AddServerScreenLayoutPreview() {
     FindroidTheme { AddServerScreenLayout(state = AddServerState(), onAction = {}) }
+}
+
+@PreviewScreenSizes
+@Composable
+private fun AddServerScreenLayoutLocalNetworkDeniedPreview() {
+    FindroidTheme {
+        AddServerScreenLayout(
+            state =
+                AddServerState(
+                    localNetworkDenied = true,
+                    localNetworkSettingName = "Nearby devices",
+                ),
+            onAction = {},
+        )
+    }
 }

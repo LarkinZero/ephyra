@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Sin límite</string>
     <string name="ce_number_off">Desactivado</string>
+    <string name="ce_pref_player_keep_landscape">Mantener el reproductor en horizontal</string>
+    <string name="ce_pref_player_keep_landscape_summary">Reproducir los videos en horizontal, aunque gires la tableta en vertical</string>
 </resources>

@@ -190,4 +190,6 @@
     </plurals>
     <string name="ce_number_no_limit">制限なし</string>
     <string name="ce_number_off">オフ</string>
+    <string name="ce_pref_player_keep_landscape">プレーヤーを横向きに固定</string>
+    <string name="ce_pref_player_keep_landscape_summary">タブレットを縦向きにしても、動画を横向きで再生します</string>
 </resources>

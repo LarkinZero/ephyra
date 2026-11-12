@@ -192,4 +192,6 @@
     </plurals>
     <string name="ce_number_no_limit">Sense límit</string>
     <string name="ce_number_off">Desactivat</string>
+    <string name="ce_pref_player_keep_landscape">Mantén el reproductor en horitzontal</string>
+    <string name="ce_pref_player_keep_landscape_summary">Reprodueix els vídeos en horitzontal, encara que posis la tauleta en vertical</string>
 </resources>

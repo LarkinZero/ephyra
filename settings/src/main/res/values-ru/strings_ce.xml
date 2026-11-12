@@ -196,4 +196,6 @@
     </plurals>
     <string name="ce_number_no_limit">Без ограничений</string>
     <string name="ce_number_off">Выкл.</string>
+    <string name="ce_pref_player_keep_landscape">Держать плеер в альбомной ориентации</string>
+    <string name="ce_pref_player_keep_landscape_summary">Воспроизводить видео в альбомной ориентации, даже если повернуть планшет вертикально</string>
 </resources>
