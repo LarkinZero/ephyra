@@ -85,12 +85,15 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.4" />
 
-        <!-- Scrolls in a window too narrow for every button, so the back button stays reachable. -->
+        <!-- Scrolls in a window too narrow for every button, so the back button stays reachable.
+             CE: it then starts at its end (PlayerActivity), and fades on the side with more. -->
         <HorizontalScrollView
             android:id="@+id/extra_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fadingEdgeLength="32dp"
             android:overScrollMode="never"
+            android:requiresFadingEdge="horizontal"
             android:scrollbars="none"
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toEndOf="parent"
