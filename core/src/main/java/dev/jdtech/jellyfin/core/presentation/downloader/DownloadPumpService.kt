@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -51,6 +52,13 @@ class DownloadPumpService : Service() {
     /** Set once the service has stopped itself: nothing is posted after that. */
     private var stopped = false
 
+    /**
+     * True for a service created while the pump is idle. Only the system does that, when it starts
+     * the service again after the process died: the queue restores its downloads a moment later, so
+     * the service waits [RESTORE_GRACE_MS] for the pump before it concludes there is nothing to do.
+     */
+    private var awaitingRestore = false
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
@@ -59,6 +67,14 @@ class DownloadPumpService : Service() {
         ensureNotificationChannel()
         downloadPumpNotice(downloadQueue.entries.value)?.let { notice = it }
         enterForeground()
+        awaitingRestore = !downloadQueue.pumpActive.value
+        if (awaitingRestore) {
+            scope.launch {
+                delay(RESTORE_GRACE_MS)
+                awaitingRestore = false
+                stopWhenPumpIdle()
+            }
+        }
         observeQueue()
     }
 
@@ -69,7 +85,7 @@ class DownloadPumpService : Service() {
         // stop for it) still has to be answered with startForeground. CE (#372): this is also what
         // posts the notification again after the notification permission was granted.
         if (!stopped) enterForeground()
-        // A start with nothing to pump, such as the system restarting the service: stop again.
+        // A start with nothing to pump: stop again.
         stopWhenPumpIdle()
         return START_STICKY
     }
@@ -87,6 +103,7 @@ class DownloadPumpService : Service() {
                             stopWhenPumpIdle()
                             return@collect
                         }
+                        awaitingRestore = false
                         val next = downloadPumpNotice(entries) ?: return@collect
                         if (next != notice) {
                             notice = next
@@ -103,7 +120,7 @@ class DownloadPumpService : Service() {
      * service running and in the foreground again through [onStartCommand].
      */
     private fun stopWhenPumpIdle() {
-        if (stopped || downloadQueue.pumpActive.value) return
+        if (stopped || awaitingRestore || downloadQueue.pumpActive.value) return
         if (!stopSelfResult(lastStartId)) return
         stopped = true
         // Before anything else, so that no later queue update can post a notification (#560).
@@ -209,6 +226,7 @@ class DownloadPumpService : Service() {
         private const val CHANNEL_ID = "download_pump"
         private const val NOTIFICATION_ID = 42
         private const val ACTION_REFRESH_NOTIFICATION = "refresh_notification"
+        private const val RESTORE_GRACE_MS = 5_000L
 
         @Volatile private var running = false
 
