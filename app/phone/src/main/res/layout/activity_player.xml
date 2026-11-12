@@ -60,10 +60,50 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/playback_info_content"
+            android:id="@+id/playback_info_loading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="@android:color/white"
+            android:text="@string/playback_info_loading"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/playback_info_original"
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/playback_info_original_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="3dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="@android:color/white"
+            tools:text="Video: hevc · 1920×1080 · 23.98 fps\nAudio: aac · 2 ch · 48 kHz\nContainer: mkv" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="#55FFFFFF" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playback_info_output"
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/playback_info_output_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:fontFamily="monospace"
             android:lineSpacingExtra="3dp"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"

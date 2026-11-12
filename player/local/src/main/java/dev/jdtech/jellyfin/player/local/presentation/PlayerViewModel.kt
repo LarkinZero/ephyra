@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.models.MediaSegmentAction
 import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
+import dev.jdtech.jellyfin.player.core.domain.models.PlayerStreamInfo
 import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
 import dev.jdtech.jellyfin.player.local.PlaybackService
 import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
@@ -1652,31 +1653,44 @@ constructor(
         val video = selectedFormat(C.TRACK_TYPE_VIDEO)
         val audio = selectedFormat(C.TRACK_TYPE_AUDIO)
         val transcode = getTranscodingInfo(item.itemId)
+        val playbackMethod =
+            when {
+                item.isTranscoded ||
+                    (transcode != null && (!transcode.isVideoDirect || !transcode.isAudioDirect)) ->
+                    PlaybackMethod.TRANSCODE
+                item.mediaSourceUri.startsWith("file:") || item.mediaSourceUri.startsWith("/") ->
+                    PlaybackMethod.LOCAL_FILE
+                else -> PlaybackMethod.DIRECT_PLAY
+            }
+        val outputVideo =
+            PlaybackTrackInfo(
+                codec = transcode?.videoCodec ?: video?.let(::formatCodec),
+                width = transcode?.width?.takeIf { it > 0 } ?: video?.width?.takeIf { it > 0 },
+                height = transcode?.height?.takeIf { it > 0 } ?: video?.height?.takeIf { it > 0 },
+                bitrate = video?.bitrate?.takeIf { it > 0 },
+                frameRate = video?.frameRate?.takeIf { it > 0f && it.isFinite() },
+            )
+        val outputAudio =
+            PlaybackTrackInfo(
+                codec = transcode?.audioCodec ?: audio?.let(::formatCodec),
+                bitrate = audio?.bitrate?.takeIf { it > 0 },
+                channels = audio?.channelCount?.takeIf { it > 0 }?.let { "$it ch" },
+                sampleRate = audio?.sampleRate?.takeIf { it > 0 },
+            )
         val info =
             PlaybackDebugInfo(
-                playbackMethod =
-                    when {
-                        item.isTranscoded ||
-                            (transcode != null && (!transcode.isVideoDirect || !transcode.isAudioDirect)) ->
-                            PlaybackMethod.TRANSCODE
-                        item.mediaSourceUri.startsWith("file:") || item.mediaSourceUri.startsWith("/") ->
-                            PlaybackMethod.LOCAL_FILE
-                        else -> PlaybackMethod.DIRECT_PLAY
-                    },
-                container = transcode?.container ?: if (item.isTranscoded) "HLS" else null,
-                videoCodec = transcode?.videoCodec ?: video?.let(::formatCodec),
-                videoWidth = transcode?.width?.takeIf { it > 0 } ?: video?.width?.takeIf { it > 0 },
-                videoHeight = transcode?.height?.takeIf { it > 0 } ?: video?.height?.takeIf { it > 0 },
-                videoBitrate = video?.bitrate?.takeIf { it > 0 },
-                videoFrameRate = video?.frameRate?.takeIf { it > 0f && it.isFinite() },
-                audioCodec = transcode?.audioCodec ?: audio?.let(::formatCodec),
-                audioBitrate = audio?.bitrate?.takeIf { it > 0 },
-                audioChannels = audio?.channelCount?.takeIf { it > 0 },
-                audioSampleRate = audio?.sampleRate?.takeIf { it > 0 },
+                playbackMethod = playbackMethod,
+                originalContainer = item.originalContainer,
+                originalVideo = item.originalVideo?.toPlaybackTrackInfo() ?: outputVideo.takeIf { playbackMethod != PlaybackMethod.TRANSCODE },
+                originalAudio = item.originalAudio?.toPlaybackTrackInfo() ?: outputAudio.takeIf { playbackMethod != PlaybackMethod.TRANSCODE },
+                outputContainer =
+                    transcode?.container
+                        ?: if (item.isTranscoded) "HLS" else item.originalContainer,
+                outputVideo = outputVideo,
+                outputAudio = outputAudio,
                 streamBitrate = transcode?.bitrate?.takeIf { it > 0 },
                 transcodeFrameRate = transcode?.framerate?.takeIf { it > 0f && it.isFinite() },
                 hardwareAcceleration = transcode?.hardwareAccelerationType?.toString(),
-                transcodeReasons = transcode?.transcodeReasons.orEmpty().map { it.toString() },
             )
         _uiState.update { if (it.playbackInfoVisible) it.copy(playbackInfo = info) else it }
     }
@@ -1693,6 +1707,17 @@ constructor(
     private fun formatCodec(format: Format): String? =
         format.codecs?.takeIf { it.isNotBlank() }
             ?: format.sampleMimeType?.substringAfterLast('/')
+
+    private fun PlayerStreamInfo.toPlaybackTrackInfo() =
+        PlaybackTrackInfo(
+            codec = codec,
+            width = width,
+            height = height,
+            bitrate = bitrate,
+            frameRate = frameRate,
+            channels = channelLayout,
+            sampleRate = sampleRate,
+        )
 
     private suspend fun getTranscodingInfo(itemId: UUID): TranscodingInfo? {
         val userId = jellyfinApi.userId ?: return null

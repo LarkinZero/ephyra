@@ -18,7 +18,8 @@
     <string name="playback_info_stream_bitrate">流码率</string>
     <string name="playback_info_transcode_speed">转码速度</string>
     <string name="playback_info_hardware_acceleration">硬件加速</string>
-    <string name="playback_info_transcode_reasons">转码原因</string>
+    <string name="playback_info_original">原始音视频</string>
+    <string name="playback_info_output">实际播放流</string>
     <string name="playback_info_loading">正在读取播放信息…</string>
     <string name="playback_info_close">关闭播放信息</string>
     <string name="still_watching_continue">是，继续播放</string>

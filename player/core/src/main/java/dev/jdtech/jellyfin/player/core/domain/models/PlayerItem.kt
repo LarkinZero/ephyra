@@ -14,6 +14,9 @@ data class PlayerItem(
     val mediaSourceUri: String = "",
     /** True when [mediaSourceUri] is a server-side transcode (an HLS manifest). */
     val isTranscoded: Boolean = false,
+    val originalContainer: String? = null,
+    val originalVideo: PlayerStreamInfo? = null,
+    val originalAudio: PlayerStreamInfo? = null,
     val parentIndexNumber: Int? = null,
     val indexNumber: Int? = null,
     val indexNumberEnd: Int? = null,
@@ -28,4 +31,15 @@ data class PlayerItem(
     val seasonId: UUID? = null,
     /** Server URL, or a path relative to filesDir for downloaded items. */
     val artworkUri: Uri? = null,
+) : Parcelable
+
+@Parcelize
+data class PlayerStreamInfo(
+    val codec: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
+    val bitrate: Int? = null,
+    val frameRate: Float? = null,
+    val channelLayout: String? = null,
+    val sampleRate: Int? = null,
 ) : Parcelable

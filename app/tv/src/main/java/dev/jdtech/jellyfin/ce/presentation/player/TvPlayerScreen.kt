@@ -100,7 +100,7 @@ import dev.jdtech.jellyfin.player.local.domain.getTrackNames
 import dev.jdtech.jellyfin.player.local.presentation.PlayerAction
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
-import dev.jdtech.jellyfin.player.local.presentation.toRows
+import dev.jdtech.jellyfin.player.local.presentation.toSections
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.label
@@ -478,7 +478,7 @@ fun TvPlayerScreen(
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.TopEnd).zIndex(2f).padding(top = 64.dp, end = 24.dp),
         ) {
-            val rows = remember(uiState.playbackInfo, context) { uiState.playbackInfo?.toRows(context) }
+            val sections = remember(uiState.playbackInfo, context) { uiState.playbackInfo?.toSections(context) }
             Column(
                 modifier =
                     Modifier.width(420.dp)
@@ -505,30 +505,41 @@ fun TvPlayerScreen(
                     }
                 }
                 Spacer(Modifier.height(MaterialTheme.spacings.small))
-                if (rows.isNullOrEmpty()) {
+                if (sections == null) {
                     Text(
                         text = stringResource(PlayerR.string.playback_info_loading),
                         color = Color.White.copy(alpha = 0.78f),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 } else {
-                    rows.forEach { (label, value) ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
-                            verticalAlignment = Alignment.Top,
-                        ) {
-                            Text(
-                                text = label,
-                                color = Color.White.copy(alpha = 0.72f),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(0.8f),
-                            )
-                            Text(
-                                text = value,
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1.2f),
-                            )
+                    sections.forEachIndexed { index, section ->
+                        if (index > 0) {
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                        }
+                        Text(
+                            text = section.title,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                        section.rows.forEach { (label, value) ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = Color.White.copy(alpha = 0.72f),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(0.8f),
+                                )
+                                Text(
+                                    text = value,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1.2f),
+                                )
+                            }
                         }
                     }
                 }

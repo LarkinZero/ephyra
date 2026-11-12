@@ -64,7 +64,7 @@ import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.R as PlayerR
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
-import dev.jdtech.jellyfin.player.local.presentation.toRows
+import dev.jdtech.jellyfin.player.local.presentation.toSections
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
@@ -791,10 +791,18 @@ class PlayerActivity : BasePlayerActivity() {
                             }
                             binding.connectionLost.isVisible = waitingForNetwork
                             binding.playbackInfoPanel.isVisible = playbackInfoVisible
-                            binding.playbackInfoContent.text =
-                                playbackInfo?.toRows(this@PlayerActivity)?.joinToString("\n") {
-                                    (label, value) -> "$label: $value"
-                                } ?: getString(PlayerR.string.playback_info_loading)
+                            val infoSections = playbackInfo?.toSections(this@PlayerActivity)
+                            binding.playbackInfoLoading.isVisible = infoSections == null
+                            binding.playbackInfoOriginalContent.isVisible = infoSections != null
+                            binding.playbackInfoOutputContent.isVisible = infoSections != null
+                            binding.playbackInfoOriginalContent.text =
+                                infoSections?.getOrNull(0)?.rows?.joinToString("\n") { (label, value) ->
+                                    "$label: $value"
+                                }
+                            binding.playbackInfoOutputContent.text =
+                                infoSections?.getOrNull(1)?.rows?.joinToString("\n") { (label, value) ->
+                                    "$label: $value"
+                                }
 
                             // Media segment (#271)
                             currentSegment?.let { segment ->

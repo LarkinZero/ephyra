@@ -18,7 +18,8 @@
     <string name="playback_info_stream_bitrate" translatable="false">Stream bitrate</string>
     <string name="playback_info_transcode_speed" translatable="false">Transcode speed</string>
     <string name="playback_info_hardware_acceleration" translatable="false">Hardware acceleration</string>
-    <string name="playback_info_transcode_reasons" translatable="false">Transcode reason</string>
+    <string name="playback_info_original" translatable="false">Original media</string>
+    <string name="playback_info_output" translatable="false">Playback stream</string>
     <string name="playback_info_loading" translatable="false">Collecting playback information…</string>
     <string name="playback_info_close" translatable="false">Close playback information</string>
     <string name="select_chapter">Chapters</string>

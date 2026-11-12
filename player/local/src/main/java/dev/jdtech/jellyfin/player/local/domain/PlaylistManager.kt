@@ -5,6 +5,7 @@ import androidx.media3.common.MimeTypes
 import dev.jdtech.jellyfin.models.FindroidChapter
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
@@ -12,6 +13,7 @@ import dev.jdtech.jellyfin.models.FindroidSources
 import dev.jdtech.jellyfin.player.core.domain.models.ExternalSubtitle
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
+import dev.jdtech.jellyfin.player.core.domain.models.PlayerStreamInfo
 import dev.jdtech.jellyfin.player.core.domain.models.TrickplayInfo
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
@@ -413,12 +415,23 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                 }
                 else -> null
             }
+        val originalVideo =
+            mediaSource.mediaStreams
+                .firstOrNull { it.type == MediaStreamType.VIDEO }
+                ?.toPlayerStreamInfo()
+        val originalAudio =
+            mediaSource.mediaStreams
+                .firstOrNull { it.type == MediaStreamType.AUDIO }
+                ?.toPlayerStreamInfo()
         return PlayerItem(
             name = name,
             itemId = id,
             mediaSourceId = mediaSource.id,
             mediaSourceUri = mediaSource.path,
             isTranscoded = mediaSource.transcoded,
+            originalContainer = mediaSource.container,
+            originalVideo = originalVideo,
+            originalAudio = originalAudio,
             playbackPosition = playbackPosition,
             parentIndexNumber = if (this is FindroidEpisode) parentIndexNumber else null,
             indexNumber = if (this is FindroidEpisode) indexNumber else null,
@@ -442,4 +455,15 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             )
         }
     }
+
+    private fun FindroidMediaStream.toPlayerStreamInfo() =
+        PlayerStreamInfo(
+            codec = codec,
+            width = width,
+            height = height,
+            bitrate = bitRate,
+            frameRate = frameRate,
+            channelLayout = channelLayout,
+            sampleRate = sampleRate,
+        )
 }
