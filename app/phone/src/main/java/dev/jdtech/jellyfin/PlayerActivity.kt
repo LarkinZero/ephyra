@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Space
@@ -468,6 +469,33 @@ class PlayerActivity : BasePlayerActivity() {
         for (view in bounds.keys) setUnderEpisodeSheet(view, view in covered, animate)
     }
 
+    /**
+     * CE: a top row too narrow for every button starts scrolled to its end, and stays there through
+     * a resize or rotation until the user scrolls it (by touch, or by moving focus to a button out
+     * of view, which the scroll view brings in). Scrolling also moves buttons under or out from
+     * under the open episode sheet (#456).
+     */
+    private fun configureTopRowScroll() {
+        val topRow = binding.playerView.findViewById<HorizontalScrollView>(R.id.extra_buttons)
+        val buttons = topRow.getChildAt(0)
+        fun maxScroll() =
+            topRowMaxScroll(
+                contentWidth = buttons.width,
+                viewportWidth = topRow.width - topRow.paddingLeft - topRow.paddingRight,
+            )
+        var followsEnd = true
+        topRow.setOnScrollChangeListener { _, scrollX, _, _, _ ->
+            followsEnd = topRowFollowsEnd(scrollX, maxScroll())
+            if (episodeSheetBackCallback.isEnabled) updateControlsUnderEpisodeSheet()
+        }
+        val keepAtEnd =
+            View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                if (followsEnd) topRow.scrollTo(maxScroll(), 0)
+            }
+        topRow.addOnLayoutChangeListener(keepAtEnd)
+        buttons.addOnLayoutChangeListener(keepAtEnd)
+    }
+
     private fun View.boundsInWindow(): Rect {
         val location = IntArray(2)
         getLocationInWindow(location)
@@ -624,8 +652,10 @@ class PlayerActivity : BasePlayerActivity() {
         // touch mode (the back button, with the controls up), play/pause when the controls show,
         // the next control when the focused one hides. Move focus back to the player view, so only
         // a control the user moved to with Tab or the arrows has focus.
-        binding.playerView.viewTreeObserver.addOnTouchModeChangeListener {
+        binding.playerView.isFocusableInTouchMode = true
+        binding.playerView.viewTreeObserver.addOnTouchModeChangeListener { inTouchMode ->
             keyboardFocusChosen = false
+            keepFocusThroughTouchMode(inTouchMode)
         }
         binding.playerView.viewTreeObserver.addOnGlobalFocusChangeListener { _, newFocus ->
             val playerView = binding.playerView
@@ -685,6 +715,7 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playerView.viewTreeObserver.addOnGlobalLayoutListener {
             if (episodeSheetBackCallback.isEnabled) updateControlsUnderEpisodeSheet()
         }
+        configureTopRowScroll()
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
@@ -1177,6 +1208,25 @@ class PlayerActivity : BasePlayerActivity() {
         playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
         playerView.requestFocus()
         playerView.descendantFocusability = focusability
+    }
+
+    /**
+     * CE: the first Space (or arrow, Tab, Enter) after a touch did nothing. That key ends touch
+     * mode, and when nothing has focus, or a group that hands focus on to its children, Android
+     * gives a control focus and drops the key before [onPlayerKey] sees it. So the player view
+     * keeps focus in touch mode (Android moves a control's focus to it, as it is focusable in touch
+     * mode), and for the key that ends touch mode it keeps focus itself, so the key goes on.
+     */
+    private fun keepFocusThroughTouchMode(inTouchMode: Boolean) {
+        val playerView = binding.playerView
+        if (inTouchMode) {
+            if (currentFocus == null) playerView.requestFocus()
+            return
+        }
+        if (currentFocus !== playerView) return
+        val focusability = playerView.descendantFocusability
+        playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
+        playerView.post { playerView.descendantFocusability = focusability }
     }
 
     private fun isArrowKey(keyCode: Int): Boolean =
