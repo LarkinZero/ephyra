@@ -270,6 +270,36 @@ if [ ! -f "$ROOT/media/.generated-image-subs" ]; then
   touch "$ROOT/media/.generated-image-subs"
 fi
 
+# --- a large library: the phone's A-Z fast scroller needs one that scrolls a long way (#672) ---
+if [ ! -f "$ROOT/media/.generated-big" ]; then
+  docker run --rm --entrypoint bash -v "$ROOT/media:/media" "$IMAGE" -c '
+    set -e
+    FF=/usr/lib/jellyfin-ffmpeg/ffmpeg
+    B=/media/movies-big; mkdir -p "$B"
+    $FF -v error -y -f lavfi -i "testsrc2=size=320x180:rate=24:duration=5" \
+        -f lavfi -i "sine=frequency=440:duration=5" \
+        -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 32k -shortest "$B/.clip.mkv"
+    add() { # add <title (year)>: a hard link of the one clip, so 600 items cost one file
+      mkdir -p "$B/$1"; ln -f "$B/.clip.mkv" "$B/$1/$1.mkv"
+    }
+    # 10 to 40 titles per letter, X left empty, one "The ..." per letter (sorts under its letter)
+    i=0
+    for L in A B C D E F G H I J K L M N O P Q R S T U V W Y Z; do
+      n=$((10 + (i * 7) % 31)); i=$((i + 1))
+      for k in $(seq -w 1 "$n"); do add "${L}ble Movie $k ($((1950 + 10#$k)))"; done
+      add "The ${L}ast Movie (2000)"
+    done
+    # digits and symbols go under #, accents after Z
+    for t in "1917 Big (2019)" "12 Big Monkeys (1995)" "2 Big Fast (2003)" "007 Big (1962)" \
+             "!Bang Big (2014)" "Émile Big (2010)" "Über Big (2011)" "Ångström Big (2012)" "Ølsen Big (2013)"; do
+      add "$t"
+    done
+    rm "$B/.clip.mkv"
+    chmod -R a+rX /media
+  '
+  touch "$ROOT/media/.generated-big"
+fi
+
 # --- container -----------------------------------------------------------------------------
 if ! docker ps -a --format '{{.Names}}' | grep -qx "$NAME"; then
   docker run -d --name "$NAME" --restart unless-stopped -p "$PORT:8096" \
