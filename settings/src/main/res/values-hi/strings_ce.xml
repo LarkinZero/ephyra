@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">टीवी HEVC चलाता है</string>
     <string name="ce_pref_cast_hevc_summary">HEVC (H.265) वीडियो को H.264 में बदलने के बजाय जैसा है वैसा भेजें। 4K Chromecast को यह अपने आप मिलता है; HEVC चलाने वाले किसी दूसरे टीवी या बॉक्स के लिए इसे चालू करें</string>
     <string name="ce_pref_home_episode_images_summary_phone">देखना जारी रखें और आगे देखें में, और एपिसोड के पेज के ऊपर, सीरीज़ की छवि की जगह एपिसोड की छवि दिखाएँ</string>
+    <string name="pref_player_media_segments_on_seek_bar">सीक बार पर सेगमेंट</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">इंट्रो, रीकैप, आउट्रो, प्रीव्यू और विज्ञापनों को सीक बार के रंगीन हिस्सों के रूप में दिखाएँ</string>
 </resources>

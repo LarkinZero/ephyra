@@ -213,4 +213,6 @@
     <string name="ce_pref_cast_hevc">التلفزيون يشغّل HEVC</string>
     <string name="ce_pref_cast_hevc_summary">إرسال فيديو HEVC (H.265) كما هو بدلًا من تحويله إلى H.264. يحصل Chromecast 4K على ذلك تلقائيًا؛ فعّله لتلفزيون أو جهاز آخر يشغّل HEVC</string>
     <string name="ce_pref_home_episode_images_summary_phone">عرض صورة الحلقة بدلًا من صورة المسلسل في «متابعة المشاهدة» و«التالي» وأعلى صفحة الحلقة</string>
+    <string name="pref_player_media_segments_on_seek_bar">المقاطع على شريط التقديم</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">إظهار المقدمة والملخص والخاتمة والمعاينة والإعلانات كأجزاء ملونة من شريط التقديم</string>
 </resources>

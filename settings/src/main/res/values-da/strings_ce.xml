@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">Tv\'et afspiller HEVC</string>
     <string name="ce_pref_cast_hevc_summary">Send HEVC-video (H.265), som den er, i stedet for at konvertere den til H.264. En 4K-Chromecast får det af sig selv; slå det til for et andet tv eller en boks, der afspiller HEVC</string>
     <string name="ce_pref_home_episode_images_summary_phone">Vis episodens billede i stedet for seriens billede i Fortsæt med at se, i Næste og øverst på episodens side</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmenter på tidslinjen</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Vis intro, resumé, outro, forsmag og reklamer som farvede dele af tidslinjen</string>
 </resources>

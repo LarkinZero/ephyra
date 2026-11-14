@@ -203,4 +203,6 @@
     <string name="ce_pref_cast_hevc">电视可播放 HEVC</string>
     <string name="ce_pref_cast_hevc_summary">直接发送 HEVC (H.265) 视频，而不转换为 H.264。4K Chromecast 会自动这样做；如果其他电视或盒子可播放 HEVC，请开启此项</string>
     <string name="ce_pref_home_episode_images_summary_phone">在“继续观看”、“接下来播放”和单集页面顶部显示单集的图片，而不是剧集的图片</string>
+    <string name="pref_player_media_segments_on_seek_bar">进度条上的片段</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">在进度条上用颜色显示片头、前情提要、片尾、预告和广告</string>
 </resources>

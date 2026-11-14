@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">Televisio toistaa HEVC:tä</string>
     <string name="ce_pref_cast_hevc_summary">Lähetä HEVC (H.265) -video sellaisenaan sen sijaan, että se muunnettaisiin H.264:ksi. 4K-Chromecast saa sen automaattisesti; ota käyttöön muulle televisiolle tai laitteelle, joka toistaa HEVC:tä</string>
     <string name="ce_pref_home_episode_images_summary_phone">Näytä jakson kuva sarjan kuvan sijaan riveillä Jatka katsomista ja Seuraavaksi sekä jakson sivun yläosassa</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmentit aikajanalla</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Näytä intro, kertaus, lopputekstit, ennakko ja mainokset aikajanan värillisinä osina</string>
 </resources>

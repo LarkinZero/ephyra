@@ -1,10 +1,12 @@
 package dev.jdtech.jellyfin.player.cast.presentation
 
+import android.content.Context
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidSegmentType
 import dev.jdtech.jellyfin.player.cast.CastPlayerController
@@ -18,7 +20,9 @@ import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
 import dev.jdtech.jellyfin.player.core.domain.models.Track
 import dev.jdtech.jellyfin.player.local.R as PlayerLocalR
+import dev.jdtech.jellyfin.player.local.domain.DebugSegments
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -112,6 +116,8 @@ constructor(
     private val sessionManager: CastSessionManager,
     private val playerController: CastPlayerController,
     private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private class PlayRequest(
@@ -268,7 +274,8 @@ constructor(
         segmentsJob = viewModelScope.launch {
             val loaded =
                 try {
-                    repository.getSegments(item.itemId)
+                    // Debuggable builds can fake segments for testing (#271, #681).
+                    DebugSegments.read(context) ?: repository.getSegments(item.itemId)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -278,7 +285,10 @@ constructor(
             // Another item took over, or the session ended, while these were loading.
             if (segmentsItemId == item.itemId) {
                 segments = loaded
-                _state.update { it.copy(segments = loaded) }
+                // CE (#681): the seek bar shows them unless the setting is off.
+                if (appPreferences.getValue(appPreferences.playerMediaSegmentsOnSeekBar)) {
+                    _state.update { it.copy(segments = loaded) }
+                }
             }
         }
     }

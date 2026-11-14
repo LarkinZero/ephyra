@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">Телевизорът възпроизвежда HEVC</string>
     <string name="ce_pref_cast_hevc_summary">Изпращане на HEVC (H.265) видео без промяна, вместо да се преобразува в H.264. 4K Chromecast го получава автоматично; включете за друг телевизор или приставка, които възпроизвеждат HEVC</string>
     <string name="ce_pref_home_episode_images_summary_phone">Показване на изображението на епизода вместо това на сериала в „Продължете гледането“, „Следващо“ и в горната част на страницата на епизода</string>
+    <string name="pref_player_media_segments_on_seek_bar">Сегменти в лентата за превъртане</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Показване на началото, резюмето, края, прегледа и рекламите като оцветени части от лентата за превъртане</string>
 </resources>

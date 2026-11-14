@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">A tévé lejátssza a HEVC-et</string>
     <string name="ce_pref_cast_hevc_summary">A HEVC (H.265) videó küldése változatlanul, H.264-re alakítás helyett. A 4K Chromecast ezt magától megkapja; kapcsold be más tévéhez vagy boxhoz, amely lejátssza a HEVC-et</string>
     <string name="ce_pref_home_episode_images_summary_phone">A sorozat képe helyett az epizód képének megjelenítése a Megtekintés folytatása és a Következő sorban, valamint az epizód oldalának tetején</string>
+    <string name="pref_player_media_segments_on_seek_bar">Szakaszok az idősávon</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">A bevezető, az összefoglaló, a stáblista, az előzetes és a reklámok megjelenítése az idősáv színes részeiként</string>
 </resources>
