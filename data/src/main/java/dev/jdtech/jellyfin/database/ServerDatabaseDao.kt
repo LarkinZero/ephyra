@@ -349,7 +349,16 @@ interface ServerDatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSegment(segment: FindroidSegmentDto)
 
-    @Query("SELECT * FROM segments WHERE itemId = :itemId")
+    @Query("DELETE FROM segments WHERE itemId = :itemId") suspend fun deleteSegments(itemId: UUID)
+
+    /** CE (#693): the item's segments become [segments], without rows from an earlier download. */
+    @Transaction
+    suspend fun replaceSegments(itemId: UUID, segments: List<FindroidSegmentDto>) {
+        deleteSegments(itemId)
+        segments.forEach { insertSegment(it) }
+    }
+
+    @Query("SELECT * FROM segments WHERE itemId = :itemId ORDER BY startTicks")
     suspend fun getSegments(itemId: UUID): List<FindroidSegmentDto>
 
     @Query("SELECT * FROM seasons") suspend fun getSeasons(): List<FindroidSeasonDto>

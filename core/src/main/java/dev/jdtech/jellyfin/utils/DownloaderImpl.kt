@@ -415,7 +415,7 @@ class DownloaderImpl(
                 allowRoaming,
             )
 
-            segments.forEach { database.insertSegment(it.toFindroidSegmentsDto(item.id)) }
+            database.replaceSegments(item.id, segments.map { it.toFindroidSegmentsDto(item.id) })
 
             if (trickplayInfo != null) {
                 downloadTrickplayData(item.id, sourceId, trickplayInfo)
@@ -530,6 +530,7 @@ class DownloaderImpl(
         // Progress watched offline that has not reached the server yet outlives the download:
         // the sync sends it and then removes the row (#281).
         database.deleteSyncedUserData(item.id)
+        database.deleteSegments(item.id)
 
         File(context.filesDir, "trickplay/${item.id}").deleteRecursively()
         File(context.filesDir, "images/${item.id}").deleteRecursively()
