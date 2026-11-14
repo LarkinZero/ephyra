@@ -35,7 +35,7 @@ The app is **Ephyra**, a fork of [Findroid](https://github.com/jarnedemeulemeest
 # Format the tree
 ./gradlew ktfmtFormat
 
-# Unit tests (CI does not run them: run them yourself before opening a PR)
+# Unit tests of every module and flavour (CI does not run them: run them yourself before opening a PR)
 ./gradlew testDebugUnitTest
 ```
 
