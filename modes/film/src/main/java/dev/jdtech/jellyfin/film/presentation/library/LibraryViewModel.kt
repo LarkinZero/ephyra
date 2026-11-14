@@ -52,7 +52,7 @@ constructor(
 
     /**
      * @param indexed CE (#135): load the grid with placeholders, so it knows its length and can
-     *   jump, and build a [LetterIndex] when sorting by name. TV uses this, phone doesn't.
+     *   jump, and build a [LetterIndex] when sorting by name. TV and phone (#672) both use it.
      */
     fun setup(parentId: UUID, libraryType: CollectionType, indexed: Boolean = false) {
         this.parentId = parentId
