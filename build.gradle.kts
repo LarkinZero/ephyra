@@ -60,6 +60,30 @@ subprojects {
             }
         }
     tasks.named("ktfmtCheck") { dependsOn(ktfmtCheckCoverage) }
+
+    // A module with product flavors has no testDebugUnitTest, only test<Flavor>DebugUnitTest, so
+    // `./gradlew testDebugUnitTest` skipped app:phone, app:tv and player:cast (#515). This adds
+    // the task to those modules, running the debug unit tests of every flavor.
+    listOf("com.android.application", "com.android.library").forEach { id ->
+        pluginManager.withPlugin(id) {
+            extensions
+                .getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
+                .onVariants { variant ->
+                    if (
+                        variant.flavorName.isNullOrEmpty() ||
+                            "testDebugUnitTest" in tasks.names
+                    )
+                        return@onVariants
+                    val flavorTests = Regex("test[A-Z]\\w*DebugUnitTest")
+                    tasks.register("testDebugUnitTest") {
+                        group = "verification"
+                        description = "Runs the debug unit tests of every flavor."
+                        // Names only: realizing every task fails on the Compose preview tasks.
+                        dependsOn(provider { tasks.names.filter { flavorTests.matches(it) } })
+                    }
+                }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

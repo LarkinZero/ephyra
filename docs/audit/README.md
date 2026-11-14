@@ -65,7 +65,7 @@ One issue at a time, in the order below. For each issue:
    issues share one cause (they are joined with `+` below).
 3. **Test.** At the level the batch names:
    - **A, logic:** a unit test that fails before the fix and passes after it, plus
-     `./gradlew testDebugUnitTest`.
+     `./gradlew testDebugUnitTest` (every module, every flavour).
    - **B, one device:** A where the logic can be unit tested, plus the issue's steps on one
      emulator before and after the fix, with a screenshot or log as proof.
    - **C, player:** B on both backends, plus `docs/mpv-checklist.md` (CLAUDE.md requires it for
