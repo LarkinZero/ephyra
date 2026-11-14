@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Вече сте гледали някои от тези епизоди.</string>
     <string name="ce_download_choice_unwatched">Само негледаните (%1$d)</string>
     <string name="ce_download_choice_all">Всички епизоди (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Заглавието е скрито</string>
+    <string name="ce_spoiler_overview_hidden">Скрито, докато не гледате този епизод. Задръжте, за да го покажете.</string>
+    <string name="ce_spoiler_reveal">Показване</string>
 </resources>

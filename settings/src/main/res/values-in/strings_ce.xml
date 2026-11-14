@@ -205,4 +205,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Tampilkan gambar episode, bukan gambar serial, di Lanjutkan menonton, di Berikutnya, dan di bagian atas halaman episode</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmen di bilah putar</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Tampilkan intro, rekap, outro, pratinjau, dan iklan sebagai bagian berwarna di bilah putar</string>
+    <string name="ce_pref_hide_spoilers">Sembunyikan spoiler</string>
+    <string name="ce_pref_hide_spoilers_summary">Buramkan gambar serta sembunyikan judul dan ringkasan episode yang belum Anda tonton. Tekan lama salah satunya untuk menampilkannya</string>
 </resources>

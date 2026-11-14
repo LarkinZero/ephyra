@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Du har allereie sett nokre av desse episodane.</string>
     <string name="ce_download_choice_unwatched">Berre usette (%1$d)</string>
     <string name="ce_download_choice_all">Alle episodane (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Tittelen er gøymd</string>
+    <string name="ce_spoiler_overview_hidden">Gøymd til du har sett denne episoden. Trykk og hald for å visa han.</string>
+    <string name="ce_spoiler_reveal">Vis</string>
 </resources>

@@ -142,4 +142,7 @@
     <string name="ce_download_choice_message">Bu epizodların bəzilərinə artıq baxmısınız.</string>
     <string name="ce_download_choice_unwatched">Yalnız baxılmamışlar (%1$d)</string>
     <string name="ce_download_choice_all">Bütün epizodlar (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Ad gizlədilib</string>
+    <string name="ce_spoiler_overview_hidden">Bu bölümə baxana qədər gizlədilib. Göstərmək üçün basıb saxlayın.</string>
+    <string name="ce_spoiler_reveal">Göstər</string>
 </resources>

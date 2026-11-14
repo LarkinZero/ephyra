@@ -27,6 +27,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerImage
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidFolder
@@ -49,9 +52,12 @@ fun ItemPoster(
     // CE (#608): see posterSources.
     preferThumb: Boolean = false,
 ) {
+    // CE (#618): a hidden episode's still is blurred where it comes first, and left out where it
+    // is only the last resort behind the show's art.
+    val hidden = LocalSpoilers.current.hides(item)
     val sources =
-        remember(item.images, direction, preferThumb) {
-            posterSources(item, direction, preferThumb)
+        remember(item.images, direction, preferThumb, hidden) {
+            posterSources(item, direction, preferThumb, hideStill = hidden)
         }
 
     // CE (#135): without artwork, or when none of it loads, the card shows the title and an icon
@@ -74,7 +80,7 @@ fun ItemPoster(
                 title =
                     if (item is FindroidEpisode && (direction == Direction.VERTICAL || preferThumb))
                         item.seriesName
-                    else item.name,
+                    else spoilerFreeName(item, hidden),
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -83,7 +89,13 @@ fun ItemPoster(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onError = { index++ },
-                modifier = Modifier.fillMaxSize(),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .spoilerImage(
+                            hidden = hidden && imageUri == item.images.primary,
+                            fallback = MaterialTheme.colorScheme.surfaceVariant,
+                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
             )
         }
     }
@@ -102,6 +114,7 @@ internal fun posterSources(
     item: FindroidItem,
     direction: Direction,
     preferThumb: Boolean = false,
+    hideStill: Boolean = false,
 ): List<Uri> =
     when (direction) {
         Direction.HORIZONTAL ->
@@ -110,7 +123,9 @@ internal fun posterSources(
                     if (preferThumb) listOf(item.images.thumb, item.images.backdrop)
                     else listOf(item.images.backdrop)
                 is FindroidEpisode ->
-                    if (preferThumb) {
+                    if (preferThumb && hideStill) {
+                        listOf(item.images.showThumb, item.images.showBackdrop)
+                    } else if (preferThumb) {
                         listOf(item.images.showThumb, item.images.showBackdrop, item.images.primary)
                     } else {
                         listOf(item.images.primary)

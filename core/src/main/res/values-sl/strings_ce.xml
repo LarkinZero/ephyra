@@ -157,4 +157,7 @@
     <string name="ce_download_choice_message">Nekatere od teh epizod ste že gledali.</string>
     <string name="ce_download_choice_unwatched">Samo neogledane (%1$d)</string>
     <string name="ce_download_choice_all">Vse epizode (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Naslov je skrit</string>
+    <string name="ce_spoiler_overview_hidden">Skrito, dokler si te epizode ne ogledate. Pridržite, da razkrijete.</string>
+    <string name="ce_spoiler_reveal">Razkrij</string>
 </resources>

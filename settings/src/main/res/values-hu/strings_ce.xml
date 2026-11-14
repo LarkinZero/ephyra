@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">A sorozat képe helyett az epizód képének megjelenítése a Megtekintés folytatása és a Következő sorban, valamint az epizód oldalának tetején</string>
     <string name="pref_player_media_segments_on_seek_bar">Szakaszok az idősávon</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">A bevezető, az összefoglaló, a stáblista, az előzetes és a reklámok megjelenítése az idősáv színes részeiként</string>
+    <string name="ce_pref_hide_spoilers">Spoilerek elrejtése</string>
+    <string name="ce_pref_hide_spoilers_summary">Elhomályosítja a képet, és elrejti a nem látott epizódok címét és leírását. Tartsa lenyomva az egyiket a megjelenítéséhez</string>
 </resources>

@@ -205,4 +205,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">「続きを見る」と「次のエピソード」、およびエピソードページの上部で、シリーズの画像の代わりにエピソードの画像を表示</string>
     <string name="pref_player_media_segments_on_seek_bar">シークバーのセグメント</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">イントロ、あらすじ、エンディング、予告、CM をシークバー上に色付きで表示します</string>
+    <string name="ce_pref_hide_spoilers">ネタバレを隠す</string>
+    <string name="ce_pref_hide_spoilers_summary">未視聴のエピソードの画像をぼかし、タイトルとあらすじを隠します。長押しすると表示されます</string>
 </resources>

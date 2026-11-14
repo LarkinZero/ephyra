@@ -211,4 +211,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Pokazuj obraz odcinka zamiast obrazu serialu w sekcjach Kontynuuj oglądanie i Następne oraz u góry strony odcinka</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenty na pasku przewijania</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Pokazuj czołówkę, streszczenie, napisy końcowe, zapowiedź i reklamy jako kolorowe części paska przewijania</string>
+    <string name="ce_pref_hide_spoilers">Ukrywaj spoilery</string>
+    <string name="ce_pref_hide_spoilers_summary">Rozmywa obraz oraz ukrywa tytuł i opis nieobejrzanych odcinków. Przytrzymaj odcinek, aby go odsłonić</string>
 </resources>

@@ -116,6 +116,7 @@ constructor(
                 watchNextCandidates(
                     resume = repository.getResumeItems(),
                     nextUp = repository.getNextUp(),
+                    hideSpoilers = appPreferences.getValue(appPreferences.hideSpoilers),
                 )
             } catch (e: Exception) {
                 Timber.w(e, "Watch Next: could not load the items")

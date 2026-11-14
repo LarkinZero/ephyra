@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Показване на изображението на епизода вместо това на сериала в „Продължете гледането“, „Следващо“ и в горната част на страницата на епизода</string>
     <string name="pref_player_media_segments_on_seek_bar">Сегменти в лентата за превъртане</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Показване на началото, резюмето, края, прегледа и рекламите като оцветени части от лентата за превъртане</string>
+    <string name="ce_pref_hide_spoilers">Скриване на спойлери</string>
+    <string name="ce_pref_hide_spoilers_summary">Размазва изображението и скрива заглавието и описанието на епизодите, които не сте гледали. Задръжте върху някой, за да го покажете</string>
 </resources>

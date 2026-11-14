@@ -24,6 +24,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.ephyra.backdropCrossfadeMillis
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -64,14 +65,21 @@ enum class ArtworkPlacement {
  *
  * [episodeImageFirst] (#630): whether an episode's header starts with its still. The episode page
  * passes the "Use episode images" setting, so the page opens on the kind of image its card had.
+ *
+ * [hideStill] (#618): an episode hidden by "Hide spoilers" leaves its still out, and shows its
+ * show's backdrop or no artwork.
  */
 fun artworkSources(
     item: FindroidItem,
     placement: ArtworkPlacement,
     canBlur: Boolean = HeroArtwork.canBlur,
     episodeImageFirst: Boolean = true,
+    hideStill: Boolean = false,
 ): List<ArtworkSource> {
     val images = item.images
+    if (item is FindroidEpisode && hideStill) {
+        return listOfNotNull(images.showBackdrop).map { ArtworkSource(it) }
+    }
     val backdrops =
         when (item) {
             is FindroidEpisode ->
@@ -130,10 +138,18 @@ fun rememberArtworkState(
     episodeImageFirst: Boolean = true,
 ): ArtworkState {
     val context = LocalContext.current
-    return remember(item?.id, item?.images, placement, episodeImageFirst) {
+    val hideStill = LocalSpoilers.current.hides(item)
+    return remember(item?.id, item?.images, placement, episodeImageFirst, hideStill) {
         ArtworkState(
             item
-                ?.let { artworkSources(it, placement, episodeImageFirst = episodeImageFirst) }
+                ?.let {
+                    artworkSources(
+                        it,
+                        placement,
+                        episodeImageFirst = episodeImageFirst,
+                        hideStill = hideStill,
+                    )
+                }
                 .orEmpty()
                 .map { it.copy(uri = it.uri.resolveIn(context)) }
         )

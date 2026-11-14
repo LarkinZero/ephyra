@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Mostra la imatge de l\'episodi en lloc de la imatge de la sèrie a Continua mirant, a Següent i a la part superior de la pàgina de l\'episodi</string>
     <string name="pref_player_media_segments_on_seek_bar">Segments a la barra de progrés</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostra la introducció, el resum, el final, l\'avançament i els anuncis com a parts de color de la barra de progrés</string>
+    <string name="ce_pref_hide_spoilers">Amaga els spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Difumina la imatge i amaga el títol i la sinopsi dels episodis que no has vist. Mantén premut un episodi per mostrar-lo</string>
 </resources>

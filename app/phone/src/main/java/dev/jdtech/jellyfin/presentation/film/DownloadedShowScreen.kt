@@ -50,6 +50,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadedShowViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -244,14 +246,19 @@ private fun EpisodeRow(
         },
         modifier = modifier,
     ) {
+        // CE (#618): a hidden episode is "Episode 5" until held.
+        val spoilers = LocalSpoilers.current
+        val hidden = spoilers.hides(episode)
         DownloadRow(
             item = episode,
-            title = episode.name,
+            title = spoilerFreeName(episode, hidden),
             meta = meta,
             shape = shape,
             showPlaybackProgress = true,
             onPlayClick = onPlayClick,
             onClick = onClick,
+            onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
+            onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         )
     }
 }

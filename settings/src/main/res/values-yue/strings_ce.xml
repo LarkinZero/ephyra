@@ -205,4 +205,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">喺「繼續觀看」、「下一集」同單集頁面頂部顯示單集嘅圖片，而唔係劇集嘅圖片</string>
     <string name="pref_player_media_segments_on_seek_bar">進度列上嘅片段</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">喺進度列上用顏色顯示片頭、前情提要、片尾、預告同廣告</string>
+    <string name="ce_pref_hide_spoilers">隱藏劇透</string>
+    <string name="ce_pref_hide_spoilers_summary">模糊未睇過嘅集數嘅圖片，並隱藏佢哋嘅標題同簡介。長按一集就會顯示</string>
 </resources>

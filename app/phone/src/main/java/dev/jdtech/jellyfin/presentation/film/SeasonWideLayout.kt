@@ -78,6 +78,8 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisodes
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
 import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
@@ -677,9 +679,12 @@ internal fun CompactEpisodeRow(
             }
             .joinToString(" · ")
 
+    // CE (#618): a hidden episode is "Episode 5" until held.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(episode)
     DownloadRow(
         item = episode,
-        title = episode.name,
+        title = spoilerFreeName(episode, hidden),
         titleStyle = MaterialTheme.typography.titleSmall,
         meta = meta,
         shape = shape,
@@ -693,6 +698,8 @@ internal fun CompactEpisodeRow(
         showPlayedBadge = true,
         onPlayClick = onPlayClick,
         onClick = onClick,
+        onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
+        onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         trailing =
             if (showDownloadControl) {
                 {

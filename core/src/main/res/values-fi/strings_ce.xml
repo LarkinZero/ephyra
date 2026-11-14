@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Olet jo katsonut osan näistä jaksoista.</string>
     <string name="ce_download_choice_unwatched">Vain katsomattomat (%1$d)</string>
     <string name="ce_download_choice_all">Kaikki jaksot (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Nimi piilotettu</string>
+    <string name="ce_spoiler_overview_hidden">Piilotettu, kunnes katsot tämän jakson. Näytä painamalla pitkään.</string>
+    <string name="ce_spoiler_reveal">Näytä</string>
 </resources>

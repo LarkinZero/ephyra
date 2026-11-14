@@ -160,6 +160,7 @@ constructor(
                     appPreferences.observe(appPreferences.showFavoritesTab),
                     askUserOnStart,
                     profileLocked,
+                    appPreferences.observe(appPreferences.hideSpoilers),
                 ) { values ->
                     val flags = values[0] as SetupFlags
                     val dynamicColors = values[1] as Boolean
@@ -167,6 +168,7 @@ constructor(
                     val showFavoritesTab = values[3] as Boolean
                     val askUserOnStart = values[4] as Boolean
                     val profileLocked = values[5] as Boolean
+                    val hideSpoilers = values[6] as Boolean
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -179,6 +181,7 @@ constructor(
                         showFavoritesTab = showFavoritesTab,
                         askUserOnStart = askUserOnStart,
                         profileLocked = profileLocked,
+                        hideSpoilers = hideSpoilers,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -203,6 +206,8 @@ data class MainState(
     val askUserOnStart: Boolean = false,
     /** CE (#299): the current profile asks for its PIN before Home shows. */
     val profileLocked: Boolean = false,
+    /** CE (#618): unwatched episodes hide their still, title and overview. */
+    val hideSpoilers: Boolean = false,
 )
 
 /**

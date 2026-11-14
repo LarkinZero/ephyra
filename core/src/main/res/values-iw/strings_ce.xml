@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">כבר צפית בחלק מהפרקים האלה.</string>
     <string name="ce_download_choice_unwatched">רק כאלה שלא נצפו (%1$d)</string>
     <string name="ce_download_choice_all">כל הפרקים (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">השם מוסתר</string>
+    <string name="ce_spoiler_overview_hidden">מוסתר עד שתצפה בפרק הזה. יש ללחוץ לחיצה ארוכה כדי להציג.</string>
+    <string name="ce_spoiler_reveal">הצגה</string>
 </resources>

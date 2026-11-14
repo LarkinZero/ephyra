@@ -142,4 +142,7 @@
     <string name="ce_download_choice_message">其中部分集數你已經看過了。</string>
     <string name="ce_download_choice_unwatched">僅限未觀看 (%1$d)</string>
     <string name="ce_download_choice_all">全部集數 (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">標題已隱藏</string>
+    <string name="ce_spoiler_overview_hidden">觀看本集前將保持隱藏。長按即可顯示。</string>
+    <string name="ce_spoiler_reveal">顯示</string>
 </resources>

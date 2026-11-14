@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Vis episodens billede i stedet for seriens billede i Fortsæt med at se, i Næste og øverst på episodens side</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenter på tidslinjen</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Vis intro, resumé, outro, forsmag og reklamer som farvede dele af tidslinjen</string>
+    <string name="ce_pref_hide_spoilers">Skjul spoilere</string>
+    <string name="ce_pref_hide_spoilers_summary">Slør billedet, og skjul titel og beskrivelse af afsnit, du ikke har set. Tryk og hold på et for at vise det</string>
 </resources>

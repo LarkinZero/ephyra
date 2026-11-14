@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -162,12 +163,17 @@ private fun ColumnScope.HeroText(
     }
 }
 
-/** Title of the hero: `headlineLarge` at Expanded, `headlineMedium` at Medium. */
+/**
+ * Title of the hero: `headlineLarge` at Expanded, `headlineMedium` at Medium. With [revealing]
+ * (#618) it stands in for a hidden episode's title, and a press and hold reveals that episode.
+ */
 @Composable
-fun HeroTitle(text: String, widthClass: WidthClass) {
+fun HeroTitle(text: String, widthClass: WidthClass, revealing: FindroidItem? = null) {
     Text(
         text = text,
-        modifier = Modifier.copyOnLongClick(text),
+        modifier =
+            if (revealing != null) Modifier.revealOnLongClick(revealing)
+            else Modifier.copyOnLongClick(text),
         overflow = TextOverflow.Ellipsis,
         maxLines = 3,
         style = heroTitleStyle(widthClass),

@@ -209,4 +209,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Afișează imaginea episodului în locul imaginii serialului în Continuă vizionarea, în Urmează și în partea de sus a paginii episodului</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmente pe bara de derulare</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Afișează introducerea, rezumatul, finalul, previzualizarea și reclamele ca părți colorate ale barei de derulare</string>
+    <string name="ce_pref_hide_spoilers">Ascunde spoilerele</string>
+    <string name="ce_pref_hide_spoilers_summary">Estompează imaginea și ascunde titlul și descrierea episoadelor pe care nu le-ai văzut. Ține apăsat pe unul pentru a-l afișa</string>
 </resources>

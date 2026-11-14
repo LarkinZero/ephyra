@@ -36,6 +36,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.view.children
@@ -57,6 +58,8 @@ import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
@@ -388,45 +391,52 @@ class PlayerActivity : BasePlayerActivity() {
                     val seasonState by seasonViewModel.state.collectAsStateWithLifecycle()
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     val currentItem = uiState.currentItem
-                    PlayerEpisodeSheet(
-                        visibleState = episodeSheetVisible,
-                        // Until the playing season has loaded, the sheet shows it loading rather
-                        // than the season it showed last.
-                        state =
-                            if (seasonState.season?.id == currentItem?.seasonId) seasonState
-                            else SeasonState(error = seasonState.error),
-                        seasonNumber = currentItem?.parentIndexNumber,
-                        currentEpisodeId = uiState.currentItemId,
-                        onEpisodeClick = { episode ->
-                            if (episode.id != uiState.currentItemId) {
-                                viewModel.playEpisode(episode.id)
-                            }
-                            closeEpisodeSheet()
-                        },
-                        onDismiss = { closeEpisodeSheet() },
-                        onClosed = { binding.episodeSheet.isVisible = false },
-                        onBoundsChanged = { bounds ->
-                            if (bounds != episodeSheetBounds) {
-                                episodeSheetBounds = bounds
-                                updateControlsUnderEpisodeSheet()
-                            }
-                        },
-                        wantsFocus = episodeSheetWantsFocus.value,
-                        mayTakeFocus = {
-                            episodeSheetTakesFocus(
-                                requested = episodeSheetWantsFocus.value,
-                                sheetOpen = episodeSheetBackCallback.isEnabled,
-                                focusParked =
-                                    currentFocus.let { it == null || it === binding.playerView },
-                            )
-                        },
-                        onFocusSettled = { focused ->
-                            episodeSheetWantsFocus.value = false
-                            // The user opened the sheet from the keyboard, so the row is a
-                            // control they chose: the arrows and Space go to it (#448).
-                            if (focused) keyboardFocusChosen = true
-                        },
-                    )
+                    // CE (#618): the other episodes hide what they give away, as in the app.
+                    CompositionLocalProvider(
+                        LocalSpoilers provides
+                            Spoilers(appPreferences.getValue(appPreferences.hideSpoilers))
+                    ) {
+                        PlayerEpisodeSheet(
+                            visibleState = episodeSheetVisible,
+                            // Until the playing season has loaded, the sheet shows it loading
+                            // rather
+                            // than the season it showed last.
+                            state =
+                                if (seasonState.season?.id == currentItem?.seasonId) seasonState
+                                else SeasonState(error = seasonState.error),
+                            seasonNumber = currentItem?.parentIndexNumber,
+                            currentEpisodeId = uiState.currentItemId,
+                            onEpisodeClick = { episode ->
+                                if (episode.id != uiState.currentItemId) {
+                                    viewModel.playEpisode(episode.id)
+                                }
+                                closeEpisodeSheet()
+                            },
+                            onDismiss = { closeEpisodeSheet() },
+                            onClosed = { binding.episodeSheet.isVisible = false },
+                            onBoundsChanged = { bounds ->
+                                if (bounds != episodeSheetBounds) {
+                                    episodeSheetBounds = bounds
+                                    updateControlsUnderEpisodeSheet()
+                                }
+                            },
+                            wantsFocus = episodeSheetWantsFocus.value,
+                            mayTakeFocus = {
+                                episodeSheetTakesFocus(
+                                    requested = episodeSheetWantsFocus.value,
+                                    sheetOpen = episodeSheetBackCallback.isEnabled,
+                                    focusParked =
+                                        currentFocus.let { it == null || it === binding.playerView },
+                                )
+                            },
+                            onFocusSettled = { focused ->
+                                episodeSheetWantsFocus.value = false
+                                // The user opened the sheet from the keyboard, so the row is a
+                                // control they chose: the arrows and Space go to it (#448).
+                                if (focused) keyboardFocusChosen = true
+                            },
+                        )
+                    }
                 }
             }
         }

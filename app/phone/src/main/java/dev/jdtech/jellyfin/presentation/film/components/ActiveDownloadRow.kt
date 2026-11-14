@@ -21,6 +21,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadProgress
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.film.presentation.downloads.ActiveDownload
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -115,13 +116,22 @@ fun ActiveDownloadRow(
 @Composable
 fun downloadTitles(item: FindroidItem): Pair<String, String?> {
     if (item !is FindroidEpisode) return item.name to null
+    // CE (#618): a hidden episode is only its number.
     val episodeLabel =
-        stringResource(
-            CoreR.string.episode_name_extended,
-            item.parentIndexNumber,
-            item.indexNumber,
-            item.name,
-        )
+        if (LocalSpoilers.current.hides(item)) {
+            stringResource(
+                CoreR.string.season_episode_number,
+                item.parentIndexNumber,
+                item.indexNumber,
+            )
+        } else {
+            stringResource(
+                CoreR.string.episode_name_extended,
+                item.parentIndexNumber,
+                item.indexNumber,
+                item.name,
+            )
+        }
     return if (item.seriesName.isNotEmpty()) item.seriesName to episodeLabel
     else episodeLabel to null
 }

@@ -40,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerImage
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -89,6 +91,7 @@ fun DownloadRow(
     onPlayClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
     footer: String? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
@@ -100,6 +103,7 @@ fun DownloadRow(
                         if (onClick != null || onLongClick != null) {
                             Modifier.combinedClickable(
                                 onClick = onClick ?: {},
+                                onLongClickLabel = onLongClickLabel,
                                 onLongClick = onLongClick,
                             )
                         } else Modifier
@@ -188,6 +192,8 @@ fun DownloadArtwork(
             else -> listOf(item.images.backdrop, item.images.primary)
         }
     val playLabel = stringResource(CoreR.string.play)
+    // CE (#618): an episode's still comes first here, so a hidden one is blurred.
+    val hidden = LocalSpoilers.current.hides(item)
     Box(
         modifier =
             modifier
@@ -207,7 +213,16 @@ fun DownloadArtwork(
         ArtworkImage(
             sources = sources,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+                Modifier.fillMaxSize()
+                    .spoilerImage(
+                        hidden = hidden,
+                        fallback = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        // The play glyph sits where the icon would.
+                        iconTint =
+                            if (onPlayClick != null) Color.Transparent
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
         )
         if (showPlayedBadge && item.played) {
             PlayedBadge(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp))

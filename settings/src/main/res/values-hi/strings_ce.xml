@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">देखना जारी रखें और आगे देखें में, और एपिसोड के पेज के ऊपर, सीरीज़ की छवि की जगह एपिसोड की छवि दिखाएँ</string>
     <string name="pref_player_media_segments_on_seek_bar">सीक बार पर सेगमेंट</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">इंट्रो, रीकैप, आउट्रो, प्रीव्यू और विज्ञापनों को सीक बार के रंगीन हिस्सों के रूप में दिखाएँ</string>
+    <string name="ce_pref_hide_spoilers">स्पॉइलर छिपाएँ</string>
+    <string name="ce_pref_hide_spoilers_summary">जो एपिसोड आपने नहीं देखे, उनकी छवि धुंधली करें और शीर्षक व विवरण छिपाएँ। किसी को दिखाने के लिए उसे दबाकर रखें</string>
 </resources>

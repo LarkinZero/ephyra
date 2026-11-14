@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Visa avsnittets bild i stället för seriens bild i Fortsätt titta, i Nästa och överst på avsnittets sida</string>
     <string name="pref_player_media_segments_on_seek_bar">Segment på tidslinjen</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Visa intro, sammanfattning, eftertexter, förhandstitt och reklam som färgade delar av tidslinjen</string>
+    <string name="ce_pref_hide_spoilers">Dölj spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Gör bilden suddig och dölj titel och beskrivning för avsnitt du inte har sett. Tryck länge på ett för att visa det</string>
 </resources>

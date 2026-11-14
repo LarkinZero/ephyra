@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Mostra l\'immagine dell\'episodio invece di quella della serie in Continua a guardare, in Prossimi e in cima alla pagina dell\'episodio</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenti sulla barra di avanzamento</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostra intro, riassunto, titoli di coda, anteprima e pubblicità come parti colorate della barra di avanzamento</string>
+    <string name="ce_pref_hide_spoilers">Nascondi spoiler</string>
+    <string name="ce_pref_hide_spoilers_summary">Sfoca l\'immagine e nasconde il titolo e la trama degli episodi che non hai visto. Tieni premuto un episodio per mostrarlo</string>
 </resources>

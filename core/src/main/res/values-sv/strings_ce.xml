@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Du har redan sett några av de här avsnitten.</string>
     <string name="ce_download_choice_unwatched">Bara osedda (%1$d)</string>
     <string name="ce_download_choice_all">Alla avsnitt (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Titeln är dold</string>
+    <string name="ce_spoiler_overview_hidden">Dold tills du har sett det här avsnittet. Tryck länge för att visa.</string>
+    <string name="ce_spoiler_reveal">Visa</string>
 </resources>

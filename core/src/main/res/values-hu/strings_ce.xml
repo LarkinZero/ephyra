@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Ezek közül néhány epizódot már megnéztél.</string>
     <string name="ce_download_choice_unwatched">Csak a nem látottak (%1$d)</string>
     <string name="ce_download_choice_all">Minden epizód (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Cím elrejtve</string>
+    <string name="ce_spoiler_overview_hidden">Elrejtve, amíg meg nem nézi ezt az epizódot. Tartsa lenyomva a megjelenítéséhez.</string>
+    <string name="ce_spoiler_reveal">Megjelenítés</string>
 </resources>

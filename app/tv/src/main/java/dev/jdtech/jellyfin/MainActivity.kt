@@ -19,6 +19,8 @@ import dev.jdtech.jellyfin.ce.watchnext.WatchNextLink
 import dev.jdtech.jellyfin.ce.watchnext.WatchNextSync
 import dev.jdtech.jellyfin.core.presentation.localnetwork.LocalLocalNetworkBlock
 import dev.jdtech.jellyfin.core.presentation.localnetwork.LocalNetworkBlock
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.setup.presentation.localnetwork.LocalNetworkBlockViewModel
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
@@ -59,7 +61,10 @@ class MainActivity : ComponentActivity() {
 
             FindroidTheme {
                 if (!state.isLoading) {
-                    CompositionLocalProvider(LocalLocalNetworkBlock provides block) {
+                    CompositionLocalProvider(
+                        LocalLocalNetworkBlock provides block,
+                        LocalSpoilers provides Spoilers(state.hideSpoilers),
+                    ) {
                         NavigationRoot(
                             hasServers = state.hasServers,
                             hasCurrentServer = state.hasCurrentServer,

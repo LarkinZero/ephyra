@@ -57,6 +57,8 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val detailExtras = Preference("pref_detail_extras", true)
     val detailCollections = Preference("pref_detail_collections", true)
     val detailSimilar = Preference("pref_detail_similar", true)
+    // CE (#618): an unwatched episode's still, title and overview are hidden until held.
+    val hideSpoilers = Preference("pref_hide_spoilers", false)
     // CE (#188): show the Favorites tab in the bottom navigation bar.
     val showFavoritesTab = Preference("pref_show_favorites_tab", true)
     // CE (#245): open on the user list when the server has more than one saved user.
