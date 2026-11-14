@@ -69,6 +69,54 @@ class MPVPlayer(
     subtitleOptions: Map<String, String> = emptyMap(),
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
+
+    /** CE (#460): the libmpv calls after init run here, not on the main thread. */
+    private val calls = MpvCallQueue()
+
+    /**
+     * CE (#460): every [MPVLib] call after init goes through this, so the main thread never waits
+     * for mpv's core: commands and setters are posted in order, getters wait a bounded time.
+     */
+    private val mpv = MpvCalls()
+
+    private inner class MpvCalls {
+        fun command(command: Array<String>) = calls.post { mpvLib.command(command) }
+
+        fun setOptionString(name: String, value: String) = calls.post {
+            mpvLib.setOptionString(name, value)
+        }
+
+        fun setPropertyBoolean(name: String, value: Boolean) = calls.post {
+            mpvLib.setPropertyBoolean(name, value)
+        }
+
+        fun setPropertyString(name: String, value: String) = calls.post {
+            mpvLib.setPropertyString(name, value)
+        }
+
+        fun setPropertyDouble(name: String, value: Double) = calls.post {
+            mpvLib.setPropertyDouble(name, value)
+        }
+
+        fun setPropertyInt(name: String, value: Int) = calls.post {
+            mpvLib.setPropertyInt(name, value)
+        }
+
+        fun attachSurface(surface: Surface) = calls.post { mpvLib.attachSurface(surface) }
+
+        fun detachSurface() = calls.post { mpvLib.detachSurface() }
+
+        fun getPropertyBoolean(name: String): Boolean? = calls.read {
+            mpvLib.getPropertyBoolean(name)
+        }
+
+        fun getPropertyInt(name: String): Int? = calls.read { mpvLib.getPropertyInt(name) }
+
+        fun getPropertyDouble(name: String): Double? = calls.read { mpvLib.getPropertyDouble(name) }
+
+        fun getPropertyString(name: String): String? = calls.read { mpvLib.getPropertyString(name) }
+    }
+
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
     private var audioFocusCallback: () -> Unit = {}
     private lateinit var audioFocusRequest: AudioFocusRequestCompat
@@ -89,7 +137,7 @@ class MPVPlayer(
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action != AudioManager.ACTION_AUDIO_BECOMING_NOISY) return
-                mpvLib.setPropertyBoolean("pause", true)
+                mpv.setPropertyBoolean("pause", true)
                 setPlayerStateAndNotifyIfChanged(
                     playWhenReady = false,
                     playWhenReadyChangeReason = PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY,
@@ -469,6 +517,86 @@ class MPVPlayer(
      */
     private var reloadingAfterError = false
 
+    /** CE (#460): mpv says it plays, but the position stands still. */
+    private val stallWatch = MpvStallWatch()
+
+    /**
+     * CE (#460): the player reports BUFFERING because [stallWatch] found playback stalled, not
+     * because mpv said so. Cleared by every state mpv reports itself.
+     */
+    private var stalledBuffering = false
+
+    private val stallCheck =
+        object : Runnable {
+            override fun run() {
+                if (released) return
+                checkForStall()
+                handler.postDelayed(this, STALL_CHECK_INTERVAL_MS)
+            }
+        }
+
+    init {
+        handler.postDelayed(stallCheck, STALL_CHECK_INTERVAL_MS)
+    }
+
+    /**
+     * CE (#460): reports BUFFERING while playback should move and does not, READY again when it
+     * moves, and after [MpvStallWatch.GIVE_UP_MS] a network error at the position it stood still
+     * at. As after a broken stream (#445), mpv is paused on the file and prepare() loads it again,
+     * which [NetworkRecovery][dev.jdtech.jellyfin.player.local.domain.NetworkRecovery] does.
+     */
+    private fun checkForStall() {
+        val expectMoving =
+            isPlayerReady &&
+                playerError == null &&
+                currentPlayWhenReady &&
+                suppressionReason == PLAYBACK_SUPPRESSION_REASON_NONE &&
+                (playbackState == STATE_READY ||
+                    (stalledBuffering && playbackState == STATE_BUFFERING))
+        if (!expectMoving) {
+            stallWatch.reset()
+            if (stalledBuffering) {
+                // Paused or suppressed while stalled: mpv is not expected to move now.
+                stalledBuffering = false
+                if (playbackState == STATE_BUFFERING) {
+                    setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
+                }
+            }
+            return
+        }
+        val now = SystemClock.elapsedRealtime()
+        when (stallWatch.check(currentPositionMs, now)) {
+            MpvStallWatch.Verdict.MOVING ->
+                if (stalledBuffering) {
+                    stalledBuffering = false
+                    Timber.i("mpv playback moves again at $currentPositionMs ms")
+                    setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
+                }
+            MpvStallWatch.Verdict.STALLED ->
+                if (!stalledBuffering) {
+                    stalledBuffering = true
+                    Timber.w(
+                        "mpv reports playing, but the position stood still at " +
+                            "$currentPositionMs ms for ${stallWatch.stillForMs(now)} ms"
+                    )
+                    setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
+                }
+            MpvStallWatch.Verdict.GIVE_UP -> {
+                Timber.e("mpv playback stood still at $currentPositionMs ms, giving up")
+                stalledBuffering = false
+                stallWatch.reset()
+                failPlayback(
+                    PlaybackException(
+                        "Playback stalled",
+                        null,
+                        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
+                    ),
+                    stop = false,
+                )
+            }
+        }
+    }
+
     // mpv events
 
     /**
@@ -563,6 +691,7 @@ class MPVPlayer(
                 }
                 "paused-for-cache" -> {
                     if (isPlayerReady) {
+                        stalledBuffering = false
                         if (value) {
                             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
                         } else {
@@ -652,25 +781,27 @@ class MPVPlayer(
                     if (!isPlayerReady) {
                         // CE (#617): async, so these return without waiting for the download.
                         for (command in initialCommands) {
-                            mpvLib.command(command)
+                            mpv.command(command)
                         }
                     }
                 }
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
                     loadState.fileLoaded()
                     errorRecovery.fileLoaded()
-                    isSeekable = mpvLib.getPropertyBoolean("seekable") == true
+                    isSeekable = mpv.getPropertyBoolean("seekable") == true
                     currentDurationMs =
-                        (mpvLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
+                        (mpv.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
                     notifyAvailableCommandsIfChanged()
                 }
                 // Position discontinuities are reported from seekTo() (and the end-of-file
                 // auto-advance), not here: mpv also raises this event for the internal start
                 // position seek below, which must not look like a seek to listeners.
                 MpvEvent.MPV_EVENT_SEEK -> {
+                    stalledBuffering = false
                     setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
                 }
                 MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
+                    stalledBuffering = false
                     if (!isPlayerReady) {
                         isPlayerReady = true
                         val passed = startPassedToLoadMs
@@ -690,7 +821,7 @@ class MPVPlayer(
                             playWhenReady &&
                                 playbackSuppressionReason == PLAYBACK_SUPPRESSION_REASON_NONE
                         if (play) Timber.d("Starting playback...")
-                        mpvLib.setPropertyBoolean("pause", !play)
+                        mpv.setPropertyBoolean("pause", !play)
                         for (videoListener in videoListeners) {
                             videoListener.onRenderedFirstFrame()
                         }
@@ -709,7 +840,7 @@ class MPVPlayer(
                             "endFileExpected=${loadState.endFileExpected}"
                     )
                     val end = loadState.endFile {
-                        mpvLib.getPropertyInt("playlist-playing-pos").also {
+                        mpv.getPropertyInt("playlist-playing-pos").also {
                             Timber.d("mpv END_FILE: mpv is on playlist entry $it")
                         }
                     }
@@ -720,7 +851,7 @@ class MPVPlayer(
                             // #576: mpv's error lines come after END_FILE here. mpv is stopped
                             // now, so it does not play on; the report waits for the first line.
                             Timber.d("mpv could not open the file, waiting for its error line")
-                            mpvLib.command(arrayOf("stop", "keep-playlist"))
+                            mpv.command(arrayOf("stop", "keep-playlist"))
                             handler.removeCallbacks(loadErrorHoldTimeout)
                             handler.postDelayed(loadErrorHoldTimeout, MpvLoadState.HOLD_MS)
                         }
@@ -779,9 +910,9 @@ class MPVPlayer(
         errorRecovery.onError(currentMediaItemIndex, error.errorCode)
         loadState.expectEndFile()
         if (stop) {
-            mpvLib.command(arrayOf("stop", "keep-playlist"))
+            mpv.command(arrayOf("stop", "keep-playlist"))
         } else {
-            mpvLib.setPropertyBoolean("pause", true)
+            mpv.setPropertyBoolean("pause", true)
         }
         listeners.queueEvent(EVENT_PLAYER_ERROR) { listener ->
             listener.onPlayerErrorChanged(error)
@@ -854,7 +985,7 @@ class MPVPlayer(
      * @return true if the track is or was already selected
      */
     private fun selectTrack(trackType: MPVTrackType, id: String) {
-        mpvLib.setPropertyString(trackType.type, id)
+        mpv.setPropertyString(trackType.type, id)
     }
 
     // Timeline wrapper
@@ -971,7 +1102,7 @@ class MPVPlayer(
             // and suppresses playback until the focus comes back. Gain used to unpause mpv while
             // playWhenReady stayed false, so the player said paused while audio played (#305).
             AudioManager.AUDIOFOCUS_LOSS -> {
-                mpvLib.setPropertyBoolean("pause", true)
+                mpv.setPropertyBoolean("pause", true)
                 setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
                 setPlayerStateAndNotifyIfChanged(
                     playWhenReady = false,
@@ -980,20 +1111,20 @@ class MPVPlayer(
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 val oldAudioFocusCallback = audioFocusCallback
-                mpvLib.setPropertyBoolean("pause", true)
+                mpv.setPropertyBoolean("pause", true)
                 setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_TRANSIENT_AUDIO_FOCUS_LOSS)
                 audioFocusCallback = {
                     oldAudioFocusCallback()
                     setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
                     if (playWhenReady && isPlayerReady && playerError == null) {
-                        mpvLib.setPropertyBoolean("pause", false)
+                        mpv.setPropertyBoolean("pause", false)
                     }
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                mpvLib.command(arrayOf("multiply", "volume", "$AUDIO_FOCUS_DUCKING"))
+                mpv.command(arrayOf("multiply", "volume", "$AUDIO_FOCUS_DUCKING"))
                 audioFocusCallback = {
-                    mpvLib.command(arrayOf("multiply", "volume", "${1f / AUDIO_FOCUS_DUCKING}"))
+                    mpv.command(arrayOf("multiply", "volume", "${1f / AUDIO_FOCUS_DUCKING}"))
                 }
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -1046,8 +1177,8 @@ class MPVPlayer(
         startNewLoad(index = null)
         errorRecovery.forget()
         reloadingAfterError = false
-        mpvLib.command(arrayOf("playlist-clear"))
-        mpvLib.command(arrayOf("playlist-remove", "current"))
+        mpv.command(arrayOf("playlist-clear"))
+        mpv.command(arrayOf("playlist-remove", "current"))
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
         internalMediaItems = mediaItems.toMutableList()
     }
@@ -1073,8 +1204,8 @@ class MPVPlayer(
         startNewLoad(index = null)
         errorRecovery.forget()
         reloadingAfterError = false
-        mpvLib.command(arrayOf("playlist-clear"))
-        mpvLib.command(arrayOf("playlist-remove", "current"))
+        mpv.command(arrayOf("playlist-clear"))
+        mpv.command(arrayOf("playlist-remove", "current"))
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
         internalMediaItems = mediaItems.toMutableList()
         // The old playlist is gone, so the tracked index no longer refers to
@@ -1103,7 +1234,7 @@ class MPVPlayer(
         val insertAt = index.coerceIn(0, internalMediaItems.size)
         internalMediaItems.addAll(insertAt, mediaItems)
         mediaItems.forEachIndexed { offset, mediaItem ->
-            mpvLib.command(
+            mpv.command(
                 arrayOf(
                     "loadfile",
                     "${mediaItem.localConfiguration?.uri}",
@@ -1156,7 +1287,7 @@ class MPVPlayer(
         if (removesCurrent) startNewLoad(index = null)
         // From the end, so the indexes of the entries still to remove don't move.
         for (index in end - 1 downTo fromIndex) {
-            mpvLib.command(arrayOf("playlist-remove", "$index"))
+            mpv.command(arrayOf("playlist-remove", "$index"))
         }
         internalMediaItems.subList(fromIndex, end).clear()
         when {
@@ -1242,6 +1373,8 @@ class MPVPlayer(
      */
     private fun resetInternalState() {
         isPlayerReady = false
+        stalledBuffering = false
+        stallWatch.reset()
         isSeekable = false
         currentPositionMs = null
         currentDurationMs = null
@@ -1251,7 +1384,7 @@ class MPVPlayer(
         initialCommands.clear()
         forcedSubtitleFiles.clear()
         subtitleFiles.clear()
-        mpvLib.setPropertyDouble("sub-delay", 0.0)
+        mpv.setPropertyDouble("sub-delay", 0.0)
     }
 
     /** Prepares the player. */
@@ -1270,10 +1403,10 @@ class MPVPlayer(
                 // mpv 0.38+ (the bundled build is 0.42): loadfile <url> <flags> <index> <options>.
                 // An index of -1 is the default, the options are what is needed here.
                 val startSeconds = initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)
-                mpvLib.command(arrayOf("loadfile", uri, "replace", "-1", "start=$startSeconds"))
+                mpv.command(arrayOf("loadfile", uri, "replace", "-1", "start=$startSeconds"))
                 startPassedToLoadMs = initialSeekTo
             } else {
-                mpvLib.command(arrayOf("loadfile", uri, if (index == 0) "replace" else "append"))
+                mpv.command(arrayOf("loadfile", uri, if (index == 0) "replace" else "append"))
             }
         }
         prepareMediaItem(initialIndex)
@@ -1319,12 +1452,12 @@ class MPVPlayer(
         // plays nothing, and after a stream break it still holds the old file.
         reloadingAfterError = true
         if (positionMs > 0L) {
-            mpvLib.command(arrayOf("loadfile", uri, "insert-at", "$index", "start=$startSeconds"))
+            mpv.command(arrayOf("loadfile", uri, "insert-at", "$index", "start=$startSeconds"))
         } else {
-            mpvLib.command(arrayOf("loadfile", uri, "insert-at", "$index"))
+            mpv.command(arrayOf("loadfile", uri, "insert-at", "$index"))
         }
-        mpvLib.command(arrayOf("playlist-play-index", "$index"))
-        mpvLib.command(arrayOf("playlist-remove", "${index + 1}"))
+        mpv.command(arrayOf("playlist-play-index", "$index"))
+        mpv.command(arrayOf("playlist-remove", "${index + 1}"))
     }
 
     /**
@@ -1398,13 +1531,13 @@ class MPVPlayer(
                 if (handleAudioFocus && playWhenReady) {
                     val res = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest)
                     if (res != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                        mpvLib.setPropertyBoolean("pause", true)
+                        mpv.setPropertyBoolean("pause", true)
                     } else {
                         setPlaybackSuppressionReason(PLAYBACK_SUPPRESSION_REASON_NONE)
-                        mpvLib.setPropertyBoolean("pause", false)
+                        mpv.setPropertyBoolean("pause", false)
                     }
                 } else {
-                    mpvLib.setPropertyBoolean("pause", !playWhenReady)
+                    mpv.setPropertyBoolean("pause", !playWhenReady)
                 }
             }
         }
@@ -1428,16 +1561,16 @@ class MPVPlayer(
     override fun setRepeatMode(repeatMode: Int) {
         when (repeatMode) {
             REPEAT_MODE_OFF -> {
-                mpvLib.setOptionString("loop-file", "no")
-                mpvLib.setOptionString("loop-playlist", "no")
+                mpv.setOptionString("loop-file", "no")
+                mpv.setOptionString("loop-playlist", "no")
             }
             REPEAT_MODE_ONE -> {
-                mpvLib.setOptionString("loop-file", "inf")
-                mpvLib.setOptionString("loop-playlist", "no")
+                mpv.setOptionString("loop-file", "inf")
+                mpv.setOptionString("loop-playlist", "no")
             }
             REPEAT_MODE_ALL -> {
-                mpvLib.setOptionString("loop-file", "no")
-                mpvLib.setOptionString("loop-playlist", "inf")
+                mpv.setOptionString("loop-file", "no")
+                mpv.setOptionString("loop-playlist", "inf")
             }
         }
     }
@@ -1553,7 +1686,7 @@ class MPVPlayer(
             initialSeekTo = 0L
             return false
         }
-        mpvLib.command(
+        mpv.command(
             arrayOf("seek", "${initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)}", "absolute")
         )
         streamBreak.onSeek(initialSeekTo)
@@ -1626,7 +1759,7 @@ class MPVPlayer(
             // duplicate
             // external subtitle entries.
             if (currentMediaItemIndex != index) {
-                mpvLib.command(arrayOf("playlist-play-index", "$index"))
+                mpv.command(arrayOf("playlist-play-index", "$index"))
             }
             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
         }
@@ -1656,7 +1789,7 @@ class MPVPlayer(
      */
     override fun setPlaybackParameters(playbackParameters: PlaybackParameters) {
         if (getPlaybackParameters().speed != playbackParameters.speed) {
-            mpvLib.setPropertyDouble("speed", playbackParameters.speed.toDouble())
+            mpv.setPropertyDouble("speed", playbackParameters.speed.toDouble())
         }
     }
 
@@ -1671,7 +1804,7 @@ class MPVPlayer(
 
     override fun stop() {
         startNewLoad(index = null)
-        mpvLib.command(arrayOf("stop", "keep-playlist"))
+        mpv.command(arrayOf("stop", "keep-playlist"))
     }
 
     /**
@@ -1697,7 +1830,9 @@ class MPVPlayer(
         handler.removeCallbacksAndMessages(null)
         listeners.release()
         released = true
-        mpvLib.destroy()
+        // #460: after the calls before it, and not on the main thread: destroy() waits for mpv's
+        // core to quit, and a core stuck on a dead connection or a wedged decoder never does.
+        calls.close { mpvLib.destroy() }
     }
 
     private fun detachVideoSurface() {
@@ -1706,9 +1841,15 @@ class MPVPlayer(
         // new codec never answered, and every later libmpv call on the main thread waited on it.
         selectTrack(MPVTrackType.VIDEO, "no")
         Timber.d("Surface detached: vid=no, vo=null")
-        mpvLib.setOptionString("vo", "null")
-        mpvLib.setOptionString("force-window", "no")
-        mpvLib.detachSurface()
+        mpv.setOptionString("vo", "null")
+        mpv.setOptionString("force-window", "no")
+        mpv.detachSurface()
+        // The surface goes away when the caller returns, so wait for mpv to let go of it, but not
+        // into an ANR when mpv's core is stuck. If it is, mpv detaches when it gets to it; until
+        // then it renders into a surface that is gone, which fails without harm.
+        if (!calls.runBounded(SURFACE_DETACH_TIMEOUT_MS) {}) {
+            Timber.w("mpv did not detach the surface within $SURFACE_DETACH_TIMEOUT_MS ms")
+        }
     }
 
     override fun getCurrentTracks(): Tracks {
@@ -1880,7 +2021,7 @@ class MPVPlayer(
      * @return The linear gain applied to all audio channels.
      */
     override fun getVolume(): Float {
-        return mpvLib.getPropertyInt("volume")?.div(100f) ?: 0f
+        return mpv.getPropertyInt("volume")?.div(100f) ?: 0f
     }
 
     /**
@@ -1994,15 +2135,15 @@ class MPVPlayer(
      * @see Player.Listener.onVideoSizeChanged
      */
     override fun getVideoSize(): VideoSize {
-        val width = mpvLib.getPropertyInt("width")
-        val height = mpvLib.getPropertyInt("height")
+        val width = mpv.getPropertyInt("width")
+        val height = mpv.getPropertyInt("height")
         if (width == null || height == null) return VideoSize.UNKNOWN
         return VideoSize(width, height)
     }
 
     override fun getSurfaceSize(): Size {
         val mpvSize =
-            mpvLib.getPropertyString("android-surface-size")?.split("x") ?: return Size.UNKNOWN
+            mpv.getPropertyString("android-surface-size")?.split("x") ?: return Size.UNKNOWN
         return try {
             Size(mpvSize[0].toInt(), mpvSize[1].toInt())
         } catch (_: IndexOutOfBoundsException) {
@@ -2035,12 +2176,12 @@ class MPVPlayer(
      * device is returned.
      */
     override fun getDeviceVolume(): Int {
-        return mpvLib.getPropertyInt("volume") ?: 0
+        return mpv.getPropertyInt("volume") ?: 0
     }
 
     /** Gets whether the device is muted or not. */
     override fun isDeviceMuted(): Boolean {
-        return mpvLib.getPropertyBoolean("mute") ?: false
+        return mpv.getPropertyBoolean("mute") ?: false
     }
 
     /**
@@ -2056,7 +2197,7 @@ class MPVPlayer(
     }
 
     override fun setDeviceVolume(volume: Int, flags: Int) {
-        mpvLib.setPropertyInt("volume", volume)
+        mpv.setPropertyInt("volume", volume)
     }
 
     /** Increases the volume of the device. */
@@ -2096,15 +2237,15 @@ class MPVPlayer(
     }
 
     override fun setDeviceMuted(muted: Boolean, flags: Int) {
-        return mpvLib.setPropertyBoolean("mute", muted)
+        return mpv.setPropertyBoolean("mute", muted)
     }
 
     override fun mute() {
-        mpvLib.setPropertyBoolean("mute", true)
+        mpv.setPropertyBoolean("mute", true)
     }
 
     override fun unmute() {
-        mpvLib.setPropertyBoolean("mute", false)
+        mpv.setPropertyBoolean("mute", false)
     }
 
     override fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) {
@@ -2144,23 +2285,23 @@ class MPVPlayer(
 
     /** CE (#300, #308): applies [options] from [mpvSubtitleOptions] to the playing subtitles. */
     fun updateSubtitleOptions(options: Map<String, String>) {
-        options.forEach { (name, value) -> mpvLib.setOptionString(name, value) }
+        options.forEach { (name, value) -> mpv.setOptionString(name, value) }
     }
 
     /** CE (#619): shifts subtitles by [delayMs] (positive = later, negative = earlier). */
     fun setSubtitleDelayMs(delayMs: Int) {
-        mpvLib.setPropertyDouble("sub-delay", delayMs / 1000.0)
+        mpv.setPropertyDouble("sub-delay", delayMs / 1000.0)
     }
 
     fun updateZoomMode(enabled: Boolean) {
         if (enabled) {
-            mpvLib.setOptionString("panscan", "1")
-            mpvLib.setOptionString("sub-use-margins", "yes")
-            mpvLib.setOptionString("sub-ass-force-margins", "yes")
+            mpv.setOptionString("panscan", "1")
+            mpv.setOptionString("sub-use-margins", "yes")
+            mpv.setOptionString("sub-ass-force-margins", "yes")
         } else {
-            mpvLib.setOptionString("panscan", "0")
-            mpvLib.setOptionString("sub-use-margins", "no")
-            mpvLib.setOptionString("sub-ass-force-margins", "no")
+            mpv.setOptionString("panscan", "0")
+            mpv.setOptionString("sub-use-margins", "no")
+            mpv.setOptionString("sub-ass-force-margins", "no")
         }
     }
 
@@ -2180,9 +2321,9 @@ class MPVPlayer(
                 if (currentFrameRate > 0f) {
                     applyFrameRateToSurface(holder.surface, currentFrameRate)
                 }
-                mpvLib.attachSurface(holder.surface)
-                mpvLib.setOptionString("force-window", "yes")
-                mpvLib.setOptionString("vo", videoOutput)
+                mpv.attachSurface(holder.surface)
+                mpv.setOptionString("force-window", "yes")
+                mpv.setOptionString("vo", videoOutput)
                 // #460: detaching deselected video; select what the parameters ask for again.
                 val vid = videoTrackSelection(trackSelectionParameters)
                 selectTrack(MPVTrackType.VIDEO, vid)
@@ -2206,7 +2347,7 @@ class MPVPlayer(
                 height: Int,
             ) {
                 if (released) return
-                mpvLib.setPropertyString("android-surface-size", "${width}x$height")
+                mpv.setPropertyString("android-surface-size", "${width}x$height")
             }
 
             /**
@@ -2229,6 +2370,12 @@ class MPVPlayer(
     companion object {
         /** Fraction to which audio volume is ducked on loss of audio focus */
         private const val AUDIO_FOCUS_DUCKING = 0.5f
+
+        /** CE (#460): how long the main thread waits for mpv to detach a surface that goes away. */
+        private const val SURFACE_DETACH_TIMEOUT_MS = 2_000L
+
+        /** CE (#460): how often [stallCheck] looks at the position. */
+        private const val STALL_CHECK_INTERVAL_MS = 1_000L
 
         private val permanentAvailableCommands: Commands =
             Commands.Builder()

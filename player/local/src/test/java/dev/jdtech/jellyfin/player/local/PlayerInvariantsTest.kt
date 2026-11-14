@@ -131,6 +131,32 @@ class PlayerInvariantsTest {
     }
 
     @Test
+    fun `mpv is not called on the main thread after init`() {
+        // #460: libmpv calls wait for mpv's core. With the core stuck on a wedged decoder or a
+        // dead connection, onPause (setPlayWhenReady), surfaceChanged and leaving the player
+        // blocked the main thread into ANRs. After init every call goes through MpvCallQueue.
+        val mpvPlayer = source("mpv/MPVPlayer.kt")
+        val firstInit = Regex("""\n    init \{[\s\S]*?\n    \}""").find(mpvPlayer)
+        val callsClass =
+            Regex("""private inner class MpvCalls \{[\s\S]*?\n    \}""").find(mpvPlayer)
+        assertTrue("MPVPlayer's init block not found", firstInit != null)
+        assertTrue("MPVPlayer.MpvCalls not found", callsClass != null)
+        val rest = mpvPlayer.replace(firstInit!!.value, "").replace(callsClass!!.value, "")
+        val direct =
+            Regex("""mpvLib\.(\w+)""").findAll(rest).map { it.groupValues[1] }.toSet() -
+                setOf("removeObserver", "removeLogObserver", "destroy")
+        assertTrue("MPVPlayer calls mpvLib directly after init: $direct (#460)", direct.isEmpty())
+        assertTrue(
+            "release() must destroy mpv on the mpv thread (#460)",
+            rest.contains("calls.close { mpvLib.destroy() }"),
+        )
+        assertFalse(
+            "release() must not destroy mpv on the main thread (#460)",
+            rest.replace("calls.close { mpvLib.destroy() }", "").contains("mpvLib.destroy()"),
+        )
+    }
+
+    @Test
     fun `mpv sets a network timeout`() {
         // #460: with mpv's default of 60 s a stalled read blocked recovery for over a minute
         // after the network came back. 10 s used up ffmpeg's reconnects during a longer stall.
