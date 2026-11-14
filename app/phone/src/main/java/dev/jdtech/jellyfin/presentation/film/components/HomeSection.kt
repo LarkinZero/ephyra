@@ -16,11 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.jdtech.jellyfin.core.presentation.rows.animateRowItem
+import dev.jdtech.jellyfin.core.presentation.rows.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.animateRowItem
-import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 
 @Composable
 fun HomeSection(

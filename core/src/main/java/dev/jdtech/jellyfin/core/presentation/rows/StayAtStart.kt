@@ -1,4 +1,4 @@
-package dev.jdtech.jellyfin.presentation.utils
+package dev.jdtech.jellyfin.core.presentation.rows
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.LazyItemScope
