@@ -821,6 +821,8 @@ fun CollectionType.drawerIconRes(): Int =
     when (this) {
         CollectionType.Movies -> CoreR.drawable.ic_film
         CollectionType.TvShows -> CoreR.drawable.ic_tv
+        CollectionType.HomeVideos -> CoreR.drawable.ic_list_video
+        CollectionType.MusicVideos -> CoreR.drawable.ic_film
         CollectionType.Music -> CoreR.drawable.ic_speaker
         CollectionType.Playlists -> CoreR.drawable.ic_list
         else -> CoreR.drawable.ic_library

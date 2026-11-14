@@ -87,9 +87,20 @@ constructor(
                 CollectionType.Movies -> listOf(BaseItemKind.MOVIE)
                 CollectionType.TvShows -> listOf(BaseItemKind.SERIES)
                 CollectionType.BoxSets -> listOf(BaseItemKind.BOX_SET)
+                // CE (#671): every type here has to map to an item, or the indexed pager's
+                // positions shift. Photos don't, so they stay out.
+                CollectionType.MusicVideos -> listOf(BaseItemKind.MUSIC_VIDEO)
+                CollectionType.HomeVideos,
                 CollectionType.Mixed,
                 CollectionType.Folders ->
-                    listOf(BaseItemKind.FOLDER, BaseItemKind.MOVIE, BaseItemKind.SERIES)
+                    listOf(
+                        BaseItemKind.FOLDER,
+                        BaseItemKind.PHOTO_ALBUM,
+                        BaseItemKind.MOVIE,
+                        BaseItemKind.SERIES,
+                        BaseItemKind.VIDEO,
+                        BaseItemKind.MUSIC_VIDEO,
+                    )
                 else -> null
             }
 

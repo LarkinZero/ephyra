@@ -11,12 +11,13 @@ enum class CollectionType(val type: String) {
     BoxSets("boxsets"),
     Mixed("null"),
     Folders("folders"),
+    MusicVideos("musicvideos"),
     Unknown("unknown");
 
     companion object {
         val defaultValue = Unknown
 
-        val supported = listOf(Movies, TvShows, BoxSets, Mixed, Folders)
+        val supported = listOf(Movies, TvShows, BoxSets, Mixed, Folders, HomeVideos, MusicVideos)
 
         fun fromString(string: String?): CollectionType {
             if (

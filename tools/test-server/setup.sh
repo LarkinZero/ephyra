@@ -300,6 +300,34 @@ if [ ! -f "$ROOT/media/.generated-big" ]; then
   touch "$ROOT/media/.generated-big"
 fi
 
+# --- Home Videos & Photos and Music Videos libraries (#671) ----------------------------------
+if [ ! -f "$ROOT/media/.generated-videos" ]; then
+  docker run --rm --entrypoint bash -v "$ROOT/media:/media" "$IMAGE" -c '
+    set -e
+    FF=/usr/lib/jellyfin-ffmpeg/ffmpeg
+    clip() { # clip <out> <seconds> <freq>
+      mkdir -p "$(dirname "$1")"
+      $FF -v error -y -f lavfi -i "testsrc2=size=640x360:rate=24:duration=$2" \
+          -f lavfi -i "sine=frequency=$3:duration=$2" \
+          -c:v libx264 -preset veryfast -crf 30 -pix_fmt yuv420p -g 48 -c:a aac -b:a 64k -shortest "$1"
+    }
+    H=/media/homevideos
+    clip "$H/Birthday 2024.mkv" 360 440                     # 6 minutes, so a resume position sticks
+    clip "$H/Holiday 2023/Beach.mkv" 30 520
+    clip "$H/Holiday 2023/Hike.mkv" 30 560
+    # a folder with a photo next to its clip
+    clip "$H/Garden/Pond.mkv" 30 600
+    $FF -v error -y -f lavfi -i "testsrc2=size=640x360" -frames:v 1 "$H/Garden/Roses.jpg"
+    $FF -v error -y -f lavfi -i "testsrc2=size=640x360" -frames:v 1 "$H/Snapshot.jpg"
+    V=/media/musicvideos
+    clip "$V/Test Artist - First Song.mkv" 60 330
+    clip "$V/Test Artist - Second Song.mkv" 60 660
+    clip "$V/Other Artist/Other Artist - Only Song.mkv" 60 500
+    chmod -R a+rX /media
+  '
+  touch "$ROOT/media/.generated-videos"
+fi
+
 # --- container -----------------------------------------------------------------------------
 if ! docker ps -a --format '{{.Names}}' | grep -qx "$NAME"; then
   docker run -d --name "$NAME" --restart unless-stopped -p "$PORT:8096" \
