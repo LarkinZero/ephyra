@@ -189,6 +189,12 @@ interface JellyfinRepository {
 
     suspend fun getSegments(itemId: UUID): List<FindroidSegment>
 
+    /**
+     * CE (#693): the item's segments as the server has them now, not the ones stored with a
+     * download. A new download saves these.
+     */
+    suspend fun getServerSegments(itemId: UUID): List<FindroidSegment> = getSegments(itemId)
+
     suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray?
 
     /**

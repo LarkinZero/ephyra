@@ -293,7 +293,7 @@ class DownloaderImpl(
                 jellyfinRepository
                     .getMediaSources(item.id, true, transcodeDolbyVision, maxBitrate)
                     .first { it.id == sourceId }
-            val segments = jellyfinRepository.getSegments(item.id)
+            val segments = jellyfinRepository.getServerSegments(item.id)
             val trickplayInfo =
                 if (item is FindroidSources) {
                     item.trickplayInfo?.get(sourceId)
@@ -390,6 +390,10 @@ class DownloaderImpl(
                 }
             }
 
+            // Before the source row: once that exists, a restart resumes the download and never
+            // gets here again (#693).
+            database.replaceSegments(item.id, segments.map { it.toFindroidSegmentsDto(item.id) })
+
             val sourceDto = source.toFindroidSourceDto(item.id, destFile.absolutePath)
 
             database.insertSource(
@@ -414,8 +418,6 @@ class DownloaderImpl(
                 allowMetered,
                 allowRoaming,
             )
-
-            segments.forEach { database.insertSegment(it.toFindroidSegmentsDto(item.id)) }
 
             if (trickplayInfo != null) {
                 downloadTrickplayData(item.id, sourceId, trickplayInfo)
@@ -530,6 +532,7 @@ class DownloaderImpl(
         // Progress watched offline that has not reached the server yet outlives the download:
         // the sync sends it and then removes the row (#281).
         database.deleteSyncedUserData(item.id)
+        database.deleteSegments(item.id)
 
         File(context.filesDir, "trickplay/${item.id}").deleteRecursively()
         File(context.filesDir, "images/${item.id}").deleteRecursively()
