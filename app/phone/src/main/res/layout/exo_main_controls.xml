@@ -422,7 +422,7 @@
             </LinearLayout>
 
 
-            <androidx.media3.ui.DefaultTimeBar
+            <dev.jdtech.jellyfin.utils.SegmentTimeBar
                 android:id="@+id/exo_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

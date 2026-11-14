@@ -80,7 +80,10 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.core.presentation.ephyra.ephyraGlow
 import dev.jdtech.jellyfin.core.presentation.ephyra.glowEnabled
+import dev.jdtech.jellyfin.core.presentation.ephyra.seekBarSegmentColor
+import dev.jdtech.jellyfin.core.presentation.ephyra.seekBarSegments
 import dev.jdtech.jellyfin.core.presentation.theme.EphyraColor
+import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.player.cast.models.CastPlaybackStatus
 import dev.jdtech.jellyfin.player.cast.presentation.CastNowPlaying
 import dev.jdtech.jellyfin.player.cast.presentation.CastUiState
@@ -444,6 +447,7 @@ private fun Controls(
         positionMs = player.currentPosition,
         durationMs = player.duration,
         chapters = state.chapters,
+        segments = state.segments,
         enabled = enabled && player.duration > 0L,
         onSeek = actions.onSeek,
     )
@@ -523,6 +527,7 @@ private fun SeekBar(
     positionMs: Long,
     durationMs: Long,
     chapters: List<PlayerChapter>,
+    segments: List<FindroidSegment>,
     enabled: Boolean,
     onSeek: (Long) -> Unit,
 ) {
@@ -532,6 +537,8 @@ private fun SeekBar(
     val value = if (dragging) dragValue else positionMs.toFloat().coerceIn(range)
     val description = stringResource(PlayerR.string.player_controls_progress)
     val gap = MaterialTheme.colorScheme.surfaceContainerLow
+    val scheme = MaterialTheme.colorScheme
+    val ranges = remember(segments, durationMs) { seekBarSegments(segments, durationMs) }
 
     // Playback progress is `primary`, and its thumb is one of the three things that glow
     // (VISION §3.4, §6).
@@ -558,6 +565,20 @@ private fun SeekBar(
         trackModifier =
             Modifier.drawWithContent {
                 drawContent()
+                // CE (#681): segments on the part that hasn't played; the played part stays
+                // primary (VISION §3.4).
+                val played = if (durationMs > 0L) value / durationMs else 0f
+                ranges.forEach { range ->
+                    val start = size.width * maxOf(range.start, played)
+                    val end = size.width * range.end
+                    if (end > start) {
+                        drawRect(
+                            color = scheme.seekBarSegmentColor(range.type),
+                            topLeft = Offset(start, 0f),
+                            size = Size(end - start, size.height),
+                        )
+                    }
+                }
                 // Chapters are gaps in the bar, in the colour behind it.
                 if (durationMs > 0L && chapters.size > 1) {
                     val width = 2.dp.toPx()

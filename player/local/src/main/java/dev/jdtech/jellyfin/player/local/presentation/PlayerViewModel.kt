@@ -222,6 +222,11 @@ constructor(
          * it only while the controls are visible.
          */
         val skipButtonInWindow: Boolean = false,
+        /**
+         * CE (#681): every segment of the current item, whatever its action, for the seek bar.
+         * Empty until they are loaded.
+         */
+        val currentSegments: List<FindroidSegment> = emptyList(),
         val currentTrickplay: Trickplay?,
         val currentChapters: List<PlayerChapter>,
         val fileLoaded: Boolean,
@@ -1368,6 +1373,7 @@ constructor(
                                 currentItemSeriesName = itemTitle.seriesName,
                                 currentItem = item,
                                 currentSegment = null,
+                                currentSegments = emptyList(),
                                 currentChapters = item.chapters,
                                 fileLoaded = false,
                             )
@@ -1387,9 +1393,8 @@ constructor(
                             ?.let { sendPlaybackStart(it) }
 
                         segmentTracker.setSegments(emptyList())
-                        if (shouldPollSegments()) {
-                            getSegments(item.itemId)
-                        }
+                        // CE (#681): loaded even with every type ignored, for the seek bar.
+                        getSegments(item.itemId)
 
                         playlistManager.setCurrentMediaItemIndex(item.itemId)
 
@@ -2451,7 +2456,10 @@ constructor(
                 Timber.e(e)
                 emptyList()
             }
+        // Another item took over while these were loading.
+        if (_uiState.value.currentItemId != itemId) return
         segmentTracker.setSegments(segments)
+        _uiState.update { it.copy(currentSegments = segments) }
     }
 
     private suspend fun getTrickplay(item: PlayerItem) {

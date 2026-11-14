@@ -81,6 +81,8 @@ data class CastUiState(
     val startingItem: CastNowPlaying? = null,
     val player: CastPlayerState = CastPlayerState(),
     val chapters: List<PlayerChapter> = emptyList(),
+    /** CE (#681): every segment of the item, for the seek bar. */
+    val segments: List<FindroidSegment> = emptyList(),
     val segment: FindroidSegment? = null,
     @param:StringRes val skipSegmentLabel: Int = PlayerLocalR.string.player_controls_skip_intro,
     val audioTracks: List<Track> = emptyList(),
@@ -261,7 +263,7 @@ constructor(
         if (item.itemId == segmentsItemId) return
         segmentsItemId = item.itemId
         segments = emptyList()
-        _state.update { it.copy(segment = null) }
+        _state.update { it.copy(segment = null, segments = emptyList()) }
         segmentsJob?.cancel()
         segmentsJob = viewModelScope.launch {
             val loaded =
@@ -274,7 +276,10 @@ constructor(
                     emptyList()
                 }
             // Another item took over, or the session ended, while these were loading.
-            if (segmentsItemId == item.itemId) segments = loaded
+            if (segmentsItemId == item.itemId) {
+                segments = loaded
+                _state.update { it.copy(segments = loaded) }
+            }
         }
     }
 
@@ -290,6 +295,7 @@ constructor(
                 finished = if (ended) it.nowPlaying ?: it.finished else it.finished,
                 chapters = emptyList(),
                 segment = null,
+                segments = emptyList(),
                 audioTracks = emptyList(),
                 subtitleTracks = emptyList(),
                 canRetry = canRetry(),

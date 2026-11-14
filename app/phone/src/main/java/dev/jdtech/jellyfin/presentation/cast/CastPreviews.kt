@@ -1,5 +1,7 @@
 package dev.jdtech.jellyfin.presentation.cast
 
+import dev.jdtech.jellyfin.models.FindroidSegment
+import dev.jdtech.jellyfin.models.FindroidSegmentType
 import dev.jdtech.jellyfin.player.cast.models.CastAvailability
 import dev.jdtech.jellyfin.player.cast.models.CastConnectionState
 import dev.jdtech.jellyfin.player.cast.models.CastPlaybackStatus
@@ -47,6 +49,13 @@ internal object CastPreviews {
                     PlayerChapter(startPosition = 0L, name = "Cold open"),
                     PlayerChapter(startPosition = 420_000L, name = "Arrival"),
                     PlayerChapter(startPosition = 1_500_000L),
+                ),
+            segments =
+                listOf(
+                    FindroidSegment(FindroidSegmentType.RECAP, 0L, 60_000L),
+                    FindroidSegment(FindroidSegmentType.INTRO, 60_000L, 120_000L),
+                    FindroidSegment(FindroidSegmentType.OUTRO, 2_160_000L, 2_250_000L),
+                    FindroidSegment(FindroidSegmentType.PREVIEW, 2_250_000L, 2_280_000L),
                 ),
             audioTracks =
                 listOf(

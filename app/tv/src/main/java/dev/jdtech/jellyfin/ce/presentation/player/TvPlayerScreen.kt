@@ -89,6 +89,8 @@ import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedGlow
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.ephyra.SeekBarSegment
+import dev.jdtech.jellyfin.core.presentation.ephyra.seekBarSegments
 import dev.jdtech.jellyfin.di.SubtitleStyleEntryPoint
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -672,6 +674,10 @@ fun TvPlayerScreen(
                                 emptyList()
                             }
                         },
+                    segmentMarkers =
+                        remember(uiState.currentSegments, durationMs) {
+                            seekBarSegments(uiState.currentSegments, durationMs)
+                        },
                     hasChapters = uiState.currentChapters.isNotEmpty(),
                     sleepTimerActive = sleepTimerActive,
                     sleepTimerRemainingMs = sleepTimerRemainingMs,
@@ -837,6 +843,7 @@ private fun PlayerControls(
     giveWayAlpha: () -> Float,
     seekSettings: TvSeekSettings,
     chapterMarkers: List<Float>,
+    segmentMarkers: List<SeekBarSegment>,
     hasChapters: Boolean,
     sleepTimerActive: Boolean,
     sleepTimerRemainingMs: () -> Long?,
@@ -911,6 +918,7 @@ private fun PlayerControls(
                         onSeek = callbacks.onSeek,
                         onInteraction = onInteraction,
                         chapterMarkers = chapterMarkers,
+                        segmentMarkers = segmentMarkers,
                     )
                 }
                 if (seekPreview != null && pendingSeekMs != null) {

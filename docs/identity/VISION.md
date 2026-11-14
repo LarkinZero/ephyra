@@ -117,6 +117,12 @@ Defined in a CE-owned `EphyraColors` object next to `ColorDark`/`ColorLight` (sa
   `surfaceContainerHighest`. Other is a neutral on purpose: `secondary` sat too close to the violet
   of TV. These four differ in lightness as well as hue, so they still read for deuteranopia and
   protanopia.
+- **Media segments on the seek bar** (phone, TV and Cast): Intro `secondary`, Recap
+  `onSecondaryContainer`, Outro `onSurfaceVariant`, Preview `outline`, Commercial `error`; segments
+  of unknown type are not drawn. They tint the part of the track that hasn't played; the played part
+  stays `primary`, because progress wins. The phone and TV players are dark-only and use the dark
+  scheme; the Cast player follows the app's scheme. The skip button names the segment, so colour is
+  not the only carrier. Source: `core/.../presentation/ephyra/SeekBarSegments.kt`.
 - **Destructive actions** ("Remove all downloads", delete): `error`.
 - **Text on artwork** (hero titles, player overlay): white `#FFFFFF` and white at 70 % over a
   `scrimOverArt` gradient. Never `onSurface` (it is pale cyan and tints the image).
