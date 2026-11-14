@@ -24,6 +24,7 @@ internal class MpvStallWatch(
     }
 
     private var lastPositionMs: Long? = null
+    private var lastBufferedMs = NO_POSITION
     private var stillSinceMs = 0L
 
     /** Playback is not expected to move (paused, seeking, loading, buffering, an error). */
@@ -31,12 +32,17 @@ internal class MpvStallWatch(
         lastPositionMs = null
     }
 
-    /** Playback is expected to move; mpv's position is [positionMs] at [nowMs]. */
-    fun check(positionMs: Long?, nowMs: Long): Verdict {
+    /**
+     * Playback is expected to move; mpv's position is [positionMs] at [nowMs]. While mpv buffers,
+     * [bufferedMs] (the end of what it has buffered) moving counts as progress too.
+     */
+    fun check(positionMs: Long?, nowMs: Long, bufferedMs: Long? = null): Verdict {
         val position = positionMs ?: NO_POSITION
+        val buffered = bufferedMs ?: NO_POSITION
         val last = lastPositionMs
-        if (last == null || position != last) {
+        if (last == null || position != last || buffered != lastBufferedMs) {
             lastPositionMs = position
+            lastBufferedMs = buffered
             stillSinceMs = nowMs
             return Verdict.MOVING
         }

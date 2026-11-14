@@ -66,6 +66,29 @@ class MpvStallWatchTest {
     }
 
     @Test
+    fun `while mpv buffers, new data is progress`() {
+        // Sourcery on #691: mpv's own buffering must time out too, but not while data arrives.
+        var buffered = 620_000L
+        watch.check(617_000L, now, buffered)
+        repeat(120) {
+            buffered += 500L
+            now += 1_000L
+            assertEquals(Verdict.MOVING, watch.check(617_000L, now, buffered))
+        }
+    }
+
+    @Test
+    fun `mpv buffering without data gives up`() {
+        watch.check(617_000L, now, 620_000L)
+        repeat(59) {
+            now += 1_000L
+            assertEquals(true, watch.check(617_000L, now, 620_000L) != Verdict.GIVE_UP)
+        }
+        now += 1_000L
+        assertEquals(Verdict.GIVE_UP, watch.check(617_000L, now, 620_000L))
+    }
+
+    @Test
     fun `no position at all stands still too`() {
         // READY before mpv reported time-pos, and it never does.
         tick(null)

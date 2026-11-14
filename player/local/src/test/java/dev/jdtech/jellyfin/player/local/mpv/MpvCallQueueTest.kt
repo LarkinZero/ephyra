@@ -75,8 +75,13 @@ class MpvCallQueueTest {
         stick()
         assertNull(queue.read(timeoutMs = 100L) { 1 })
         unstick.countDown()
-        // The calls queued while stuck finish, so a read waits for its answer again.
-        assertTrue(queue.runBounded(2_000L) {})
+        // The calls queued while stuck finish and clear the stuck mark. A wait that starts before
+        // the thread got there still returns at once, so poll until one is answered.
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+        while (!queue.runBounded(2_000L) {}) {
+            assertTrue("mpv thread did not recover", System.nanoTime() < deadline)
+            Thread.sleep(10)
+        }
         assertEquals(7, queue.read(timeoutMs = 2_000L) { 7 })
     }
 

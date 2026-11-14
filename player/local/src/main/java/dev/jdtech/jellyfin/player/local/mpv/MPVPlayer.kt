@@ -540,19 +540,33 @@ class MPVPlayer(
     }
 
     /**
+     * mpv reported a state of its own (a seek, a restart, the cache): the stall time so far no
+     * longer counts.
+     */
+    private fun clearStall() {
+        stalledBuffering = false
+        stallWatch.reset()
+    }
+
+    /**
      * CE (#460): reports BUFFERING while playback should move and does not, READY again when it
      * moves, and after [MpvStallWatch.GIVE_UP_MS] a network error at the position it stood still
      * at. As after a broken stream (#445), mpv is paused on the file and prepare() loads it again,
      * which [NetworkRecovery][dev.jdtech.jellyfin.player.local.domain.NetworkRecovery] does.
+     *
+     * While mpv itself reports buffering (a seek, `paused-for-cache`), new data counts as progress
+     * too, and only the give-up applies: a buffering that neither plays nor gets data for that long
+     * ends the same way.
      */
     private fun checkForStall() {
-        val expectMoving =
+        val playing =
             isPlayerReady &&
                 playerError == null &&
                 currentPlayWhenReady &&
-                suppressionReason == PLAYBACK_SUPPRESSION_REASON_NONE &&
-                (playbackState == STATE_READY ||
-                    (stalledBuffering && playbackState == STATE_BUFFERING))
+                suppressionReason == PLAYBACK_SUPPRESSION_REASON_NONE
+        val mpvBuffering = playing && playbackState == STATE_BUFFERING && !stalledBuffering
+        val expectMoving =
+            playing && (playbackState == STATE_READY || playbackState == STATE_BUFFERING)
         if (!expectMoving) {
             stallWatch.reset()
             if (stalledBuffering) {
@@ -565,7 +579,8 @@ class MPVPlayer(
             return
         }
         val now = SystemClock.elapsedRealtime()
-        when (stallWatch.check(currentPositionMs, now)) {
+        val bufferedMs = if (mpvBuffering) currentCacheDurationMs else null
+        when (stallWatch.check(currentPositionMs, now, bufferedMs)) {
             MpvStallWatch.Verdict.MOVING ->
                 if (stalledBuffering) {
                     stalledBuffering = false
@@ -573,7 +588,8 @@ class MPVPlayer(
                     setPlayerStateAndNotifyIfChanged(playbackState = STATE_READY)
                 }
             MpvStallWatch.Verdict.STALLED ->
-                if (!stalledBuffering) {
+                // mpv's own buffering shows already; only the give-up applies to it.
+                if (!stalledBuffering && !mpvBuffering) {
                     stalledBuffering = true
                     Timber.w(
                         "mpv reports playing, but the position stood still at " +
@@ -582,7 +598,11 @@ class MPVPlayer(
                     setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
                 }
             MpvStallWatch.Verdict.GIVE_UP -> {
-                Timber.e("mpv playback stood still at $currentPositionMs ms, giving up")
+                Timber.e(
+                    "mpv playback stood still at $currentPositionMs ms" +
+                        (if (mpvBuffering) " while mpv buffered" else "") +
+                        ", giving up"
+                )
                 stalledBuffering = false
                 stallWatch.reset()
                 failPlayback(
@@ -691,7 +711,7 @@ class MPVPlayer(
                 }
                 "paused-for-cache" -> {
                     if (isPlayerReady) {
-                        stalledBuffering = false
+                        clearStall()
                         if (value) {
                             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
                         } else {
@@ -797,11 +817,11 @@ class MPVPlayer(
                 // auto-advance), not here: mpv also raises this event for the internal start
                 // position seek below, which must not look like a seek to listeners.
                 MpvEvent.MPV_EVENT_SEEK -> {
-                    stalledBuffering = false
+                    clearStall()
                     setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)
                 }
                 MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
-                    stalledBuffering = false
+                    clearStall()
                     if (!isPlayerReady) {
                         isPlayerReady = true
                         val passed = startPassedToLoadMs
@@ -1373,8 +1393,7 @@ class MPVPlayer(
      */
     private fun resetInternalState() {
         isPlayerReady = false
-        stalledBuffering = false
-        stallWatch.reset()
+        clearStall()
         isSeekable = false
         currentPositionMs = null
         currentDurationMs = null
@@ -1805,6 +1824,11 @@ class MPVPlayer(
     override fun stop() {
         startNewLoad(index = null)
         mpv.command(arrayOf("stop", "keep-playlist"))
+        // CE (#460): IDLE until prepare(), as ExoPlayer does. A stopped player that stayed READY
+        // would look stalled to checkForStall and be loaded again by NetworkRecovery.
+        isPlayerReady = false
+        clearStall()
+        setPlayerStateAndNotifyIfChanged(playbackState = STATE_IDLE)
     }
 
     /**
