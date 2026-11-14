@@ -32,6 +32,13 @@ subprojects {
     val ktfmtFormatter = rootProject.libs.ktfmt.formatter.get().toString()
     configurations.named("ktfmt") { resolutionStrategy.force(ktfmtFormatter) }
 
+    // The plugin's scripts tasks take every .kts file under the module folder, build/ included, so
+    // they read the build outputs while a build in the same Gradle call writes them and fail on a
+    // folder that disappears (#663). Only the module's own build scripts are formatted.
+    listOf("ktfmtCheckScripts", "ktfmtFormatScripts").forEach { name ->
+        tasks.named<SourceTask>(name) { setSource(fileTree(projectDir) { include("*.gradle.kts") }) }
+    }
+
     // ktfmtCheck once passed while checking no Kotlin file at all, only the build scripts: the
     // plugin found no source sets under AGP 9's built-in Kotlin (#661). This fails ktfmtCheck when
     // a .kt file under src/ is not in any of the plugin's source-set tasks.
