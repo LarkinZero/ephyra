@@ -52,7 +52,7 @@ constructor(
 
     /**
      * @param indexed CE (#135): load the grid with placeholders, so it knows its length and can
-     *   jump, and build a [LetterIndex] when sorting by name. TV uses this, phone doesn't.
+     *   jump, and build a [LetterIndex] when sorting by name. TV and phone (#672) both use it.
      */
     fun setup(parentId: UUID, libraryType: CollectionType, indexed: Boolean = false) {
         this.parentId = parentId
@@ -176,7 +176,15 @@ constructor(
         recursive: Boolean,
         filters: List<ItemFilter>?,
     ) {
-        if (letterIndexCache.containsKey(key)) return
+        // A late first page of a name-sorted grid the user has already left (#672).
+        if (sortBy != SortBy.NAME) return
+        val cached = letterIndexCache[key]
+        if (cached != null) {
+            if (cached.total == total) return
+            // The library changed since the index was built: its positions no longer hold.
+            letterIndexCache.remove(key)
+            if (key == letterIndexKey()) _state.update { it.copy(letterIndex = null) }
+        }
         val ascending = key.ascending
         letterIndexJob?.cancel()
         letterIndexJob = viewModelScope.launch {
@@ -204,7 +212,9 @@ constructor(
                     null
                 }
             if (index != null) letterIndexCache[key] = index
-            if (key == letterIndexKey()) _state.update { it.copy(letterIndex = index) }
+            if (key == letterIndexKey() && sortBy == SortBy.NAME) {
+                _state.update { it.copy(letterIndex = index) }
+            }
         }
     }
 

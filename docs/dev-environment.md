@@ -110,6 +110,11 @@ names (14 movies, 5 shows such as Breaking Bad and Bluey), so the server fetches
 overviews, cast and episode data. These need internet on the first scan, and what the metadata
 providers return can change, so do not assert on their exact content.
 
+**A large library** (`Big Movies`): about 650 movies, hard links of one 5-second clip, with
+names spread over the alphabet (10 to 40 per letter, none under X, one "The ..." per letter) and
+a few under digits, symbols and accents. No artwork. For the phone's A–Z fast scroller and
+anything else that needs a grid that scrolls a long way.
+
 To add a case, add it to `setup.sh` under a marker file of its own (as `.generated-extra` does)
 and to the table above. A file dropped into `media/` by hand works until the next `wipe --media`,
 and nobody else gets it.

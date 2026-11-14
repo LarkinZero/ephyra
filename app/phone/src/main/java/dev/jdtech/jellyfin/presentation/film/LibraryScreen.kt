@@ -1,17 +1,25 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -31,10 +39,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.CombinedLoadStates
@@ -53,6 +64,7 @@ import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.LetterFastScroller
 import dev.jdtech.jellyfin.presentation.film.components.ServerOrErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -77,7 +89,8 @@ fun LibraryScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
-        viewModel.setup(parentId = libraryId, libraryType = libraryType)
+        // CE (#672): placeholders, so the fast scroller can jump anywhere, and the letter index.
+        viewModel.setup(parentId = libraryId, libraryType = libraryType, indexed = true)
         // CE (#371): the ViewModel decides, a saved flag would skip the load after process death.
         viewModel.loadItemsIfNeeded()
     }
@@ -110,6 +123,8 @@ private fun LibraryScreenLayout(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var showSortByDialog by remember { mutableStateOf(false) }
+
+    val gridState = rememberLazyGridState()
 
     Scaffold(
         modifier =
@@ -168,22 +183,40 @@ private fun LibraryScreenLayout(
                             minColumns = 2,
                         ),
                     modifier = Modifier.fillMaxSize(),
+                    state = gridState,
                     contentPadding = contentPadding + innerPadding,
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                 ) {
                     items(count = items.itemCount, key = items.itemKey { it.id }) {
                         val item = items[it]
-                        item?.let { item ->
+                        if (item == null) {
+                            // CE (#672): not loaded yet, for example right after a jump. A cell
+                            // with no height would make the grid compose and load far ahead.
+                            ItemCardSkeleton()
+                        } else {
+                            // No animateItem() (#257, #672): the grid pages and jumps.
                             ItemCard(
                                 item = item,
                                 direction = Direction.VERTICAL,
                                 onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
                 }
+                val layoutDirection = LocalLayoutDirection.current
+                LetterFastScroller(
+                    gridState = gridState,
+                    itemCount = items.itemCount,
+                    letterIndex = state.letterIndex,
+                    modifier =
+                        Modifier.align(Alignment.TopEnd)
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = innerPadding.calculateBottomPadding(),
+                                end = innerPadding.calculateEndPadding(layoutDirection),
+                            ),
+                )
                 if (items.itemCount == 0) {
                     when (items.loadState.refresh) {
                         is LoadState.Loading ->
@@ -212,6 +245,23 @@ private fun LibraryScreenLayout(
             },
             onDismissRequest = { showSortByDialog = false },
         )
+    }
+}
+
+/** CE (#672): the shape of a vertical [ItemCard] while its page loads. */
+@Composable
+private fun ItemCardSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.width(Layout.cardVertical(currentWidthClass()))) {
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .aspectRatio(0.66f)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+        // Two lines of bodyMedium and the card's bottom spacer.
+        Spacer(modifier = Modifier.height(42.dp))
     }
 }
 
