@@ -31,7 +31,8 @@ import org.robolectric.annotation.Config
  *
  * CE (#633): the offline position's row also gets a last played time when it waits to be sent.
  *
- * CE (#693): the downloaded episode's skip segments survive the change of the segments table's key.
+ * CE (#693): a downloaded item's skip segments survive the change of the segments table's key, and
+ * those of an item that is no longer downloaded go.
  *
  * Released schemas: 12 (v1.2.0-ce.0 to ce.3), 14 (v1.2.0-ce.4 to 2.1.0), 16 (2.2.0), 18 (2.3.0,
  * 2.4.0).
@@ -122,7 +123,7 @@ class ServerDatabaseMigrationTest {
             assertEquals(PATH, dao.getSources(uuid(MOVIE)).single().path)
             assertEquals(POSITION, dao.getUserData(uuid(MOVIE), uuid(USER))!!.playbackPositionTicks)
             assertEquals(uuid(EPISODE), dao.getPendingDownloads().single().itemId)
-            assertEquals(300_000_000L, dao.getSegments(uuid(EPISODE)).single().endTicks)
+            assertEquals(300_000_000L, dao.getSegments(uuid(MOVIE)).single().endTicks)
             if (from >= 14) {
                 assertEquals(
                     "eng",
@@ -170,7 +171,10 @@ class ServerDatabaseMigrationTest {
             "INSERT INTO pending_downloads (itemId, itemKind, addedAt) VALUES ('$EPISODE', 'Episode', 1700000000)"
         )
         execSQL(
-            "INSERT INTO segments (itemId, type, startTicks, endTicks) VALUES ('$EPISODE', 'INTRO', 0, 300000000)"
+            "INSERT INTO segments (itemId, type, startTicks, endTicks) VALUES ('$MOVIE', 'INTRO', 0, 300000000)"
+        )
+        execSQL(
+            "INSERT INTO segments (itemId, type, startTicks, endTicks) VALUES ('$EPISODE', 'OUTRO', 0, 300000000)"
         )
         if (version >= 14) {
             execSQL(
@@ -205,7 +209,8 @@ class ServerDatabaseMigrationTest {
         )
         assertEquals(EPISODE, text("SELECT itemId FROM pending_downloads"))
         assertEquals(0L, long("SELECT smartQueued FROM sources"))
-        assertEquals(300_000_000L, long("SELECT endTicks FROM segments WHERE itemId = '$EPISODE'"))
+        assertEquals(300_000_000L, long("SELECT endTicks FROM segments WHERE itemId = '$MOVIE'"))
+        assertEquals(0L, long("SELECT COUNT(*) FROM segments WHERE itemId = '$EPISODE'"))
         if (from >= 14) {
             assertEquals("eng", text("SELECT language FROM seriesTrackPreferences"))
         }

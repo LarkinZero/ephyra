@@ -679,6 +679,11 @@ class JellyfinRepositoryImpl(
                 return@withContext databaseSegments
             }
 
+            getServerSegments(itemId)
+        }
+
+    override suspend fun getServerSegments(itemId: UUID): List<FindroidSegment> =
+        withContext(Dispatchers.IO) {
             try {
                 val apiSegments =
                     jellyfinApi.mediaSegmentApi.getItemSegments(itemId).content.items.map {
