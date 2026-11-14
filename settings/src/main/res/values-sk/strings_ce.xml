@@ -209,4 +209,6 @@
     <string name="ce_pref_cast_hevc">Televízor prehráva HEVC</string>
     <string name="ce_pref_cast_hevc_summary">Posielať video HEVC (H.265) bez zmeny namiesto konverzie na H.264. Chromecast 4K ho tak dostáva automaticky; zapnite pre iný televízor alebo box, ktoré HEVC prehrajú</string>
     <string name="ce_pref_home_episode_images_summary_phone">Zobraziť obrázok epizódy namiesto obrázka seriálu v radoch Pokračovať v sledovaní a Ďalšie a v hornej časti stránky epizódy</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmenty na posúvači</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Zobraziť úvod, rekapituláciu, záver, ukážku a reklamy ako farebné časti posúvača</string>
 </resources>

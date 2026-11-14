@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">A TV reproduz HEVC</string>
     <string name="ce_pref_cast_hevc_summary">Enviar o vídeo HEVC (H.265) como está em vez de convertê-lo para H.264. Um Chromecast 4K recebe assim automaticamente; ative para outra TV ou box que reproduza HEVC</string>
     <string name="ce_pref_home_episode_images_summary_phone">Mostrar a imagem do episódio em vez da imagem da série em Continuar assistindo, em A seguir e no topo da página do episódio</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmentos na barra de progresso</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Mostrar a abertura, o resumo, o encerramento, a prévia e os comerciais como partes coloridas da barra de progresso</string>
 </resources>

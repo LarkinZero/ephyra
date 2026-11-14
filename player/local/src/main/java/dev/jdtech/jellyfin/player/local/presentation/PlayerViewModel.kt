@@ -159,6 +159,10 @@ constructor(
     private var mediaSession: MediaSession? = null
 
     /** Read once per player session. The setting is only offered on phones. */
+    /** CE (#681): the segments on the seek bar. Read once per player session. */
+    private val segmentsOnSeekBar: Boolean =
+        appPreferences.getValue(appPreferences.playerMediaSegmentsOnSeekBar)
+
     val isBackgroundAudioEnabled: Boolean =
         appPreferences.getValue(appPreferences.playerBackgroundAudio)
 
@@ -222,6 +226,11 @@ constructor(
          * it only while the controls are visible.
          */
         val skipButtonInWindow: Boolean = false,
+        /**
+         * CE (#681): every segment of the current item, whatever its action, for the seek bar.
+         * Empty until they are loaded, and with the seek bar setting off.
+         */
+        val currentSegments: List<FindroidSegment> = emptyList(),
         val currentTrickplay: Trickplay?,
         val currentChapters: List<PlayerChapter>,
         val fileLoaded: Boolean,
@@ -1368,6 +1377,7 @@ constructor(
                                 currentItemSeriesName = itemTitle.seriesName,
                                 currentItem = item,
                                 currentSegment = null,
+                                currentSegments = emptyList(),
                                 currentChapters = item.chapters,
                                 fileLoaded = false,
                             )
@@ -1387,7 +1397,8 @@ constructor(
                             ?.let { sendPlaybackStart(it) }
 
                         segmentTracker.setSegments(emptyList())
-                        if (shouldPollSegments()) {
+                        // CE (#681): the seek bar shows them even with every type ignored.
+                        if (segmentsOnSeekBar || shouldPollSegments()) {
                             getSegments(item.itemId)
                         }
 
@@ -2451,7 +2462,10 @@ constructor(
                 Timber.e(e)
                 emptyList()
             }
+        // Another item took over while these were loading.
+        if (_uiState.value.currentItemId != itemId) return
         segmentTracker.setSegments(segments)
+        if (segmentsOnSeekBar) _uiState.update { it.copy(currentSegments = segments) }
     }
 
     private suspend fun getTrickplay(item: PlayerItem) {

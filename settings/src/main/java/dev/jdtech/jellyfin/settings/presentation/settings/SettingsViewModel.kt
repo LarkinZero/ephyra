@@ -937,6 +937,17 @@ constructor(
                                         nameStringResource = R.string.media_segments,
                                         preferences =
                                             listOf(
+                                                // CE (#681): the segments on the seek bar.
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string
+                                                            .pref_player_media_segments_on_seek_bar,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_on_seek_bar_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMediaSegmentsOnSeekBar,
+                                                ),
                                                 // CE (#271): one action per segment type is the
                                                 // only per-type control. The old global switches
                                                 // and type lists were migrated into these once

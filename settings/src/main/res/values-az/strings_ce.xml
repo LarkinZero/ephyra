@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">Televizor HEVC oynadır</string>
     <string name="ce_pref_cast_hevc_summary">HEVC (H.265) videonu H.264 formatına çevirmək əvəzinə olduğu kimi göndər. 4K Chromecast bunu özü alır; HEVC oynadan başqa televizor və ya qurğu üçün yandırın</string>
     <string name="ce_pref_home_episode_images_summary_phone">\"İzləməyə davam et\" və \"Növbəti\" sıralarında və bölüm səhifəsinin yuxarısında serialın şəkli əvəzinə bölümün şəklini göstər</string>
+    <string name="pref_player_media_segments_on_seek_bar">İrəliləmə zolağında seqmentlər</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Girişi, xülasəni, sonluğu, önizləməni və reklamları irəliləmə zolağında rəngli hissələr kimi göstər</string>
 </resources>

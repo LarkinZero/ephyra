@@ -78,6 +78,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
+import dev.jdtech.jellyfin.utils.SegmentTimeBar
 import dev.jdtech.jellyfin.utils.applySubtitleStyle
 import java.util.UUID
 import javax.inject.Inject
@@ -832,6 +833,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             updateSkipSegmentButton(this)
+                            // CE (#681): every segment as a range of the seek bar.
+                            binding.playerView
+                                .findViewById<SegmentTimeBar>(R.id.exo_progress)
+                                .setSegments(currentSegments)
 
                             // Trickplay
                             previewScrubListener?.let { it.currentTrickplay = currentTrickplay }

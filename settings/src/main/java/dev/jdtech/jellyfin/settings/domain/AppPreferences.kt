@@ -158,6 +158,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
                 Constants.PlayerMediaSegmentsAutoSkip.ALWAYS,
             )
 
+    /** CE (#681): draw every media segment as a range of the seek bar. Phone, TV and Cast. */
+    val playerMediaSegmentsOnSeekBar = Preference("pref_player_media_segments_on_seek_bar", true)
+
     val playerMediaSegmentsNextEpisodeThreshold
         get() = Preference("pref_player_media_segments_next_episode_threshold", 5_000L)
 

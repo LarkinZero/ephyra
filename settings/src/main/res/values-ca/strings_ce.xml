@@ -205,4 +205,6 @@
     <string name="ce_pref_cast_hevc">El televisor reprodueix HEVC</string>
     <string name="ce_pref_cast_hevc_summary">Envia el vídeo HEVC (H.265) tal com és en lloc de convertir-lo a H.264. Un Chromecast 4K el rep així automàticament; activa-ho per a un altre televisor o descodificador que reprodueixi HEVC</string>
     <string name="ce_pref_home_episode_images_summary_phone">Mostra la imatge de l\'episodi en lloc de la imatge de la sèrie a Continua mirant, a Següent i a la part superior de la pàgina de l\'episodi</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segments a la barra de progrés</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Mostra la introducció, el resum, el final, l\'avançament i els anuncis com a parts de color de la barra de progrés</string>
 </resources>
