@@ -98,7 +98,7 @@ class DeviceProfileBuilder(context: Context) {
      * no way to honor a bitrate limit and playback info returns no usable source.
      */
     fun getDirectPlayTranscodeFallbackProfile(): DeviceProfile =
-        buildDirectPlayProfile().copy(transcodingProfiles = TRANSCODING_PROFILES)
+        buildDirectPlayTranscodeFallbackProfile()
 
     /**
      * Profile for the downloader. With [transcodeDolbyVision] off this is just the permissive
@@ -121,7 +121,7 @@ class DeviceProfileBuilder(context: Context) {
                 buildDirectPlayProfile()
                     .copy(
                         transcodingProfiles = DOWNLOAD_TRANSCODING_PROFILES,
-                        subtitleProfiles = DOWNLOAD_SUBTITLE_PROFILES,
+                        subtitleProfiles = SIDECAR_SUBTITLE_PROFILES,
                     )
             else -> buildDirectPlayProfile()
         }
@@ -705,13 +705,27 @@ class DeviceProfileBuilder(context: Context) {
             )
 
         /**
-         * Subtitle handling for download transcodes: everything is delivered as an external
-         * sidecar, image formats included. Without the image entries the server's only option for a
-         * PGS/VobSub/DVB track is ENCODE (burn-in), which drags a GPU overlay filter chain (VAAPI +
-         * Vulkan/libplacebo) into the transcode — observed to wedge the encoder mid-stream and
-         * stall the download indefinitely.
+         * CE (#612): mpv's profile under a bitrate cap. The transcode carries the image subtitles
+         * as sidecars ([SIDECAR_SUBTITLE_PROFILES]): with only srt and ass the server burns the
+         * file's default PGS/VobSub track into the picture, which the subtitle dialog cannot switch
+         * off. The app picks the subtitle, not the server.
          */
-        private val DOWNLOAD_SUBTITLE_PROFILES =
+        internal fun buildDirectPlayTranscodeFallbackProfile(): DeviceProfile =
+            buildDirectPlayProfile()
+                .copy(
+                    transcodingProfiles = TRANSCODING_PROFILES,
+                    subtitleProfiles = SIDECAR_SUBTITLE_PROFILES,
+                )
+
+        /**
+         * Subtitle handling for transcodes the app never wants a subtitle burnt into (downloads,
+         * mpv under a bitrate cap): everything is delivered as an external sidecar, image formats
+         * included. Without the image entries the server's only option for a PGS/VobSub/DVB track
+         * is ENCODE (burn-in). In a download that drags a GPU overlay filter chain (VAAPI +
+         * Vulkan/libplacebo) into the transcode, observed to wedge the encoder mid-stream and stall
+         * the download indefinitely. In playback the server picks the track itself (#612).
+         */
+        private val SIDECAR_SUBTITLE_PROFILES =
             listOf(
                 SubtitleProfile("srt", SubtitleDeliveryMethod.EXTERNAL),
                 SubtitleProfile("ass", SubtitleDeliveryMethod.EXTERNAL),
@@ -774,7 +788,7 @@ class DeviceProfileBuilder(context: Context) {
                                 ),
                         )
                     ),
-                subtitleProfiles = DOWNLOAD_SUBTITLE_PROFILES,
+                subtitleProfiles = SIDECAR_SUBTITLE_PROFILES,
             )
     }
 }
