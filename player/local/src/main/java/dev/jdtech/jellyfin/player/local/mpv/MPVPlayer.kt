@@ -363,7 +363,6 @@ class MPVPlayer(
 
         mpvLib.addObserver(this)
         mpvLib.addLogObserver(logObserver)
-        ffmpegLog?.add(ffmpegLogSink)
 
         // Observe properties
         data class Property(val name: String, val format: Int)
@@ -398,6 +397,9 @@ class MPVPlayer(
                 mpvLib.setPropertyBoolean("pause", true)
             }
         }
+
+        // CE (#707): last, so a player whose construction failed is never kept in the list.
+        ffmpegLog?.add(ffmpegLogSink)
     }
 
     private fun setupDirectories(context: Context, configDir: File, cacheDir: File) {

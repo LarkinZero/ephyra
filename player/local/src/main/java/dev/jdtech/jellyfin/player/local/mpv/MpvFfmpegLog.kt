@@ -67,8 +67,9 @@ internal class MpvFfmpegLog {
             if (tried) return shared
             tried = true
             val log = MpvFfmpegLog()
+            var mpv: MPVLib? = null
             try {
-                val mpv = MPVLib.create(context) ?: return null
+                mpv = MPVLib.create(context) ?: return null
                 mpv.setOptionString("config", "no")
                 mpv.setOptionString("vo", "null")
                 mpv.setOptionString("ao", "null")
@@ -87,6 +88,12 @@ internal class MpvFfmpegLog {
                 shared = log
             } catch (e: Exception) {
                 Timber.w(e, "Could not start mpv for FFmpeg's log")
+                // Destroyed, it gives up FFmpeg's log, which the first player's mpv takes then.
+                try {
+                    mpv?.destroy()
+                } catch (e: Exception) {
+                    Timber.w(e, "Could not destroy the mpv for FFmpeg's log")
+                }
             }
             return shared
         }
