@@ -172,6 +172,16 @@ class MPVPlayer(
             }
         }
 
+    /**
+     * CE (#707): FFmpeg's lines (tcp, http) come from the process' [MpvFfmpegLog], not from this
+     * player's mpv, which holds FFmpeg's log only when [MpvFfmpegLog] could not start.
+     */
+    private val ffmpegLog: MpvFfmpegLog?
+
+    private val ffmpegLogSink = MpvFfmpegLog.Sink { prefix, level, text ->
+        logObserver.logMessage(prefix, level, text)
+    }
+
     private constructor(
         builder: Builder
     ) : this(
@@ -270,6 +280,9 @@ class MPVPlayer(
 
         setupDirectories(context, configDir, cacheDir)
 
+        // CE (#707): before this player's mpv, so that one never holds FFmpeg's log.
+        ffmpegLog = MpvFfmpegLog.shared(context)
+
         mpvLib =
             MPVLib.create(context) ?: throw IllegalStateException("MPVLib.create() returned null")
 
@@ -350,6 +363,7 @@ class MPVPlayer(
 
         mpvLib.addObserver(this)
         mpvLib.addLogObserver(logObserver)
+        ffmpegLog?.add(ffmpegLogSink)
 
         // Observe properties
         data class Property(val name: String, val format: Int)
@@ -1850,6 +1864,7 @@ class MPVPlayer(
         currentPlayWhenReady = false
         mpvLib.removeObserver(this)
         mpvLib.removeLogObserver(logObserver)
+        ffmpegLog?.remove(ffmpegLogSink)
         // Events mpv posted before removeObserver would otherwise still run, after destroy().
         handler.removeCallbacksAndMessages(null)
         listeners.release()
