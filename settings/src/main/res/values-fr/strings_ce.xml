@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Afficher l\'image de l\'épisode au lieu de celle de la série dans Reprendre la lecture, dans À suivre et en haut de la page de l\'épisode</string>
     <string name="pref_player_media_segments_on_seek_bar">Segments sur la barre de lecture</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Afficher l\'intro, le récapitulatif, le générique de fin, l\'aperçu et les publicités en couleur sur la barre de lecture</string>
+    <string name="ce_pref_side_backdrop">Arrière-plan à côté du texte</string>
+    <string name="ce_pref_side_backdrop_summary">Sur une tablette en paysage, afficher l\'arrière-plan d\'un élément dans sa propre forme à côté du titre au lieu de toute la largeur</string>
 </resources>

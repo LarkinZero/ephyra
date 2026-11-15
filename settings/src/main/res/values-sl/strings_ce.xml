@@ -211,4 +211,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Prikaži sliko epizode namesto slike serije v vrsticah Nadaljuj z ogledom in Naslednje ter na vrhu strani epizode</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenti na drsniku</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Prikaži uvod, povzetek, odjavno špico, napovednik in oglase kot barvne dele drsnika</string>
+    <string name="ce_pref_side_backdrop">Ozadje ob besedilu</string>
+    <string name="ce_pref_side_backdrop_summary">Na tabličnem računalniku v ležečem načinu prikaži ozadje elementa v njegovi obliki ob naslovu namesto čez celo širino</string>
 </resources>

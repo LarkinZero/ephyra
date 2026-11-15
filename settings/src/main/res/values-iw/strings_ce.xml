@@ -209,4 +209,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">הצגת תמונת הפרק במקום תמונת הסדרה ב\"המשך צפייה\", ב\"הבא בתור\" ובראש דף הפרק</string>
     <string name="pref_player_media_segments_on_seek_bar">מקטעים בסרגל ההתקדמות</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">הצגת הפתיח, הסיכום, הסיום, התצוגה המקדימה והפרסומות כחלקים צבעוניים בסרגל ההתקדמות</string>
+    <string name="ce_pref_side_backdrop">רקע לצד הטקסט</string>
+    <string name="ce_pref_side_backdrop_summary">בטאבלט במצב לרוחב, הצג את הרקע של פריט בצורתו המקורית לצד הכותרת במקום לכל הרוחב</string>
 </resources>
