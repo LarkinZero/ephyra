@@ -44,6 +44,15 @@ class VideoLibraryItemTest {
     }
 
     @Test
+    fun `only the new library types narrow their Latest row`() {
+        assertEquals(listOf(BaseItemKind.VIDEO), CollectionType.HomeVideos.latestItemTypes)
+        assertEquals(listOf(BaseItemKind.MUSIC_VIDEO), CollectionType.MusicVideos.latestItemTypes)
+        assertNull(CollectionType.Movies.latestItemTypes)
+        assertNull(CollectionType.TvShows.latestItemTypes)
+        assertNull(CollectionType.Mixed.latestItemTypes)
+    }
+
+    @Test
     fun `a home video and a music video map to a movie`() {
         assertTrue(map(BaseItemKind.VIDEO) is FindroidMovie)
         assertTrue(map(BaseItemKind.MUSIC_VIDEO) is FindroidMovie)

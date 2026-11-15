@@ -349,7 +349,10 @@ class JellyfinRepositoryOfflineImpl(
         }
     }
 
-    override suspend fun getLatestMedia(parentId: UUID): List<FindroidItem> {
+    override suspend fun getLatestMedia(
+        parentId: UUID,
+        includeItemTypes: List<BaseItemKind>?,
+    ): List<FindroidItem> {
         return withContext(Dispatchers.IO) {
             val serverId = currentServerId() ?: return@withContext emptyList()
             when (parentId) {

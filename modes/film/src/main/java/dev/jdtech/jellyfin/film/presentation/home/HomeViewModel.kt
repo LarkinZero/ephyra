@@ -12,6 +12,7 @@ import dev.jdtech.jellyfin.film.domain.homerows.HomeRowsProfile
 import dev.jdtech.jellyfin.film.domain.homerows.HomeRowsStore
 import dev.jdtech.jellyfin.film.domain.homerows.LegacyHomeSwitches
 import dev.jdtech.jellyfin.film.domain.homerows.homeLibraries
+import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.HomeSection
@@ -414,7 +415,13 @@ constructor(
                 .mapIndexed { i, view ->
                     async {
                         val result =
-                            logFailure("library ${view.id}") { repository.getLatestMedia(view.id) }
+                            logFailure("library ${view.id}") {
+                                repository.getLatestMedia(
+                                    view.id,
+                                    CollectionType.fromString(view.collectionType?.serialName)
+                                        .latestItemTypes,
+                                )
+                            }
                         synchronized(results) {
                             results[i] = result
                             _state.update { it.copy(views = items()) }

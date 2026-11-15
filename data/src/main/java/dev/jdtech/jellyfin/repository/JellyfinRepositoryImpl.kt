@@ -459,12 +459,16 @@ class JellyfinRepositoryImpl(
                 .toFindroidItems()
         }
 
-    override suspend fun getLatestMedia(parentId: UUID): List<FindroidItem> =
+    override suspend fun getLatestMedia(
+        parentId: UUID,
+        includeItemTypes: List<BaseItemKind>?,
+    ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
             jellyfinApi.libraryApi
                 .getLatestMedia(
                     currentUserId,
                     parentId = parentId,
+                    includeItemTypes = includeItemTypes,
                     fields = listOf(ItemFields.OVERVIEW),
                     limit = 16,
                     imageTypeLimit = 1,
