@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -260,8 +261,11 @@ private fun ItemCardSkeleton(modifier: Modifier = Modifier) {
                     .background(MaterialTheme.colorScheme.surfaceContainer)
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-        // Two lines of bodyMedium and the card's bottom spacer.
-        Spacer(modifier = Modifier.height(42.dp))
+        // One line of title and the card's bottom spacer: most titles fit on one line, so the
+        // row keeps its height when the page comes in (a two-line title still grows it).
+        val titleLine =
+            with(LocalDensity.current) { MaterialTheme.typography.bodyMedium.lineHeight.toDp() }
+        Spacer(modifier = Modifier.height(titleLine + 2.dp))
     }
 }
 
