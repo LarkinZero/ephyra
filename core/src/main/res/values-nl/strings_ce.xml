@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Je hebt een deel van deze afleveringen al gezien.</string>
     <string name="ce_download_choice_unwatched">Alleen ongezien (%1$d)</string>
     <string name="ce_download_choice_all">Alle afleveringen (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Titel verborgen</string>
+    <string name="ce_spoiler_overview_hidden">Verborgen tot je deze aflevering hebt gezien. Houd ingedrukt om hem te tonen.</string>
+    <string name="ce_spoiler_reveal">Tonen</string>
 </resources>

@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadPumpService
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.LocalNotificationPermissionRequest
@@ -79,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                 if (!state.isLoading) {
                     CompositionLocalProvider(
                         LocalOfflineMode provides state.isOfflineMode,
+                        LocalSpoilers provides Spoilers(state.hideSpoilers),
                         LocalSideBackdrop provides state.sideBackdrop,
                         LocalServerStatus provides serverStatus,
                         LocalPlaybackStopped provides stopped,

@@ -152,4 +152,7 @@
     <string name="ce_download_choice_message">Některé z těchto epizod jste už viděli.</string>
     <string name="ce_download_choice_unwatched">Jen nezhlédnuté (%1$d)</string>
     <string name="ce_download_choice_all">Všechny epizody (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Název je skrytý</string>
+    <string name="ce_spoiler_overview_hidden">Skryto, dokud tuto epizodu neuvidíte. Podržením odkryjete.</string>
+    <string name="ce_spoiler_reveal">Odkrýt</string>
 </resources>

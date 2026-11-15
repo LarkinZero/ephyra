@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Du hast einige dieser Folgen schon gesehen.</string>
     <string name="ce_download_choice_unwatched">Nur ungesehene (%1$d)</string>
     <string name="ce_download_choice_all">Alle Folgen (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Titel ausgeblendet</string>
+    <string name="ce_spoiler_overview_hidden">Ausgeblendet, bis du diese Episode gesehen hast. Zum Aufdecken gedrückt halten.</string>
+    <string name="ce_spoiler_reveal">Aufdecken</string>
 </resources>

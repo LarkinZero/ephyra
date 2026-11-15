@@ -325,6 +325,14 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.showFavoritesTab,
                                                 ),
+                                                // CE (#618)
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_hide_spoilers,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_hide_spoilers_summary,
+                                                    backendPreference = appPreferences.hideSpoilers,
+                                                ),
                                                 // CE (#332): what the movie, show and episode pages
                                                 // show, on a page of
                                                 // its own. The rows at the bottom of a page are the

@@ -215,6 +215,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">عرض صورة الحلقة بدلًا من صورة المسلسل في «متابعة المشاهدة» و«التالي» وأعلى صفحة الحلقة</string>
     <string name="pref_player_media_segments_on_seek_bar">المقاطع على شريط التقديم</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">إظهار المقدمة والملخص والخاتمة والمعاينة والإعلانات كأجزاء ملونة من شريط التقديم</string>
+    <string name="ce_pref_hide_spoilers">إخفاء ما يحرق الأحداث</string>
+    <string name="ce_pref_hide_spoilers_summary">تمويه الصورة وإخفاء عنوان ونبذة الحلقات التي لم تشاهدها. اضغط مطولًا على إحداها لإظهارها</string>
     <string name="ce_pref_side_backdrop">الخلفية بجانب النص</string>
     <string name="ce_pref_side_backdrop_summary">على الجهاز اللوحي في الوضع الأفقي، اعرض خلفية العنصر بشكلها الأصلي بجانب العنوان بدلاً من امتدادها على كامل العرض</string>
 </resources>

@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Oled mõnda neist osadest juba vaadanud.</string>
     <string name="ce_download_choice_unwatched">Ainult vaatamata (%1$d)</string>
     <string name="ce_download_choice_all">Kõik osad (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Pealkiri on peidetud</string>
+    <string name="ce_spoiler_overview_hidden">Peidetud, kuni oled selle episoodi vaadanud. Näitamiseks vajuta ja hoia.</string>
+    <string name="ce_spoiler_reveal">Näita</string>
 </resources>

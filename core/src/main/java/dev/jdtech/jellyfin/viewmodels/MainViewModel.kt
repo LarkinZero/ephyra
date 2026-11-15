@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.core.presentation.spoiler.SpoilerReveals
 import dev.jdtech.jellyfin.core.reachability.ServerReachability
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -79,6 +82,14 @@ constructor(
 
     init {
         check()
+        // CE (#618): reveals belong to the user who made them.
+        viewModelScope.launch {
+            appPreferences
+                .observe(appPreferences.sessionUserId)
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { SpoilerReveals.clear() }
+        }
     }
 
     fun loadServerAndUser() {
@@ -160,6 +171,7 @@ constructor(
                     appPreferences.observe(appPreferences.showFavoritesTab),
                     askUserOnStart,
                     profileLocked,
+                    appPreferences.observe(appPreferences.hideSpoilers),
                     appPreferences.observe(appPreferences.sideBackdrop),
                 ) { values ->
                     val flags = values[0] as SetupFlags
@@ -168,7 +180,8 @@ constructor(
                     val showFavoritesTab = values[3] as Boolean
                     val askUserOnStart = values[4] as Boolean
                     val profileLocked = values[5] as Boolean
-                    val sideBackdrop = values[6] as Boolean
+                    val hideSpoilers = values[6] as Boolean
+                    val sideBackdrop = values[7] as Boolean
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -181,6 +194,7 @@ constructor(
                         showFavoritesTab = showFavoritesTab,
                         askUserOnStart = askUserOnStart,
                         profileLocked = profileLocked,
+                        hideSpoilers = hideSpoilers,
                         sideBackdrop = sideBackdrop,
                     )
                 }
@@ -206,6 +220,8 @@ data class MainState(
     val askUserOnStart: Boolean = false,
     /** CE (#299): the current profile asks for its PIN before Home shows. */
     val profileLocked: Boolean = false,
+    /** CE (#618): unwatched episodes hide their still, title and overview. */
+    val hideSpoilers: Boolean = false,
     /** CE (#622): item pages show the backdrop at 16:9 beside the text in landscape. */
     val sideBackdrop: Boolean = false,
 )

@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -49,13 +51,22 @@ fun ItemCard(
             Direction.HORIZONTAL -> Layout.cardHorizontal(widthClass)
             Direction.VERTICAL -> Layout.cardVertical(widthClass)
         }
+    // CE (#618): a hidden episode's press and hold reveals it, instead of copying its name.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(item)
     Column(
         modifier =
             modifier
                 .width(width)
                 .keyboardFocusRing(MaterialTheme.shapes.small)
                 .clip(MaterialTheme.shapes.small)
-                .copyOnLongClick(item.name, onClick = { onClick(item) })
+                .then(
+                    if (hidden) {
+                        Modifier.revealOnLongClick(item, onClick = { onClick(item) })
+                    } else {
+                        Modifier.copyOnLongClick(item.name, onClick = { onClick(item) })
+                    }
+                )
     ) {
         Surface(shape = MaterialTheme.shapes.small) {
             Box {
@@ -90,12 +101,20 @@ fun ItemCard(
         val subtitle =
             when (item) {
                 is FindroidEpisode ->
-                    stringResource(
-                        id = R.string.episode_name_extended,
-                        item.parentIndexNumber,
-                        item.indexNumber,
-                        item.name,
-                    )
+                    if (hidden) {
+                        stringResource(
+                            id = R.string.season_episode_number,
+                            item.parentIndexNumber,
+                            item.indexNumber,
+                        )
+                    } else {
+                        stringResource(
+                            id = R.string.episode_name_extended,
+                            item.parentIndexNumber,
+                            item.indexNumber,
+                            item.name,
+                        )
+                    }
                 is FindroidSeason -> if (showSeriesName) item.name else null
                 else -> null
             }

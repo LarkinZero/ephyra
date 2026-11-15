@@ -211,6 +211,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">Zobrazit obrázek epizody místo obrázku seriálu v řadách Pokračovat ve sledování a Další a v horní části stránky epizody</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenty na posuvníku</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Zobrazit úvod, rekapitulaci, závěr, upoutávku a reklamy jako barevné části posuvníku</string>
+    <string name="ce_pref_hide_spoilers">Skrýt spoilery</string>
+    <string name="ce_pref_hide_spoilers_summary">Rozmaže obrázek a skryje název a popis epizod, které jste neviděli. Podržením epizodu odkryjete</string>
     <string name="ce_pref_side_backdrop">Pozadí vedle textu</string>
     <string name="ce_pref_side_backdrop_summary">Na tabletu na šířku zobrazit pozadí položky v jeho vlastním tvaru vedle názvu místo přes celou šířku</string>
 </resources>

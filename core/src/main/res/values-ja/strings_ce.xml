@@ -142,4 +142,7 @@
     <string name="ce_download_choice_message">これらのエピソードの一部はすでに視聴済みです。</string>
     <string name="ce_download_choice_unwatched">未視聴のみ (%1$d)</string>
     <string name="ce_download_choice_all">すべてのエピソード (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">タイトルは非表示</string>
+    <string name="ce_spoiler_overview_hidden">このエピソードを観るまで非表示です。長押しすると表示されます。</string>
+    <string name="ce_spoiler_reveal">表示</string>
 </resources>

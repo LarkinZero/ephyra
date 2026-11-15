@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -45,6 +46,9 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
@@ -270,13 +274,25 @@ private fun EpisodeScreenLayout(
                                 maxLines = 1,
                                 style = MaterialTheme.typography.labelLarge,
                             )
-                            Text(
-                                text = episode.name,
-                                modifier = Modifier.copyOnLongClick(episode.name),
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 3,
-                                style = MaterialTheme.typography.headlineMedium,
-                            )
+                            // CE (#618): hidden, the title is only the line above; holding it
+                            // reveals the episode.
+                            if (LocalSpoilers.current.hides(episode)) {
+                                Text(
+                                    text = stringResource(CoreR.string.ce_spoiler_title_hidden),
+                                    modifier = Modifier.revealOnLongClick(episode),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 3,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                )
+                            } else {
+                                Text(
+                                    text = episode.name,
+                                    modifier = Modifier.copyOnLongClick(episode.name),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 3,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                )
+                            }
                         }
                     },
                 )
@@ -367,7 +383,7 @@ private fun EpisodeScreenLayout(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    OverviewText(text = episode.overview)
+                    EpisodeOverview(episode)
                     EpisodeWatchAndLinks(episode, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
@@ -413,6 +429,26 @@ private fun EpisodeScreenLayout(
                 onDismiss = { downloadQualityDialogOpen = false },
             )
         }
+    }
+}
+
+/**
+ * The episode's overview, or (CE, #618) while "Hide spoilers" hides the episode the line that says
+ * so, which a press and hold reveals.
+ */
+@Composable
+internal fun EpisodeOverview(episode: FindroidEpisode, maxCollapsedLines: Int = Int.MAX_VALUE) {
+    val spoilers = LocalSpoilers.current
+    if (spoilers.hides(episode) && episode.overview.isNotBlank()) {
+        Text(
+            text = spoilerFreeOverview(episode.overview, hidden = true),
+            modifier = Modifier.revealOnLongClick(episode),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontStyle = FontStyle.Italic,
+        )
+    } else {
+        OverviewText(text = episode.overview, maxCollapsedLines = maxCollapsedLines)
     }
 }
 

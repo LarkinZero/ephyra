@@ -205,6 +205,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">Hiển thị hình ảnh của tập thay cho hình ảnh của phim bộ trong Tiếp tục xem, Tiếp theo và ở đầu trang của tập</string>
     <string name="pref_player_media_segments_on_seek_bar">Phân đoạn trên thanh tua</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Hiển thị phần mở đầu, tóm tắt, kết thúc, xem trước và quảng cáo thành các phần có màu trên thanh tua</string>
+    <string name="ce_pref_hide_spoilers">Ẩn nội dung tiết lộ</string>
+    <string name="ce_pref_hide_spoilers_summary">Làm mờ hình ảnh và ẩn tên cùng phần tóm tắt của các tập bạn chưa xem. Nhấn giữ một tập để hiện nó</string>
     <string name="ce_pref_side_backdrop">Ảnh nền cạnh văn bản</string>
     <string name="ce_pref_side_backdrop_summary">Trên máy tính bảng ở chế độ ngang, hiển thị ảnh nền của mục theo đúng hình dạng bên cạnh tiêu đề thay vì trải hết chiều rộng</string>
 </resources>

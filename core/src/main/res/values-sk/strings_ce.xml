@@ -152,4 +152,7 @@
     <string name="ce_download_choice_message">Niektoré z týchto epizód ste už videli.</string>
     <string name="ce_download_choice_unwatched">Len nepozreté (%1$d)</string>
     <string name="ce_download_choice_all">Všetky epizódy (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Názov je skrytý</string>
+    <string name="ce_spoiler_overview_hidden">Skryté, kým túto epizódu neuvidíte. Podržaním odkryjete.</string>
+    <string name="ce_spoiler_reveal">Odkryť</string>
 </resources>

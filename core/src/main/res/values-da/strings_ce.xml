@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Du har allerede set nogle af disse afsnit.</string>
     <string name="ce_download_choice_unwatched">Kun ikke-sete (%1$d)</string>
     <string name="ce_download_choice_all">Alle afsnit (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Titel skjult</string>
+    <string name="ce_spoiler_overview_hidden">Skjult, indtil du ser dette afsnit. Tryk og hold for at vise det.</string>
+    <string name="ce_spoiler_reveal">Vis</string>
 </resources>

@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">आप इनमें से कुछ एपिसोड पहले ही देख चुके हैं।</string>
     <string name="ce_download_choice_unwatched">केवल बिना देखे (%1$d)</string>
     <string name="ce_download_choice_all">सभी एपिसोड (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">शीर्षक छिपा है</string>
+    <string name="ce_spoiler_overview_hidden">यह एपिसोड देखने तक छिपा है। दिखाने के लिए दबाकर रखें।</string>
+    <string name="ce_spoiler_reveal">दिखाएँ</string>
 </resources>

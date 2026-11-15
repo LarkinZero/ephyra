@@ -207,6 +207,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">Mostrar a imagem do episódio em vez da imagem da série em Continuar a ver, em A seguir e no topo da página do episódio</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmentos na barra de progresso</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostrar a introdução, o resumo, o final, a antevisão e os anúncios como partes coloridas da barra de progresso</string>
+    <string name="ce_pref_hide_spoilers">Ocultar spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Desfoca a imagem e oculta o título e a sinopse dos episódios que ainda não viu. Mantenha premido um episódio para o mostrar</string>
     <string name="ce_pref_side_backdrop">Fundo ao lado do texto</string>
     <string name="ce_pref_side_backdrop_summary">Num tablet na horizontal, mostrar o fundo de um item na sua própria forma ao lado do título em vez de em toda a largura</string>
 </resources>

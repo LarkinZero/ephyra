@@ -157,4 +157,7 @@
     <string name="ce_download_choice_message">Некоторые из этих серий вы уже посмотрели.</string>
     <string name="ce_download_choice_unwatched">Только непросмотренные (%1$d)</string>
     <string name="ce_download_choice_all">Все серии (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Название скрыто</string>
+    <string name="ce_spoiler_overview_hidden">Скрыто, пока вы не посмотрите эту серию. Нажмите и удерживайте, чтобы показать.</string>
+    <string name="ce_spoiler_reveal">Показать</string>
 </resources>

@@ -142,4 +142,7 @@
     <string name="ce_download_choice_message">Bu bölümlerin bazılarını zaten izledin.</string>
     <string name="ce_download_choice_unwatched">Yalnızca izlenmeyenler (%1$d)</string>
     <string name="ce_download_choice_all">Tüm bölümler (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Başlık gizli</string>
+    <string name="ce_spoiler_overview_hidden">Bu bölümü izleyene kadar gizli. Göstermek için basılı tutun.</string>
+    <string name="ce_spoiler_reveal">Göster</string>
 </resources>

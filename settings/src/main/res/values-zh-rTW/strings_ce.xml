@@ -205,6 +205,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">在「繼續觀看」、「接下來播放」和單集頁面頂部顯示單集的圖片，而不是影集的圖片</string>
     <string name="pref_player_media_segments_on_seek_bar">進度列上的片段</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">在進度列上以顏色顯示片頭、前情提要、片尾、預告和廣告</string>
+    <string name="ce_pref_hide_spoilers">隱藏劇透</string>
+    <string name="ce_pref_hide_spoilers_summary">模糊未觀看單集的圖片，並隱藏其標題和簡介。長按某一集即可顯示</string>
     <string name="ce_pref_side_backdrop">背景圖顯示在文字旁</string>
     <string name="ce_pref_side_backdrop_summary">在橫向平板上，將項目的背景圖以原始比例顯示在標題旁邊，而不是填滿整個寬度</string>
 </resources>

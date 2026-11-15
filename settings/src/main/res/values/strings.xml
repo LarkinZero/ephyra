@@ -330,4 +330,7 @@
     <string name="ce_pref_side_backdrop">Backdrop beside the text</string>
     <string name="ce_pref_side_backdrop_summary">On a tablet in landscape, show an item\'s backdrop in its own shape next to the title instead of across the full width</string>
     <string name="ce_pref_home_episode_images_summary_phone">Show the episode\'s image instead of the show\'s artwork in Continue Watching, in Next Up and at the top of an episode\'s page</string>
+    <!-- CE (#618) -->
+    <string name="ce_pref_hide_spoilers">Hide spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Blur the image and hide the title and overview of episodes you haven\'t watched. Press and hold one to reveal it</string>
 </resources>

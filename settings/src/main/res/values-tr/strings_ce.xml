@@ -207,6 +207,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">İzlemeye devam et ve Sıradaki satırlarında ve bölüm sayfasının üst kısmında dizinin görseli yerine bölümün görselini göster</string>
     <string name="pref_player_media_segments_on_seek_bar">İlerleme çubuğunda bölümler</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Giriş, özet, kapanış, önizleme ve reklamları ilerleme çubuğunda renkli bölümler olarak göster</string>
+    <string name="ce_pref_hide_spoilers">Spoilerları gizle</string>
+    <string name="ce_pref_hide_spoilers_summary">İzlemediğiniz bölümlerin görselini bulanıklaştırır, adını ve özetini gizler. Göstermek için birine basılı tutun</string>
     <string name="ce_pref_side_backdrop">Metnin yanında arka plan</string>
     <string name="ce_pref_side_backdrop_summary">Yatay konumdaki tablette, öğenin arka planını tam genişlik yerine kendi biçiminde başlığın yanında göster</string>
 </resources>

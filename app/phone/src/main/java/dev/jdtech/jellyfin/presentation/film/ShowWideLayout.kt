@@ -33,6 +33,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeEpisodeLine
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.models.FindroidEpisode
@@ -275,11 +278,16 @@ private fun RowTitle(text: String, contentPadding: PaddingValues) {
 /** Next Up as a row card of `cardHorizontal` width instead of the compact page's lone card. */
 @Composable
 private fun NextUpCard(episode: FindroidEpisode, widthClass: WidthClass, onClick: () -> Unit) {
+    // CE (#618): a hidden Next Up is only its number, until held.
+    val hidden = LocalSpoilers.current.hides(episode)
     Column(
         modifier =
             Modifier.width(Layout.cardHorizontal(widthClass))
                 .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = onClick)
+                .then(
+                    if (hidden) Modifier.revealOnLongClick(episode, onClick)
+                    else Modifier.clickable(onClick = onClick)
+                )
     ) {
         ItemPoster(
             item = episode,
@@ -288,13 +296,7 @@ private fun NextUpCard(episode: FindroidEpisode, widthClass: WidthClass, onClick
         )
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(
-            text =
-                stringResource(
-                    id = CoreR.string.episode_name_extended,
-                    episode.parentIndexNumber,
-                    episode.indexNumber,
-                    episode.name,
-                ),
+            text = spoilerFreeEpisodeLine(episode, hidden),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

@@ -34,6 +34,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderAction
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.models.FindroidEpisode
@@ -49,7 +50,6 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeroHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
-import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
@@ -183,7 +183,16 @@ fun EpisodeWideContent(
                             text = "${seasonName(episode)} · $episodeNumberText",
                             style = MaterialTheme.typography.labelLarge,
                         )
-                        HeroTitle(text = episode.name, widthClass = widthClass)
+                        // CE (#618): hidden, the title is only the line above.
+                        if (LocalSpoilers.current.hides(episode)) {
+                            HeroTitle(
+                                text = stringResource(CoreR.string.ce_spoiler_title_hidden),
+                                widthClass = widthClass,
+                                revealing = episode,
+                            )
+                        } else {
+                            HeroTitle(text = episode.name, widthClass = widthClass)
+                        }
                     },
                 ) {
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
@@ -243,7 +252,7 @@ fun EpisodeWideContent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    OverviewText(text = episode.overview, maxCollapsedLines = 4)
+                    EpisodeOverview(episode, maxCollapsedLines = 4)
                     EpisodeWatchAndLinks(episode, onAction)
                 }
                 Spacer(Modifier.height(MaterialTheme.spacings.medium))

@@ -157,4 +157,7 @@
     <string name="ce_download_choice_message">Niektóre z tych odcinków już obejrzałeś.</string>
     <string name="ce_download_choice_unwatched">Tylko nieobejrzane (%1$d)</string>
     <string name="ce_download_choice_all">Wszystkie odcinki (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Tytuł ukryty</string>
+    <string name="ce_spoiler_overview_hidden">Ukryte, dopóki nie obejrzysz tego odcinka. Przytrzymaj, aby odsłonić.</string>
+    <string name="ce_spoiler_reveal">Odsłoń</string>
 </resources>

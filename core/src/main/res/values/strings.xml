@@ -270,4 +270,11 @@
     <string name="ce_download_choice_message">You\'ve already watched some of these episodes.</string>
     <string name="ce_download_choice_unwatched">Unwatched only (%1$d)</string>
     <string name="ce_download_choice_all">All episodes (%1$d)</string>
+
+    <!-- CE (#618): "Hide spoilers" is on. The first two take the place of an unwatched episode's
+         title on its page and of its overview; the last is what a screen reader says a press and
+         hold does. -->
+    <string name="ce_spoiler_title_hidden">Title hidden</string>
+    <string name="ce_spoiler_overview_hidden">Hidden until you watch this episode. Press and hold to reveal it.</string>
+    <string name="ce_spoiler_reveal">Reveal</string>
 </resources>

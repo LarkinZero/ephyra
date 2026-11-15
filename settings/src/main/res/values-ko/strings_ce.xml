@@ -205,6 +205,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">이어서 보기와 다음 에피소드, 그리고 에피소드 페이지 상단에서 시리즈 이미지 대신 에피소드 이미지 표시</string>
     <string name="pref_player_media_segments_on_seek_bar">탐색 막대의 구간</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">인트로, 요약, 아웃트로, 미리보기, 광고를 탐색 막대에 색으로 표시합니다</string>
+    <string name="ce_pref_hide_spoilers">스포일러 숨기기</string>
+    <string name="ce_pref_hide_spoilers_summary">보지 않은 에피소드의 이미지를 흐리게 하고 제목과 줄거리를 숨깁니다. 길게 누르면 표시됩니다</string>
     <string name="ce_pref_side_backdrop">텍스트 옆에 배경 표시</string>
     <string name="ce_pref_side_backdrop_summary">가로 모드 태블릿에서 항목의 배경을 전체 너비 대신 원래 모양 그대로 제목 옆에 표시합니다</string>
 </resources>

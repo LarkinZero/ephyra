@@ -65,4 +65,24 @@ class ItemPosterSourcesTest {
             posterSources(noThumb, Direction.HORIZONTAL, preferThumb = true).filterNotNull(),
         )
     }
+
+    @Test
+    fun `a hidden episode that prefers the thumb leaves its own frame out`() {
+        assertEquals(
+            listOf(showThumb, showBackdrop),
+            posterSources(episode, Direction.HORIZONTAL, preferThumb = true, hideStill = true),
+        )
+    }
+
+    @Test
+    fun `a hidden episode's header shows only its show's backdrop`() {
+        assertEquals(
+            listOf(ArtworkSource(showBackdrop)),
+            artworkSources(episode, ArtworkPlacement.Header, hideStill = true),
+        )
+        assertEquals(
+            listOf(ArtworkSource(showBackdrop)),
+            artworkSources(episode, ArtworkPlacement.Hero, hideStill = true),
+        )
+    }
 }

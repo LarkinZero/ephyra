@@ -167,4 +167,7 @@
     <string name="ce_download_choice_message">لقد شاهدت بعض هذه الحلقات بالفعل.</string>
     <string name="ce_download_choice_unwatched">غير المشاهدة فقط (%1$d)</string>
     <string name="ce_download_choice_all">كل الحلقات (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">العنوان مخفي</string>
+    <string name="ce_spoiler_overview_hidden">مخفي حتى تشاهد هذه الحلقة. اضغط مطولًا لإظهاره.</string>
+    <string name="ce_spoiler_reveal">إظهار</string>
 </resources>

@@ -9,6 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerImage
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -30,18 +33,28 @@ fun ItemPoster(
     modifier: Modifier = Modifier,
     preferThumb: Boolean = false,
 ) {
+    // CE (#618): a hidden episode's still is blurred where it comes first, and left out where it
+    // is only the last resort behind the show's art.
+    val hidden = LocalSpoilers.current.hides(item)
     val sources =
-        remember(item.images, item.id, direction, preferThumb) {
-            posterSources(item, direction, preferThumb)
+        remember(item.images, item.id, direction, preferThumb, hidden) {
+            posterSources(item, direction, preferThumb, hideStill = hidden)
         }
+    val stillFirst = item.images.primary != null && sources.firstOrNull() == item.images.primary
 
     ArtworkImage(
         sources = sources,
-        contentDescription = stringResource(CoreR.string.image_description_poster, item.name),
+        contentDescription =
+            stringResource(CoreR.string.image_description_poster, spoilerFreeName(item, hidden)),
         modifier =
             modifier
                 .aspectRatio(if (direction == Direction.HORIZONTAL) 1.77f else 0.66f)
-                .background(MaterialTheme.colorScheme.surfaceContainer),
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .spoilerImage(
+                    hidden = hidden && stillFirst,
+                    fallback = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
     )
 }
 
@@ -53,6 +66,7 @@ internal fun posterSources(
     item: FindroidItem,
     direction: Direction,
     preferThumb: Boolean = false,
+    hideStill: Boolean = false,
 ): List<Uri?> =
     when (direction) {
         Direction.HORIZONTAL ->
@@ -64,7 +78,9 @@ internal fun posterSources(
                         listOf(item.images.backdrop, item.images.primary)
                     }
                 is FindroidEpisode ->
-                    if (preferThumb) {
+                    if (preferThumb && hideStill) {
+                        listOf(item.images.showThumb, item.images.showBackdrop)
+                    } else if (preferThumb) {
                         listOf(item.images.showThumb, item.images.showBackdrop, item.images.primary)
                     } else {
                         listOf(item.images.primary, item.images.showBackdrop)

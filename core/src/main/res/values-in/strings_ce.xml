@@ -142,4 +142,7 @@
     <string name="ce_download_choice_message">Kamu sudah menonton beberapa episode ini.</string>
     <string name="ce_download_choice_unwatched">Hanya yang belum ditonton (%1$d)</string>
     <string name="ce_download_choice_all">Semua episode (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Judul disembunyikan</string>
+    <string name="ce_spoiler_overview_hidden">Disembunyikan sampai Anda menonton episode ini. Tekan lama untuk menampilkannya.</string>
+    <string name="ce_spoiler_reveal">Tampilkan</string>
 </resources>

@@ -77,6 +77,9 @@ import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.core.presentation.ephyra.backdropCrossfadeMillis
 import dev.jdtech.jellyfin.core.presentation.rows.animateRowItem
 import dev.jdtech.jellyfin.core.presentation.rows.rememberLazyListStateAtStart
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
@@ -491,9 +494,11 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
                 .testTag("ce_home_hero"),
     ) {
         HeroTitle(item = shown, images = images)
+        // CE (#618): a hidden episode is "Episode 5", without its overview.
+        val hidden = LocalSpoilers.current.hides(shown)
         if (shown is FindroidEpisode) {
             Text(
-                text = shown.name,
+                text = spoilerFreeName(shown, hidden),
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -510,7 +515,7 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
         if (shown.overview.isNotBlank()) {
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
             Text(
-                text = shown.overview,
+                text = spoilerFreeOverview(shown.overview, hidden),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = .8f),
                 maxLines = 3,
@@ -532,12 +537,13 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
 private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
     val previous = remember { PreviousImage() }
     val crossfadeMillis = backdropCrossfadeMillis()
+    val hideStill = LocalSpoilers.current.hides(item)
     // Counts the candidates that turned out to be missing, so the next one is asked for.
     var missing by remember(item) { mutableIntStateOf(0) }
     val request =
-        remember(item, images, crossfadeMillis, missing) {
+        remember(item, images, crossfadeMillis, missing, hideStill) {
             images
-                .backdrop(item)
+                .backdrop(item, hideStill)
                 ?.newBuilder()
                 ?.placeholderMemoryCacheKey(previous.key)
                 ?.transitionFactory(heroCrossfade(crossfadeMillis))
@@ -556,7 +562,7 @@ private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
             onSuccess = { previous.key = it.result.memoryCacheKey },
             // Only when the failure moved the hero on to another candidate: any other error would
             // ask for the same image again, for ever.
-            onError = { if (images.backdrop(item)?.data != request.data) missing++ },
+            onError = { if (images.backdrop(item, hideStill)?.data != request.data) missing++ },
             modifier =
                 Modifier.fillMaxWidth(HERO_BACKDROP_WIDTH).aspectRatio(16f / 9f).drawWithCache {
                     val fadeLeft = backdropFadeLeft(background)

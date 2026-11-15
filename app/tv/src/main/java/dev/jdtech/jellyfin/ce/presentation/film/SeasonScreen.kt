@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -80,6 +81,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisodes
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
@@ -474,9 +478,11 @@ private fun EpisodeDetails(
     val versions = remember(episode.sources) { episode.getVersions() }
     var versionDialogOpen by remember { mutableStateOf(false) }
 
+    // CE (#618): a hidden episode is "Episode 5", without its overview, until OK is held on it.
+    val hidden = LocalSpoilers.current.hides(episode)
     Column(modifier = modifier) {
         Text(
-            text = episode.name,
+            text = spoilerFreeName(episode, hidden),
             style = MaterialTheme.typography.headlineMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -488,13 +494,24 @@ private fun EpisodeDetails(
             color = Color.White.copy(alpha = .8f),
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-        // CE (#545): a cut overview takes focus and opens in full on OK.
-        TvOverviewText(
-            title = episode.name,
-            text = episode.overview,
-            maxLines = 3,
-            modifier = Modifier.width(640.dp),
-        )
+        if (hidden) {
+            Text(
+                text = spoilerFreeOverview(episode.overview, hidden = true),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = .7f),
+                fontStyle = FontStyle.Italic,
+                maxLines = 3,
+                modifier = Modifier.width(640.dp),
+            )
+        } else {
+            // CE (#545): a cut overview takes focus and opens in full on OK.
+            TvOverviewText(
+                title = episode.name,
+                text = episode.overview,
+                maxLines = 3,
+                modifier = Modifier.width(640.dp),
+            )
+        }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
         // Reserve the chips' height, so the buttons don't jump when they load.
         Box(modifier = Modifier.height(24.dp)) {
@@ -713,9 +730,13 @@ private fun EpisodeRowCard(
     onFocus: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(episode)
     Column(modifier = modifier.width(EPISODE_CARD_WIDTH)) {
         Surface(
             onClick = onClick,
+            // CE (#618): holding OK on a hidden episode reveals it.
+            onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
             shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
             border = ClickableSurfaceDefaults.border(focusedBorder = ephyraFocusedBorder()),
             glow = ClickableSurfaceDefaults.glow(focusedGlow = ephyraFocusedGlow()),
@@ -752,7 +773,15 @@ private fun EpisodeRowCard(
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
         Text(
             text =
-                stringResource(id = CoreR.string.episode_name, episode.indexNumber, episode.name),
+                if (hidden) {
+                    spoilerFreeName(episode, hidden = true)
+                } else {
+                    stringResource(
+                        id = CoreR.string.episode_name,
+                        episode.indexNumber,
+                        episode.name,
+                    )
+                },
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

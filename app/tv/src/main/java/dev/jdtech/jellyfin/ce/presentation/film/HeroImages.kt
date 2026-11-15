@@ -48,9 +48,11 @@ internal class HeroImages(
     /** Backdrops the server doesn't have (404), so the hero goes on to the next candidate. */
     private val missing: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
+    fun backdrop(item: FindroidItem): ImageRequest? = backdrop(item, hideStill = false)
+
     /** The first of [heroBackdropUrls] that isn't known to be missing. */
-    fun backdrop(item: FindroidItem): ImageRequest? =
-        heroBackdropUrls(item, backdropWidthPx)
+    fun backdrop(item: FindroidItem, hideStill: Boolean): ImageRequest? =
+        heroBackdropUrls(item, backdropWidthPx, hideStill)
             .firstOrNull { it !in missing }
             ?.let { request(it, backdropWidthPx, backdropWidthPx * 9 / 16, Scale.FILL) }
 
@@ -196,15 +198,20 @@ internal fun heroCrossfade(durationMillis: Int): Transition.Factory =
  * The server sends an episode the backdrop of its show but not of its season, so the season's is
  * asked for without a tag and may not exist: [HeroImages] skips it after the first 404.
  */
-internal fun heroBackdropUrls(item: FindroidItem, widthPx: Int): List<String> {
+internal fun heroBackdropUrls(
+    item: FindroidItem,
+    widthPx: Int,
+    hideStill: Boolean = false,
+): List<String> {
     val uris =
         when (item) {
             is FindroidEpisode ->
                 listOf(
                     item.images.showBackdrop,
-                    item.images.backdrop,
+                    // CE (#618): "Hide spoilers" leaves the episode's own pictures out.
+                    item.images.backdrop.takeUnless { hideStill },
                     seasonBackdrop(item),
-                    item.images.primary,
+                    item.images.primary.takeUnless { hideStill },
                 )
             else -> listOf(item.images.backdrop)
         }

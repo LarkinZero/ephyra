@@ -207,6 +207,8 @@
     <string name="ce_pref_home_episode_images_summary_phone">Kuva ridades Jätka vaatamist ja Järgmisena ning episoodi lehe ülaosas sarja pildi asemel episoodi pilti</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmendid ajaribal</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Näita sissejuhatust, kokkuvõtet, lõputiitreid, eelvaadet ja reklaame ajariba värviliste osadena</string>
+    <string name="ce_pref_hide_spoilers">Peida rikkujad</string>
+    <string name="ce_pref_hide_spoilers_summary">Hägustab pildi ning peidab vaatamata episoodide pealkirja ja kirjelduse. Näitamiseks vajuta ja hoia</string>
     <string name="ce_pref_side_backdrop">Taust teksti kõrval</string>
     <string name="ce_pref_side_backdrop_summary">Näita tahvelarvutil rõhtpaigutuses üksuse tausta selle enda kujul pealkirja kõrval, mitte kogu laiuses</string>
 </resources>

@@ -147,4 +147,7 @@
     <string name="ce_download_choice_message">Você já assistiu a alguns destes episódios.</string>
     <string name="ce_download_choice_unwatched">Só os não assistidos (%1$d)</string>
     <string name="ce_download_choice_all">Todos os episódios (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Título oculto</string>
+    <string name="ce_spoiler_overview_hidden">Oculto até você assistir a este episódio. Toque e segure para mostrar.</string>
+    <string name="ce_spoiler_reveal">Mostrar</string>
 </resources>

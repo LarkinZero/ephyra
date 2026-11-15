@@ -152,4 +152,7 @@
     <string name="ce_download_choice_message">Ai văzut deja câteva dintre aceste episoade.</string>
     <string name="ce_download_choice_unwatched">Doar cele nevizionate (%1$d)</string>
     <string name="ce_download_choice_all">Toate episoadele (%1$d)</string>
+    <string name="ce_spoiler_title_hidden">Titlu ascuns</string>
+    <string name="ce_spoiler_overview_hidden">Ascuns până când vezi acest episod. Ține apăsat pentru a-l afișa.</string>
+    <string name="ce_spoiler_reveal">Afișează</string>
 </resources>
