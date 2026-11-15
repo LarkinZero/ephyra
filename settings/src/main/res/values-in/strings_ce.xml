@@ -205,4 +205,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Tampilkan gambar episode, bukan gambar serial, di Lanjutkan menonton, di Berikutnya, dan di bagian atas halaman episode</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmen di bilah putar</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Tampilkan intro, rekap, outro, pratinjau, dan iklan sebagai bagian berwarna di bilah putar</string>
+    <string name="ce_pref_side_backdrop">Latar di samping teks</string>
+    <string name="ce_pref_side_backdrop_summary">Di tablet dalam mode lanskap, tampilkan latar item dalam bentuk aslinya di samping judul, bukan selebar layar</string>
 </resources>

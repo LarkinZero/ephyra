@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Toon in Verder kijken, in Volgende en bovenaan de pagina van een aflevering de afbeelding van de aflevering in plaats van die van de serie</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenten op de tijdbalk</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Toon de intro, terugblik, aftiteling, vooruitblik en reclames als gekleurde delen van de tijdbalk</string>
+    <string name="ce_pref_side_backdrop">Achtergrond naast de tekst</string>
+    <string name="ce_pref_side_backdrop_summary">Toon op een tablet in liggende stand de achtergrond van een item in zijn eigen vorm naast de titel in plaats van over de volle breedte</string>
 </resources>

@@ -37,8 +37,10 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.FadeIntoPageHeight
 import dev.jdtech.jellyfin.presentation.utils.Layout
+import dev.jdtech.jellyfin.presentation.utils.LocalSideBackdrop
 import dev.jdtech.jellyfin.presentation.utils.WidthClass
 import dev.jdtech.jellyfin.presentation.utils.drawFadeIntoPage
+import dev.jdtech.jellyfin.presentation.utils.drawStartFadeIntoPage
 import dev.jdtech.jellyfin.presentation.utils.drawTopScrimOverArt
 import dev.jdtech.jellyfin.presentation.utils.parallaxLayoutModifier
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -83,7 +85,19 @@ fun ItemHeroHeader(
             else collapsedHeroHeight(safePadding.top, posterOverlap)
 
         if (artwork.hasArtwork) {
-            Box(modifier = Modifier.fillMaxWidth().height(heroHeight).clipToBounds()) {
+            // #622: with the setting on, a landscape window keeps the backdrop at 16:9 at the end
+            // side, fading into the page towards the text, instead of a strip cropped across the
+            // full width.
+            val backdropWidth =
+                Layout.heroBackdropWidth(maxWidth, heroHeight, beside = LocalSideBackdrop.current)
+            val beside = backdropWidth < maxWidth
+            Box(
+                modifier =
+                    Modifier.align(Alignment.TopEnd)
+                        .width(backdropWidth)
+                        .height(heroHeight)
+                        .clipToBounds()
+            ) {
                 ArtworkBackdrop(
                     state = artwork,
                     modifier =
@@ -100,6 +114,14 @@ fun ItemHeroHeader(
                         fadeBottom = size.height,
                     )
                     drawTopScrimOverArt()
+                    // After the scrim, so the scrim fades out with the picture and shows no edge
+                    // where the picture starts.
+                    if (beside) {
+                        drawStartFadeIntoPage(
+                            background = pageBackground,
+                            width = size.width * SideFadeShare,
+                        )
+                    }
                 }
             }
         }
@@ -139,6 +161,9 @@ fun ItemHeroHeader(
  */
 internal fun collapsedHeroHeight(safeTop: Dp, posterOverlap: Dp): Dp =
     safeTop + Layout.topBarHeight + posterOverlap
+
+/** #622: share of a backdrop beside the text that fades into the page on its start side. */
+private const val SideFadeShare = 0.4f
 
 /** The narrowest text column beside the poster; below it the header stacks (4-design.md §6). */
 internal val HeroMinColumnWidth: Dp = 360.dp

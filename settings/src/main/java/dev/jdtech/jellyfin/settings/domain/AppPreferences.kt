@@ -35,6 +35,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // with the title on it) unless this is on, like the web client's setting of the same name.
     // On the phone the header of the episode page follows it too (#630).
     val homeEpisodeImages = Preference("pref_home_episode_images", false)
+    // CE (#622): in a landscape window on a tablet, the item page shows its backdrop at 16:9
+    // beside the text instead of across the full width. Off by default; phone app only.
+    val sideBackdrop = Preference("pref_side_backdrop", false)
     // CE (#138): the Android TV launcher's Watch Next row. Only the TV app shows and uses it.
     val tvWatchNext = Preference("pref_tv_watch_next", true)
     // CE (#140): Android TV screensaver.

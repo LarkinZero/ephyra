@@ -13,6 +13,7 @@ import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppCaches
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.KeepPlayerLandscape
+import dev.jdtech.jellyfin.settings.domain.WideWindow
 import dev.jdtech.jellyfin.settings.domain.bounded
 import dev.jdtech.jellyfin.settings.domain.models.PermissionDefinitions
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
@@ -85,6 +86,14 @@ constructor(
      */
     private val keepLandscapeDeviceTypes =
         if (appVariant == AppVariant.PHONE && KeepPlayerLandscape.isShown(context)) {
+            listOf(DeviceType.PHONE)
+        } else {
+            emptyList()
+        }
+
+    /** CE (#622): only where an item page can get a wide window, see [WideWindow]. */
+    private val sideBackdropDeviceTypes =
+        if (appVariant == AppVariant.PHONE && WideWindow.isPossible(context)) {
             listOf(DeviceType.PHONE)
         } else {
             emptyList()
@@ -222,6 +231,14 @@ constructor(
                                                             Build.VERSION_CODES.S,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference = appPreferences.dynamicColors,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.ce_pref_side_backdrop,
+                                                    descriptionStringRes =
+                                                        R.string.ce_pref_side_backdrop_summary,
+                                                    supportedDeviceTypes = sideBackdropDeviceTypes,
+                                                    backendPreference = appPreferences.sideBackdrop,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =

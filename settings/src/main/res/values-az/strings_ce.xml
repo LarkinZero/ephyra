@@ -207,4 +207,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">\"İzləməyə davam et\" və \"Növbəti\" sıralarında və bölüm səhifəsinin yuxarısında serialın şəkli əvəzinə bölümün şəklini göstər</string>
     <string name="pref_player_media_segments_on_seek_bar">İrəliləmə zolağında seqmentlər</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Girişi, xülasəni, sonluğu, önizləməni və reklamları irəliləmə zolağında rəngli hissələr kimi göstər</string>
+    <string name="ce_pref_side_backdrop">Fon şəkli mətnin yanında</string>
+    <string name="ce_pref_side_backdrop_summary">Planşet üfüqi vəziyyətdə olanda elementin fon şəklini bütün en boyu deyil, öz formasında başlığın yanında göstər</string>
 </resources>

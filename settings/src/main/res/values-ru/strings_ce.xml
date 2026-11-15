@@ -211,4 +211,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Показывать изображение серии вместо изображения сериала в «Продолжить просмотр», в «Далее» и вверху страницы серии</string>
     <string name="pref_player_media_segments_on_seek_bar">Сегменты на полосе перемотки</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Показывать вступление, краткое содержание, титры, превью и рекламу цветными участками полосы перемотки</string>
+    <string name="ce_pref_side_backdrop">Фон рядом с текстом</string>
+    <string name="ce_pref_side_backdrop_summary">На планшете в альбомной ориентации показывать фон элемента в его собственной форме рядом с названием, а не во всю ширину</string>
 </resources>

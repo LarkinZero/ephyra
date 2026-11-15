@@ -211,4 +211,6 @@
     <string name="ce_pref_home_episode_images_summary_phone">Zobraziť obrázok epizódy namiesto obrázka seriálu v radoch Pokračovať v sledovaní a Ďalšie a v hornej časti stránky epizódy</string>
     <string name="pref_player_media_segments_on_seek_bar">Segmenty na posúvači</string>
     <string name="pref_player_media_segments_on_seek_bar_summary">Zobraziť úvod, rekapituláciu, záver, ukážku a reklamy ako farebné časti posúvača</string>
+    <string name="ce_pref_side_backdrop">Pozadie vedľa textu</string>
+    <string name="ce_pref_side_backdrop_summary">Na tablete na šírku zobraziť pozadie položky v jeho vlastnom tvare vedľa názvu namiesto cez celú šírku</string>
 </resources>
