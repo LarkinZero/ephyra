@@ -24,6 +24,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalNotificationPermissionRequest
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPlaybackStopped
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
+import dev.jdtech.jellyfin.presentation.utils.LocalSideBackdrop
 import dev.jdtech.jellyfin.presentation.utils.ProvideLocalNetworkBlock
 import dev.jdtech.jellyfin.presentation.utils.ServerStatusUi
 import dev.jdtech.jellyfin.repository.DataChangeEvents
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity() {
                     CompositionLocalProvider(
                         LocalOfflineMode provides state.isOfflineMode,
                         LocalSpoilers provides Spoilers(state.hideSpoilers),
+                        LocalSideBackdrop provides state.sideBackdrop,
                         LocalServerStatus provides serverStatus,
                         LocalPlaybackStopped provides stopped,
                         LocalNotificationPermissionRequest provides ::requestNotificationPermission,

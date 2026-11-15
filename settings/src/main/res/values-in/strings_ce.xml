@@ -207,4 +207,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Tampilkan intro, rekap, outro, pratinjau, dan iklan sebagai bagian berwarna di bilah putar</string>
     <string name="ce_pref_hide_spoilers">Sembunyikan spoiler</string>
     <string name="ce_pref_hide_spoilers_summary">Buramkan gambar serta sembunyikan judul dan ringkasan episode yang belum Anda tonton. Tekan lama salah satunya untuk menampilkannya</string>
+    <string name="ce_pref_side_backdrop">Latar di samping teks</string>
+    <string name="ce_pref_side_backdrop_summary">Di tablet dalam mode lanskap, tampilkan latar item dalam bentuk aslinya di samping judul, bukan selebar layar</string>
 </resources>

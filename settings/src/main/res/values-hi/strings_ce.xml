@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">इंट्रो, रीकैप, आउट्रो, प्रीव्यू और विज्ञापनों को सीक बार के रंगीन हिस्सों के रूप में दिखाएँ</string>
     <string name="ce_pref_hide_spoilers">स्पॉइलर छिपाएँ</string>
     <string name="ce_pref_hide_spoilers_summary">जो एपिसोड आपने नहीं देखे, उनकी छवि धुंधली करें और शीर्षक व विवरण छिपाएँ। किसी को दिखाने के लिए उसे दबाकर रखें</string>
+    <string name="ce_pref_side_backdrop">टेक्स्ट के बगल में बैकड्रॉप</string>
+    <string name="ce_pref_side_backdrop_summary">लैंडस्केप में टैबलेट पर, आइटम का बैकड्रॉप पूरी चौड़ाई के बजाय उसके अपने आकार में शीर्षक के बगल में दिखाएँ</string>
 </resources>

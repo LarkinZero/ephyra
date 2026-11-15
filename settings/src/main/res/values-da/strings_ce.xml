@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Vis intro, resumé, outro, forsmag og reklamer som farvede dele af tidslinjen</string>
     <string name="ce_pref_hide_spoilers">Skjul spoilere</string>
     <string name="ce_pref_hide_spoilers_summary">Slør billedet, og skjul titel og beskrivelse af afsnit, du ikke har set. Tryk og hold på et for at vise det</string>
+    <string name="ce_pref_side_backdrop">Baggrund ved siden af teksten</string>
+    <string name="ce_pref_side_backdrop_summary">På en tablet i liggende format vises et elements baggrund i sin egen form ved siden af titlen i stedet for i fuld bredde</string>
 </resources>

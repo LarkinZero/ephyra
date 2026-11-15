@@ -213,4 +213,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Показывать вступление, краткое содержание, титры, превью и рекламу цветными участками полосы перемотки</string>
     <string name="ce_pref_hide_spoilers">Скрывать спойлеры</string>
     <string name="ce_pref_hide_spoilers_summary">Размывать изображение и скрывать название и описание непросмотренных серий. Нажмите и удерживайте серию, чтобы показать её</string>
+    <string name="ce_pref_side_backdrop">Фон рядом с текстом</string>
+    <string name="ce_pref_side_backdrop_summary">На планшете в альбомной ориентации показывать фон элемента в его собственной форме рядом с названием, а не во всю ширину</string>
 </resources>

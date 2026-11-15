@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostra la introducció, el resum, el final, l\'avançament i els anuncis com a parts de color de la barra de progrés</string>
     <string name="ce_pref_hide_spoilers">Amaga els spoilers</string>
     <string name="ce_pref_hide_spoilers_summary">Difumina la imatge i amaga el títol i la sinopsi dels episodis que no has vist. Mantén premut un episodi per mostrar-lo</string>
+    <string name="ce_pref_side_backdrop">Fons al costat del text</string>
+    <string name="ce_pref_side_backdrop_summary">En una tauleta en horitzontal, mostra el fons d\'un element amb la seva forma pròpia al costat del títol en lloc d\'ocupar tota l\'amplada</string>
 </resources>

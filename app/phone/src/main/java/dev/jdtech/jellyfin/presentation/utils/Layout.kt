@@ -113,6 +113,22 @@ object Layout {
      */
     fun heroHeight(width: Dp, windowHeight: Dp): Dp =
         maxOf(320.dp, minOf(width * 9f / 16f, windowHeight * 0.45f))
+
+    /**
+     * CE (#622): width of the backdrop in a hero [width] wide and [heroHeight] high. A landscape
+     * window crops a full-width backdrop to a strip; with [beside] (the "Backdrop beside the text"
+     * setting), when a 16:9 picture of the hero's height covers less than [SideBackdropMaxShare] of
+     * the width, the backdrop keeps 16:9 at the end side of the hero instead. Portrait windows and
+     * panes keep the full width either way.
+     */
+    fun heroBackdropWidth(width: Dp, heroHeight: Dp, beside: Boolean): Dp {
+        if (!beside) return width
+        val picture = heroHeight * 16f / 9f
+        return if (picture < width * SideBackdropMaxShare) picture else width
+    }
+
+    /** Above this share of the hero's width a 16:9 backdrop spans the full width instead. */
+    const val SideBackdropMaxShare: Float = 0.8f
 }
 
 /**

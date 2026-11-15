@@ -213,4 +213,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Показувати вступ, стислий переказ, титри, анонс і рекламу кольоровими частинами смуги перемотування</string>
     <string name="ce_pref_hide_spoilers">Приховувати спойлери</string>
     <string name="ce_pref_hide_spoilers_summary">Розмивати зображення та приховувати назву й опис непереглянутих серій. Натисніть і утримуйте серію, щоб показати її</string>
+    <string name="ce_pref_side_backdrop">Фон поруч із текстом</string>
+    <string name="ce_pref_side_backdrop_summary">На планшеті в альбомній орієнтації показувати фон елемента в його власній формі поруч із назвою, а не на всю ширину</string>
 </resources>

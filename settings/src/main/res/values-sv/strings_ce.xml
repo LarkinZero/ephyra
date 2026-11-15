@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Visa intro, sammanfattning, eftertexter, förhandstitt och reklam som färgade delar av tidslinjen</string>
     <string name="ce_pref_hide_spoilers">Dölj spoilers</string>
     <string name="ce_pref_hide_spoilers_summary">Gör bilden suddig och dölj titel och beskrivning för avsnitt du inte har sett. Tryck länge på ett för att visa det</string>
+    <string name="ce_pref_side_backdrop">Bakgrund bredvid texten</string>
+    <string name="ce_pref_side_backdrop_summary">På en surfplatta i liggande läge visas ett objekts bakgrund i sin egen form bredvid titeln i stället för över hela bredden</string>
 </resources>

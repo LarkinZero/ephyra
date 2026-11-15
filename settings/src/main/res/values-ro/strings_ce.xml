@@ -211,4 +211,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Afișează introducerea, rezumatul, finalul, previzualizarea și reclamele ca părți colorate ale barei de derulare</string>
     <string name="ce_pref_hide_spoilers">Ascunde spoilerele</string>
     <string name="ce_pref_hide_spoilers_summary">Estompează imaginea și ascunde titlul și descrierea episoadelor pe care nu le-ai văzut. Ține apăsat pe unul pentru a-l afișa</string>
+    <string name="ce_pref_side_backdrop">Fundal lângă text</string>
+    <string name="ce_pref_side_backdrop_summary">Pe o tabletă în modul peisaj, afișează fundalul unui element în forma sa proprie lângă titlu în loc de pe toată lățimea</string>
 </resources>

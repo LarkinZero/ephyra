@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostra intro, riassunto, titoli di coda, anteprima e pubblicità come parti colorate della barra di avanzamento</string>
     <string name="ce_pref_hide_spoilers">Nascondi spoiler</string>
     <string name="ce_pref_hide_spoilers_summary">Sfoca l\'immagine e nasconde il titolo e la trama degli episodi che non hai visto. Tieni premuto un episodio per mostrarlo</string>
+    <string name="ce_pref_side_backdrop">Sfondo accanto al testo</string>
+    <string name="ce_pref_side_backdrop_summary">Su un tablet in orizzontale, mostra lo sfondo di un elemento nella sua forma accanto al titolo invece che a tutta larghezza</string>
 </resources>

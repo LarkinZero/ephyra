@@ -213,4 +213,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Zobraziť úvod, rekapituláciu, záver, ukážku a reklamy ako farebné časti posúvača</string>
     <string name="ce_pref_hide_spoilers">Skryť spoilery</string>
     <string name="ce_pref_hide_spoilers_summary">Rozmaže obrázok a skryje názov a popis epizód, ktoré ste nevideli. Podržaním epizódu odkryjete</string>
+    <string name="ce_pref_side_backdrop">Pozadie vedľa textu</string>
+    <string name="ce_pref_side_backdrop_summary">Na tablete na šírku zobraziť pozadie položky v jeho vlastnom tvare vedľa názvu namiesto cez celú šírku</string>
 </resources>

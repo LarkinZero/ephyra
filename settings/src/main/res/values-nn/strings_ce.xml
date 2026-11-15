@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Vis intro, oppsummering, rulletekst, førehandsvising og reklame som farga delar av tidslinja</string>
     <string name="ce_pref_hide_spoilers">Gøym avsløringar</string>
     <string name="ce_pref_hide_spoilers_summary">Gjer biletet uskarpt og gøym tittelen og skildringa av episodar du ikkje har sett. Trykk og hald på ein for å visa han</string>
+    <string name="ce_pref_side_backdrop">Bakgrunn ved sida av teksten</string>
+    <string name="ce_pref_side_backdrop_summary">På nettbrett i liggjande format, vis bakgrunnen til eit element i si eiga form ved sida av tittelen i staden for over heile breidda</string>
 </resources>

@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Mostrar la intro, el resumen, el final, el avance y los anuncios como partes de color de la barra de progreso</string>
     <string name="ce_pref_hide_spoilers">Ocultar spoilers</string>
     <string name="ce_pref_hide_spoilers_summary">Difumina la imagen y oculta el título y la sinopsis de los episodios que no has visto. Mantén pulsado uno para mostrarlo</string>
+    <string name="ce_pref_side_backdrop">Fondo junto al texto</string>
+    <string name="ce_pref_side_backdrop_summary">En una tableta en horizontal, muestra el fondo de un elemento con su propia forma junto al título en lugar de a todo el ancho</string>
 </resources>

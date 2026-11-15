@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Toon de intro, terugblik, aftiteling, vooruitblik en reclames als gekleurde delen van de tijdbalk</string>
     <string name="ce_pref_hide_spoilers">Spoilers verbergen</string>
     <string name="ce_pref_hide_spoilers_summary">Maak de afbeelding wazig en verberg de titel en beschrijving van afleveringen die je nog niet hebt gezien. Houd er een ingedrukt om hem te tonen</string>
+    <string name="ce_pref_side_backdrop">Achtergrond naast de tekst</string>
+    <string name="ce_pref_side_backdrop_summary">Toon op een tablet in liggende stand de achtergrond van een item in zijn eigen vorm naast de titel in plaats van over de volle breedte</string>
 </resources>

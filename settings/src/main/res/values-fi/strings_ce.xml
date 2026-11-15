@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Näytä intro, kertaus, lopputekstit, ennakko ja mainokset aikajanan värillisinä osina</string>
     <string name="ce_pref_hide_spoilers">Piilota juonipaljastukset</string>
     <string name="ce_pref_hide_spoilers_summary">Sumentaa kuvan ja piilottaa katsomattomien jaksojen nimen ja kuvauksen. Näytä jakso painamalla sitä pitkään</string>
+    <string name="ce_pref_side_backdrop">Taustakuva tekstin vieressä</string>
+    <string name="ce_pref_side_backdrop_summary">Näytä tabletilla vaakatilassa kohteen taustakuva sen omassa muodossa otsikon vieressä koko leveyden sijaan</string>
 </resources>

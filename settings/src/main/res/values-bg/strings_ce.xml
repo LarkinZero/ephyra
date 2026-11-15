@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Показване на началото, резюмето, края, прегледа и рекламите като оцветени части от лентата за превъртане</string>
     <string name="ce_pref_hide_spoilers">Скриване на спойлери</string>
     <string name="ce_pref_hide_spoilers_summary">Размазва изображението и скрива заглавието и описанието на епизодите, които не сте гледали. Задръжте върху някой, за да го покажете</string>
+    <string name="ce_pref_side_backdrop">Фон до текста</string>
+    <string name="ce_pref_side_backdrop_summary">На таблет в хоризонтален режим показвай фона на елемента в собствената му форма до заглавието вместо по цялата ширина</string>
 </resources>

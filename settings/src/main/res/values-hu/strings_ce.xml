@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">A bevezető, az összefoglaló, a stáblista, az előzetes és a reklámok megjelenítése az idősáv színes részeiként</string>
     <string name="ce_pref_hide_spoilers">Spoilerek elrejtése</string>
     <string name="ce_pref_hide_spoilers_summary">Elhomályosítja a képet, és elrejti a nem látott epizódok címét és leírását. Tartsa lenyomva az egyiket a megjelenítéséhez</string>
+    <string name="ce_pref_side_backdrop">Háttérkép a szöveg mellett</string>
+    <string name="ce_pref_side_backdrop_summary">Fekvő tájolású táblagépen az elem háttérképe a saját formájában jelenjen meg a cím mellett a teljes szélesség helyett</string>
 </resources>

@@ -209,4 +209,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Intro, Rückblick, Abspann, Vorschau und Werbung als farbige Abschnitte der Zeitleiste anzeigen</string>
     <string name="ce_pref_hide_spoilers">Spoiler ausblenden</string>
     <string name="ce_pref_hide_spoilers_summary">Bild unscharf machen und Titel und Beschreibung ungesehener Episoden ausblenden. Zum Aufdecken gedrückt halten</string>
+    <string name="ce_pref_side_backdrop">Hintergrund neben dem Text</string>
+    <string name="ce_pref_side_backdrop_summary">Auf einem Tablet im Querformat den Hintergrund eines Eintrags in seiner eigenen Form neben dem Titel zeigen statt über die volle Breite</string>
 </resources>

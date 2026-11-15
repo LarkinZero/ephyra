@@ -213,4 +213,6 @@
     <string name="pref_player_media_segments_on_seek_bar_summary">Prikaži uvod, povzetek, odjavno špico, napovednik in oglase kot barvne dele drsnika</string>
     <string name="ce_pref_hide_spoilers">Skrij razkritja</string>
     <string name="ce_pref_hide_spoilers_summary">Zamegli sliko ter skrije naslov in opis epizod, ki si jih še niste ogledali. Pridržite epizodo, da jo razkrijete</string>
+    <string name="ce_pref_side_backdrop">Ozadje ob besedilu</string>
+    <string name="ce_pref_side_backdrop_summary">Na tabličnem računalniku v ležečem načinu prikaži ozadje elementa v njegovi obliki ob naslovu namesto čez celo širino</string>
 </resources>
