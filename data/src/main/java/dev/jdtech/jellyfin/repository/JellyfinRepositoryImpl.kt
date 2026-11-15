@@ -440,7 +440,13 @@ class JellyfinRepositoryImpl(
                     currentUserId,
                     limit = 12,
                     mediaTypes = listOf(MediaType.VIDEO),
-                    includeItemTypes = listOf(BaseItemKind.MOVIE, BaseItemKind.EPISODE),
+                    includeItemTypes =
+                        listOf(
+                            BaseItemKind.MOVIE,
+                            BaseItemKind.EPISODE,
+                            BaseItemKind.VIDEO,
+                            BaseItemKind.MUSIC_VIDEO,
+                        ),
                     // The TV hero shows it, and Jellyfin leaves it out of Resume, Latest and Next
                     // Up unless asked (#410).
                     fields = listOf(ItemFields.OVERVIEW),
@@ -453,12 +459,16 @@ class JellyfinRepositoryImpl(
                 .toFindroidItems()
         }
 
-    override suspend fun getLatestMedia(parentId: UUID): List<FindroidItem> =
+    override suspend fun getLatestMedia(
+        parentId: UUID,
+        includeItemTypes: List<BaseItemKind>?,
+    ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
             jellyfinApi.libraryApi
                 .getLatestMedia(
                     currentUserId,
                     parentId = parentId,
+                    includeItemTypes = includeItemTypes,
                     fields = listOf(ItemFields.OVERVIEW),
                     limit = 16,
                     imageTypeLimit = 1,

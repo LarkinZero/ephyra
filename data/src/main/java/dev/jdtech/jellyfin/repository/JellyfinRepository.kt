@@ -130,7 +130,11 @@ interface JellyfinRepository {
 
     suspend fun getResumeItems(): List<FindroidItem>
 
-    suspend fun getLatestMedia(parentId: UUID): List<FindroidItem>
+    /** [includeItemTypes] null leaves the choice to the server. */
+    suspend fun getLatestMedia(
+        parentId: UUID,
+        includeItemTypes: List<BaseItemKind>? = null,
+    ): List<FindroidItem>
 
     suspend fun getSeasons(seriesId: UUID, offline: Boolean = false): List<FindroidSeason>
 

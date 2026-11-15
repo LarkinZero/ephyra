@@ -79,6 +79,8 @@ if not report_only:
     add_library(existing, "Real Movies", "movies", "/media/movies-meta", [], internet=True)
     add_library(existing, "Real Shows", "tvshows", "/media/shows-meta", [], internet=True)
     add_library(existing, "Big Movies", "movies", "/media/movies-big", ["Movie"])
+    add_library(existing, "Home Videos", "homevideos", "/media/homevideos", [])
+    add_library(existing, "Music Videos", "musicvideos", "/media/musicvideos", [])
     # trickplay on the edge-case libraries (small files, quick to extract)
     for folder in call("GET", "/Library/VirtualFolders"):
         opts = folder["LibraryOptions"]

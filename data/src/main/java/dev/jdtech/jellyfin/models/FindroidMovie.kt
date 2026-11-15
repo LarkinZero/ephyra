@@ -5,6 +5,7 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.time.LocalDateTime
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.PlayAccess
 
 data class FindroidMovie(
@@ -76,7 +77,9 @@ suspend fun BaseItemDto.toFindroidMovie(
         played = userData?.played == true,
         favorite = userData?.isFavorite == true,
         canPlay = playAccess != PlayAccess.NONE,
-        canDownload = canDownload == true,
+        // CE (#671): the download store keeps movies and episodes only, and a home video or a
+        // music video stored as a movie would be listed with the downloaded movies.
+        canDownload = canDownload == true && type == BaseItemKind.MOVIE,
         runtimeTicks = runTimeTicks ?: 0,
         playbackPositionTicks = userData?.playbackPositionTicks ?: 0,
         premiereDate = premiereDate,

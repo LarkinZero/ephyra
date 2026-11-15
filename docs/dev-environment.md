@@ -115,6 +115,12 @@ names spread over the alphabet (10 to 40 per letter, none under X, one "The ..."
 a few under digits, symbols and accents. No artwork. For the phone's A–Z fast scroller and
 anything else that needs a grid that scrolls a long way.
 
+**Other library types** (`Home Videos` of the type Home Videos & Photos, and `Music Videos`):
+Home Videos has a 6-minute clip at the top (resume), a plain folder with two clips, a folder with
+a clip and a photo (the server makes that one a `PhotoAlbum`), and a loose photo. Music Videos
+has three clips, one of them in an artist folder; the server lists all three flat, as
+`MusicVideo` items.
+
 To add a case, add it to `setup.sh` under a marker file of its own (as `.generated-extra` does)
 and to the table above. A file dropped into `media/` by hand works until the next `wipe --media`,
 and nobody else gets it.
