@@ -1,6 +1,8 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import android.content.Context
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -17,7 +19,10 @@ private const val HTTP_READ_TIMEOUT_MS = 60_000L
  * CE (#296): media goes over [apiClient] (the Jellyfin API's OkHttp client, see
  * `JellyfinApi.httpClient`) with its own timeouts. `newBuilder()` keeps the connection pool, so the
  * first media request reuses the connection the PlaybackInfo call just used instead of opening one.
+ *
+ * CE (#613): an image subtitle loaded as a file of its own is read by [ImageSubtitleParserFactory].
  */
+@OptIn(UnstableApi::class)
 internal fun buildMediaSourceFactory(
     context: Context,
     apiClient: OkHttpClient,
@@ -29,11 +34,12 @@ internal fun buildMediaSourceFactory(
             .readTimeout(HTTP_READ_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .build()
     return DefaultMediaSourceFactory(
-        DefaultDataSource.Factory(
-            context,
-            // The User-Agent DefaultHttpDataSource sent (the system's), so the server's logs and
-            // any proxy rules see the same client as before.
-            OkHttpDataSource.Factory(client).setUserAgent(System.getProperty("http.agent")),
+            DefaultDataSource.Factory(
+                context,
+                // The User-Agent DefaultHttpDataSource sent (the system's), so the server's logs
+                // and any proxy rules see the same client as before.
+                OkHttpDataSource.Factory(client).setUserAgent(System.getProperty("http.agent")),
+            )
         )
-    )
+        .setSubtitleParserFactory(ImageSubtitleParserFactory())
 }

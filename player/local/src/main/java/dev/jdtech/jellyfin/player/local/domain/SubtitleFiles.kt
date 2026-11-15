@@ -33,11 +33,11 @@ data class SubtitleFile(
  * CE (#597): a transcode does not carry the tracks inside the file. The server extracts the ones it
  * can and lists each with a delivery URL of its own, so the text tracks among those are loaded as
  * files too, before the external ones, which is the order of a stream that plays directly. Left out
- * are a track the server lists without a URL, and an image track (PGS, VobSub, DVB) even when it
- * has one: ExoPlayer lists such a file and then draws nothing from it (seen with the PGS track of
- * the test server's "Image Subs Movie"), and a track that shows nothing is worse than a track that
- * is not offered. Only for a transcode: for a stream that plays directly the server can list the
- * same URLs (it does for mpv's profile), and the track would then be there twice.
+ * is a track the server lists without a URL, or in a format no player reads from a file. The image
+ * tracks (PGS, VobSub, DVB) are in since #613: ExoPlayer reads the files the server makes of them
+ * with [ImageSubtitleParserFactory], and mpv reads them itself. Only for a transcode: for a stream
+ * that plays directly the server can list the same URLs (it does for mpv's profile), and the track
+ * would then be there twice.
  */
 fun subtitleFiles(source: FindroidSource): List<SubtitleFile> {
     val local = source.type == FindroidSourceType.LOCAL
@@ -50,7 +50,7 @@ fun subtitleFiles(source: FindroidSource): List<SubtitleFile> {
             delivered.filter {
                 !it.isExternal &&
                     it.deliveryMethod == SubtitleDeliveryMethod.EXTERNAL &&
-                    subtitleMimeType(it.codec, it.path) in TEXT_SUBTITLE_TYPES
+                    subtitleMimeType(it.codec, it.path) in FILE_SUBTITLE_TYPES
             }
         } else {
             emptyList()
@@ -60,14 +60,14 @@ fun subtitleFiles(source: FindroidSource): List<SubtitleFile> {
         external.map { it.toSubtitleFile(embedded = false, local) }
 }
 
-/** The subtitle formats that are text: the ones a player can load from a file of their own. */
-private val TEXT_SUBTITLE_TYPES =
+/** The subtitle formats a player can load from a file of their own. */
+private val FILE_SUBTITLE_TYPES =
     setOf(
         MimeTypes.APPLICATION_SUBRIP,
         MimeTypes.TEXT_VTT,
         MimeTypes.TEXT_SSA,
         MimeTypes.APPLICATION_TTML,
-    )
+    ) + IMAGE_SUBTITLE_TYPES
 
 private fun FindroidMediaStream.toSubtitleFile(embedded: Boolean, local: Boolean) =
     SubtitleFile(
@@ -108,9 +108,7 @@ private fun mimeTypeOfSubtitleFormat(format: String): String? =
         "ass",
         "ssa" -> MimeTypes.TEXT_SSA
         "ttml" -> MimeTypes.APPLICATION_TTML
-        // Image-based subtitle sidecars. media3 ships native parsers
-        // for these, so advertising the correct MIME lets the renderer
-        // actually draw the bitmaps instead of dropping the track.
+        // Image subtitle files: ImageSubtitleParserFactory reads the ones the server makes (#613).
         "pgssub",
         "sup" -> MimeTypes.APPLICATION_PGS
         "dvdsub",

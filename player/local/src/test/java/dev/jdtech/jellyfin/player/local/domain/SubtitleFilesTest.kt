@@ -71,9 +71,9 @@ class SubtitleFilesTest {
     }
 
     @Test
-    fun `an image track inside the file is left out of a transcode, also with an address`() {
-        // What the test server lists for "Image Subs Movie" under ExoPlayer's profile: both with an
-        // address. ExoPlayer lists such a file and draws nothing from it.
+    fun `an image track inside the file is a file of a transcode too`() {
+        // #613: what the test server lists for "Image Subs Movie" under ExoPlayer's profile, and
+        // under mpv's since #612: both with an address. ImageSubtitleParserFactory reads them.
         val streams =
             listOf(
                 subtitle(2, "eng", codec = "PGSSUB", method = SubtitleDeliveryMethod.EXTERNAL)
@@ -99,10 +99,16 @@ class SubtitleFilesTest {
 
         val files = subtitleFiles(source(transcoded = true, streams = streams))
 
-        // The converted text track, and the external image file, which was loaded before too.
-        assertEquals(listOf("deu", "fra"), files.map { it.language })
+        // The file's tracks in their order, then the external one.
+        assertEquals(listOf("eng", "nld", "deu", "fra"), files.map { it.language })
+        assertEquals(listOf(true, true, true, false), files.map { it.embedded })
         assertEquals(
-            listOf(MimeTypes.APPLICATION_SUBRIP, MimeTypes.APPLICATION_PGS),
+            listOf(
+                MimeTypes.APPLICATION_PGS,
+                MimeTypes.APPLICATION_VOBSUB,
+                MimeTypes.APPLICATION_SUBRIP,
+                MimeTypes.APPLICATION_PGS,
+            ),
             files.map { it.mimeType },
         )
     }
