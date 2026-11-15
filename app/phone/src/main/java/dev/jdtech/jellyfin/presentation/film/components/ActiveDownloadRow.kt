@@ -70,10 +70,15 @@ fun ActiveDownloadRow(
 
     val item = activeDownload.item
     val (title, supporting) = downloadTitles(item)
+    // CE (#618): a hidden episode is revealed by a press and hold, as in the other lists.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(item)
     DownloadRow(
         item = item,
         title = title,
         supporting = supporting,
+        onLongClick = if (hidden) ({ spoilers.reveal(item) }) else null,
+        onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         meta = statusLine(activeDownload),
         metaColor =
             if (status == DownloadStatus.FAILED) MaterialTheme.colorScheme.error

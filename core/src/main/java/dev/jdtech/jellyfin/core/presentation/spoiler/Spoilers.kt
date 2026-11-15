@@ -36,6 +36,11 @@ internal object SpoilerReveals {
     fun reveal(id: UUID) {
         revealed[id] = Unit
     }
+
+    /** Another user's reveals are not this one's: the same episode has the same id for both. */
+    fun clear() {
+        revealed.clear()
+    }
 }
 
 /**
@@ -112,6 +117,24 @@ fun Modifier.revealOnLongClick(item: FindroidItem, onClick: (() -> Unit)? = null
         onLongClick = { spoilers.reveal(item) },
     )
 }
+
+/** "S1:E5 - Title", or "S1 E5" while [episode] is hidden. */
+@Composable
+fun spoilerFreeEpisodeLine(episode: FindroidEpisode, hidden: Boolean): String =
+    if (hidden) {
+        stringResource(
+            R.string.season_episode_number,
+            episode.parentIndexNumber,
+            episode.indexNumber,
+        )
+    } else {
+        stringResource(
+            R.string.episode_name_extended,
+            episode.parentIndexNumber,
+            episode.indexNumber,
+            episode.name,
+        )
+    }
 
 /** [overview], or the line that says it is hidden. */
 @Composable

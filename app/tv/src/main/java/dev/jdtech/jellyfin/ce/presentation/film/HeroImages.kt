@@ -208,9 +208,9 @@ internal fun heroBackdropUrls(
             is FindroidEpisode ->
                 listOf(
                     item.images.showBackdrop,
-                    item.images.backdrop,
+                    // CE (#618): "Hide spoilers" leaves the episode's own pictures out.
+                    item.images.backdrop.takeUnless { hideStill },
                     seasonBackdrop(item),
-                    // CE (#618): "Hide spoilers" leaves the still out.
                     item.images.primary.takeUnless { hideStill },
                 )
             else -> listOf(item.images.backdrop)

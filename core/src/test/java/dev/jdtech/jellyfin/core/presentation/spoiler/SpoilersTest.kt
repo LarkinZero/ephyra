@@ -36,4 +36,12 @@ class SpoilersTest {
         assertFalse(Spoilers(enabled = true).hides(revealed))
         assertTrue(on.hides(other))
     }
+
+    @Test
+    fun `another user's reveals are cleared`() {
+        val revealed = dummyEpisode.copy(id = UUID.randomUUID(), played = false)
+        on.reveal(revealed)
+        SpoilerReveals.clear()
+        assertTrue(on.hides(revealed))
+    }
 }

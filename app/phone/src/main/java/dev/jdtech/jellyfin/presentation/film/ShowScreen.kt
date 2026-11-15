@@ -44,6 +44,9 @@ import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeEpisodeLine
 import dev.jdtech.jellyfin.film.presentation.DownloadPrompt
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowEvent
@@ -377,6 +380,8 @@ private fun ShowScreenLayout(
                     ShowLinks(show, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     state.nextUp?.let { nextUp ->
+                        // CE (#618): a hidden Next Up is only its number, until held.
+                        val hidden = LocalSpoilers.current.hides(nextUp)
                         Text(
                             text = stringResource(CoreR.string.next_up),
                             style = MaterialTheme.typography.titleMedium,
@@ -386,7 +391,17 @@ private fun ShowScreenLayout(
                             modifier =
                                 Modifier.widthIn(max = 420.dp)
                                     .clip(MaterialTheme.shapes.small)
-                                    .clickable { onAction(ShowAction.NavigateToItem(nextUp)) }
+                                    .then(
+                                        if (hidden) {
+                                            Modifier.revealOnLongClick(nextUp) {
+                                                onAction(ShowAction.NavigateToItem(nextUp))
+                                            }
+                                        } else {
+                                            Modifier.clickable {
+                                                onAction(ShowAction.NavigateToItem(nextUp))
+                                            }
+                                        }
+                                    )
                         ) {
                             ItemPoster(
                                 item = nextUp,
@@ -395,13 +410,7 @@ private fun ShowScreenLayout(
                             )
                             Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
                             Text(
-                                text =
-                                    stringResource(
-                                        id = CoreR.string.episode_name_extended,
-                                        nextUp.parentIndexNumber,
-                                        nextUp.indexNumber,
-                                        nextUp.name,
-                                    ),
+                                text = spoilerFreeEpisodeLine(nextUp, hidden),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
