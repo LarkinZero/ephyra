@@ -441,6 +441,23 @@ class DeviceProfileBuilderTest {
     }
 
     @Test
+    fun `capped mpv profile delivers image subtitles as files, never burnt in`() {
+        // #612: with only srt and ass the server burns the default PGS track into the transcode.
+        val profile = DeviceProfileBuilder.buildDirectPlayTranscodeFallbackProfile()
+
+        assertTrue(profile.transcodingProfiles.isNotEmpty())
+        assertTrue(profile.subtitleProfiles.none { it.method == SubtitleDeliveryMethod.ENCODE })
+        for (format in listOf("srt", "ass", "pgssub", "dvdsub", "dvbsub")) {
+            assertTrue(
+                "$format must be delivered as a file",
+                profile.subtitleProfiles.any {
+                    it.format == format && it.method == SubtitleDeliveryMethod.EXTERNAL
+                },
+            )
+        }
+    }
+
+    @Test
     fun `direct-play profile is permissive and never transcodes`() {
         val profile = DeviceProfileBuilder.buildDirectPlayProfile()
 
