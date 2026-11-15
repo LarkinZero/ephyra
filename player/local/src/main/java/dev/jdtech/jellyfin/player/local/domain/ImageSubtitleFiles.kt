@@ -84,45 +84,98 @@ internal class ImageSubtitleFileParser(
         outputOptions: SubtitleParser.OutputOptions,
         output: Consumer<CuesWithTiming>,
     ) {
-        val cues =
-            when {
-                // A PGS sample starts with a segment type, never with "PG".
-                data.startsWith(offset, length, SUP_MAGIC) -> parseSupFile(data, offset, length)
-                // A VobSub or DVB track in a container always comes with its setup.
-                format.initializationData.isEmpty() &&
-                    data.startsWith(offset, length, EBML_MAGIC) ->
-                    parseMatroskaFile(data, offset, length, factory)
-                else -> {
-                    val parser = sampleParser ?: factory.create(format).also { sampleParser = it }
-                    parser.parse(data, offset, length, outputOptions, output)
-                    return
-                }
+        val ordered = OrderedOutput(outputOptions, output::accept)
+        when {
+            // A PGS sample starts with a segment type, never with "PG".
+            data.startsWith(offset, length, SUP_MAGIC) ->
+                parseSupFile(data, offset, length, ordered::accept)
+            // A VobSub or DVB track in a container always comes with its setup.
+            format.initializationData.isEmpty() && data.startsWith(offset, length, EBML_MAGIC) ->
+                parseMatroskaFile(data, offset, length, factory, ordered::accept)
+            else -> {
+                val parser = sampleParser ?: factory.create(format).also { sampleParser = it }
+                parser.parse(data, offset, length, outputOptions, output)
+                return
             }
-        cuesInOutputOrder(lastingUntilNext(cues), outputOptions).forEach(output::accept)
+        }
+        ordered.finish()
     }
 }
 
 /**
- * [cues] sorted by time, each without a duration of its own lasting until the next one starts.
+ * How long the last picture of a file shows when nothing clears it: to the end of any film. A
+ * picture without a duration is not shown from a file loaded on its own (see [LastingUntilNext]).
+ */
+private const val LAST_PICTURE_DURATION_US = 24L * 60 * 60 * 1_000_000
+
+/**
+ * Passes on pictures, given in the order of their times, each without a duration of its own lasting
+ * until the next one starts. Only one picture is held back, so a long film's decoded pictures are
+ * not all in memory at once.
  *
  * A picture lasts until the next one replaces it, so the parsers give it no duration. In a
  * container that works, but from a file loaded on its own ExoPlayer showed none of them (#613,
- * emulator, media3 1.11.1). The last one keeps having none: nothing follows it.
+ * emulator, media3 1.11.1).
  */
 @OptIn(UnstableApi::class)
-internal fun lastingUntilNext(cues: List<CuesWithTiming>): List<CuesWithTiming> {
-    val sorted = cues.sortedBy { it.startTimeUs }
-    return sorted.mapIndexed { index, current ->
-        val next = sorted.getOrNull(index + 1)
-        if (current.durationUs != C.TIME_UNSET || next == null) {
-            current
-        } else {
-            CuesWithTiming(
-                current.cues,
-                current.startTimeUs,
-                next.startTimeUs - current.startTimeUs,
+internal class LastingUntilNext(private val output: (CuesWithTiming) -> Unit) {
+    private var pending: CuesWithTiming? = null
+
+    fun add(cues: CuesWithTiming) {
+        pending?.let { previous ->
+            output(
+                if (
+                    previous.durationUs != C.TIME_UNSET || cues.startTimeUs < previous.startTimeUs
+                ) {
+                    previous
+                } else {
+                    previous.lasting(cues.startTimeUs - previous.startTimeUs)
+                }
             )
         }
+        pending = cues
+    }
+
+    fun finish() {
+        pending?.let { last ->
+            output(
+                if (last.durationUs != C.TIME_UNSET || last.cues.isEmpty()) last
+                else last.lasting(LAST_PICTURE_DURATION_US)
+            )
+        }
+        pending = null
+    }
+
+    private fun CuesWithTiming.lasting(durationUs: Long) =
+        CuesWithTiming(cues, startTimeUs, durationUs)
+}
+
+/**
+ * Passes cues on in the order [options] asks for, given in the order of their times: all of them
+ * without a start time. With one, those still showing at it or later, and then (when it asks for
+ * all of them) the ones before, which are held until [finish]. ExoPlayer asks a file loaded on its
+ * own for all of them, so nothing is held then.
+ */
+@OptIn(UnstableApi::class)
+internal class OrderedOutput(
+    private val options: SubtitleParser.OutputOptions,
+    private val output: (CuesWithTiming) -> Unit,
+) {
+    private val before = mutableListOf<CuesWithTiming>()
+
+    fun accept(cues: CuesWithTiming) {
+        val startTimeUs = options.startTimeUs
+        when {
+            startTimeUs == C.TIME_UNSET ||
+                cues.endTimeUs == C.TIME_UNSET ||
+                cues.endTimeUs > startTimeUs -> output(cues)
+            options.outputAllCues -> before += cues
+        }
+    }
+
+    fun finish() {
+        before.forEach(output)
+        before.clear()
     }
 }
 
@@ -145,13 +198,18 @@ private fun ByteArray.startsWith(offset: Int, length: Int, magic: ByteArray): Bo
  * The display sets of a `.sup` file, each at the time of its first segment. Each is handed to
  * media3's [PgsParser] the way Matroska carries one: the segments without their "PG" headers. A
  * display set lasts until the next one, which replaces it (an empty one clears the picture), so
- * none has a duration here ([lastingUntilNext] gives them one). A damaged file gives the display
- * sets before the damage.
+ * none has a duration of its own: [LastingUntilNext] gives them one. They go to [output] one at a
+ * time, in the order of the file. A damaged file gives the display sets before the damage.
  */
 @OptIn(UnstableApi::class)
-internal fun parseSupFile(data: ByteArray, offset: Int, length: Int): List<CuesWithTiming> {
+internal fun parseSupFile(
+    data: ByteArray,
+    offset: Int,
+    length: Int,
+    output: (CuesWithTiming) -> Unit,
+) {
     val parser = PgsParser()
-    val result = mutableListOf<CuesWithTiming>()
+    val timing = LastingUntilNext(output)
     val displaySet = ByteArrayOutputStream()
     var startTimeUs = C.TIME_UNSET
     val end = offset + length
@@ -170,7 +228,7 @@ internal fun parseSupFile(data: ByteArray, offset: Int, length: Int): List<CuesW
             val timeUs = startTimeUs
             try {
                 parser.parse(displaySet.toByteArray(), SubtitleParser.OutputOptions.allCues()) {
-                    result += CuesWithTiming(it.cues, timeUs, C.TIME_UNSET)
+                    timing.add(CuesWithTiming(it.cues, timeUs, C.TIME_UNSET))
                 }
             } catch (e: RuntimeException) {
                 Timber.w(e, "Skipped a PGS display set at $timeUs us")
@@ -180,7 +238,7 @@ internal fun parseSupFile(data: ByteArray, offset: Int, length: Int): List<CuesW
         }
     }
     if (position < end) Timber.w("PGS file damaged at byte ${position - offset} of $length")
-    return result
+    timing.finish()
 }
 
 private fun ByteArray.readUInt16(position: Int): Int =
@@ -191,8 +249,9 @@ private fun ByteArray.readUInt32(position: Int): Long =
 
 /**
  * The subtitles of a Matroska file, read by media3's [MatroskaExtractor], which hands each sample
- * of a subtitle track to [factory]'s parser with the track's setup and its time. A damaged file
- * gives the subtitles before the damage.
+ * of a subtitle track to [factory]'s parser with the track's setup and its time. The parsed samples
+ * are kept encoded (a picture compressed), and decoded one at a time for [output], in the order of
+ * their times. A damaged file gives the subtitles before the damage.
  */
 @OptIn(UnstableApi::class)
 internal fun parseMatroskaFile(
@@ -200,11 +259,12 @@ internal fun parseMatroskaFile(
     offset: Int,
     length: Int,
     factory: SubtitleParser.Factory,
-): List<CuesWithTiming> {
-    val output = SubtitleTracksOutput()
+    output: (CuesWithTiming) -> Unit,
+) {
+    val tracks = SubtitleTracksOutput()
     // The whole file is at hand: no need to jump to the index at its end.
     val extractor = MatroskaExtractor(factory, MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES)
-    extractor.init(output)
+    extractor.init(tracks)
     val positionHolder = PositionHolder()
     var input = byteInput(data, offset, length, 0)
     try {
@@ -221,8 +281,15 @@ internal fun parseMatroskaFile(
     } finally {
         extractor.release()
     }
-    return output.cues().sortedBy { it.startTimeUs }
+    val decoder = CueDecoder()
+    val timing = LastingUntilNext(output)
+    for (sample in tracks.samples().sortedBy { it.timeUs }) {
+        timing.add(decoder.decode(sample.timeUs, sample.data, 0, sample.data.size))
+    }
+    timing.finish()
 }
+
+private class EncodedCues(val timeUs: Long, val data: ByteArray)
 
 @OptIn(UnstableApi::class)
 private fun byteInput(data: ByteArray, offset: Int, length: Int, position: Long) =
@@ -249,7 +316,7 @@ private fun byteInput(data: ByteArray, offset: Int, length: Int, position: Long)
 private class SubtitleTracksOutput : ExtractorOutput {
     private val tracks = mutableListOf<CueTrackOutput>()
 
-    fun cues(): List<CuesWithTiming> = tracks.flatMap { it.cues }
+    fun samples(): List<EncodedCues> = tracks.flatMap { it.samples }
 
     override fun track(id: Int, type: Int): TrackOutput =
         if (type == C.TRACK_TYPE_TEXT) CueTrackOutput().also { tracks += it }
@@ -266,8 +333,7 @@ private class SubtitleTracksOutput : ExtractorOutput {
  */
 @OptIn(UnstableApi::class)
 private class CueTrackOutput : TrackOutput {
-    val cues = mutableListOf<CuesWithTiming>()
-    private val decoder = CueDecoder()
+    val samples = mutableListOf<EncodedCues>()
     private var parsed = false
     private var buffer = ByteArray(4096)
     private var size = 0
@@ -306,7 +372,7 @@ private class CueTrackOutput : TrackOutput {
         cryptoData: TrackOutput.CryptoData?,
     ) {
         val start = this.size - offset - size
-        if (parsed) cues += decoder.decode(timeUs, buffer, start, size)
+        if (parsed) samples += EncodedCues(timeUs, buffer.copyOfRange(start, start + size))
         // Keep only what follows the sample: the start of the next one.
         System.arraycopy(buffer, start + size, buffer, 0, offset)
         this.size = offset
@@ -315,21 +381,4 @@ private class CueTrackOutput : TrackOutput {
     private fun ensureCapacity(capacity: Int) {
         if (capacity > buffer.size) buffer = buffer.copyOf(maxOf(capacity, buffer.size * 2))
     }
-}
-
-/**
- * [cues], sorted by time, in the order [options] asks for: from the one showing at its start time
- * on, then (when it asks for all of them) the ones before. All of them for no start time.
- */
-@OptIn(UnstableApi::class)
-internal fun cuesInOutputOrder(
-    cues: List<CuesWithTiming>,
-    options: SubtitleParser.OutputOptions,
-): List<CuesWithTiming> {
-    val sorted = cues.sortedBy { it.startTimeUs }
-    if (options.startTimeUs == C.TIME_UNSET) return sorted
-    // The last one to start by then is still showing: a picture lasts until the next one.
-    val first = sorted.indexOfLast { it.startTimeUs <= options.startTimeUs }.coerceAtLeast(0)
-    val after = sorted.subList(first, sorted.size)
-    return if (options.outputAllCues) after + sorted.subList(0, first) else after
 }

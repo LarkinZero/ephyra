@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.player.local.domain
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.text.Cue
 import androidx.media3.extractor.text.CuesWithTiming
 import androidx.media3.extractor.text.SubtitleParser
 import org.junit.Assert.assertEquals
@@ -56,18 +57,36 @@ class ImageSubtitleFilesTest {
     }
 
     @Test
-    fun `a picture that started before the start time comes first, the earlier ones last`() {
-        val cues = listOf(0L, 4L, 5L, 9L).map { CuesWithTiming(emptyList(), it, C.TIME_UNSET) }
+    fun `a last picture that nothing clears still shows`() {
+        // Without a duration ExoPlayer would not show it from a file loaded on its own.
+        val cues = mutableListOf<CuesWithTiming>()
+        val timing = LastingUntilNext { cues += it }
+        timing.add(CuesWithTiming(emptyList(), 0, C.TIME_UNSET))
+        timing.add(CuesWithTiming(listOf(Cue.Builder().setText("x").build()), 3, C.TIME_UNSET))
+        timing.finish()
 
-        val after = cuesInOutputOrder(cues, SubtitleParser.OutputOptions.onlyCuesAfter(6))
-        val all =
-            cuesInOutputOrder(
-                cues,
-                SubtitleParser.OutputOptions.cuesAfterThenRemainingCuesBefore(6),
-            )
+        assertEquals(listOf(3L), cues.dropLast(1).map { it.durationUs })
+        assertTrue(cues.last().durationUs > 10L * 60 * 60 * 1_000_000)
+    }
 
-        assertEquals(listOf(5L, 9L), after.map { it.startTimeUs })
-        assertEquals(listOf(5L, 9L, 0L, 4L), all.map { it.startTimeUs })
+    @Test
+    fun `a picture still showing at the start time comes first, the earlier ones last`() {
+        val cues = listOf(0L, 4L, 5L, 9L).map { CuesWithTiming(emptyList(), it, 1) }
+        fun order(options: SubtitleParser.OutputOptions): List<Long> {
+            val out = mutableListOf<Long>()
+            val ordered = OrderedOutput(options) { out += it.startTimeUs }
+            val timing = LastingUntilNext(ordered::accept)
+            cues.forEach { timing.add(CuesWithTiming(it.cues, it.startTimeUs, C.TIME_UNSET)) }
+            timing.finish()
+            ordered.finish()
+            return out
+        }
+
+        assertEquals(listOf(5L, 9L), order(SubtitleParser.OutputOptions.onlyCuesAfter(6)))
+        assertEquals(
+            listOf(5L, 9L, 0L, 4L),
+            order(SubtitleParser.OutputOptions.cuesAfterThenRemainingCuesBefore(6)),
+        )
     }
 
     private fun parse(resource: String, mimeType: String): List<CuesWithTiming> {
