@@ -29,7 +29,7 @@ scripts/avds.sh create ce_phone  # then: start ce_phone, install ce_phone
 
 ```bash
 ./gradlew ktfmtFormat          # CI fails on unformatted code
-./gradlew testDebugUnitTest    # CI does not run the tests, so run them yourself
+./gradlew testDebugUnitTest    # CI runs them too, but a local run is quicker to fix
 ```
 
 - **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/):

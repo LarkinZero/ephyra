@@ -35,11 +35,11 @@ The app is **Ephyra**, a fork of [Findroid](https://github.com/jarnedemeulemeest
 # Format the tree
 ./gradlew ktfmtFormat
 
-# Unit tests of every module and flavour (CI does not run them: run them yourself before opening a PR)
+# Unit tests of every module and flavour (CI runs them too: run them yourself before opening a PR to save a round trip)
 ./gradlew testDebugUnitTest
 ```
 
-CI on a pull request runs `ktfmtCheck` (when Kotlin files or `gradle/libs.versions.toml` change) and, unless the change touches only docs-like paths (see `build.yaml`), the CE translation check and a debug build of every app variant. The build needs JDK 21.
+CI on a pull request runs `ktfmtCheck` (when Kotlin files or `gradle/libs.versions.toml` change) and, unless the change touches only docs-like paths (see `build.yaml`), the CE translation check, a debug build of every app variant and the unit tests (`testDebugUnitTest`, which uploads the test reports when it fails). Pushes to `main` run the same jobs; the Beta workflow does not wait for them. The build needs JDK 21.
 
 ## Module Structure
 
