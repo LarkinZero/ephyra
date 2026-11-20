@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.utils
 
 import android.app.Application
 import android.content.Context
+import android.os.Environment
 import androidx.room3.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import dev.jdtech.jellyfin.database.ServerDatabase
@@ -10,6 +11,7 @@ import dev.jdtech.jellyfin.models.FindroidEpisodeDto
 import dev.jdtech.jellyfin.models.FindroidMovieDto
 import dev.jdtech.jellyfin.models.FindroidSeasonDto
 import dev.jdtech.jellyfin.models.FindroidShowDto
+import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceDto
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.FindroidUserDataDto
@@ -35,6 +37,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowEnvironment
 
 /**
  * CE (#718): Room keeps one copy per item id. A download from one server of an id another server
@@ -62,13 +65,16 @@ class OtherServersCopyTest {
         AppPreferences(context.getSharedPreferences("other-servers-copy", Context.MODE_PRIVATE))
     private val dir = File(context.cacheDir, "other-servers-copy").apply { mkdirs() }
 
+    /** What the server answers; anything else fails, as with the server gone. */
+    private var server: (String) -> Any? = { name -> throw IllegalStateException(name) }
+
     private val downloader: DownloaderImpl by lazy {
         val repository =
             Proxy.newProxyInstance(
                 JellyfinRepository::class.java.classLoader,
                 arrayOf(JellyfinRepository::class.java),
             ) { _, method, _ ->
-                throw IllegalStateException("JellyfinRepository.${method.name}")
+                server("JellyfinRepository.${method.name}")
             } as JellyfinRepository
         DownloaderImpl(
             context,
@@ -193,7 +199,7 @@ class OtherServersCopyTest {
             val movie = database.getMovie(movieId).toFindroidMovie(database, userB)
 
             current(SERVER_B)
-            downloader.releaseOtherServersCopy(movie)
+            downloader.releaseOtherServersCopy(movie, SERVER_B)
 
             assertNull(database.getMovieOrNull(movieId), "A's movie row")
             assertEquals(emptyList(), database.getSources(movieId), "A's source rows")
@@ -208,7 +214,7 @@ class OtherServersCopyTest {
         val movie = database.getMovie(movieId).toFindroidMovie(database, userA)
 
         current(SERVER_A)
-        downloader.releaseOtherServersCopy(movie)
+        downloader.releaseOtherServersCopy(movie, SERVER_A)
 
         assertEquals(SERVER_A, database.getMovieOrNull(movieId)?.serverId)
         assertEquals(1, database.getSources(movieId).size)
@@ -223,7 +229,7 @@ class OtherServersCopyTest {
             val episode = database.getEpisode(episodeId).toFindroidEpisode(database, userB)
 
             current(SERVER_B)
-            downloader.releaseOtherServersCopy(episode)
+            downloader.releaseOtherServersCopy(episode, SERVER_B)
 
             assertNull(database.getEpisodeOrNull(episodeId), "the episode B downloads")
             assertFalse(taken.exists(), "its file")
@@ -232,6 +238,67 @@ class OtherServersCopyTest {
             assertEquals(listOf(seasonId), database.getSeasonsByShowId(showId).map { it.id })
             assertEquals(1, database.getSources(otherEpisodeId).size)
         }
+
+    /** The server's source of the movie, [size] bytes. */
+    private fun serverSource(size: Long) =
+        FindroidSource(
+            id = "source-$movieId",
+            name = "Original",
+            type = FindroidSourceType.REMOTE,
+            path = "http://server.invalid/Videos/$movieId/stream",
+            size = size,
+            mediaStreams = emptyList(),
+        )
+
+    private fun assertMovieKept(file: File) = runBlocking {
+        assertEquals(SERVER_A, database.getMovieOrNull(movieId)?.serverId, "A's movie row")
+        assertEquals(listOf(file.absolutePath), database.getSources(movieId).map { it.path })
+        assertTrue(file.exists(), "A's file")
+    }
+
+    @Test
+    fun `a download refused for want of space leaves the other server's copy`(): Unit =
+        runBlocking {
+            ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED)
+            for (external in context.getExternalFilesDirs(null)) {
+                ShadowEnvironment.setExternalStorageState(external, Environment.MEDIA_MOUNTED)
+            }
+            val file = storeMovie(SERVER_A)
+            val movie = database.getMovie(movieId).toFindroidMovie(database, userB)
+            server = { name ->
+                when (name) {
+                    "JellyfinRepository.getMediaSources" -> listOf(serverSource(Long.MAX_VALUE / 4))
+                    "JellyfinRepository.getServerSegments" -> emptyList<Any>()
+                    else -> throw IllegalStateException(name)
+                }
+            }
+
+            current(SERVER_B)
+            val (downloadId, error) = downloader.downloadItem(movie, "source-$movieId", 0, null)
+
+            assertEquals(-1L, downloadId)
+            assertNotNull(error, "the refusal")
+            assertMovieKept(file)
+        }
+
+    @Test
+    fun `a download that fails at the server leaves the other server's copy`(): Unit = runBlocking {
+        val file = storeMovie(SERVER_A)
+        val movie = database.getMovie(movieId).toFindroidMovie(database, userB)
+        // The source comes, then the server stops answering.
+        server = { name ->
+            when (name) {
+                "JellyfinRepository.getMediaSources" -> listOf(serverSource(1L))
+                else -> throw IllegalStateException(name)
+            }
+        }
+
+        current(SERVER_B)
+        val (downloadId, _) = downloader.downloadItem(movie, "source-$movieId", 0, null)
+
+        assertEquals(-1L, downloadId)
+        assertMovieKept(file)
+    }
 
     private object Online : NetworkConnectivity {
         override fun isOnline() = true

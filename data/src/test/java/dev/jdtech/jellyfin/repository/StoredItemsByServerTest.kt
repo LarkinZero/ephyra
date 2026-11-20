@@ -253,6 +253,24 @@ class StoredItemsByServerTest {
         }
 
     @Test
+    fun `a download still in progress is not played`() = runBlocking {
+        storeMovie(SERVER_A)
+        database.insertSource(
+            source(movieId).copy(id = "partial", path = "/storage/downloads/other.mkv.download")
+        )
+
+        current(SERVER_A)
+        assertEquals(
+            listOf("source-$movieId"),
+            database.getCompletedSources(movieId, SERVER_A).map { it.id },
+        )
+        assertEquals(
+            listOf("/storage/downloads/$movieId.mkv"),
+            repository.getPlaybackSources(movieId, null).map { it.path },
+        )
+    }
+
+    @Test
     fun `downloaded marks, episode counts and smart downloads see only the current server's`() =
         runBlocking {
             storeMovie(SERVER_A)
