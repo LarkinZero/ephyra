@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.presentation.settings
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.entity.License
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #384: the licence dialog shows the bundled text, else the licence URL, never an empty body. */
 class LicenseDialogTextTest {
