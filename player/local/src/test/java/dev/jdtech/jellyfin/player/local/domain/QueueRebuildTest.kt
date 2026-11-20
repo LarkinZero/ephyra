@@ -58,7 +58,9 @@ class QueueRebuildTest {
 
             // The user switches quality: e3's new stream waits on the server too.
             slow += "getPlaybackSources" to e3
-            val rebuild = async { rebuildQueue(playlist::items) { manager.recreatePlayerItem(it) } }
+            val rebuild = async {
+                rebuildQueue(playlist::items, manager::forget) { manager.recreatePlayerItem(it) }
+            }
             awaitHeld(e3)
 
             // The neighbours come in first: e2 before e3, then e4 after it.
@@ -90,7 +92,9 @@ class QueueRebuildTest {
         assertEquals(listOf(e2, e3, e4), playlist.ids)
 
         slow += "getPlaybackSources" to e2
-        val rebuild = async { rebuildQueue(playlist::items) { manager.recreatePlayerItem(it) } }
+        val rebuild = async {
+            rebuildQueue(playlist::items, manager::forget) { manager.recreatePlayerItem(it) }
+        }
         awaitHeld(e2)
         // A jump in the queue (the TV's queue row) replaces the playlist.
         playlist.replace(manager.jumpTo(e1)!!)
@@ -98,6 +102,11 @@ class QueueRebuildTest {
         release(e2)
 
         assertEquals(listOf(e1), rebuild.await().map { it.itemId }, "the rebuilt queue")
+
+        // The old queue's items got new streams meanwhile, but they left the playlist: the
+        // neighbour lookup for e1 still queues e2 after it.
+        loader.load(e1, playlist)
+        assertEquals(listOf(e1, e2), playlist.ids, "the playlist after e1's neighbour lookup")
     }
 
     /** The player opened at [id], before its neighbours are queued. */

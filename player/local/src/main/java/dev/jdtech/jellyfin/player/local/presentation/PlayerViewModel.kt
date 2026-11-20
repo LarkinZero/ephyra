@@ -2377,7 +2377,7 @@ constructor(
                     // queued episodes are requested with it as well.
                     if (item.seriesId != null) trackPreferences?.second?.await()
                     // CE (#721): with the items the neighbour lookup adds meanwhile.
-                    rebuildQueue({ items }) {
+                    rebuildQueue({ items }, playlistManager::forget) {
                         playlistManager.recreatePlayerItem(
                             it,
                             audioStreamIndex = track.index.takeIf { _ -> it.itemId == item.itemId },
@@ -2450,7 +2450,7 @@ constructor(
                 try {
                     // CE (#721): with the items the neighbour lookup adds meanwhile. Walking
                     // [items] itself threw when one came in, which rolled the switch back.
-                    rebuildQueue({ items }) {
+                    rebuildQueue({ items }, playlistManager::forget) {
                         playlistManager.recreatePlayerItem(
                             it,
                             playingAudio.takeIf { _ -> it.itemId.toString() == playingId },

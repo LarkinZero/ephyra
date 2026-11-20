@@ -12,18 +12,31 @@ import java.util.UUID
  * while waiting. The result is the queue as it is when this returns, in its order: the order the
  * player's current index counts, as long as the caller swaps it in without suspending first.
  *
+ * [recreate] marks an item as queued in [PlaylistManager]. An item that left the queue meanwhile (a
+ * jump replaced it) is handed to [forget] at the end, also when the rebuild fails or is cancelled,
+ * or the neighbour lookup would take it as queued and never put it back.
+ *
+ * Each pass recreates at least one item it has not seen, and the queue only grows by the neighbour
+ * lookup (two items per item change), so this ends once the user stops changing items.
+ *
  * Main thread only, like the player.
  */
 suspend fun rebuildQueue(
     queue: () -> List<PlayerItem>,
+    forget: (UUID) -> Unit,
     recreate: suspend (PlayerItem) -> PlayerItem,
 ): List<PlayerItem> {
     val rebuilt = mutableMapOf<UUID, PlayerItem>()
-    while (true) {
-        // A copy: the queue can change while a stream is fetched.
-        val items = queue().toList()
-        val missing = items.filter { it.itemId !in rebuilt }
-        if (missing.isEmpty()) return items.map { rebuilt.getValue(it.itemId) }
-        for (item in missing) rebuilt[item.itemId] = recreate(item)
+    try {
+        while (true) {
+            // A copy: the queue can change while a stream is fetched.
+            val items = queue().toList()
+            val missing = items.filter { it.itemId !in rebuilt }
+            if (missing.isEmpty()) return items.map { rebuilt.getValue(it.itemId) }
+            for (item in missing) rebuilt[item.itemId] = recreate(item)
+        }
+    } finally {
+        val queued = queue().map { it.itemId }.toSet()
+        rebuilt.keys.filter { it !in queued }.forEach(forget)
     }
 }
