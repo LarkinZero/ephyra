@@ -17,6 +17,7 @@ import java.lang.reflect.Proxy
 import java.net.InetSocketAddress
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.Executors
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -129,6 +130,10 @@ class ServerAddressesFeedbackTest {
             exchange.sendResponseHeaders(200, body.toByteArray().size.toLong())
             exchange.responseBody.use { it.write(body.toByteArray()) }
         }
+        // The SDK also tries https on the same port. On the default executor that handshake
+        // blocks the server's only thread until it times out, and the http request with it.
+        val executor = Executors.newCachedThreadPool()
+        server.executor = executor
         server.start()
         try {
             val stubAddress = "http://127.0.0.1:${server.address.port}"
@@ -142,6 +147,7 @@ class ServerAddressesFeedbackTest {
             assertEquals(3, addresses.size)
         } finally {
             server.stop(0)
+            executor.shutdownNow()
         }
     }
 
@@ -157,6 +163,8 @@ class ServerAddressesFeedbackTest {
             exchange.sendResponseHeaders(200, body.toByteArray().size.toLong())
             exchange.responseBody.use { it.write(body.toByteArray()) }
         }
+        val executor = Executors.newCachedThreadPool()
+        server.executor = executor
         server.start()
         try {
             failure = IllegalStateException("Cannot access database on the main thread")
@@ -169,6 +177,7 @@ class ServerAddressesFeedbackTest {
             assertEquals(CoreR.string.unknown_error, message.resId)
         } finally {
             server.stop(0)
+            executor.shutdownNow()
         }
     }
 
