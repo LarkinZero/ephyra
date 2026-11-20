@@ -1381,8 +1381,8 @@ class MPVPlayer(
         startNewLoad(index = null)
         errorRecovery.forget()
         reloadingAfterError = false
-        mpv.command(arrayOf("playlist-clear"))
-        mpv.command(arrayOf("playlist-remove", "current"))
+        // CE (#723): in one step, see clearPlaylistCommand.
+        mpv.command(clearPlaylistCommand())
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
         internalMediaItems = mediaItems.toMutableList()
     }
@@ -1408,17 +1408,16 @@ class MPVPlayer(
         startNewLoad(index = null)
         errorRecovery.forget()
         reloadingAfterError = false
-        mpv.command(arrayOf("playlist-clear"))
-        mpv.command(arrayOf("playlist-remove", "current"))
+        // CE (#723): in one step, see clearPlaylistCommand.
+        mpv.command(clearPlaylistCommand())
         // A copy: callers pass immutable lists (listOf, Guava), and addMediaItems adds to it.
         internalMediaItems = mediaItems.toMutableList()
-        // The old playlist is gone, so the tracked index no longer refers to
-        // anything. prepare() loads the new index 0 with "replace", making 0
-        // the effective playing position; without this reset a stale index
-        // equal to startWindowIndex makes prepareMediaItem skip the
-        // playlist-play-index command and the wrong entry keeps playing.
-        currentMediaItemIndex = 0
-        initialIndex = startWindowIndex
+        // CE (#723): the index the new playlist starts at, as ExoPlayer reports it. prepare() has
+        // mpv play that entry without starting another one first, so it holds until the item
+        // changes. It was 0 until mpv reported the index, which named the first item meanwhile.
+        val startIndex = if (startWindowIndex in mediaItems.indices) startWindowIndex else 0
+        currentMediaItemIndex = startIndex
+        initialIndex = startIndex
         initialSeekTo = startPositionMs
         // Before prepare() sends a state change: the media session checks its cached position
         // against the timeline then, and crashed on a shorter playlist (#453).
@@ -1600,19 +1599,19 @@ class MPVPlayer(
         }
         startNewLoad(index = null)
         startPassedToLoadMs = null
-        internalMediaItems.forEachIndexed { index, mediaItem ->
-            val uri = "${mediaItem.localConfiguration?.uri}"
-            if (index == 0 && initialIndex == 0 && initialSeekTo > 0L) {
-                // mpv 0.38+ (the bundled build is 0.42): loadfile <url> <flags> <index> <options>.
-                // An index of -1 is the default, the options are what is needed here.
-                val startSeconds = initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)
-                mpv.command(arrayOf("loadfile", uri, "replace", "-1", "start=$startSeconds"))
+        // The start option for the first item only, as before: a later one seeks once it is up.
+        val startSeconds =
+            if (initialIndex == 0 && initialSeekTo > 0L) {
                 startPassedToLoadMs = initialSeekTo
+                initialSeekTo.toDouble().div(C.MILLIS_PER_SECOND)
             } else {
-                mpv.command(arrayOf("loadfile", uri, if (index == 0) "replace" else "append"))
+                null
             }
-        }
-        prepareMediaItem(initialIndex)
+        val uris = internalMediaItems.map { "${it.localConfiguration?.uri}" }
+        playlistLoadCommands(uris, initialIndex, startSeconds).forEach { mpv.command(it) }
+        // CE (#723): the loaded playlist plays nothing yet, so this always sends the
+        // playlist-play-index, also when currentMediaItemIndex is initialIndex already.
+        prepareMediaItem(initialIndex, play = true)
     }
 
     /**
@@ -1929,7 +1928,12 @@ class MPVPlayer(
         }
     }
 
-    private fun prepareMediaItem(index: Int) {
+    /**
+     * Resets the file state for the entry at [index] and, when [play], has mpv play it. Without
+     * [play] only for another entry than the current one: playing the current one again restarts
+     * it.
+     */
+    private fun prepareMediaItem(index: Int, play: Boolean = currentMediaItemIndex != index) {
         internalMediaItems.getOrNull(index)?.let { mediaItem ->
             startNewLoad(index)
             resetInternalState()
@@ -1958,7 +1962,7 @@ class MPVPlayer(
             // This is a problem on initial load when the first item is still loading causing
             // duplicate
             // external subtitle entries.
-            if (currentMediaItemIndex != index) {
+            if (play) {
                 mpv.command(arrayOf("playlist-play-index", "$index"))
             }
             setPlayerStateAndNotifyIfChanged(playbackState = STATE_BUFFERING)

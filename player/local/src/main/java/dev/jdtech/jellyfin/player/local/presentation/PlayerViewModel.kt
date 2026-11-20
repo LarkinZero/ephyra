@@ -70,6 +70,7 @@ import dev.jdtech.jellyfin.player.local.domain.SleepTimer
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.domain.StillWatchingTracker
 import dev.jdtech.jellyfin.player.local.domain.StoredChoice
+import dev.jdtech.jellyfin.player.local.domain.StreamSwitches
 import dev.jdtech.jellyfin.player.local.domain.TV_TRICKPLAY_WIDTH_DP
 import dev.jdtech.jellyfin.player.local.domain.TrackCandidate
 import dev.jdtech.jellyfin.player.local.domain.TrackChoices
@@ -86,7 +87,6 @@ import dev.jdtech.jellyfin.player.local.domain.isNewEndOfItem
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
 import dev.jdtech.jellyfin.player.local.domain.playerTitle
-import dev.jdtech.jellyfin.player.local.domain.rebuildQueue
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.domain.toTrackPick
@@ -2368,41 +2368,26 @@ constructor(
             index,
             audioTracks.map { TrackCandidate(it.language, it.title) },
         )
-        if (track.index == item.audioStreamIndex) return
-
-        viewModelScope.launch {
-            val rebuilt =
-                try {
-                    // An episode's pick is saved for its series: once it is written, the other
-                    // queued episodes are requested with it as well.
-                    if (item.seriesId != null) trackPreferences?.second?.await()
-                    // CE (#721): with the items the neighbour lookup adds meanwhile.
-                    rebuildQueue({ items }, playlistManager::forget) {
-                        playlistManager.recreatePlayerItem(
-                            it,
-                            audioStreamIndex = track.index.takeIf { _ -> it.itemId == item.itemId },
-                        )
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    // The stream that plays keeps playing, with the track it has.
-                    e.localizedMessage?.let {
-                        Toast.makeText(application, it, Toast.LENGTH_LONG).show()
-                    }
-                    return@launch
-                }
-            reloadQueue(rebuilt)
+        // CE (#726): one switch at a time, see StreamSwitches. An episode's pick is saved for its
+        // series: once it is written, the other queued episodes are requested with it as well.
+        streamSwitches.selectAudio(item.itemId, track.index, item.audioStreamIndex) {
+            if (item.seriesId != null) trackPreferences?.second?.await()
         }
     }
 
     /**
      * Swaps the whole queue for [rebuilt], the same items with new streams, keeping the item, the
-     * position and the pause state. [rebuilt] comes from [rebuildQueue] with no suspension since,
-     * so it is in the order the player's current index counts (#721).
+     * position and the pause state, unless every stream is the one that plays already. [rebuilt]
+     * comes from [rebuildQueue] with no suspension since, so it is in the order the player's
+     * current index counts (#721).
      */
-    private fun reloadQueue(rebuilt: List<PlayerItem>) {
+    private fun swapInQueue(rebuilt: List<PlayerItem>) {
+        // Same URLs for the whole queue (local file, or every source already below the cap):
+        // nothing to reload, keep playing untouched.
+        if (rebuilt.map { it.mediaSourceUri } == items.map { it.mediaSourceUri }) {
+            items = rebuilt.toMutableList()
+            return
+        }
         val currentIndex = player.currentMediaItemIndex
         val position = player.currentPosition
         val playWhenReady = player.playWhenReady
@@ -2436,48 +2421,59 @@ constructor(
      */
     fun selectMaxBitrate(bitrate: Int) {
         markUserInteraction()
-        if (bitrate == maxBitrate) return
-        val previousBitrate = maxBitrate
-        maxBitrate = bitrate
-        appPreferences.setValue(appPreferences.playerMaxBitrate, bitrate)
+        // CE (#726): one switch at a time, see StreamSwitches.
+        streamSwitches.selectBitrate(bitrate)
+    }
 
-        viewModelScope.launch {
-            // CE (#580): the playing item keeps its audio track when the switch leads to a
-            // transcode, which carries one track.
-            val playingId = player.currentMediaItem?.mediaId
-            val playingAudio = selectedAudioChoice()
-            val rebuilt =
-                try {
-                    // CE (#721): with the items the neighbour lookup adds meanwhile. Walking
-                    // [items] itself threw when one came in, which rolled the switch back.
-                    rebuildQueue({ items }, playlistManager::forget) {
-                        playlistManager.recreatePlayerItem(
-                            it,
-                            playingAudio.takeIf { _ -> it.itemId.toString() == playingId },
+    /**
+     * CE (#726): the quality and transcode audio switches, one at a time. The newest cancels the
+     * one in flight and takes its choices over.
+     */
+    private val streamSwitches by lazy {
+        StreamSwitches(
+            scope = viewModelScope,
+            playingBitrate = maxBitrate,
+            host =
+                object : StreamSwitches.Host {
+                    override fun queue(): List<PlayerItem> = items
+
+                    // CE (#580): the playing item keeps its audio track when the switch leads to
+                    // a transcode, which carries one track.
+                    override fun playing() =
+                        StreamSwitches.Playing(
+                            itemId = currentPlayerItem()?.itemId,
+                            audio = selectedAudioChoice(),
                         )
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    // Keep playing the current stream and roll the setting back so
-                    // the UI does not claim a quality that is not being delivered.
-                    maxBitrate = previousBitrate
-                    appPreferences.setValue(appPreferences.playerMaxBitrate, previousBitrate)
-                    // A Toast without text throws, and some errors (an NPE) have no message.
-                    e.localizedMessage?.let {
-                        Toast.makeText(application, it, Toast.LENGTH_LONG).show()
-                    }
-                    return@launch
-                }
 
-            // Same URLs for the whole queue (local file, or every source already
-            // below the cap) — nothing to reload, keep playing untouched.
-            if (rebuilt.map { it.mediaSourceUri } == items.map { it.mediaSourceUri }) {
-                items = rebuilt.toMutableList()
-                return@launch
-            }
+                    override fun forget(itemId: UUID) = playlistManager.forget(itemId)
 
-            reloadQueue(rebuilt)
-        }
+                    override suspend fun recreate(
+                        item: PlayerItem,
+                        playingAudio: StoredChoice?,
+                        pickedAudio: Int?,
+                    ) =
+                        playlistManager.recreatePlayerItem(
+                            item,
+                            selectedAudio = playingAudio,
+                            audioStreamIndex = pickedAudio,
+                        )
+
+                    override fun setBitrate(bitrate: Int) {
+                        maxBitrate = bitrate
+                        appPreferences.setValue(appPreferences.playerMaxBitrate, bitrate)
+                    }
+
+                    override fun swapIn(rebuilt: List<PlayerItem>) = swapInQueue(rebuilt)
+
+                    override fun failed(error: Exception) {
+                        Timber.e(error)
+                        // A Toast without text throws, and some errors (an NPE) have no message.
+                        error.localizedMessage?.let {
+                            Toast.makeText(application, it, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                },
+        )
     }
 
     private suspend fun getSegments(itemId: UUID) {
