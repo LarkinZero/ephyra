@@ -111,8 +111,6 @@
         <item quantity="one">%d com falha</item>
         <item quantity="other">%d com falha</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Ainda não transferiu nada</string>
-    <string name="ce_home_offline_empty_body">Está offline. Os filmes e episódios que transferir aparecem aqui e em Downloads.</string>
     <string name="ce_cast_sheet_title">Transmitir para um dispositivo</string>
     <string name="ce_cast_searching">A procurar dispositivos…</string>
     <string name="ce_cast_wifi_hint">Certifique-se de que a TV está ligada e na mesma rede Wi-Fi que este dispositivo.</string>

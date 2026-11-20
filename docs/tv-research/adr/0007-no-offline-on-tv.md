@@ -11,7 +11,7 @@ Phone CE has downloads, offline mode, Smart Downloads (#116) and a Downloads scr
 Don't bring downloads or offline mode to TV for now:
 
 - The TV app hides every download and storage setting (ADR 0008).
-- The shared code needs no change: `LocalOfflineMode` stays off on TV, and the download buttons don't appear in the CE screens.
+- The shared code needs no change: `LocalOfflineMode` stays off on TV, and the download buttons don't appear in the CE screens. (Since #281 there is no offline mode or `LocalOfflineMode` on any device: downloads work without one.)
 - We reconsider if users ask for it, for example for a TV in a holiday home or a camper. That would be its own issue (size L).
 
 ## Consequences

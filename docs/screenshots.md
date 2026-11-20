@@ -97,7 +97,6 @@ so add or remove them in threes.
 | `downloaded-show.webp` | A downloaded show page with episode sizes | **own server** |
 | `download-quality.webp` | The download quality dialog over a movie page | **own server** |
 | `smart-downloads.webp` | Settings → Downloads with Smart Downloads on (switch it off again) (website only) | **own server** |
-| `offline.webp` | Home with Settings → Offline Mode on, after the downloads finished (website only) | **own server** |
 | `subtitle-style.webp` | Settings → Player → Subtitle style with a non-default colour | demo |
 | `home-rows.webp` | Settings → Interface → Home rows | demo |
 | `player-quality.webp` | Landscape: the video quality dialog over the player | demo |

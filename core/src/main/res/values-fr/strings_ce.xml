@@ -111,8 +111,6 @@
         <item quantity="one">%d en échec</item>
         <item quantity="other">%d en échec</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Rien de téléchargé pour l\'instant</string>
-    <string name="ce_home_offline_empty_body">Vous êtes hors ligne. Les films et épisodes que vous téléchargez apparaissent ici et dans Téléchargements.</string>
     <string name="ce_cast_sheet_title">Caster sur un appareil</string>
     <string name="ce_cast_searching">Recherche d\'appareils…</string>
     <string name="ce_cast_wifi_hint">Vérifiez que le téléviseur est allumé et connecté au même réseau Wi-Fi que cet appareil.</string>
