@@ -14,10 +14,11 @@ import java.util.TreeMap
  * delivered again.
  *
  * [SubtitleOffsetRenderer] shows a subtitle track [delay][SubtitleOffsetRenderer] later by
- * rendering it at an earlier position. After a seek, or after the delay grows, that position lies
- * before the samples the stream still has: the cue that is due was read before and is gone.
- * [rewind] makes the stream deliver the kept samples from a time on again, up to the next sample of
- * [upstream], before it carries on with [upstream].
+ * rendering it at an earlier position. When the delay grows during playback, that position lies
+ * before the samples the stream still has: the cue that is due was read before and is gone. (After
+ * a seek [SubtitleDelayMediaPeriod] starts the stream early enough, #650.) [rewind] makes the
+ * stream deliver the kept samples from a time on again, up to the next sample of [upstream], before
+ * it carries on with [upstream].
  *
  * Only the playback thread uses it.
  */
@@ -44,6 +45,12 @@ class SubtitleReplaySampleStream(val upstream: SampleStream) : SampleStream {
     fun rewind(fromUs: Long) {
         replay.clear()
         rewindFromUs = fromUs
+    }
+
+    /** Drops a replay [rewind] asked for and that has not been delivered yet. */
+    fun cancelReplay() {
+        replay.clear()
+        rewindFromUs = null
     }
 
     /** True while kept samples wait to be delivered again. */
