@@ -10,7 +10,6 @@ import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import dev.jdtech.jellyfin.utils.NetworkConnectivity
-import dev.jdtech.jellyfin.utils.isOfflineModeActive
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
@@ -101,8 +100,7 @@ constructor(
 
     /** Smart Downloads needs the server to say what is watched, so it never runs offline. */
     private fun isActive(): Boolean =
-        appPreferences.getValue(appPreferences.smartDownloads) &&
-            !isOfflineModeActive(appPreferences, networkConnectivity)
+        appPreferences.getValue(appPreferences.smartDownloads) && networkConnectivity.isOnline()
 
     private suspend fun run(seriesId: UUID, finishedRecently: Boolean) {
         // Smart Downloads that was already on before the moment was recorded: only what is watched

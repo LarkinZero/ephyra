@@ -127,7 +127,7 @@ class SettingsTreeVariantTest {
         }
 
     @Test
-    fun `TV variant hides downloads category and offline mode at top level`() = runTest {
+    fun `TV variant hides downloads category at top level`() = runTest {
         val tvViewModel = SettingsViewModel(context, appPreferences, AppVariant.TV)
         tvViewModel.loadPreferences(emptyList())
 
@@ -135,17 +135,13 @@ class SettingsTreeVariantTest {
         val names = preferences.map { it.nameStringResource }
 
         assertFalse(
-            names.contains(SettingsR.string.offline_mode),
-            message = "Offline mode switch must be hidden on TV",
-        )
-        assertFalse(
             names.contains(SettingsR.string.title_download),
             message = "Downloads category must be hidden on TV",
         )
     }
 
     @Test
-    fun `Phone variant shows downloads category and offline mode at top level`() = runTest {
+    fun `Phone variant shows downloads category at top level`() = runTest {
         val phoneViewModel = SettingsViewModel(context, appPreferences, AppVariant.PHONE)
         phoneViewModel.loadPreferences(emptyList())
 
@@ -153,12 +149,13 @@ class SettingsTreeVariantTest {
         val names = preferences.map { it.nameStringResource }
 
         assertTrue(
-            names.contains(SettingsR.string.offline_mode),
-            message = "Offline mode switch must be present on Phone",
-        )
-        assertTrue(
             names.contains(SettingsR.string.title_download),
             message = "Downloads category must be present on Phone",
+        )
+        // #281: downloads work without a mode, so there is no Offline Mode switch any more.
+        assertFalse(
+            names.contains(SettingsR.string.offline_mode),
+            message = "No Offline Mode switch on Phone",
         )
     }
 

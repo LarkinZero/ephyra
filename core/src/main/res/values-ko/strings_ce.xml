@@ -106,8 +106,6 @@
     <plurals name="ce_downloads_failed_count">
         <item quantity="other">%d개 실패</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">아직 다운로드한 항목이 없습니다</string>
-    <string name="ce_home_offline_empty_body">오프라인 상태입니다. 다운로드한 영화와 에피소드가 여기와 다운로드에 표시됩니다.</string>
     <string name="ce_cast_sheet_title">기기로 전송</string>
     <string name="ce_cast_searching">기기 찾는 중…</string>
     <string name="ce_cast_wifi_hint">TV가 켜져 있고 이 기기와 같은 Wi-Fi 네트워크에 연결되어 있는지 확인하세요.</string>

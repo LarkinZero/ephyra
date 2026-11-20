@@ -167,15 +167,18 @@ constructor(
                                 seasonId = seasonId,
                                 offline = true,
                             )
-                        if (downloadsOnly) stored
-                        else
-                            serverOrStoredList(stored) {
-                                repository.getEpisodes(
-                                    seriesId = resolvedSeriesId,
-                                    seasonId = seasonId,
-                                    fields = seasonEpisodeFields,
-                                )
-                            }
+                        val episodes =
+                            if (downloadsOnly) stored
+                            else
+                                serverOrStoredList(stored) {
+                                    repository.getEpisodes(
+                                        seriesId = resolvedSeriesId,
+                                        seasonId = seasonId,
+                                        fields = seasonEpisodeFields,
+                                    )
+                                }
+                        // The fallback hands back the stored list itself.
+                        episodes to (downloadsOnly || episodes === stored)
                     }
                     val seriesSeasonsAsync = async {
                         if (!includeSeriesSeasons) {
@@ -190,12 +193,13 @@ constructor(
                         }
                     }
                     val season = seasonAsync.await()
-                    val episodes = episodesAsync.await()
+                    val (episodes, storedOnly) = episodesAsync.await()
                     val seriesSeasons = seriesSeasonsAsync.await()
                     _state.emit(
                         _state.value.copy(
                             season = season,
                             episodes = episodes,
+                            storedOnly = storedOnly,
                             seriesSeasons = seriesSeasons,
                             episodeDownloadProgress =
                                 buildDownloadProgressMap(episodes, downloadQueue.entries.value),
@@ -214,8 +218,8 @@ constructor(
 
     /**
      * Marks the season played or unplayed and updates the season in place (#252) instead of loading
-     * the page again. Only the episodes are fetched again: the server marks them too, the offline
-     * repository doesn't, so their state has to come from the repository.
+     * the page again. Only the episodes are fetched again: the server marks them too, so their
+     * state has to come from the repository.
      */
     private fun setPlayed(played: Boolean) {
         viewModelScope.launch {

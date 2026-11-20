@@ -121,8 +121,6 @@
         <item quantity="many">Помилка: %d</item>
         <item quantity="other">Помилка: %d</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Ще нічого не завантажено</string>
-    <string name="ce_home_offline_empty_body">Немає з\'єднання. Завантажені фільми й епізоди з\'являться тут і в розділі «Завантаження».</string>
     <string name="ce_cast_sheet_title">Трансляція на пристрій</string>
     <string name="ce_cast_searching">Пошук пристроїв…</string>
     <string name="ce_cast_wifi_hint">Переконайтеся, що телевізор увімкнено й він у тій самій мережі Wi-Fi, що й цей пристрій.</string>

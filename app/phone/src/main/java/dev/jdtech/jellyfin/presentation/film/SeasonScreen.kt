@@ -78,7 +78,6 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
@@ -261,11 +260,14 @@ private fun SeasonScreenLayout(
         remember(state.episodeDownloadProgress, hiddenIds) {
             state.episodeDownloadProgress - hiddenIds
         }
-    val offlineMode = LocalOfflineMode.current
     // These only depend on the episode list, so a progress tick must not redo them.
+    // CE (#281): a list of stored episodes drops a removed one at once, as the Downloads tab
+    // does; it would leave the list once the removal is done. A list from the server keeps it, as
+    // not downloaded.
     val episodes =
-        remember(state.episodes, hiddenIds, offlineMode) {
-            if (offlineMode) state.episodes.filterNot { it.id in hiddenIds } else state.episodes
+        remember(state.episodes, state.storedOnly, hiddenIds) {
+            if (state.storedOnly) state.episodes.filterNot { it.id in hiddenIds }
+            else state.episodes
         }
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
@@ -375,7 +377,8 @@ private fun SeasonScreenLayout(
                             it.status == DownloadStatus.QUEUED ||
                             it.status == DownloadStatus.PAUSED
                     }
-                val totalCount = episodes.size
+                // Counts an episode behind the Undo snackbar, as the downloaded count does.
+                val totalCount = state.episodes.size
 
                 if (downloadedCount > 0 || downloadingCount > 0) {
                     item {

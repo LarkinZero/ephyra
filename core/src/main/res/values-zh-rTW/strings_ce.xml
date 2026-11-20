@@ -106,8 +106,6 @@
     <plurals name="ce_downloads_failed_count">
         <item quantity="other">%d 個失敗</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">尚未下載任何內容</string>
-    <string name="ce_home_offline_empty_body">你目前離線。你下載的電影和單集會顯示在這裡和「下載」中。</string>
     <string name="ce_cast_sheet_title">投放到裝置</string>
     <string name="ce_cast_searching">正在尋找裝置…</string>
     <string name="ce_cast_wifi_hint">請確認電視已開機，並與此裝置連上同一個 Wi-Fi 網路。</string>

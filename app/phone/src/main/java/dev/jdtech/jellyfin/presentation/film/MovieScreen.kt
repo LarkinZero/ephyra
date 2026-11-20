@@ -73,7 +73,6 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -98,7 +97,7 @@ fun MovieScreen(
     val castPlayback = LocalCastPlayback.current
     val uriHandler = LocalUriHandler.current
     // CE (#281): with the server away the page of a deleted download cannot load again either.
-    val serverAway = LocalOfflineMode.current || LocalServerStatus.current.unreachable
+    val serverAway = LocalServerStatus.current.unreachable
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     // Not read here: a progress tick must only recompose the download card.
@@ -425,7 +424,7 @@ internal fun MovieWatchAndLinks(movie: FindroidMovie, onAction: (MovieAction) ->
         Spacer(Modifier.height(MaterialTheme.spacings.small))
         WatchHistoryText(playCount = movie.playCount, lastPlayedDate = movie.lastPlayedDate)
     }
-    if (movie.externalLinks.isNotEmpty() && !LocalOfflineMode.current) {
+    if (movie.externalLinks.isNotEmpty()) {
         Spacer(Modifier.height(MaterialTheme.spacings.medium))
         ExternalLinksRow(movie.externalLinks) { url -> onAction(MovieAction.OpenExternalLink(url)) }
     }

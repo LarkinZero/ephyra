@@ -106,8 +106,6 @@
     <plurals name="ce_downloads_failed_count">
         <item quantity="other">%d gagal</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Belum ada yang diunduh</string>
-    <string name="ce_home_offline_empty_body">Anda sedang offline. Film dan episode yang Anda unduh muncul di sini dan di Unduhan.</string>
     <string name="ce_cast_sheet_title">Transmisikan ke perangkat</string>
     <string name="ce_cast_searching">Mencari perangkat…</string>
     <string name="ce_cast_wifi_hint">Pastikan TV menyala dan berada di jaringan Wi-Fi yang sama dengan perangkat ini.</string>

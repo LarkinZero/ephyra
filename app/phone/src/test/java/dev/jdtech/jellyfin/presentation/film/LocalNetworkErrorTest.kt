@@ -27,7 +27,6 @@ import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ErrorState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.setup.R as SetupR
 import java.net.SocketTimeoutException
 import kotlin.test.assertEquals
@@ -76,7 +75,6 @@ class LocalNetworkErrorTest {
             FindroidTheme {
                 CompositionLocalProvider(
                     LocalLocalNetworkBlock provides block,
-                    LocalOfflineMode provides false,
                     LocalDensity provides Density(density.density, fontScale),
                 ) {
                     content()

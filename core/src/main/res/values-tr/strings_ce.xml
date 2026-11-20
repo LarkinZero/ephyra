@@ -106,8 +106,6 @@
     <plurals name="ce_downloads_failed_count">
         <item quantity="other">%d başarısız</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Henüz hiçbir şey indirilmedi</string>
-    <string name="ce_home_offline_empty_body">Çevrimdışısınız. İndirdiğiniz filmler ve bölümler burada ve İndirilenler\'de görünür.</string>
     <string name="ce_cast_sheet_title">Cihaza yayınla</string>
     <string name="ce_cast_searching">Cihazlar aranıyor…</string>
     <string name="ce_cast_wifi_hint">TV\'nin açık ve bu cihazla aynı Wi-Fi ağında olduğundan emin olun.</string>

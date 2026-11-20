@@ -121,8 +121,6 @@
         <item quantity="many">Ошибка: %d</item>
         <item quantity="other">Ошибка: %d</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Пока ничего не загружено</string>
-    <string name="ce_home_offline_empty_body">Нет подключения. Загруженные фильмы и эпизоды появятся здесь и в разделе «Загрузки».</string>
     <string name="ce_cast_sheet_title">Трансляция на устройство</string>
     <string name="ce_cast_searching">Поиск устройств…</string>
     <string name="ce_cast_wifi_hint">Убедитесь, что телевизор включён и подключён к той же сети Wi-Fi, что и это устройство.</string>

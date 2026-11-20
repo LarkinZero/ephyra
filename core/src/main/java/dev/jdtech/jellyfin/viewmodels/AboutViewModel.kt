@@ -49,7 +49,7 @@ constructor(
     private val deviceProfileBuilder: DeviceProfileBuilder,
     private val appPreferences: AppPreferences,
     private val database: ServerDatabaseDao,
-    // A Provider, so the online or offline repository is picked when the info loads.
+    // A Provider, so the repository is only made when the info loads.
     private val repository: Provider<JellyfinRepository>,
     val appVariant: AppVariant,
 ) : ViewModel() {

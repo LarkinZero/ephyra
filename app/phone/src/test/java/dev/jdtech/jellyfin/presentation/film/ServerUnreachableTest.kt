@@ -31,7 +31,6 @@ import dev.jdtech.jellyfin.models.FindroidTrailer
 import dev.jdtech.jellyfin.presentation.film.components.ErrorState
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ServerStatusUi
 import dev.jdtech.jellyfin.setup.R as SetupR
@@ -58,7 +57,6 @@ class ServerUnreachableTest {
     private var homeState by mutableStateOf(HomeState())
     private var error: Exception by mutableStateOf(ConnectException("Failed to connect"))
     private var localNetworkBlocked by mutableStateOf(false)
-    private var offlineMode by mutableStateOf(false)
     private var downloadsOpened = 0
     private var checks = 0
     private var retries = 0
@@ -91,7 +89,6 @@ class ServerUnreachableTest {
         rule.setContent {
             FindroidTheme {
                 CompositionLocalProvider(
-                    LocalOfflineMode provides offlineMode,
                     LocalServerStatus provides status,
                     LocalLocalNetworkBlock provides
                         LocalNetworkBlock(blocked = localNetworkBlocked, request = {}),
@@ -424,13 +421,5 @@ class ServerUnreachableTest {
         status = ServerStatusUi()
         settle()
         assertButtons(shown = true)
-    }
-
-    @Test
-    fun offlineModeHidesTheButtonsAsBefore() {
-        offlineMode = true
-        setButtons()
-
-        assertButtons(shown = false)
     }
 }

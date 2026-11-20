@@ -11,10 +11,8 @@ import dev.jdtech.jellyfin.player.DeviceProfileBuilder
 import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.JellyfinRepositoryImpl
-import dev.jdtech.jellyfin.repository.JellyfinRepositoryOfflineImpl
 import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import dev.jdtech.jellyfin.utils.useOfflineRepository
 import dev.jdtech.jellyfin.work.UserDataSync
 import javax.inject.Singleton
 
@@ -55,36 +53,9 @@ object RepositoryModule {
         )
     }
 
-    @Singleton
-    @Provides
-    fun provideJellyfinRepositoryOfflineImpl(
-        application: Application,
-        jellyfinApi: JellyfinApi,
-        serverDatabase: ServerDatabaseDao,
-        appPreferences: AppPreferences,
-        userDataSync: UserDataSync,
-    ): JellyfinRepositoryOfflineImpl {
-
-        return JellyfinRepositoryOfflineImpl(
-            application,
-            jellyfinApi,
-            serverDatabase,
-            appPreferences,
-            userDataSync,
-        )
-    }
-
+    /** CE (#281): one repository; downloaded items fall back to Room when the server is away. */
     @Provides
     fun provideJellyfinRepository(
-        jellyfinRepositoryImpl: JellyfinRepositoryImpl,
-        jellyfinRepositoryOfflineImpl: JellyfinRepositoryOfflineImpl,
-        appPreferences: AppPreferences,
-    ): JellyfinRepository {
-
-        return if (useOfflineRepository(appPreferences)) {
-            jellyfinRepositoryOfflineImpl
-        } else {
-            jellyfinRepositoryImpl
-        }
-    }
+        jellyfinRepositoryImpl: JellyfinRepositoryImpl
+    ): JellyfinRepository = jellyfinRepositoryImpl
 }

@@ -20,7 +20,6 @@ import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
-import dev.jdtech.jellyfin.repository.JellyfinRepositoryOfflineImpl
 import dev.jdtech.jellyfin.repository.ReloadPolicy
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.toView
@@ -68,9 +67,6 @@ constructor(
     private var cachedLibraries: List<BaseItemDto>? = null
     private var cachedLibrariesKey: Pair<String?, UUID?>? = null
     private var cacheChecked = false
-
-    /** The repository is chosen when this view model is made, so this holds for its whole life. */
-    private val offline = repository is JellyfinRepositoryOfflineImpl
 
     init {
         syncPreferences()
@@ -123,10 +119,6 @@ constructor(
                 val user = logFailure("user") { database.getServerCurrentUser(server.id) }
                 _state.update { it.copy(user = user.getOrNull()) }
                 showCachedRows(server.id, user.getOrNull()?.id)
-                if (offline) {
-                    val none = logFailure("downloads") { nothingDownloaded(database, server.id) }
-                    _state.update { it.copy(nothingDownloaded = none.getOrDefault(false)) }
-                }
             }
             // CE (#142): the rows this user chose for this server, in their order.
             val stored = homeRowsStore.read(HomeRowsProfile.of(server))
@@ -194,11 +186,10 @@ constructor(
     }
 
     /**
-     * CE (#543): a server renamed on the server is renamed here too, on the next load. Offline, or
-     * when the server does not answer, the stored name stays.
+     * CE (#543): a server renamed on the server is renamed here too, on the next load. When the
+     * server does not answer, the stored name stays.
      */
     private suspend fun refreshServerName(server: Server) {
-        if (offline) return
         logFailure("server name") {
             val renamed = server.renamedTo(repository.getPublicSystemInfo()) ?: return@logFailure
             database.updateServer(renamed)
@@ -212,8 +203,6 @@ constructor(
      */
     private suspend fun showCachedRows(serverId: String, userId: UUID?) {
         val cache = homeCache ?: return
-        // CE (#428): offline, the rows are the downloads; the remembered ones can't be opened.
-        if (offline) return
         if (userId == null || cacheChecked || !_state.value.isEmpty) return
         cacheChecked = true
         if (!appPreferences.getValue(appPreferences.homeCache)) {
@@ -238,11 +227,11 @@ constructor(
         }
     }
 
-    /** Offline, the rows are the downloads: not worth showing on the next online start. */
+    /** The rows of a full load, for the next cold start (#251). */
     private suspend fun saveRows(server: Server?) {
         val cache = homeCache ?: return
         val user = _state.value.user ?: return
-        if (server == null || offline) return
+        if (server == null) return
         if (!appPreferences.getValue(appPreferences.homeCache)) return
         cache.write(server.id, user.id, _state.value)
     }
@@ -387,8 +376,7 @@ constructor(
         val shown = layout.filter { it.visible }.mapNotNullTo(mutableSetOf()) { it.libraryId }
         val views = libraries.filter { it.id in shown }
         if (views.isEmpty()) {
-            // CE (#428): no Latest row to load, so none of the old ones may stay: offline with
-            // nothing downloaded, the rows remembered from an online start would.
+            // CE (#428): no Latest row to load, so none of the old ones may stay.
             _state.update { it.copy(views = emptyList()) }
             return
         }

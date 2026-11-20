@@ -854,13 +854,7 @@ class JellyfinRepositoryImpl(
                     runtimeTicks = database.getRuntimeTicks(itemId),
                     thresholds = resumeThresholds.get(currentServerId()),
                 )
-            if (userData != null) {
-                database.setPlaybackPositionTicks(itemId, currentUserId, userData.positionTicks)
-                userData.played?.let { database.setPlayed(currentUserId, itemId, it) }
-                // CE (#633): sent along if this stop has to be synced later.
-                database.setLastPlayedDate(currentUserId, itemId, System.currentTimeMillis())
-            }
-            try {
+            val stop = suspend {
                 jellyfinApi.sessionApi.reportPlaybackStopped(
                     PlaybackStopInfo(
                         itemId = itemId,
@@ -870,9 +864,22 @@ class JellyfinRepositoryImpl(
                         playSessionId = playSessions.sessionOf(itemId),
                     )
                 )
-            } catch (_: Exception) {
-                // Nothing local changed without user data, so there is nothing to sync later.
-                if (userData != null) markToBeSynced(itemId)
+                Unit
+            }
+            if (userData == null) {
+                // Nothing local changes without user data, so there is nothing to sync later.
+                try {
+                    stop()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {}
+                return@withContext
+            }
+            reportUserData(itemId, report = stop) { userId ->
+                setPlaybackPositionTicks(itemId, userId, userData.positionTicks)
+                userData.played?.let { setPlayed(userId, itemId, it) }
+                // CE (#633): sent along if this stop has to be synced later.
+                setLastPlayedDate(userId, itemId, System.currentTimeMillis())
             }
         }
     }
@@ -886,60 +893,58 @@ class JellyfinRepositoryImpl(
         Timber.d("Posting progress of $itemId, position: $positionTicks")
         val report = playSessions.playReport(itemId, transcoded)
         withContext(Dispatchers.IO) {
-            database.setPlaybackPositionTicks(itemId, currentUserId, positionTicks)
-            // CE (#633): sent along if this progress has to be synced later.
-            database.setLastPlayedDate(currentUserId, itemId, System.currentTimeMillis())
-            try {
-                jellyfinApi.sessionApi.reportPlaybackProgress(
-                    PlaybackProgressInfo(
-                        itemId = itemId,
-                        canSeek = true,
-                        isPaused = isPaused,
-                        isMuted = false,
-                        playMethod = report.playMethod,
-                        playSessionId = report.playSessionId,
-                        repeatMode = RepeatMode.REPEAT_NONE,
-                        playbackOrder = PlaybackOrder.DEFAULT,
-                        positionTicks = positionTicks,
+            reportUserData(
+                itemId,
+                report = {
+                    jellyfinApi.sessionApi.reportPlaybackProgress(
+                        PlaybackProgressInfo(
+                            itemId = itemId,
+                            canSeek = true,
+                            isPaused = isPaused,
+                            isMuted = false,
+                            playMethod = report.playMethod,
+                            playSessionId = report.playSessionId,
+                            repeatMode = RepeatMode.REPEAT_NONE,
+                            playbackOrder = PlaybackOrder.DEFAULT,
+                            positionTicks = positionTicks,
+                        )
                     )
-                )
-            } catch (_: Exception) {
-                markToBeSynced(itemId)
+                },
+            ) { userId ->
+                setPlaybackPositionTicks(itemId, userId, positionTicks)
+                // CE (#633): sent along if this progress has to be synced later.
+                setLastPlayedDate(userId, itemId, System.currentTimeMillis())
             }
         }
     }
 
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setFavorite(currentUserId, itemId, true)
-            try {
-                jellyfinApi.userDataApi.markFavoriteItem(itemId)
-            } catch (_: Exception) {
-                markToBeSynced(itemId)
+            reportUserData(itemId, report = { jellyfinApi.userDataApi.markFavoriteItem(itemId) }) {
+                userId ->
+                setFavorite(userId, itemId, true)
             }
         }
     }
 
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setFavorite(currentUserId, itemId, false)
-            try {
-                jellyfinApi.userDataApi.unmarkFavoriteItem(itemId)
-            } catch (_: Exception) {
-                markToBeSynced(itemId)
+            reportUserData(
+                itemId,
+                report = { jellyfinApi.userDataApi.unmarkFavoriteItem(itemId) },
+            ) { userId ->
+                setFavorite(userId, itemId, false)
             }
         }
     }
 
     override suspend fun markAsPlayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setPlayed(currentUserId, itemId, true)
-            // CE (#633): as the server does for a played mark without a date.
-            database.setLastPlayedDateIfUnknown(currentUserId, itemId, System.currentTimeMillis())
-            try {
-                jellyfinApi.userDataApi.markPlayedItem(itemId)
-            } catch (_: Exception) {
-                markToBeSynced(itemId)
+            reportUserData(itemId, report = { jellyfinApi.userDataApi.markPlayedItem(itemId) }) {
+                userId ->
+                setPlayed(userId, itemId, true)
+                // CE (#633): as the server does for a played mark without a date.
+                setLastPlayedDateIfUnknown(userId, itemId, System.currentTimeMillis())
             }
         }
     }
@@ -949,27 +954,31 @@ class JellyfinRepositoryImpl(
             // CE (#635): the time of the mark, taken before the request: a request that fails only
             // after a timeout must not make the mark look later than a play elsewhere meanwhile.
             val markedAt = System.currentTimeMillis()
-            database.setPlayed(currentUserId, itemId, false)
-            try {
-                jellyfinApi.userDataApi.markUnplayedItem(itemId)
-                // CE (#633): the server clears it for an unplayed mark too.
-                database.setLastPlayedDate(currentUserId, itemId, null)
-            } catch (_: Exception) {
-                // CE (#635): kept until the sync sends the mark, which cannot clear the server's;
-                // with it the sync sees the mark is not older than the play it undoes. A row
-                // without one gets the time of the mark, or it would always count as older.
-                database.setLastPlayedDateIfUnknown(currentUserId, itemId, markedAt)
-                markToBeSynced(itemId)
-            }
+            val reached =
+                reportUserData(
+                    itemId,
+                    report = { jellyfinApi.userDataApi.markUnplayedItem(itemId) },
+                ) { userId ->
+                    setPlayed(userId, itemId, false)
+                    // CE (#635): kept until the sync sends the mark, which cannot clear the
+                    // server's; with it the sync sees the mark is not older than the play it
+                    // undoes. A row without one gets the time of the mark, or it would always count
+                    // as older.
+                    setLastPlayedDateIfUnknown(userId, itemId, markedAt)
+                }
+            // CE (#633): the server clears it for an unplayed mark too.
+            if (reached) database.setLastPlayedDate(currentUserId, itemId, null)
         }
     }
 
-    /**
-     * Marks the item's user data to be sent to the server later and asks for a sync. The request is
-     * only made when the mark is new, so a run of failed progress reports asks once.
-     */
-    private suspend fun markToBeSynced(itemId: UUID) {
-        if (database.markUserDataToBeSynced(currentUserId, itemId) > 0) syncRequester.request()
+    /** See the top-level [writeAndReport]: the change is written and marked before [report]. */
+    private suspend fun reportUserData(
+        itemId: UUID,
+        report: suspend () -> Unit,
+        write: suspend ServerDatabaseDao.(userId: UUID) -> Unit,
+    ): Boolean {
+        val userId = currentUserId
+        return writeAndReport(database, syncRequester, userId, itemId, { write(userId) }, report)
     }
 
     override fun getBaseUrl() = jellyfinApi.api.baseUrl.orEmpty()

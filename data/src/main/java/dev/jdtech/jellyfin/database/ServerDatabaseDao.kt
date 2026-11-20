@@ -336,11 +336,6 @@ interface ServerDatabaseDao {
     )
     suspend fun getSeasonEpisodeCounts(seriesId: UUID): List<SeasonEpisodeCounts>
 
-    @Query(
-        "SELECT * FROM episodes WHERE serverId = :serverId ORDER BY seriesName ASC, parentIndexNumber ASC, indexNumber ASC"
-    )
-    suspend fun getEpisodesByServerId(serverId: String): List<FindroidEpisodeDto>
-
     @Query("DELETE FROM episodes WHERE id = :id") suspend fun deleteEpisode(id: UUID)
 
     @Query("DELETE FROM episodes WHERE seasonId = :seasonId")
@@ -364,15 +359,6 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM seasons") suspend fun getSeasons(): List<FindroidSeasonDto>
 
     @Query("SELECT * FROM episodes") suspend fun getEpisodes(): List<FindroidEpisodeDto>
-
-    @Query("SELECT itemId FROM userdata WHERE userId = :userId AND favorite = 1")
-    suspend fun getFavoriteItemIds(userId: UUID): List<UUID>
-
-    @Query("SELECT itemId FROM userdata WHERE userId = :userId AND playbackPositionTicks > 0")
-    suspend fun getResumableItemIds(userId: UUID): List<UUID>
-
-    @Query("SELECT itemId FROM userdata WHERE userId = :userId AND played = 1")
-    suspend fun getPlayedItemIds(userId: UUID): List<UUID>
 
     @Query("SELECT * FROM userdata WHERE itemId = :itemId AND userId = :userId")
     suspend fun getUserData(itemId: UUID, userId: UUID): FindroidUserDataDto?
@@ -557,15 +543,6 @@ interface ServerDatabaseDao {
         playbackPositionTicks: Long,
         lastPlayedDate: Long?,
     )
-
-    @Query("SELECT * FROM movies WHERE serverId = :serverId AND name LIKE '%' || :name || '%'")
-    suspend fun searchMovies(serverId: String, name: String): List<FindroidMovieDto>
-
-    @Query("SELECT * FROM shows WHERE serverId = :serverId AND name LIKE '%' || :name || '%'")
-    suspend fun searchShows(serverId: String, name: String): List<FindroidShowDto>
-
-    @Query("SELECT * FROM episodes WHERE serverId = :serverId AND name LIKE '%' || :name || '%'")
-    suspend fun searchEpisodes(serverId: String, name: String): List<FindroidEpisodeDto>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrickplayInfo(trickplayInfoDto: FindroidTrickplayInfoDto)

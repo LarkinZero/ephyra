@@ -175,8 +175,8 @@ constructor(
                     if (relatedFor == showId) loadRelated(showId)
 
                     if (localCounts == null) return@coroutineScope
-                    // Offline, the stored episodes are all there is, and they say nothing about
-                    // what the server allows to download.
+                    // On the downloads-only page the stored episodes are all there is, and they
+                    // say nothing about what the server allows to download.
                     val totals =
                         if (downloadsOnly)
                             localCounts.mapValues { SeasonEpisodeTotals(total = it.value.total) }
@@ -243,7 +243,7 @@ constructor(
     /**
      * CE (#332): the extras and "More like this" rows, each from its own request. The page calls
      * this once it has drawn the show, so these requests never delay it; they are made once per
-     * show. Not on the downloads-only page, and offline the repository has none.
+     * show. Not on the downloads-only page.
      */
     fun loadRelated(showId: UUID) {
         val show = _state.value.show?.takeIf { it.id == showId } ?: return

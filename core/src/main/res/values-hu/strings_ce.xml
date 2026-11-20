@@ -111,8 +111,6 @@
         <item quantity="one">%d sikertelen</item>
         <item quantity="other">%d sikertelen</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Még nincs semmi letöltve</string>
-    <string name="ce_home_offline_empty_body">Nincs kapcsolat. A letöltött filmek és epizódok itt és a Letöltések között jelennek meg.</string>
     <string name="ce_cast_sheet_title">Átküldés eszközre</string>
     <string name="ce_cast_searching">Eszközök keresése…</string>
     <string name="ce_cast_wifi_hint">Ellenőrizd, hogy a tévé be van kapcsolva, és ugyanazon a Wi-Fi-hálózaton van, mint ez az eszköz.</string>

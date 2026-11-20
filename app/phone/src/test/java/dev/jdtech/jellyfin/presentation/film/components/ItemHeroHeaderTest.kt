@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -21,7 +20,6 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.presentation.film.EpisodeWideContent
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Rule
@@ -119,18 +117,16 @@ class ItemHeroHeaderTest {
 
     private fun show(paneWidth: Dp) {
         rule.setContent {
-            CompositionLocalProvider(LocalOfflineMode provides false) {
-                FindroidTheme {
-                    Box(modifier = Modifier.width(paneWidth)) {
-                        EpisodeWideContent(
-                            state = EpisodeState(episode = episode),
-                            downloaderState = { DownloaderState() },
-                            onAction = {},
-                            onDownloaderAction = {},
-                            onMediaInfoClick = {},
-                            scrollState = rememberScrollState(),
-                        )
-                    }
+            FindroidTheme {
+                Box(modifier = Modifier.width(paneWidth)) {
+                    EpisodeWideContent(
+                        state = EpisodeState(episode = episode),
+                        downloaderState = { DownloaderState() },
+                        onAction = {},
+                        onDownloaderAction = {},
+                        onMediaInfoClick = {},
+                        scrollState = rememberScrollState(),
+                    )
                 }
             }
         }
