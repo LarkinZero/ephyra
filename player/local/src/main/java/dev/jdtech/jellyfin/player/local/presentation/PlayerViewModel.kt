@@ -473,7 +473,14 @@ constructor(
     val tracksVersion: StateFlow<Int> = _tracksVersion.asStateFlow()
 
     /** The item [subtitleDelay] belongs to. */
-    private var subtitleDelayItemId: String? = null
+    @Volatile private var subtitleDelayItemId: String? = null
+
+    /**
+     * CE (#650): the subtitle delay of the item [mediaId], for [SubtitleDelayMediaPeriod] on the
+     * playback thread. Only the playing item has one: the next item, buffered ahead, starts at 0.
+     */
+    private fun subtitleDelayUsFor(mediaId: String): Long =
+        if (mediaId == subtitleDelayItemId) subtitleOffsetUs.get() else 0L
 
     private val _currentTrackCues = MutableStateFlow<List<SubtitleSyncCue>>(emptyList())
 
@@ -767,7 +774,10 @@ constructor(
                         .setAudioAttributes(audioAttributes, true)
                         .setHandleAudioBecomingNoisy(true)
                         .setMediaSourceFactory(
-                            buildMediaSourceFactory(application, jellyfinApi.httpClient)
+                            SubtitleDelayMediaSource.Factory(
+                                buildMediaSourceFactory(application, jellyfinApi.httpClient),
+                                ::subtitleDelayUsFor,
+                            )
                         )
                         .setTrackSelector(trackSelector)
                         .setSeekBackIncrementMs(
@@ -1334,8 +1344,9 @@ constructor(
         // CE (#619): the delay is the item's. A reload of the same item (quality or transcode
         // audio switch, reconnect) also lands here and keeps it.
         if (mediaItem?.mediaId != subtitleDelayItemId) {
-            subtitleDelayItemId = mediaItem?.mediaId
+            // The delay first: the new item's periods read it with the id on another thread.
             setSubtitleDelay(0)
+            subtitleDelayItemId = mediaItem?.mediaId
         }
         clearSubtitleCues()
         displayRefreshRateManager.onMediaItemTransition()

@@ -14,11 +14,11 @@ import androidx.media3.exoplayer.source.SampleStream
  * CE (#619): Offsets the playback timestamp fed to ExoPlayer's subtitle [Renderer] so that
  * subtitles are shifted earlier or later without restarting playback or rebuffering.
  *
- * The text renderer only moves its output on when the position passes its next cue change, and
- * after a seek its stream starts at the seek position. So when the shifted position goes back (a
- * seek with a delay, or a larger delay), the renderer is reset at the shifted position and its
- * stream, a [SubtitleReplaySampleStream], delivers the cues it already had again. A delay change
- * takes effect on the next render, also while paused: no seek needed.
+ * After a seek or a subtitle track switch the stream has to start at the shifted position, before
+ * the seek position for a positive delay: [SubtitleDelayMediaPeriod] puts it there (#650). A delay
+ * change during playback moves the shifted position without a seek, so the text renderer is reset
+ * at the new shifted position and its stream, a [SubtitleReplaySampleStream], delivers the cues it
+ * already had again. The change takes effect on the next render, also while paused.
  *
  * [itemDurationUsProvider] gives the duration of the playing item, or [C.TIME_UNSET].
  */
@@ -111,8 +111,8 @@ class SubtitleOffsetRenderer(
     override fun resetPosition(positionUs: Long, sampleStreamIsResetToKeyFrame: Boolean) {
         this.positionUs = positionUs
         appliedDelayUs = subtitleDelayUsProvider()
-        // Without a delay the stream starts where the player seeked to, as always.
-        if (appliedDelayUs != 0L) rewindStream(adjust(positionUs, appliedDelayUs))
+        // The period started the stream at the shifted position: nothing to replay.
+        stream?.cancelReplay()
         super.resetPosition(adjust(positionUs, appliedDelayUs), sampleStreamIsResetToKeyFrame)
     }
 
