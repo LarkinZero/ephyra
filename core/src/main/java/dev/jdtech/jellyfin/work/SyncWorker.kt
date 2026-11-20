@@ -468,10 +468,9 @@ internal fun serverUserDataToStore(
 
 /**
  * CE (#635): whether a run refreshes the downloads' user data from the server: only with downloads,
- * and not while the player here has an item open ([playingHere]). In Offline Mode every progress
- * report is synced, every few seconds, and a refresh then would read the server each time for
- * nothing. The player is closed before it reports the stop, so the run that sends the stop
- * refreshes.
+ * and not while the player here has an item open ([playingHere]): its own reports keep that item
+ * current, and a refresh would read the server for nothing. The player is closed before it reports
+ * the stop, so the run that sends the stop refreshes.
  */
 internal fun refreshesDownloads(hasDownloads: Boolean, playingHere: UUID?): Boolean =
     hasDownloads && playingHere == null

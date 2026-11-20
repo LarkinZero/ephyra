@@ -11,7 +11,6 @@ import dev.jdtech.jellyfin.player.DeviceProfileBuilder
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import java.util.UUID
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -88,11 +87,4 @@ class UnfinishedDownloadPlaybackTest {
             // Asking the server is what fails here; the partial file must not be the answer.
             assertTrue(result.isFailure, message = "Got ${result.getOrNull()?.map { it.path }}")
         }
-
-    @Test
-    fun `offline, an unfinished download is not a playback source`() = runBlocking {
-        val repository = JellyfinRepositoryOfflineImpl(context, api(), database, preferences())
-
-        assertEquals(emptyList<Any>(), repository.getPlaybackSources(episodeId, null))
-    }
 }

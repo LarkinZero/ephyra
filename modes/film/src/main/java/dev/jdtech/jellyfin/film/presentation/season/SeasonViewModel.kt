@@ -214,8 +214,8 @@ constructor(
 
     /**
      * Marks the season played or unplayed and updates the season in place (#252) instead of loading
-     * the page again. Only the episodes are fetched again: the server marks them too, the offline
-     * repository doesn't, so their state has to come from the repository.
+     * the page again. Only the episodes are fetched again: the server marks them too, so their
+     * state has to come from the repository.
      */
     private fun setPlayed(played: Boolean) {
         viewModelScope.launch {

@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -18,7 +17,6 @@ import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.View
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
@@ -41,15 +39,13 @@ class ScreenReaderLabelsTest {
     fun `the Home header buttons say what they do`() {
         rule.setContent {
             FindroidTheme {
-                CompositionLocalProvider(LocalOfflineMode provides false) {
-                    HomeHeader(
-                        serverName = "Ephyra Test",
-                        onServerClick = {},
-                        onSearchClick = {},
-                        onUserClick = {},
-                        user = dummyUser,
-                    )
-                }
+                HomeHeader(
+                    serverName = "Ephyra Test",
+                    onServerClick = {},
+                    onSearchClick = {},
+                    onUserClick = {},
+                    user = dummyUser,
+                )
             }
         }
 
