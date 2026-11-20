@@ -144,6 +144,29 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --continue
 
+      # One row per module and flavor, so a module that suddenly runs no tests stands out.
+      - name: Summarize test results
+        if: always()
+        shell: python3 {0}
+        run: |
+          import glob, os, xml.etree.ElementTree as ET
+          from collections import Counter
+          totals = {}
+          for path in sorted(glob.glob("**/build/test-results/*/TEST-*.xml", recursive=True)):
+              task = os.path.dirname(path).replace("/build/test-results/", " ")
+              suite = ET.parse(path).getroot()
+              row = totals.setdefault(task, Counter())
+              for key in ("tests", "failures", "errors", "skipped"):
+                  row[key] += int(suite.get(key, 0))
+          lines = ["| Tests | Count | Failed | Skipped |", "|---|---:|---:|---:|"]
+          for task, row in totals.items():
+              lines.append(f"| {task} | {row['tests']} | {row['failures'] + row['errors']} | {row['skipped']} |")
+          all_rows = sum(totals.values(), Counter())
+          lines.append(f"| **All** | **{all_rows['tests']}** | **{all_rows['failures'] + all_rows['errors']}** | **{all_rows['skipped']}** |")
+          print("\n".join(lines))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("\n".join(lines) + "\n")
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
