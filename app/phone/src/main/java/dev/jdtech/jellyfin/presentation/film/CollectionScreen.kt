@@ -4,13 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +40,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ServerOrErrorCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.showsServerBanner
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 
 @Composable
@@ -104,11 +101,11 @@ fun CollectionScreenLayout(
                         }
                     }
                 },
-                windowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+                windowInsets = topAndSideInsets,
                 scrollBehavior = scrollBehavior,
             )
         },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets = topAndSideInsets,
     ) { innerPadding ->
         // CE (#281): what is on screen stays (the items, or "no favourites" from before the server
         // went away), with the unreachable banner above it. A failed load with nothing to show

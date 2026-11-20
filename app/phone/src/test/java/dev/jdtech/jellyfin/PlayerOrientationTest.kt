@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /** CE (R6, #363): which orientation the player asks for. */

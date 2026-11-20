@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.film.presentation.season
 
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.ItemFields
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -23,8 +23,9 @@ class SeasonEpisodeFieldsTest {
     @Test
     fun `season episode request includes CanDownload`() {
         assertTrue(
-            "loadSeason must request ItemFields.CAN_DOWNLOAD, otherwise SeasonScreen can never show the season download button",
             seasonEpisodeFields.contains(ItemFields.CAN_DOWNLOAD),
+            message =
+                "loadSeason must request ItemFields.CAN_DOWNLOAD, otherwise SeasonScreen can never show the season download button",
         )
     }
 }

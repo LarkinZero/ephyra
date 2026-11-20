@@ -8,14 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -101,6 +97,7 @@ import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.WidthClass
 import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 
 /** Queues longer than this collapse behind a "Show all" toggle. */
@@ -275,7 +272,7 @@ internal fun DownloadsScreenLayout(
                     SortMenu(sortOrder = state.sortOrder, onSortOrderChange = onSortOrderChange)
                 }
             }
-            val insets = WindowInsets.statusBars.union(WindowInsets.displayCutout)
+            val insets = topAndSideInsets
             if (compact) {
                 LargeTopAppBar(
                     title = title,
@@ -295,7 +292,7 @@ internal fun DownloadsScreenLayout(
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets = topAndSideInsets,
     ) { innerPadding ->
         if (queueItems.isEmpty() && sections.isEmpty()) {
             val contentModifier = Modifier.padding(innerPadding).fillMaxSize()

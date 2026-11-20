@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.player.local.mpv
 
 import dev.jdtech.jellyfin.player.local.mpv.MpvStreamBreak.Outcome
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /**
@@ -39,7 +39,7 @@ class MpvStreamBreakTest {
     }
 
     private fun assertBroken(expectedPositionMs: Long, outcome: Outcome) {
-        assertTrue("expected a break, got $outcome", outcome is Outcome.Broken)
+        assertTrue(outcome is Outcome.Broken, message = "expected a break, got $outcome")
         assertEquals(expectedPositionMs, (outcome as Outcome.Broken).positionMs)
     }
 
@@ -245,7 +245,7 @@ class MpvStreamBreakTest {
     fun `only the stream and demuxer layers count`() {
         val network = "tcp: Failed to resolve hostname demo.jellyfin.org"
         listOf("ffmpeg", "ffmpeg/demuxer", "lavf", "demux", "stream", "stream/http").forEach {
-            assertTrue(it, MpvStreamBreak.isStreamError(it, network))
+            assertTrue(MpvStreamBreak.isStreamError(it, network), message = it)
         }
         listOf(
                 "ffmpeg/video",
@@ -256,7 +256,7 @@ class MpvStreamBreakTest {
                 "ao/audiotrack",
                 "cplayer",
             )
-            .forEach { assertTrue(it, !MpvStreamBreak.isStreamError(it, network)) }
+            .forEach { assertTrue(!MpvStreamBreak.isStreamError(it, network), message = it) }
         // Recorded on the tablet at a seek near the end of an episode: the hardware decoder.
         assertTrue(
             !MpvStreamBreak.isStreamError(

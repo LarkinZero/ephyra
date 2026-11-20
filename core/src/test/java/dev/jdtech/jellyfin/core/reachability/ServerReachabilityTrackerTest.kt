@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.core.reachability
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /** CE (#281): the rules that say whether the server answers, and how sure that is. */
@@ -136,7 +136,7 @@ class ServerReachabilityTrackerTest {
 
     @Test
     fun `coming to the foreground probes unless the server answered a moment ago`() {
-        assertTrue("nothing known", tracker.wantsProbe())
+        assertTrue(tracker.wantsProbe(), message = "nothing known")
 
         answer()
         clock += ServerReachabilityTracker.RECENT_ANSWER_MS - 1
@@ -147,7 +147,7 @@ class ServerReachabilityTrackerTest {
 
         answer()
         tracker.onProbe(reached = false, startedAt = clock + 1)
-        assertTrue("unreachable is always worth asking again", tracker.wantsProbe())
+        assertTrue(tracker.wantsProbe(), message = "unreachable is always worth asking again")
     }
 
     @Test

@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

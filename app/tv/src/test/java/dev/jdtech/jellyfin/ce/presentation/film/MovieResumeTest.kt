@@ -15,7 +15,7 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,7 +83,7 @@ class MovieResumeTest {
         rule.onNodeWithText("Restart").assertIsFocused()
         press(Key.DirectionCenter)
 
-        assertEquals(
+        assertEquals<List<MovieAction>>(
             listOf(
                 MovieAction.Play(startFromBeginning = false),
                 MovieAction.Play(startFromBeginning = true),
@@ -126,7 +126,7 @@ class MovieResumeTest {
         select("Resume")
         select("720p")
 
-        assertEquals(
+        assertEquals<List<MovieAction>>(
             listOf(
                 MovieAction.Play(startFromBeginning = true, mediaSourceId = "b"),
                 MovieAction.Play(startFromBeginning = false, mediaSourceId = "a"),

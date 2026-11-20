@@ -13,7 +13,7 @@ import androidx.compose.ui.test.pressKey
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.setup.presentation.pin.PinPrompt
 import java.util.UUID
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

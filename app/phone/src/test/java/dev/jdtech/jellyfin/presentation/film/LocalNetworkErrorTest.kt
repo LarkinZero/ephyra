@@ -30,9 +30,9 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.setup.R as SetupR
 import java.net.SocketTimeoutException
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -228,6 +228,9 @@ class LocalNetworkErrorTest {
         allow.assertIsDisplayed()
         val cardBottom = allow.getBoundsInRoot().bottom
         val rowTop = rule.onNodeWithText("Continue watching").getBoundsInRoot().top
-        assertTrue("rows at $rowTop start above the card's end, $cardBottom", rowTop >= cardBottom)
+        assertTrue(
+            rowTop >= cardBottom,
+            message = "rows at $rowTop start above the card's end, $cardBottom",
+        )
     }
 }

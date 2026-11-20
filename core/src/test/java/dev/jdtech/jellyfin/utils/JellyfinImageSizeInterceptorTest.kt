@@ -1,6 +1,6 @@
 package dev.jdtech.jellyfin.utils
 
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class JellyfinImageSizeInterceptorTest {

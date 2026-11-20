@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.repository
 
 import java.time.LocalDateTime
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 
 class NextUpDateCutoffTest {

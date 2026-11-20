@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.player.cast
 
 import dev.jdtech.jellyfin.player.cast.devices.Chromecast
 import dev.jdtech.jellyfin.player.cast.devices.ChromecastH265
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.MediaStreamProtocol
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -20,11 +20,11 @@ class CastDeviceProfileTest {
                 profile.transcodingProfiles.map { profile.name to it }
             }
         val hls = profiles.filter { (_, it) -> it.protocol == MediaStreamProtocol.HLS }
-        assertTrue("no HLS transcoding profile", hls.isNotEmpty())
+        assertTrue(hls.isNotEmpty(), message = "no HLS transcoding profile")
         for ((name, it) in hls) {
             assertTrue(
-                "$name lists ${it.videoCodec}",
                 it.videoCodec.split(",").first().trim() == "h264",
+                message = "$name lists ${it.videoCodec}",
             )
         }
     }

@@ -19,6 +19,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -26,9 +29,6 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -170,7 +170,7 @@ class SubtitleFinalizeTest {
         val reads = streamReads.get()
         Thread.sleep(300)
 
-        assertEquals("the job still polls", reads, streamReads.get())
+        assertEquals(reads, streamReads.get(), message = "the job still polls")
     }
 
     @Test

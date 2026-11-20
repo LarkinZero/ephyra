@@ -11,8 +11,8 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.lang.reflect.Proxy
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

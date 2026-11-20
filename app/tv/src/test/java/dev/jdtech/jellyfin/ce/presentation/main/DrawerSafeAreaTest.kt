@@ -27,8 +27,8 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,8 +85,8 @@ class DrawerSafeAreaTest {
         for (tag in iconTags) {
             val left = rule.onNodeWithTag(tag, useUnmergedTree = true).getBoundsInRoot().left
             assertTrue(
-                "$state: $tag starts at $left, in the margin (${TvSafeArea.horizontal})",
                 left >= TvSafeArea.horizontal,
+                message = "$state: $tag starts at $left, in the margin (${TvSafeArea.horizontal})",
             )
         }
     }
@@ -116,7 +116,7 @@ class DrawerSafeAreaTest {
         assertIconsInSafeArea("expanded")
         for (label in listOf(dummyUser.name, "Search", "Home", "Settings")) {
             val left = rule.onNodeWithText(label, useUnmergedTree = true).getBoundsInRoot().left
-            assertTrue("The label $label starts at $left", left >= TvSafeArea.horizontal)
+            assertTrue(left >= TvSafeArea.horizontal, message = "The label $label starts at $left")
         }
     }
 
@@ -133,17 +133,20 @@ class DrawerSafeAreaTest {
         val server = bounds("drawer_profile_server")
         for ((label, line) in listOf("name" to name, "server" to server)) {
             assertTrue(
-                "the $label line $line is outside the profile item $item",
                 line.left >= item.left &&
                     line.right <= item.right &&
                     line.top >= item.top &&
                     line.bottom <= item.bottom,
+                message = "the $label line $line is outside the profile item $item",
             )
         }
-        assertTrue("the server name $server is not below the name $name", server.top >= name.bottom)
+        assertTrue(
+            server.top >= name.bottom,
+            message = "the server name $server is not below the name $name",
+        )
         // One line each: titleMedium is 22.5 sp high, bodySmall 21 sp.
-        assertTrue("the name takes ${name.height}", name.height <= 23.dp)
-        assertTrue("the server name takes ${server.height}", server.height <= 21.dp)
+        assertTrue(name.height <= 23.dp, message = "the name takes ${name.height}")
+        assertTrue(server.height <= 21.dp, message = "the server name takes ${server.height}")
     }
 
     @Test

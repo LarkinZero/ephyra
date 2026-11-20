@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import androidx.media3.common.Player
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /**

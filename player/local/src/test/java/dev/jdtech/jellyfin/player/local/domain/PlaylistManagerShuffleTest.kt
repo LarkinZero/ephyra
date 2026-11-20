@@ -10,13 +10,13 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.lang.reflect.Proxy
 import java.util.UUID
 import kotlin.random.Random
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlaylistManagerShuffleTest {
@@ -94,12 +94,12 @@ class PlaylistManagerShuffleTest {
                 )!!
             manager.setCurrentMediaItemIndex(first.itemId)
             val second = manager.getNextPlayerItem()
-            assertNotNull("second", second)
+            assertNotNull(second, message = "second")
 
             manager.setCurrentMediaItemIndex(second!!.itemId)
-            assertNull("previous is already queued", manager.getPreviousPlayerItem())
+            assertNull(manager.getPreviousPlayerItem(), message = "previous is already queued")
             val third = manager.getNextPlayerItem()
-            assertNotNull("third", third)
+            assertNotNull(third, message = "third")
         }
     }
 

@@ -25,7 +25,7 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonState
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -122,7 +122,7 @@ class PersonFocusRestoreTest {
         setUpPerson()
         rule.waitForIdle()
         rule.onNode(card(movies[0])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -135,7 +135,7 @@ class PersonFocusRestoreTest {
         rule.waitForIdle()
 
         rule.onNode(card(movies[1])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -149,12 +149,12 @@ class PersonFocusRestoreTest {
         rule.onRoot().performKeyInput { pressKey(Key.DirectionDown) }
         rule.waitForIdle()
         rule.onNode(card(shows[0])).assertIsFocused()
-        assertTrue("second section didn't scroll", nameTop() < 0f)
+        assertTrue(nameTop() < 0f, message = "second section didn't scroll")
 
         rule.onRoot().performKeyInput { pressKey(Key.DirectionUp) }
         rule.waitForIdle()
         rule.onNode(card(movies[0])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -170,6 +170,6 @@ class PersonFocusRestoreTest {
         rule.waitForIdle()
 
         rule.onNode(card(target)).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 }

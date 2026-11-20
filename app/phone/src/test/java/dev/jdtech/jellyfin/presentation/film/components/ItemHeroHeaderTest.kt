@@ -22,8 +22,8 @@ import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.presentation.film.EpisodeWideContent
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,7 +64,10 @@ class ItemHeroHeaderTest {
     fun `narrower list-detail panes and book posture stack`() {
         // 1024, 900 and 841 dp windows (panes 614, 540, 481) and a ~420 dp book-posture pane.
         listOf(566.dp, 492.dp, 433.dp, 372.dp).forEach { inner ->
-            assertTrue(inner.toString(), heroStacked(inner, posterWidth = 320.dp, gap = 24.dp))
+            assertTrue(
+                heroStacked(inner, posterWidth = 320.dp, gap = 24.dp),
+                message = inner.toString(),
+            )
         }
     }
 
@@ -91,12 +94,12 @@ class ItemHeroHeaderTest {
             )
             .forEach { id ->
                 val icon = bounds(rule.activity.getString(id))
-                assertTrue("$id squeezed: $icon", icon.right - icon.left >= 24.dp)
-                assertTrue("$id outside the pane: $icon", icon.right <= 480.dp)
+                assertTrue(icon.right - icon.left >= 24.dp, message = "$id squeezed: $icon")
+                assertTrue(icon.right <= 480.dp, message = "$id outside the pane: $icon")
             }
         val playText =
             rule.onNodeWithText("23 mins left", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        assertTrue("Play text wrapped: $playText", playText.bottom - playText.top < 30.dp)
+        assertTrue(playText.bottom - playText.top < 30.dp, message = "Play text wrapped: $playText")
     }
 
     @Test

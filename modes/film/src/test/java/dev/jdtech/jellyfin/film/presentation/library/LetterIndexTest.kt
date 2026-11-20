@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.film.presentation.library
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class LetterIndexTest {
@@ -44,7 +44,7 @@ class LetterIndexTest {
         grid.forEachIndexed { position, name ->
             val first = sortName(name).first().uppercaseChar()
             val expected = if (first in 'A'..'Z') first else LetterIndex.OTHER
-            assertEquals(name, expected, index.letterAt(position))
+            assertEquals(expected, index.letterAt(position), message = name)
         }
     }
 

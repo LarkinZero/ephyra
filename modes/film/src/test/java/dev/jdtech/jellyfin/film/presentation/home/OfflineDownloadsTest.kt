@@ -2,9 +2,9 @@ package dev.jdtech.jellyfin.film.presentation.home
 
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import java.lang.reflect.Proxy
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Offline Home says nothing is downloaded only when the server has no downloaded item. */

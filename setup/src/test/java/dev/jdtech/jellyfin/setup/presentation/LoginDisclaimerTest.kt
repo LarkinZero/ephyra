@@ -9,11 +9,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import dev.jdtech.jellyfin.setup.presentation.login.loginDisclaimerText
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -142,7 +142,7 @@ class LoginDisclaimerTest {
                 "<a href=\"https://a\"><a href=\"https://b\">twice</a></a>",
             )
         for (input in inputs) {
-            assertNotNull(input, loginDisclaimerText(input))
+            assertNotNull(loginDisclaimerText(input), message = input)
         }
         assertEquals("nested after", loginDisclaimerText("<b><i>nested</b></i> after")!!.text)
     }

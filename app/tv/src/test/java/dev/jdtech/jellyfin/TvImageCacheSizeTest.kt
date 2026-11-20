@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

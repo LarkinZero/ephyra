@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.mpv
 
 import dev.jdtech.jellyfin.settings.domain.Constants
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /** Unit tests for the mpv options [mpvSubtitleOptions] builds from the subtitle settings. */

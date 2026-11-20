@@ -6,7 +6,7 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.decoder.DecoderInputBuffer
 import androidx.media3.exoplayer.FormatHolder
 import androidx.media3.exoplayer.source.SampleStream
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /** Unit tests for [SubtitleReplaySampleStream]: cues delivered again after a rewind (#619). */
