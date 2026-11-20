@@ -45,7 +45,15 @@ import dev.jdtech.mpv.MPVLib.MpvEvent
 import dev.jdtech.mpv.MPVLib.MpvFormat
 import java.io.File
 import java.io.IOException
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.TimeUnit
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -67,6 +75,7 @@ class MPVPlayer(
     hwDec: String = "mediacodec",
     private val matchRefreshRate: Boolean = false,
     subtitleOptions: Map<String, String> = emptyMap(),
+    subtitleHttpClient: OkHttpClient? = null,
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
 
@@ -197,6 +206,7 @@ class MPVPlayer(
         hwDec = builder.hwDec,
         matchRefreshRate = builder.matchRefreshRate,
         subtitleOptions = builder.subtitleOptions,
+        subtitleHttpClient = builder.subtitleHttpClient,
     )
 
     class Builder(val context: Context) {
@@ -231,6 +241,9 @@ class MPVPlayer(
             private set
 
         var subtitleOptions: Map<String, String> = emptyMap()
+            private set
+
+        var subtitleHttpClient: OkHttpClient? = null
             private set
 
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
@@ -270,6 +283,12 @@ class MPVPlayer(
         fun setSubtitleOptions(subtitleOptions: Map<String, String>) = apply {
             this.subtitleOptions = subtitleOptions
         }
+
+        /**
+         * CE (#711): downloads the subtitle files, see [MpvSubtitleFiles]: the API's client, so
+         * they go the way the API calls go. Without it a client of its own downloads them.
+         */
+        fun setSubtitleHttpClient(client: OkHttpClient) = apply { this.subtitleHttpClient = client }
 
         fun build() = MPVPlayer(this)
     }
@@ -489,19 +508,42 @@ class MPVPlayer(
     private var currentPositionMs: Long? = null
     private var currentDurationMs: Long? = null
     private var currentCacheDurationMs: Long? = null
-    private var initialCommands = mutableListOf<Array<String>>()
 
     /**
-     * CE (#597): the subtitle files of the item being loaded that are marked forced. `sub-add`
-     * cannot pass that mark on, so the track list gets it back from here.
+     * CE (#711): the subtitle files of the item being loaded, which are fetched when wanted instead
+     * of all at the start. See [MpvSubtitleFiles].
      */
-    private val forcedSubtitleFiles = HashSet<String>()
+    private val subtitles = MpvSubtitleFiles()
+
+    /** mpv started the current file, so `sub-add` has a file to add to. */
+    private var fileStarted = false
+
+    /** The last track list mpv sent, so the tracks can be listed again when a pick changes them. */
+    private var lastTrackList: String? = null
+
+    private val subtitleHttpClient: OkHttpClient =
+        (subtitleHttpClient ?: OkHttpClient())
+            .newBuilder()
+            // The server answers once it has extracted the file's subtitle tracks: minutes on a
+            // slow disk. A read that times out is tried again (see onSubtitleDownloaded).
+            .readTimeout(SUBTITLE_READ_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+            .build()
+
+    /** The subtitle downloads that run, by URL. */
+    private val subtitleDownloads = HashMap<String, Call>()
 
     /**
-     * CE (#617): the subtitle files of the item being loaded, in its order. mpv downloads them side
-     * by side and lists each when it is there, so the track list puts them back in this order.
+     * This player's own folder of downloaded subtitle files, under [SUBTITLE_DIR] in the cache: a
+     * new player can start while the old one is still being released. Each item's files go when the
+     * next item starts, the folder goes with the player, and folders left by a process that died
+     * are removed when the next player starts (see [removeStaleSubtitleDirs]).
      */
-    private val subtitleFiles = ArrayList<String>()
+    private val subtitleDir =
+        File(File(context.cacheDir, SUBTITLE_DIR), UUID.randomUUID().toString()).also {
+            liveSubtitleDirs += it.name
+            removeStaleSubtitleDirs(it.parentFile!!)
+        }
+    private var subtitleDownloadCount = 0
     private var initialIndex: Int = 0
     private var initialSeekTo: Long = 0L
 
@@ -652,7 +694,12 @@ class MPVPlayer(
             when (property) {
                 "track-list" -> {
                     val hadVideo = currentTracks.isTypeSelected(C.TRACK_TYPE_VIDEO)
-                    val newTracks = getTracks(value, forcedSubtitleFiles, subtitleFiles)
+                    lastTrackList = value
+                    // CE (#711): a picked subtitle file that mpv has now, or the default one.
+                    subtitles.onTrackList(mpvTracks(value))?.let {
+                        selectTrack(MPVTrackType.SUBTITLE, it)
+                    }
+                    val newTracks = getTracks(value, subtitles)
                     currentTracks = newTracks
                     // The selected video track's frame rate, not the last video group's:
                     // mpv also lists attached pictures as 1fps video tracks.
@@ -815,10 +862,10 @@ class MPVPlayer(
                     loadState.startFile()
                     streamBreak.reset()
                     if (!isPlayerReady) {
-                        // CE (#617): async, so these return without waiting for the download.
-                        for (command in initialCommands) {
-                            mpv.command(command)
-                        }
+                        fileStarted = true
+                        // CE (#711): the subtitle files that are there already; the others follow
+                        // when they are downloaded.
+                        addSubtitleFiles()
                     }
                 }
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
@@ -1022,6 +1069,127 @@ class MPVPlayer(
      */
     private fun selectTrack(trackType: MPVTrackType, id: String) {
         mpv.setPropertyString(trackType.type, id)
+    }
+
+    /**
+     * CE (#711): selects subtitle track [id] for the player: a file mpv does not have yet is
+     * fetched, shown once mpv has it, and listed as selected meanwhile.
+     */
+    private fun selectSubtitle(id: String) {
+        subtitles.select(id)?.let { selectTrack(MPVTrackType.SUBTITLE, it) }
+        fetchSubtitleFiles()
+        val trackList = lastTrackList ?: return
+        val newTracks = getTracks(trackList, subtitles)
+        if (newTracks == currentTracks) return
+        currentTracks = newTracks
+        listeners.sendEvent(EVENT_TRACKS_CHANGED) { listener ->
+            listener.onTracksChanged(currentTracks)
+        }
+    }
+
+    /** CE (#711): starts the downloads of the subtitle files that are wanted and not there. */
+    private fun fetchSubtitleFiles() {
+        for (url in subtitles.toFetch()) {
+            subtitles.downloadStarted(url)
+            val name = subtitleFileName(url)
+            val target = File(subtitleDir, "${subtitleDownloadCount++}-$name")
+            Timber.d("Subtitle file downloading: $name")
+            val call = subtitleHttpClient.newCall(Request.Builder().url(url).build())
+            subtitleDownloads[url] = call
+            call.enqueue(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        post { onSubtitleDownloadFailed(url, call, e, retriable = true) }
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        try {
+                            response.use {
+                                if (!it.isSuccessful) {
+                                    // The server turned it down for good: no retries (as on
+                                    // ExoPlayer, SubtitleFileMediaPeriod.isRetriable).
+                                    val retriable = it.code !in 400..499
+                                    val error = IOException("HTTP ${it.code}")
+                                    post { onSubtitleDownloadFailed(url, call, error, retriable) }
+                                    return
+                                }
+                                subtitleDir.mkdirs()
+                                val body = it.body ?: throw IOException("No body")
+                                target.outputStream().use { out -> body.byteStream().copyTo(out) }
+                            }
+                            post { onSubtitleDownloaded(url, target) }
+                        } catch (e: IOException) {
+                            target.delete()
+                            post { onSubtitleDownloadFailed(url, call, e, retriable = true) }
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    private fun onSubtitleDownloaded(url: String, target: File) {
+        subtitleDownloads.remove(url)
+        val name = subtitleFileName(url)
+        if (!subtitles.isFileOfItem(url)) {
+            // The item it was for is gone (its download ended as the next one started).
+            Thread { target.delete() }.start()
+            subtitles.downloadCanceled(url)
+            return
+        }
+        Timber.d("Subtitle file downloaded: $name")
+        subtitles.downloaded(url, target.path)
+        addSubtitleFiles()
+    }
+
+    private fun onSubtitleDownloadFailed(
+        url: String,
+        call: Call,
+        error: IOException,
+        retriable: Boolean,
+    ) {
+        subtitleDownloads.remove(url)
+        val name = subtitleFileName(url)
+        if (call.isCanceled()) {
+            Timber.d("Subtitle file download canceled: $name")
+            subtitles.downloadCanceled(url)
+            return
+        }
+        Timber.w("Subtitle file download failed: $name: ${error.message}")
+        if (subtitles.downloadFailed(url, retriable)) {
+            handler.postDelayed({ if (!released) fetchSubtitleFiles() }, SUBTITLE_RETRY_DELAY_MS)
+        }
+    }
+
+    /**
+     * CE (#711): stops the subtitle downloads that are not for the current item's files and deletes
+     * the files of the item before, so they do not pile up over a queue.
+     */
+    private fun dropOtherSubtitleFiles() {
+        val calls = subtitleDownloads.filterKeys { !subtitles.isFileOfItem(it) }
+        if (calls.isNotEmpty()) Timber.d("Subtitle file downloads canceled: ${calls.size}")
+        calls.values.forEach { it.cancel() }
+        val stale = subtitles.dropOtherDownloads()
+        if (stale.isNotEmpty()) Thread { stale.forEach { File(it).delete() } }.start()
+    }
+
+    /** CE (#711): gives mpv the subtitle files that are there and that it does not have. */
+    private fun addSubtitleFiles() {
+        if (!fileStarted) return
+        for ((index, path) in subtitles.takeToAdd()) {
+            val file = subtitles.files[index]
+            mpv.command(
+                arrayOf(
+                    // CE (#617): returns at once; mpv reads the file on its own thread.
+                    /* prefix= */ "async",
+                    /* command= */ "sub-add",
+                    /* url= */ path,
+                    /* flags= */ "auto",
+                    /* title= */ file.title,
+                    /* lang= */ file.language,
+                )
+            )
+        }
     }
 
     // Timeline wrapper
@@ -1416,9 +1584,9 @@ class MPVPlayer(
         currentCacheDurationMs = null
         currentTracks = Tracks.EMPTY
         playbackParameters = PlaybackParameters.DEFAULT
-        initialCommands.clear()
-        forcedSubtitleFiles.clear()
-        subtitleFiles.clear()
+        subtitles.reset(emptyList(), preferredLanguage = null)
+        fileStarted = false
+        lastTrackList = null
         mpv.setPropertyDouble("sub-delay", 0.0)
     }
 
@@ -1765,28 +1933,25 @@ class MPVPlayer(
         internalMediaItems.getOrNull(index)?.let { mediaItem ->
             startNewLoad(index)
             resetInternalState()
-            mediaItem.localConfiguration?.subtitleConfigurations?.forEach { subtitle ->
-                subtitleFiles.add("${subtitle.uri}")
-                initialCommands.add(
-                    arrayOf(
-                        // CE (#617): mpv downloads the file on its own thread and this call
-                        // returns at once instead of blocking the main thread until it is there.
-                        // mpv cancels the download when the file ends (another item, stop, an
-                        // error reload) and waits for it in destroy(). Without a reply, so mpv's
-                        // log is the only trace of a failed one, as before.
-                        /* prefix= */ "async",
-                        /* command= */ "sub-add",
-                        /* url= */ "${subtitle.uri}",
-                        /* flags= */ "auto",
+            // CE (#711): the files are fetched when wanted, see MpvSubtitleFiles.
+            subtitles.reset(
+                mediaItem.localConfiguration?.subtitleConfigurations.orEmpty().map { subtitle ->
+                    MpvSubtitleFiles.SubtitleFile(
+                        url = "${subtitle.uri}",
                         // CE (#597): a subtitle without a title has none, not the title "null".
-                        /* title= */ subtitle.label.orEmpty(),
-                        /* lang= */ subtitle.language.orEmpty(),
+                        title = subtitle.label.orEmpty(),
+                        language = subtitle.language.orEmpty(),
+                        mimeType = subtitle.mimeType,
+                        forced = subtitle.selectionFlags and C.SELECTION_FLAG_FORCED != 0,
+                        default = subtitle.selectionFlags and C.SELECTION_FLAG_DEFAULT != 0,
                     )
-                )
-                if (subtitle.selectionFlags and C.SELECTION_FLAG_FORCED != 0) {
-                    forcedSubtitleFiles.add("${subtitle.uri}")
-                }
-            }
+                },
+                preferredLanguage = trackSelectionParameters.preferredTextLanguages.firstOrNull(),
+                // Subtitles off stay off: mpv had sid=no, so it showed none of the files.
+                textOff = C.TRACK_TYPE_TEXT in trackSelectionParameters.disabledTrackTypes,
+            )
+            dropOtherSubtitleFiles()
+            fetchSubtitleFiles()
             // Only set the playlist index when the index is not the currently playing item.
             // Otherwise
             // playback will be restarted.
@@ -1862,6 +2027,17 @@ class MPVPlayer(
         }
         setBecomingNoisyRegistered(false)
         resetInternalState()
+        // CE (#711): the subtitle downloads go with the player.
+        if (subtitleDownloads.isNotEmpty()) {
+            Timber.d("Subtitle file downloads canceled: ${subtitleDownloads.size}")
+        }
+        subtitleDownloads.values.forEach { it.cancel() }
+        subtitleDownloads.clear()
+        Thread {
+                subtitleDir.deleteRecursively()
+                liveSubtitleDirs -= subtitleDir.name
+            }
+            .start()
         playbackState = STATE_IDLE
         currentPlayWhenReady = false
         mpvLib.removeObserver(this)
@@ -1920,13 +2096,15 @@ class MPVPlayer(
             if (trackType == MPVTrackType.VIDEO && currentSurface == null) continue
             val id = override.key.getFormat(0).id ?: continue
 
-            selectTrack(trackType, id)
+            if (trackType == MPVTrackType.SUBTITLE) selectSubtitle(id)
+            else selectTrack(trackType, id)
         }
         for (notOverriddenType in notOverriddenTypes) {
-            if (notOverriddenType in disabledTrackTypes) {
-                selectTrack(notOverriddenType, "no")
+            val id = if (notOverriddenType in disabledTrackTypes) "no" else "auto"
+            if (notOverriddenType == MPVTrackType.SUBTITLE) {
+                selectSubtitle(id)
             } else {
-                selectTrack(notOverriddenType, "auto")
+                selectTrack(notOverriddenType, id)
             }
         }
     }
@@ -2418,6 +2596,33 @@ class MPVPlayer(
         /** CE (#460): how often [stallCheck] looks at the position. */
         private const val STALL_CHECK_INTERVAL_MS = 1_000L
 
+        /** CE (#711): see [subtitleHttpClient]. */
+        private const val SUBTITLE_READ_TIMEOUT_MINUTES = 5L
+
+        /** CE (#711): how long a failed subtitle download waits before it is tried again. */
+        private const val SUBTITLE_RETRY_DELAY_MS = 5_000L
+
+        /** CE (#711): the cache folder that holds a folder of downloaded subtitles per player. */
+        private const val SUBTITLE_DIR = "mpv-subtitles"
+
+        /** CE (#711): the subtitle folders of the players of this process that are not released. */
+        private val liveSubtitleDirs: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+        /**
+         * CE (#711): removes the subtitle folders in [parent] that no player of this process uses:
+         * those of a process that died (a crash, a kill in the background) before it released its
+         * player. A live player's folder is in [liveSubtitleDirs] from before it is created.
+         */
+        private fun removeStaleSubtitleDirs(parent: File) {
+            Thread {
+                    parent
+                        .listFiles()
+                        ?.filter { it.name !in liveSubtitleDirs }
+                        ?.forEach { it.deleteRecursively() }
+                }
+                .start()
+        }
+
         private val permanentAvailableCommands: Commands =
             Commands.Builder()
                 .addAll(
@@ -2458,7 +2663,8 @@ class MPVPlayer(
 
         private fun createTracksGroupfromMpvJson(
             json: JSONObject,
-            forcedSubtitleFiles: Set<String>,
+            subtitleFile: MpvSubtitleFiles.SubtitleFile? = null,
+            id: String? = null,
         ): Tracks.Group {
             val trackType = MPVTrackType.entries.first { it.type == json.optString("type") }
 
@@ -2474,7 +2680,7 @@ class MPVPlayer(
             // Base format shared between video, audio and subtitles
             val baseFormat =
                 Format.Builder()
-                    .setId(json.optInt("id"))
+                    .setId(id ?: json.optInt("id").toString())
                     .setLabel(title)
                     .setLanguage(json.optNullableString("lang"))
                     .setSelectionFlags(
@@ -2482,7 +2688,7 @@ class MPVPlayer(
                             // CE (#451): the track dialog marks forced subtitles, as on ExoPlayer.
                             // CE (#597): or a subtitle file added as forced, which mpv cannot
                             // be told.
-                            (if (json.optBoolean("forced") || externalFile in forcedSubtitleFiles) {
+                            (if (json.optBoolean("forced") || subtitleFile?.forced == true) {
                                 C.SELECTION_FLAG_FORCED
                             } else {
                                 0
@@ -2533,31 +2739,92 @@ class MPVPlayer(
             )
         }
 
-        private fun getTracks(
-            trackList: String,
-            forcedSubtitleFiles: Set<String>,
-            subtitleFiles: List<String>,
-        ): Tracks {
-            var tracks = Tracks.EMPTY
+        /**
+         * The tracks of mpv's [trackList], then the subtitle files of the item in its order
+         * (CE #617), whichever mpv read first. A file mpv does not have yet is listed from what the
+         * server says about it (CE #711, see [MpvSubtitleFiles]).
+         */
+        internal fun getTracks(trackList: String, subtitles: MpvSubtitleFiles): Tracks {
             val trackGroups = mutableListOf<Tracks.Group>()
+            val fileTracks = HashMap<Int, JSONObject>()
             try {
                 val currentTrackList = JSONArray(trackList)
-                // CE (#617): the item's subtitle files in its order, whichever finished first.
-                // The other tracks keep mpv's order, ahead of them as mpv lists them.
-                val sorted =
-                    (0 until currentTrackList.length())
-                        .map { currentTrackList.getJSONObject(it) }
-                        .sortedBy {
-                            subtitleFiles.indexOf(it.optNullableString("external-filename"))
-                        }
-                for (json in sorted) {
-                    trackGroups.add(createTracksGroupfromMpvJson(json, forcedSubtitleFiles))
+                for (i in 0 until currentTrackList.length()) {
+                    val json = currentTrackList.getJSONObject(i)
+                    val file = subtitles.indexOfMpvFile(json.optNullableString("external-filename"))
+                    if (file != null) {
+                        fileTracks[file] = json
+                    } else {
+                        trackGroups.add(createTracksGroupfromMpvJson(json))
+                    }
                 }
-                if (trackGroups.isNotEmpty()) {
-                    tracks = Tracks(trackGroups)
-                }
-            } catch (_: JSONException) {}
-            return tracks
+            } catch (_: JSONException) {
+                return Tracks.EMPTY
+            }
+            for ((index, file) in subtitles.files.withIndex()) {
+                val json = fileTracks[index]
+                trackGroups.add(
+                    if (json != null) {
+                        createTracksGroupfromMpvJson(json, file, subtitles.id(index))
+                    } else {
+                        subtitleFileTrackGroup(
+                            file,
+                            subtitles.id(index),
+                            subtitles.isWaitingFor(index),
+                        )
+                    }
+                )
+            }
+            return if (trackGroups.isEmpty()) Tracks.EMPTY else Tracks(trackGroups)
         }
+
+        /**
+         * CE (#711): a subtitle file mpv does not have yet, named as mpv will name it: the title
+         * and language it is added with, and a codec from its MIME type ("application/pgs" gives
+         * "pgs", which the track dialog calls PGS, as mpv's "hdmv_pgs_subtitle").
+         */
+        private fun subtitleFileTrackGroup(
+            file: MpvSubtitleFiles.SubtitleFile,
+            id: String,
+            selected: Boolean,
+        ): Tracks.Group {
+            val codec = file.mimeType?.substringAfter('/')
+            val format =
+                Format.Builder()
+                    .setId(id)
+                    .setLabel(file.title.ifBlank { null })
+                    .setLanguage(file.language.ifBlank { null })
+                    .setSelectionFlags(if (file.forced) C.SELECTION_FLAG_FORCED else 0)
+                    .setCodecs(codec)
+                    .setSampleMimeType("text/$codec")
+                    .build()
+            return Tracks.Group(
+                TrackGroup(format),
+                false,
+                intArrayOf(C.FORMAT_HANDLED),
+                booleanArrayOf(selected),
+            )
+        }
+
+        /** CE (#711): the tracks of mpv's [trackList], for [MpvSubtitleFiles.onTrackList]. */
+        private fun mpvTracks(trackList: String): List<MpvSubtitleFiles.MpvTrack> =
+            try {
+                val json = JSONArray(trackList)
+                (0 until json.length()).map { i ->
+                    val track = json.getJSONObject(i)
+                    MpvSubtitleFiles.MpvTrack(
+                        id = track.optInt("id").toString(),
+                        type = track.optString("type"),
+                        externalFilename = track.optNullableString("external-filename"),
+                        selected = track.optBoolean("selected"),
+                    )
+                }
+            } catch (_: JSONException) {
+                emptyList()
+            }
+
+        /** The name of the file at [url], for the log: without the query, which has the key. */
+        private fun subtitleFileName(url: String): String =
+            url.substringBefore('?').substringAfterLast('/')
     }
 }

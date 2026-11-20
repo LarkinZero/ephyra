@@ -808,6 +808,8 @@ constructor(
                             appPreferences.getValue(appPreferences.playerTvMatchRefreshRate)
                         )
                         .setSubtitleOptions(appPreferences.mpvSubtitleOptions())
+                        // CE (#711): the subtitle files go over the API's client, as on ExoPlayer.
+                        .setSubtitleHttpClient(jellyfinApi.httpClient)
                         .build()
                 }
 
