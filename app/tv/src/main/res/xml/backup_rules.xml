@@ -14,4 +14,17 @@
     <exclude
         domain="sharedpref"
         path="." />
+    <!-- CE (#731): downloads and login caches are of no use without the servers database -->
+    <exclude
+        domain="external"
+        path="downloads" />
+    <exclude
+        domain="file"
+        path="images" />
+    <exclude
+        domain="file"
+        path="trickplay" />
+    <exclude
+        domain="file"
+        path="home-cache" />
 </full-backup-content>
