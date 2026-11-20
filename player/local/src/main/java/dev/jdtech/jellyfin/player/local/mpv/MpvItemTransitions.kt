@@ -22,9 +22,13 @@ internal class MpvItemTransitions(private val listeners: ListenerSet<Player.List
     /**
      * mpv's `playlist-current-pos` moved to [index], playing [item]. Queues a transition when the
      * item changed. When only the index changed, the timeline is sent again instead, so the media
-     * session takes the new index: setMediaItems resets the index to 0 until mpv reports where it
-     * plays, and a quality switch reloads the same item at its old index, so without this the
-     * session kept index 0 and showed the previous episode's title.
+     * session takes the new index (an item put in front of the playing one moves it). Before #723,
+     * setMediaItems reported index 0 until mpv said where it played, and the session kept index 0
+     * and showed the previous episode's title.
+     *
+     * mpv must only report entries it plays: one it reports on the way to another is taken as an
+     * item change. [MPVPlayer.prepare] loads a playlist without starting any entry before the
+     * wanted one for that (#723).
      */
     fun currentPositionChanged(timeline: Timeline, item: MediaItem?, indexChanged: Boolean) {
         if (transitionIfChanged(item, Player.MEDIA_ITEM_TRANSITION_REASON_AUTO)) return

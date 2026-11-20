@@ -134,8 +134,8 @@ class MpvItemTransitionsTest {
         val items = listOf(item("a"), item("b"), item("c"))
 
         replace(items, 2)
-        // mpv then reports index 2 (MPVPlayer said 0 until then): the timeline again, no second
-        // transition.
+        // mpv then reports index 2 while MPVPlayer had another index (0 before #723): the timeline
+        // again, no second transition.
         mpvCurrentPos(items[2], timelineOf(items))
 
         assertEquals(
@@ -164,6 +164,34 @@ class MpvItemTransitionsTest {
         mpvCurrentPos(reloaded[1], timelineOf(reloaded))
 
         assertEquals(listOf("timeline 3 $timelineReplaced", "timeline 3 $timelineReplaced"), events)
+    }
+
+    @Test
+    fun `a reload at index 1 sends no transition, and a Next right after it sends one`() {
+        // #723: setMediaItems reports the start index at once, and mpv plays no other entry on
+        // the way, so its report of index 1 is no change.
+        val e1 = item("e1")
+        val e2 = item("e2")
+        val e3 = item("e3")
+        val queue = listOf(e1, e2, e3)
+        replace(queue, 1)
+        mpvCurrentPos(e2, timelineOf(queue), indexChanged = false)
+        events.clear()
+
+        val reloaded = listOf(item("e1"), item("e2"), item("e3"))
+        replace(reloaded, 1)
+        mpvCurrentPos(reloaded[1], timelineOf(reloaded), indexChanged = false)
+
+        assertEquals(listOf("timeline 3 $timelineReplaced"), events, "the reload")
+
+        events.clear()
+        mpvCurrentPos(reloaded[2], timelineOf(reloaded))
+
+        assertEquals(
+            listOf("transition e3 reason ${Player.MEDIA_ITEM_TRANSITION_REASON_AUTO}"),
+            events,
+            "Next after the reload",
+        )
     }
 
     @Test
