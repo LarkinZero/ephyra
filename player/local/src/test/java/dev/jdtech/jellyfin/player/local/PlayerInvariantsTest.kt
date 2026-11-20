@@ -377,4 +377,33 @@ class PlayerInvariantsTest {
                 "START_FILE must not clear initialCommands, or a reload after an error loses them (#474)",
         )
     }
+
+    @Test
+    fun `an item change sets up its neighbours before it waits for the previous stop`() {
+        // #657: onMediaItemTransition waited for the previous item's stop report before it set up
+        // the neighbour loading. With a slow server and Next pressed quickly, the player had left
+        // the item by then, so its neighbours were never loaded, and the late coroutine set the
+        // queue's current item back to the item the player had left. Only the start report has to
+        // wait for the stop; NeighbourLoaderTest covers where the neighbours go.
+        val viewModel = source("presentation/PlayerViewModel.kt")
+        val transition =
+            Regex("""override fun onMediaItemTransition\([\s\S]*?\n    }""").find(viewModel)
+        assertTrue(transition != null, message = "PlayerViewModel.onMediaItemTransition not found")
+        val body = transition!!.value
+        val stopWait = body.indexOf("stopJob?.join()")
+        assertTrue(
+            stopWait >= 0,
+            message = "onMediaItemTransition no longer waits for the stop report",
+        )
+        for (setup in
+            listOf(
+                "playlistManager.setCurrentMediaItemIndex(item.itemId)",
+                "deferredWork = item",
+                "runDeferredWork()",
+            )) {
+            val at = body.indexOf(setup)
+            assertTrue(at >= 0, message = "onMediaItemTransition must call $setup (#657)")
+            assertTrue(at < stopWait, message = "$setup must come before stopJob?.join() (#657)")
+        }
+    }
 }

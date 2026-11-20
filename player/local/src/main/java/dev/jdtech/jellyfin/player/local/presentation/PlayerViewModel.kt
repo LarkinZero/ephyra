@@ -57,6 +57,7 @@ import dev.jdtech.jellyfin.player.local.domain.AudioDecoderFallback
 import dev.jdtech.jellyfin.player.local.domain.AutoSyncSubtitleCueParser
 import dev.jdtech.jellyfin.player.local.domain.DebugSegments
 import dev.jdtech.jellyfin.player.local.domain.DisplayRefreshRateManager
+import dev.jdtech.jellyfin.player.local.domain.NeighbourLoader
 import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery
 import dev.jdtech.jellyfin.player.local.domain.PlaybackStartGate
 import dev.jdtech.jellyfin.player.local.domain.PlaylistManager
@@ -1383,6 +1384,21 @@ constructor(
                             )
                         }
 
+                        segmentTracker.setSegments(emptyList())
+                        playlistManager.setCurrentMediaItemIndex(item.itemId)
+
+                        // Trickplay and the neighbouring items are not needed to show the first
+                        // frame, so they wait for the player to be ready. When it already is (an
+                        // auto-advance), they start now.
+                        // CE (#657): set up here, not after the stop report below: they send no
+                        // report, and an item left before that report got through (a slow server,
+                        // Next pressed quickly) never loaded its neighbours, while this coroutine
+                        // then set them up for an item the player was no longer on.
+                        deferredWork = item
+                        if (player.playbackState == ExoPlayer.STATE_READY) {
+                            runDeferredWork()
+                        }
+
                         // Keep the previous item's stop ahead of this item's start, as the old
                         // auto-advance code did. A stop that reaches the server after the start
                         // can clear the session's now-playing item.
@@ -1396,20 +1412,9 @@ constructor(
                             )
                             ?.let { sendPlaybackStart(it) }
 
-                        segmentTracker.setSegments(emptyList())
                         // CE (#681): the seek bar shows them even with every type ignored.
                         if (segmentsOnSeekBar || shouldPollSegments()) {
                             getSegments(item.itemId)
-                        }
-
-                        playlistManager.setCurrentMediaItemIndex(item.itemId)
-
-                        // Trickplay and the neighbouring items are not needed to show the first
-                        // frame, so they wait for the player to be ready. When it already is (an
-                        // auto-advance), they start now.
-                        deferredWork = item
-                        if (player.playbackState == ExoPlayer.STATE_READY) {
-                            runDeferredWork()
                         }
                     }
             } catch (e: Exception) {
@@ -1460,6 +1465,19 @@ constructor(
     /** The item whose trickplay and neighbour queueing wait for the first ready state. */
     private var deferredWork: PlayerItem? = null
 
+    private val neighbourLoader = NeighbourLoader(playlistManager)
+
+    /** [items] and the player's playlist, which [neighbourLoader] adds to together. */
+    private val neighbourPlaylist =
+        object : NeighbourLoader.Playlist {
+            override fun itemIds(): List<UUID> = items.map { it.itemId }
+
+            override fun insert(index: Int, item: PlayerItem) {
+                items.add(index, item)
+                player.addMediaItem(index, item.toMediaItem())
+            }
+        }
+
     /** Runs the work [onMediaItemTransition] left for the ready state, once per item. */
     private fun runDeferredWork() {
         val item = deferredWork ?: return
@@ -1476,17 +1494,8 @@ constructor(
             }
 
             try {
-                val previousItem = playlistManager.getPreviousPlayerItem()
-                if (previousItem != null) {
-                    items.add(player.currentMediaItemIndex, previousItem)
-                    player.addMediaItem(player.currentMediaItemIndex, previousItem.toMediaItem())
-                }
-
-                val nextItem = playlistManager.getNextPlayerItem()
-                if (nextItem != null) {
-                    items.add(player.currentMediaItemIndex + 1, nextItem)
-                    player.addMediaItem(player.currentMediaItemIndex + 1, nextItem.toMediaItem())
-                }
+                // CE (#657): next to this item, wherever it is once they arrive.
+                neighbourLoader.load(item.itemId, neighbourPlaylist)
 
                 _queue.value = playlistManager.upcomingItems()
 
