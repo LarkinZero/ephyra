@@ -119,3 +119,37 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.apks }}
           if-no-files-found: error
+
+  # The debug unit tests of every module and flavor. The assemble jobs never compile the test
+  # sources, so a test that stops compiling only shows up here (#720). `--continue` runs the other
+  # modules' tests after a failure, so the reports show every failing module at once.
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --continue
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 7
