@@ -16,6 +16,11 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -23,11 +28,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -72,7 +72,7 @@ class DownloadQueueRetryTransitionTest {
         val failed = published.filter { entries ->
             entries.any { it.state is DownloadQueue.EntryState.Failed }
         }
-        assertEquals("Published as failed before the retry: $failed", 0, failed.size)
+        assertEquals(0, failed.size, message = "Published as failed before the retry: $failed")
         assertTrue(queue.entries.value.all { it.retryAt != null })
     }
 
@@ -96,7 +96,7 @@ class DownloadQueueRetryTransitionTest {
 
         assertTrue(hasDownloadWork(queue.entries.value))
         assertTrue(queue.pumpActive.value)
-        assertEquals("The pump went idle with retries waiting: $idle", 0, idle.size)
+        assertEquals(0, idle.size, message = "The pump went idle with retries waiting: $idle")
     }
 
     @Test
@@ -138,7 +138,10 @@ class DownloadQueueRetryTransitionTest {
             await(queue) { it.single().state is DownloadQueue.EntryState.Completed }
             Thread.sleep(round % 3L)
             runBlocking { queue.enqueue(later) }
-            assertTrue("Round $round: no pump for the new download", queue.pumpActive.value)
+            assertTrue(
+                queue.pumpActive.value,
+                message = "Round $round: no pump for the new download",
+            )
             val watch =
                 queue.pumpActive
                     .onEach { if (!it) idle.add(queue.entries.value) }
@@ -148,7 +151,11 @@ class DownloadQueueRetryTransitionTest {
                     it.id == later.id && it.state is DownloadQueue.EntryState.Downloading
                 }
             }
-            assertEquals("Round $round: the pump went idle with work: $idle", 0, idle.size)
+            assertEquals(
+                0,
+                idle.size,
+                message = "Round $round: the pump went idle with work: $idle",
+            )
             watch.cancel()
 
             downloader.progressOf[downloader.idOf.getValue(later.id)] =

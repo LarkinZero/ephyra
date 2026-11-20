@@ -16,11 +16,11 @@ import dev.jdtech.jellyfin.utils.download.DownloadStatus
 import java.lang.reflect.Proxy
 import java.util.UUID
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

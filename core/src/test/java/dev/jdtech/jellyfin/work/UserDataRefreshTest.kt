@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.work
 
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /**

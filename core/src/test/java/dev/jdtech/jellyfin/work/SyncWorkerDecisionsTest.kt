@@ -2,10 +2,10 @@ package dev.jdtech.jellyfin.work
 
 import dev.jdtech.jellyfin.models.FindroidUserDataDto
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** CE (#552): when the user data sync retries, and when it lets a row be. */

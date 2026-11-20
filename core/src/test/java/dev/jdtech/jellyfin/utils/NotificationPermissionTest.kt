@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.utils
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /** CE (#372): when starting a download asks for the notification permission. */

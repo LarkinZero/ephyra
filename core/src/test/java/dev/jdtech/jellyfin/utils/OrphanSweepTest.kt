@@ -13,11 +13,11 @@ import java.io.File
 import java.lang.reflect.Proxy
 import java.util.UUID
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,7 +89,7 @@ class OrphanSweepTest {
 
         assertTrue(tracked.exists())
         assertFalse(orphan.exists())
-        assertFalse("its emptied folders go too", File(root, "Pioneer One").exists())
+        assertFalse(File(root, "Pioneer One").exists(), message = "its emptied folders go too")
         assertTrue(freshOrphan.exists())
         assertFalse(File(root, "Bluey").exists())
         assertTrue(root.isDirectory)

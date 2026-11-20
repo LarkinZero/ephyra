@@ -3,14 +3,14 @@ package dev.jdtech.jellyfin.utils.download
 import dev.jdtech.jellyfin.utils.NetworkConnectivity
 import java.io.File
 import java.nio.file.Files
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -29,7 +29,10 @@ class MediaDownloadEngineHttpErrorTest {
     fun `a 404 fails at once with its status and never waits for the network`() {
         val seen = run(code = 404)
 
-        assertFalse("PAUSED reads as Waiting for network: $seen", DownloadStatus.PAUSED in seen)
+        assertFalse(
+            DownloadStatus.PAUSED in seen,
+            message = "PAUSED reads as Waiting for network: $seen",
+        )
         assertEquals(DownloadStatus.FAILED, seen.last())
         assertEquals(404, engine.snapshot(ID)?.httpStatus)
     }
@@ -44,9 +47,11 @@ class MediaDownloadEngineHttpErrorTest {
 
     @Test
     fun `4xx answers are permanent except 408 and 429, 5xx answers are not`() {
-        listOf(400, 401, 403, 404, 410).forEach { assertTrue("$it", isPermanentHttpFailure(it)) }
+        listOf(400, 401, 403, 404, 410).forEach {
+            assertTrue(isPermanentHttpFailure(it), message = "$it")
+        }
         listOf(408, 429, 500, 502, 503, 504).forEach {
-            assertFalse("$it", isPermanentHttpFailure(it))
+            assertFalse(isPermanentHttpFailure(it), message = "$it")
         }
     }
 
