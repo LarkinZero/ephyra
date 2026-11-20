@@ -17,7 +17,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class PlaylistManagerShuffleTest {
     private val seriesId = UUID.randomUUID()

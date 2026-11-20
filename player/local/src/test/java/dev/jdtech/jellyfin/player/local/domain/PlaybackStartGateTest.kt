@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for [PlaybackStartGate] (#601): the start report waits for the item to load, and a

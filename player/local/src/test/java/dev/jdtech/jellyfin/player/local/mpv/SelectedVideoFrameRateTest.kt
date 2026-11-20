@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.player.local.mpv
 import androidx.media3.common.Format
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Which video track's frame rate [selectedVideoFrameRate] hints the display with. */
 class SelectedVideoFrameRateTest {
