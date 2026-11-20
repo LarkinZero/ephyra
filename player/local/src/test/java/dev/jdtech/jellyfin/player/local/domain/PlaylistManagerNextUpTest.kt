@@ -9,11 +9,11 @@ import dev.jdtech.jellyfin.models.FindroidTrickplayInfo
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**

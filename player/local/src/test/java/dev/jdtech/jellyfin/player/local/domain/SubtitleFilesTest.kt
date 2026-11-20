@@ -4,9 +4,9 @@ import androidx.media3.common.MimeTypes
 import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
+import kotlin.test.assertEquals
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**

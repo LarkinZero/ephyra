@@ -3,9 +3,9 @@ package dev.jdtech.jellyfin.player.local.domain
 import androidx.media3.common.PlaybackException
 import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery.Check
 import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery.OnError
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /**

@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.domain
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class ReportedPauseTest {
