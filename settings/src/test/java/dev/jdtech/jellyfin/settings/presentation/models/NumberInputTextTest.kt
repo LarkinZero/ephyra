@@ -1,6 +1,6 @@
 package dev.jdtech.jellyfin.settings.presentation.models
 
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class NumberInputTextTest {
