@@ -4,7 +4,7 @@ import dev.jdtech.jellyfin.player.local.domain.TrickplayTileLocation
 import dev.jdtech.jellyfin.player.local.domain.TrickplayTiles
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class TrickplayTilesTest {
 

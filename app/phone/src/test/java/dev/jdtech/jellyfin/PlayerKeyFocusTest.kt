@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #448: Space on a hardware keyboard closed the player. Android had put focus on the back button by

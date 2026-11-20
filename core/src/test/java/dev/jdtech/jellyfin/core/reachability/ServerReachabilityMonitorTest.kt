@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#281): the probes behind the reachability banner. The risk named in the issue is a probe with
@@ -22,7 +22,6 @@ class ServerReachabilityMonitorTest {
     private var probes = 0
     private var probe: suspend () -> Boolean? = { true }
     private var network = true
-    private var enabled = true
 
     private fun TestScope.monitor() =
         ServerReachabilityMonitor(
@@ -32,7 +31,6 @@ class ServerReachabilityMonitorTest {
                 probe()
             },
             hasNetwork = { network },
-            enabled = { enabled },
             now = { testScheduler.currentTime },
             probeTimeoutMs = 3_000,
             settleMs = 250,
@@ -262,33 +260,6 @@ class ServerReachabilityMonitorTest {
     }
 
     @Test
-    fun `with Offline Mode on nothing is probed or shown, and the signs are passed on`() = runTest {
-        enabled = false
-        probe = { false }
-        val monitor = monitor()
-        var confirmed = 0
-        backgroundScope.launch { monitor.serverConfirmed.collect { confirmed++ } }
-        runCurrent()
-
-        monitor.onForeground()
-        monitor.onStarted()
-        monitor.onUnanswered()
-        advanceTimeBy(60_000)
-        runCurrent()
-
-        assertEquals(0, probes)
-        assertEquals(Reachability.Unknown, monitor.reachability)
-        // The user data sync still gets "the app is in front", as before #281.
-        assertEquals(1, confirmed)
-
-        monitor.onNetworkChanged()
-        advanceTimeBy(1_000)
-        runCurrent()
-        assertEquals(0, probes)
-        assertEquals(2, confirmed)
-    }
-
-    @Test
     fun `the sync is told when a probe reaches the server, not when it fails`() = runTest {
         probe = { false }
         val monitor = monitor()
@@ -313,23 +284,6 @@ class ServerReachabilityMonitorTest {
         runCurrent()
         assertEquals(probesSoFar, probes)
         assertEquals(2, confirmed)
-    }
-
-    @Test
-    fun `Offline Mode switched on while unreachable clears what was known`() = runTest {
-        probe = { false }
-        val monitor = monitor()
-        monitor.onForeground()
-        runCurrent()
-        assertTrue(monitor.state.value.unreachable)
-
-        // The setting restarts the activity: the app is in front again with the mode on.
-        enabled = false
-        monitor.onBackground()
-        monitor.onForeground()
-        runCurrent()
-
-        assertEquals(Reachability.Unknown, monitor.reachability)
     }
 
     @Test

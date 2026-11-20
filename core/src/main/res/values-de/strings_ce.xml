@@ -111,8 +111,6 @@
         <item quantity="one">%d fehlgeschlagen</item>
         <item quantity="other">%d fehlgeschlagen</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Noch nichts heruntergeladen</string>
-    <string name="ce_home_offline_empty_body">Du bist offline. Filme und Folgen, die du herunterlädst, erscheinen hier und unter Downloads.</string>
     <string name="ce_cast_sheet_title">Auf Gerät streamen</string>
     <string name="ce_cast_searching">Geräte werden gesucht…</string>
     <string name="ce_cast_wifi_hint">Der Fernseher muss eingeschaltet und im selben WLAN wie dieses Gerät sein.</string>

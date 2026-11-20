@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#657): the items next to an item reach the player's playlist next to that item, however the

@@ -19,7 +19,7 @@ import android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class TvPlayerKeyHandlerTest {
     private class FakeControls : TvPlayerControls {

@@ -31,9 +31,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.jellyfin.sdk.model.api.PersonKind
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * Drives the real detail ViewModels with the "Display cast and crew" setting on and off. The phone
@@ -48,12 +48,12 @@ class CastAndCrewPreferenceTest {
     private val writer = person("Writer", PersonKind.WRITER)
     private val people = listOf(actor, director, writer)
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

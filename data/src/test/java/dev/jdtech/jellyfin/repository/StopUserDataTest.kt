@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.repository
 
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for [stopUserData]: what a playback stop writes to the local database. CE (#637): the

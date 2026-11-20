@@ -116,8 +116,6 @@
         <item quantity="few">%d selhala</item>
         <item quantity="other">%d selhalo</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Zatím nic staženo</string>
-    <string name="ce_home_offline_empty_body">Jste offline. Filmy a epizody, které si stáhnete, se zobrazí tady a ve Stažených souborech.</string>
     <string name="ce_cast_sheet_title">Odeslat do zařízení</string>
     <string name="ce_cast_searching">Hledání zařízení…</string>
     <string name="ce_cast_wifi_hint">Zkontrolujte, že je televize zapnutá a ve stejné síti Wi-Fi jako toto zařízení.</string>

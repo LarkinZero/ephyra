@@ -746,7 +746,6 @@ class PlayerActivity : BasePlayerActivity() {
         val sleepTimerRemaining =
             binding.playerView.findViewById<TextView>(R.id.sleep_timer_remaining)
         val qualityButton = binding.playerView.findViewById<ImageButton>(R.id.btn_quality)
-        val qualitySpace = binding.playerView.findViewById<Space>(R.id.space_quality)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         // CE (#523): the skip button can appear while the episode sheet is open, and never shows
         // under it; the other controls can move under it or away, when the window is resized.
@@ -1019,15 +1018,8 @@ class PlayerActivity : BasePlayerActivity() {
         sleepTimerButton.isEnabled = false
         sleepTimerButton.imageAlpha = 75
 
-        // A bitrate cap only makes sense against the server; offline playback
-        // always plays the local file as-is.
-        if (appPreferences.getValue(appPreferences.offlineMode)) {
-            qualityButton.isVisible = false
-            qualitySpace.isVisible = false
-        } else {
-            qualityButton.isEnabled = false
-            qualityButton.imageAlpha = 75
-        }
+        qualityButton.isEnabled = false
+        qualityButton.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false

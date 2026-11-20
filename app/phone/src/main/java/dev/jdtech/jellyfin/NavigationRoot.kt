@@ -81,7 +81,6 @@ import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinScreen
 import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.useDockedSearch
 import dev.jdtech.jellyfin.setup.presentation.permission.PermissionAction
@@ -202,7 +201,6 @@ fun NavigationRoot(
                 navigationState = navigationState,
                 navigator = navigator,
                 entryDecorators = entryDecorators.main,
-                isOfflineMode = LocalOfflineMode.current,
                 showFavoritesTab = showFavoritesTab,
                 searchExpanded = searchExpanded,
                 searchFromHome = searchFromHome,
@@ -394,7 +392,6 @@ private fun MainNavigation(
     navigationState: NavigationState,
     navigator: Navigator,
     entryDecorators: List<NavEntryDecorator<NavKey>>,
-    isOfflineMode: Boolean,
     showFavoritesTab: Boolean,
     searchExpanded: MutableState<Boolean>,
     searchFromHome: MutableState<Boolean>,
@@ -405,7 +402,6 @@ private fun MainNavigation(
         remember(searchExpanded, searchFromHome) { MediaSearch(searchExpanded, searchFromHome) }
     val navigationItems =
         when {
-            isOfflineMode -> listOf(homeTab, downloadsTab)
             showFavoritesTab -> listOf(homeTab, favoritesTab, mediaTab, downloadsTab)
             else -> listOf(homeTab, mediaTab, downloadsTab)
         }
@@ -508,7 +504,7 @@ private fun MainNavigation(
             CastHost(
                 route = navigationState.currentBackStack().lastOrNull(),
                 showBottomBar = showBottomBar,
-                isOfflineMode = isOfflineMode || serverStatus.unreachable,
+                serverUnreachable = serverStatus.unreachable,
             ) {
                 NavDisplay(
                     entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),

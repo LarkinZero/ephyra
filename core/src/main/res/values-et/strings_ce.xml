@@ -111,8 +111,6 @@
         <item quantity="one">%d ebaõnnestus</item>
         <item quantity="other">%d ebaõnnestus</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Midagi pole veel alla laaditud</string>
-    <string name="ce_home_offline_empty_body">Oled võrguühenduseta. Allalaaditud filmid ja osad kuvatakse siin ja jaotises Allalaadimised.</string>
     <string name="ce_cast_sheet_title">Kanna üle seadmesse</string>
     <string name="ce_cast_searching">Seadmete otsimine…</string>
     <string name="ce_cast_wifi_hint">Veendu, et teler on sisse lülitatud ja selle seadmega samas Wi-Fi-võrgus.</string>

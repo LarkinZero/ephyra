@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.utils
 import androidx.media3.ui.CaptionStyleCompat
 import dev.jdtech.jellyfin.settings.domain.Constants
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for the pure-Kotlin pieces of [SubtitleStyle].

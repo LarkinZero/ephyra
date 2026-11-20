@@ -5,6 +5,7 @@ To use this app you must have a Jellyfin server.
 What Ephyra adds:
 - Resumable download engine with SD card and quality selection
 - Redesigned downloads screen, bulk downloads, and Smart Downloads
+- Downloads that play without a connection, with no offline mode to switch on
 - Dolby Vision direct play and improved audio codec handling (Atmos, ffmpeg fallback)
 - Video quality selector and version picker during playback
 - Subtitle styling (colors, size, fonts) and wide format support (PGS, VobSub, SSA/ASS)
@@ -12,7 +13,7 @@ What Ephyra adds:
 - Chapter list and media segment skipping (intro/outro)
 - Background audio playback
 - Google Cast (Chromecast) on phones and tablets, with a remote control player
-- Library enhancements including hide-watched filter and auto offline mode
+- Library enhancements including hide-watched filter
 
 Based on Findroid by Jarne Demeulemeester.
 

@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.ce.presentation.player
 import androidx.media3.common.Player
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #486: the TV player showed nothing while buffering, on either backend. It now shows a spinner

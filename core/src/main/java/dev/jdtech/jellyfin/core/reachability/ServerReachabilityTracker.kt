@@ -127,7 +127,7 @@ class ServerReachabilityTracker(private val now: () -> Long) {
         reachability = Reachability.Unreachable
     }
 
-    /** Another server, or the Offline Mode setting: nothing is known. */
+    /** Another server or user: nothing is known. */
     fun reset() {
         reachability = Reachability.Unknown
         failedProbes = 0

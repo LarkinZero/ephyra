@@ -111,8 +111,6 @@
         <item quantity="one">%d non riuscito</item>
         <item quantity="other">%d non riusciti</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Ancora nessun download</string>
-    <string name="ce_home_offline_empty_body">Sei offline. I film e gli episodi che scarichi compaiono qui e in Download.</string>
     <string name="ce_cast_sheet_title">Trasmetti a un dispositivo</string>
     <string name="ce_cast_searching">Ricerca di dispositivi…</string>
     <string name="ce_cast_wifi_hint">Assicurati che la TV sia accesa e sulla stessa rete Wi-Fi di questo dispositivo.</string>

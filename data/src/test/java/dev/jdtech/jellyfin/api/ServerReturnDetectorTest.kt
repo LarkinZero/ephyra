@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.api
 
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** CE (#552): the server coming back is told from the app's own requests. */
 class ServerReturnDetectorTest {

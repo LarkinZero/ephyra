@@ -116,8 +116,6 @@
         <item quantity="few">%d eșuate</item>
         <item quantity="other">%d eșuate</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Nimic descărcat încă</string>
-    <string name="ce_home_offline_empty_body">Ești offline. Filmele și episoadele pe care le descarci apar aici și în Descărcări.</string>
     <string name="ce_cast_sheet_title">Proiectează pe un dispozitiv</string>
     <string name="ce_cast_searching">Se caută dispozitive…</string>
     <string name="ce_cast_wifi_hint">Asigură-te că televizorul este pornit și în aceeași rețea Wi-Fi ca acest dispozitiv.</string>

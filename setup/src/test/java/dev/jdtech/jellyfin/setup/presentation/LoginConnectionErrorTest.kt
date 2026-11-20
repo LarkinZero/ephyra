@@ -21,9 +21,9 @@ import kotlinx.coroutines.test.setMain
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.exception.TimeoutException
 import org.jellyfin.sdk.model.api.QuickConnectResult
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#571): a login that could not reach the server said "Unknown error", and Quick Connect showed
@@ -66,12 +66,12 @@ class LoginConnectionErrorTest {
     private fun LoginViewModel.errorResource(): Int? =
         (state.value.error as? UiText.StringResource)?.resId
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

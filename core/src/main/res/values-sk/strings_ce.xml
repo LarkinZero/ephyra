@@ -116,8 +116,6 @@
         <item quantity="few">%d zlyhali</item>
         <item quantity="other">%d zlyhalo</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Zatiaľ nič stiahnuté</string>
-    <string name="ce_home_offline_empty_body">Ste offline. Filmy a epizódy, ktoré si stiahnete, sa zobrazia tu a v Stiahnutých.</string>
     <string name="ce_cast_sheet_title">Prenášať do zariadenia</string>
     <string name="ce_cast_searching">Hľadajú sa zariadenia…</string>
     <string name="ce_cast_wifi_hint">Skontrolujte, či je televízor zapnutý a v rovnakej sieti Wi-Fi ako toto zariadenie.</string>

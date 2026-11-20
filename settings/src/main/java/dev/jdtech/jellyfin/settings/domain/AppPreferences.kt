@@ -288,9 +288,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val sortBy = Preference("pref_sort_by", "SortName")
     val sortOrder = Preference("pref_sort_order", "Ascending")
 
-    // Offline mode
-    val offlineMode = Preference("pref_offline_mode", false)
-
     // Permissions
     val localNetworkPermissionDecided = Preference("pref_permission_local_network_decided", false)
 
@@ -301,6 +298,16 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     val mediaSegmentActionsMigrated =
         Preference("pref_player_media_segments_actions_migrated", false)
+
+    /**
+     * CE (#281): the Offline Mode setting is gone, and nothing reads its value. It is removed so an
+     * older build installed over this one does not start in Offline Mode either.
+     */
+    fun removeOfflineMode() {
+        if (sharedPreferences.contains(OFFLINE_MODE_KEY)) {
+            sharedPreferences.edit().remove(OFFLINE_MODE_KEY).apply()
+        }
+    }
 
     /**
      * CE (#271): one-shot move from the old global media segment switches (show skip button, auto
@@ -413,5 +420,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
                 )
         }
         editor.apply()
+    }
+
+    private companion object {
+        /** The key the Offline Mode setting was stored under, see [removeOfflineMode]. */
+        const val OFFLINE_MODE_KEY = "pref_offline_mode"
     }
 }

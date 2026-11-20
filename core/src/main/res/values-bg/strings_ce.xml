@@ -111,8 +111,6 @@
         <item quantity="one">%d неуспешно</item>
         <item quantity="other">%d неуспешни</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Още няма изтеглени</string>
-    <string name="ce_home_offline_empty_body">Нямате връзка. Филмите и епизодите, които изтеглите, се показват тук и в Изтегляния.</string>
     <string name="ce_cast_sheet_title">Предаване към устройство</string>
     <string name="ce_cast_searching">Търсят се устройства…</string>
     <string name="ce_cast_wifi_hint">Уверете се, че телевизорът е включен и е в същата Wi-Fi мрежа като това устройство.</string>

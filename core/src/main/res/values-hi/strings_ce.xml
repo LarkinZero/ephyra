@@ -111,8 +111,6 @@
         <item quantity="one">%d विफल</item>
         <item quantity="other">%d विफल</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">अभी तक कुछ भी डाउनलोड नहीं हुआ</string>
-    <string name="ce_home_offline_empty_body">आप ऑफ़लाइन हैं। आपकी डाउनलोड की गई फ़िल्में और एपिसोड यहाँ और डाउनलोड में दिखते हैं।</string>
     <string name="ce_cast_sheet_title">किसी डिवाइस पर कास्ट करें</string>
     <string name="ce_cast_searching">डिवाइस खोजे जा रहे हैं…</string>
     <string name="ce_cast_wifi_hint">पक्का करें कि टीवी चालू है और इस डिवाइस वाले ही Wi-Fi नेटवर्क पर है।</string>

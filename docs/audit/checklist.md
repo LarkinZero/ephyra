@@ -231,21 +231,21 @@ download setting (ADR 0007, `SettingsViewModel`).
 | DLD-26 | A Dolby Vision file is downloaded as a transcode when "Transcode Dolby Vision" is on, and plays offline | ce.30, #60 | not tested: no Dolby Vision file | not tested: no Dolby Vision file | n/a |
 | DLD-27 | Downloads screen in two columns on an expanded window | #288 | n/a | works: the storage summary and the Downloading section span the grid capped at 720 dp, at the start, since #434 | n/a |
 
-## 6. Offline mode
+## 6. Downloads without the server
 
-Phone and tablet only, except OFF-12: TV has no offline mode (ADR 0007).
+Phone and tablet only, except OFF-12: TV has no downloads (ADR 0007). Since #281 there is no Offline Mode setting: downloads work while the server does not answer, and the rows that described the mode say what replaced them.
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| OFF-01 | Offline mode on (Settings): the app restarts, shows only Home and Downloads, and an "Offline" label | `SettingsViewModel`, `NavigationRoot` | works | works | n/a |
+| OFF-01 | There is no Offline Mode setting. A user who had it on before updating lands in the normal app with all tabs, and keeps their downloads | #281 | works (emulator: setting on in a 2.7.0 debug build, then this build installed over it) | not tested | n/a |
 | OFF-02 | Starting the app with no network keeps the normal layout and all tabs, and shows the "Can't reach the Jellyfin server" banner with Downloads and Retry; it goes by itself when the network is back (until #281 step 2: offline mode turned itself on, until the next start) | #281 | works (emulator, airplane mode): the banner is there with the first frame over the remembered Home rows, and gone 1.3 s after the network returned, with Home loading again; with the Home cache off, Home is the "Can't reach" page with Downloads and Retry | works (10.5 inch emulator, airplane mode): banner at start, gone when the network returned | n/a |
 | OFF-03 | Turning the network off while the app is open: the app stays usable and says what failed, no crash | #353 | works since #392 (server cut off with a proxy, not the network): a failed refresh shows the error card under the header, whose details give the reason in words with Retry, Share and Close; the header keeps its width. Since #281 step 2 the banner of OFF-02 shows by itself within a second of the network going (emulator), and stands in for the error card while the server does not answer | broken #427: My media blank, stays blank when the network returns | n/a |
-| OFF-04 | Offline Home and item pages show the downloaded items | | works | works since the #428 fix (8 inch, airplane mode and the Offline Mode setting): Home shows only the downloads; with nothing downloaded it shows "Nothing downloaded yet", pointing to Downloads (10.5 inch at phone size, airplane mode), instead of the Latest rows remembered from the last online start, which could not be opened. The cancelled downloads of #426 (fixed in #471) were not retested here | n/a |
+| OFF-04 | With the server away, Home shows the "Can't reach the Jellyfin server" banner (or page) with Downloads, and downloaded item pages open from the stored copy | #281 | works (emulator, server blocked with iptables, cold start) | not tested since #281 | n/a |
 | OFF-05 | A downloaded item plays offline, and its position is kept locally | | works | works | n/a |
-| OFF-06 | Back online: the position, watched state and favourites changed offline reach the server (at the next app start with network) | `SyncWorker` | works; watched and favourites not tried | works | n/a |
+| OFF-06 | Back online: the position, watched state and favourites changed offline reach the server (when the server answers again, #552) | `SyncWorker` | works; watched and favourites not tried | works | n/a |
 | OFF-07 | Online with the server down or slower than 3 s: a downloaded movie or episode still opens and plays from the local copy | #281 | works (emulator, the test server blocked with iptables while the internet stayed up): Downloads and a downloaded movie open and play, and the position reaches the server when it is back | not tested: cannot make the demo server slow or down | n/a |
-| OFF-08 | Offline, the quality button, trailers and external links are hidden | `PlayerActivity`, #332 | works; the player's quality button is #356 | not tested: player (#356), links not checked | n/a |
-| OFF-09 | Turning offline mode off brings back all tabs and the server's data | | works | works | n/a |
+| OFF-08 | While the server is away, trailers and the download button are hidden; external links stay (they need the internet, not the server) | #332, #639 | works for the buttons (#639); the player's quality button is #356 | not tested: player (#356), links not checked | n/a |
+| OFF-09 | The server back: the banner goes, screens load again, and what changed meanwhile reaches the server | #639 | works (see OFF-02 and OFF-06) | works (OFF-02) | n/a |
 | OFF-10 | Downloads keep working across a switch between online and offline | ce.29 | works | not tested: no download progressing (transcode 404, #444) | n/a |
 | OFF-11 | A download started online keeps its state when the app goes offline and back | ce.29 | works | not tested: no download progressing (transcode 404, #444) | n/a |
 | OFF-12 | TV started without network: no crash, a message or an empty screen instead of a hang | `RepositoryModule` | n/a | n/a | not tested: the emulator's Ethernet cannot be switched off |
@@ -264,11 +264,11 @@ is shown, saved and kept.
 | SET-02 | TV settings: one list layout on every page, a details pane for selects, numbers changed with steps (+1, −1, +10, −10) | #347, 31b087ae | n/a | n/a | works: Left and Back from the details pane return to the row that opened it (#419); ms values step by 1 and 10 s (#420) |
 | SET-03 | Settings that make no sense on TV (gestures, PiP, downloads, theme) are not shown on TV | #133 | n/a | n/a | works; the mpv options page has no empty "Advanced" heading any more (#421) |
 
-### Offline and language
+### Language
 
 | ID | Feature: what to do, and what "works" means | Source | Phone | Tablet | TV |
 |---|---|---|---|---|---|
-| SET-04 | Offline mode (see OFF-01) | `offlineMode` | works | works | n/a |
+| SET-04 | No Offline Mode row (removed in #281, see OFF-01) | | works | not tested | n/a |
 | SET-05 | App language (Android 13+, disabled below): the app switches language. TV renders no row for this setting | `PreferenceAppLanguage` | works | works | n/a |
 | SET-06 | Preferred audio language (player effect: PLY-36) | `preferredAudioLanguage` | works | works | works |
 | SET-07 | Preferred subtitle language (player effect: PLY-37) | `preferredSubtitleLanguage` | works | works | works |

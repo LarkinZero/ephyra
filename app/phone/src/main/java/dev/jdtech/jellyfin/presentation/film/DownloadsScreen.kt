@@ -94,7 +94,6 @@ import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.Layout
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.WidthClass
 import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
 import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
@@ -140,8 +139,7 @@ fun DownloadsScreen(
         onDismissDownload = { viewModel.dismissCompletedDownload(it) },
         onRetryDownload = { viewModel.retryDownload(it) },
         onRetryClick = { viewModel.loadItems() },
-        // The library can't be browsed offline, so the empty state offers no way there.
-        onBrowseLibraryClick = onBrowseLibraryClick.takeUnless { LocalOfflineMode.current },
+        onBrowseLibraryClick = onBrowseLibraryClick,
         onStorageClick = onStorageClick,
     )
 }

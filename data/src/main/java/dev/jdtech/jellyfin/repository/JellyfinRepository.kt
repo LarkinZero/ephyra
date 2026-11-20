@@ -118,8 +118,7 @@ interface JellyfinRepository {
 
     /**
      * Searches movies and shows. With [itemKinds], it searches those kinds instead, with a separate
-     * limit per kind so one kind (episodes) can't push the others out (CE, TV search). The offline
-     * repository ignores [itemKinds].
+     * limit per kind so one kind (episodes) can't push the others out (CE, TV search).
      */
     suspend fun getSearchItems(
         query: String,

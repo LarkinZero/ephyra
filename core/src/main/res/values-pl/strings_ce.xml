@@ -121,8 +121,6 @@
         <item quantity="many">%d nieudanych</item>
         <item quantity="other">%d nieudanych</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Nic jeszcze nie pobrano</string>
-    <string name="ce_home_offline_empty_body">Jesteś offline. Pobrane filmy i odcinki pojawią się tutaj i w sekcji Pobrane.</string>
     <string name="ce_cast_sheet_title">Przesyłaj na urządzenie</string>
     <string name="ce_cast_searching">Szukam urządzeń…</string>
     <string name="ce_cast_wifi_hint">Upewnij się, że telewizor jest włączony i w tej samej sieci Wi-Fi co to urządzenie.</string>

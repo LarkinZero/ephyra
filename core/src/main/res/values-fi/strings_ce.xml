@@ -111,8 +111,6 @@
         <item quantity="one">%d epäonnistui</item>
         <item quantity="other">%d epäonnistui</item>
     </plurals>
-    <string name="ce_home_offline_empty_title">Mitään ei ole vielä ladattu</string>
-    <string name="ce_home_offline_empty_body">Olet offline-tilassa. Lataamasi elokuvat ja jaksot näkyvät täällä ja Latauksissa.</string>
     <string name="ce_cast_sheet_title">Lähetä laitteeseen</string>
     <string name="ce_cast_searching">Etsitään laitteita…</string>
     <string name="ce_cast_wifi_hint">Varmista, että televisio on päällä ja samassa Wi-Fi-verkossa kuin tämä laite.</string>

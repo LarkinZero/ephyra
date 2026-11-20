@@ -121,6 +121,8 @@ regular expression** `^Beta`, and **Filter APKs by regular expression**
   downloads.
 - Downloads screen with progress per episode and per show, a storage breakdown, multi-select and undo.
 - Smart Downloads (opt-in): keeps the next episodes of what you're watching, removes them once watched.
+- No offline mode to switch on: downloads open and play when the server can't be reached, and a
+  banner on the other screens leads to them.
 - In step with the server: what you watch offline is sent when you're back and moves up in Continue
   Watching, and progress made on your other devices reaches your downloads.
 

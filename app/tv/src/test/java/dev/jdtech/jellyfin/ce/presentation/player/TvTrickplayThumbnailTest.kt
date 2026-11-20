@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.ce.presentation.player
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #464: the seek bar's thumbnail covered the title, the skip button and the "Up next" card. They

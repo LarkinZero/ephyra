@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -11,7 +10,6 @@ import androidx.compose.ui.test.performClick
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -58,18 +56,16 @@ class ItemButtonsBarWatchedTest {
     private fun show(played: Boolean) {
         rule.setContent {
             FindroidTheme {
-                CompositionLocalProvider(LocalOfflineMode provides false) {
-                    ItemButtonsBar(
-                        item = dummyEpisode.copy(played = played),
-                        onPlayClick = {},
-                        onMarkAsPlayedClick = { clicks++ },
-                        onMarkAsFavoriteClick = {},
-                        onDownloadClick = {},
-                        onDownloadCancelClick = {},
-                        onDownloadDeleteClick = {},
-                        onTrailerClick = {},
-                    )
-                }
+                ItemButtonsBar(
+                    item = dummyEpisode.copy(played = played),
+                    onPlayClick = {},
+                    onMarkAsPlayedClick = { clicks++ },
+                    onMarkAsFavoriteClick = {},
+                    onDownloadClick = {},
+                    onDownloadCancelClick = {},
+                    onDownloadDeleteClick = {},
+                    onTrailerClick = {},
+                )
             }
         }
     }

@@ -16,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 
 @Composable
@@ -25,9 +24,6 @@ fun ActorsRow(
     onActorClick: (personId: UUID) -> Unit,
     contentPadding: PaddingValues,
 ) {
-    // PersonScreen fetches details from the server, so navigating to an actor
-    // bio while offline would just spin on a loading state.
-    val isOfflineMode = LocalOfflineMode.current
     Column(modifier = Modifier.padding(contentPadding)) {
         Text(
             text = stringResource(CoreR.string.cast_amp_crew),
@@ -40,11 +36,7 @@ fun ActorsRow(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
     ) {
         items(items = actors, key = { person -> person.id }) { person ->
-            PersonItem(
-                person = person,
-                onClick = { onActorClick(person.id) },
-                enabled = !isOfflineMode,
-            )
+            PersonItem(person = person, onClick = { onActorClick(person.id) })
         }
     }
 }

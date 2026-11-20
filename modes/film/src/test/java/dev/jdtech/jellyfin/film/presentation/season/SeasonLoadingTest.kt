@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.SharedPreferences
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
+import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -24,9 +25,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /** CE (#505): the season page can tell a season without episodes from one that is still loading. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,13 +36,14 @@ class SeasonLoadingTest {
     private val seasonId = UUID.fromString("22222222-2222-2222-2222-222222222223")
 
     private var episodesFail = false
+    private var storedEpisodes = emptyList<Any>()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
@@ -86,6 +88,39 @@ class SeasonLoadingTest {
         assertFalse(state.isLoading)
     }
 
+    @Test
+    fun `episodes from the server are not stored only`() = runBlocking {
+        storedEpisodes = listOf(dummyEpisode)
+        val viewModel = viewModel()
+        viewModel.loadSeason(seasonId, seriesId = seriesId)
+        val state = withTimeout(5_000) { viewModel.state.first { !it.isLoading } }
+
+        assertFalse(state.storedOnly, message = "the server's list keeps a removed download")
+    }
+
+    @Test
+    fun `the stored episodes stand in for a server that fails, and say so`() = runBlocking {
+        // #281: without Offline Mode, a removed download leaves such a list at once.
+        storedEpisodes = listOf(dummyEpisode)
+        episodesFail = true
+        val viewModel = viewModel()
+        viewModel.loadSeason(seasonId, seriesId = seriesId)
+        val state = withTimeout(5_000) { viewModel.state.first { !it.isLoading } }
+
+        assertEquals(listOf(dummyEpisode.id), state.episodes.map { it.id })
+        assertTrue(state.storedOnly, message = "the list is the stored episodes")
+    }
+
+    @Test
+    fun `the downloads-only page is stored only`() = runBlocking {
+        storedEpisodes = listOf(dummyEpisode)
+        val viewModel = viewModel()
+        viewModel.loadSeason(seasonId, downloadsOnly = true, seriesId = seriesId)
+        val state = withTimeout(5_000) { viewModel.state.first { !it.isLoading } }
+
+        assertTrue(state.storedOnly)
+    }
+
     private fun viewModel(): SeasonViewModel {
         val repository = repository()
         val preferences = appPreferences()
@@ -113,7 +148,7 @@ class SeasonLoadingTest {
                 "getEpisodes" -> {
                     val offline = args!![args.size - 2] as Boolean
                     if (!offline && episodesFail) throw IllegalStateException("No connection")
-                    emptyList<Any>()
+                    if (offline) storedEpisodes else emptyList<Any>()
                 }
                 else -> throw NotImplementedError("JellyfinRepository.${method.name}")
             }

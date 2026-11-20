@@ -110,7 +110,7 @@ constructor(
     /**
      * CE (#332): the extras, collections and "More like this" rows, each from its own request. The
      * page calls this once it has drawn the movie, so these requests never delay it; they are made
-     * once per movie, not again on every return to the page. Offline the repository has none.
+     * once per movie, not again on every return to the page.
      */
     fun loadRelated(movieId: UUID) {
         val movie = _state.value.movie?.takeIf { it.id == movieId } ?: return

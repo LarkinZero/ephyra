@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.player.local.mpv
 import dev.jdtech.jellyfin.player.local.mpv.MpvStreamBreak.Outcome
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #445: on mpv a lost connection reached `eof-reached` like a real end, so the item was reported

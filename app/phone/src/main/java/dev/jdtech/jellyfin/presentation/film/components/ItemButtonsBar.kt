@@ -45,7 +45,6 @@ import dev.jdtech.jellyfin.models.getVersions
 import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.utils.download.DownloadStatus
 
@@ -76,7 +75,7 @@ fun ItemButtonsBar(
     val context = LocalContext.current
     // CE (#281): what needs the server is also left out while it is known not to answer. Not on
     // one failed probe alone, so a slow server does not make the buttons flash.
-    val serverAway = LocalOfflineMode.current || LocalServerStatus.current.confirmedUnreachable
+    val serverAway = LocalServerStatus.current.confirmedUnreachable
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
     // CE (#332): every remote trailer; a menu picks one when there are several.

@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** CE (#281): the server's answer when it comes, Room's copy when it doesn't. */
 class StoredFallbackTest {

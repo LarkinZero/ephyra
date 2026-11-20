@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.core.presentation.localnetwork
 
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#571): an error screen loads again by itself when local network access comes back. Once: a

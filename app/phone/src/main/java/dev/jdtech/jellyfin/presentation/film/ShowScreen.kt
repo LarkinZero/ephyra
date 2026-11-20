@@ -79,7 +79,6 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
@@ -493,7 +492,7 @@ private fun ShowScreenLayout(
 /** CE (#332): the show's outside links, below the info text. */
 @Composable
 internal fun ShowLinks(show: FindroidShow, onAction: (ShowAction) -> Unit) {
-    if (show.externalLinks.isEmpty() || LocalOfflineMode.current) return
+    if (show.externalLinks.isEmpty()) return
     Spacer(Modifier.height(MaterialTheme.spacings.medium))
     ExternalLinksRow(show.externalLinks) { url -> onAction(ShowAction.OpenExternalLink(url)) }
 }
