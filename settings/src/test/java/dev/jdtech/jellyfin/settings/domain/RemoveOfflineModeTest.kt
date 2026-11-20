@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import java.lang.reflect.Proxy
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #281: the stored value of the removed Offline Mode setting goes, and nothing else does. */
 class RemoveOfflineModeTest {
