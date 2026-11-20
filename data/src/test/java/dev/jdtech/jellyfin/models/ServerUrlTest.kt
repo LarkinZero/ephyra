@@ -15,7 +15,7 @@ import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRange
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * The server's transcode and subtitle URLs start with a slash, and the stored address of a server
