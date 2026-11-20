@@ -57,6 +57,9 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
     private var queueLoader: (suspend () -> List<FindroidItem>)? = null
     private val queueMutex = Mutex()
 
+    /** CE (#657): one [appendNextSeason] at a time; see [getNextPlayerItem]. */
+    private val nextSeasonMutex = Mutex()
+
     /**
      * CE (#580): the audio stream each item was last requested with, by the server's index. The
      * stream of a transcode does not say which track it carries, so a quality switch from one
@@ -312,7 +315,12 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                 is FindroidMovie -> null
                 is FindroidEpisode -> {
                     if (index >= 0 && index == items.lastIndex && !shuffled) {
-                        appendNextSeason()
+                        // CE (#657): two lookups for the last episode can overlap (the user left
+                        // it and came back while the first waited on the server). The second
+                        // checks again once the first is done, so the season goes in once.
+                        nextSeasonMutex.withLock {
+                            if (queueIndex(itemId) == items.lastIndex) appendNextSeason()
+                        }
                     }
 
                     if (index < 0 || index == items.lastIndex) {

@@ -383,7 +383,7 @@ class PlayerInvariantsTest {
         assertTrue("onMediaItemTransition no longer waits for the stop report", stopWait >= 0)
         for (setup in
             listOf(
-                "playlistManager.setCurrentMediaItemIndex(",
+                "playlistManager.setCurrentMediaItemIndex(item.itemId)",
                 "deferredWork = item",
                 "runDeferredWork()",
             )) {

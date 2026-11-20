@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.player.local.domain
 
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidImages
+import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
@@ -34,6 +35,12 @@ class NeighbourLoaderTest {
     private val e3 = episodes[2].id
     private val e4 = episodes[3].id
     private val e5 = episodes[4].id
+    private val e6 = episodes[5].id
+
+    /** The next season, there only for the tests that set [seasons]. */
+    private val season2Id = UUID.randomUUID()
+    private val season2 = List(3) { episode(it + 1, season2Id, seasonNumber = 2) }
+    private var seasons: List<FindroidSeason> = emptyList()
 
     /** Requests to hold, as the method name and the item id it asks about. */
     private val slow = mutableListOf<Pair<String, UUID>>()
@@ -159,6 +166,28 @@ class NeighbourLoaderTest {
             assertEquals(order.take(3), playlist.ids)
         }
 
+    @Test
+    fun `two overlapping lookups at the season's last episode append the next season once`() =
+        runBlocking {
+            seasons = listOf(season(seasonId, 1), season(season2Id, 2))
+            manager.getInitialItem(e6, BaseItemKind.EPISODE)
+            manager.loadQueue()
+
+            // The first lookup waits on the server for the seasons; the user leaves e6 and comes
+            // back, and e6 asks again.
+            slow += "getSeasons" to seriesId
+            val first = launch { manager.getNextPlayerItem(e6) }
+            awaitHeld(seriesId)
+            val second = launch { manager.getNextPlayerItem(e6) }
+            repeat(10) { yield() }
+            release(seriesId)
+            first.join()
+            second.join()
+
+            manager.setCurrentMediaItemIndex(e6)
+            assertEquals(season2.map { it.id }, manager.upcomingItems().map { it.id })
+        }
+
     /** e3 playing, with e2 and e4 queued around it. */
     private suspend fun startAtThirdEpisode(): FakePlaylist {
         manager.getInitialItem(e3, BaseItemKind.EPISODE)
@@ -218,8 +247,8 @@ class NeighbourLoaderTest {
                 when (method.name) {
                     "getEpisode" -> episodes.first { it.id == args[0] }
                     // A whole series (shuffle) or the season.
-                    "getEpisodes" -> episodes
-                    "getSeasons" -> emptyList<Any>()
+                    "getEpisodes" -> if (args[1] == season2Id) season2 else episodes
+                    "getSeasons" -> seasons
                     "getPlaybackSources" -> listOf(source())
                     else -> error("Unexpected call to ${method.name}")
                 }
@@ -234,7 +263,7 @@ class NeighbourLoaderTest {
             }
         } as JellyfinRepository
 
-    private fun episode(number: Int) =
+    private fun episode(number: Int, season: UUID = seasonId, seasonNumber: Int = 1) =
         FindroidEpisode(
             id = UUID.randomUUID(),
             name = "Episode $number",
@@ -242,7 +271,7 @@ class NeighbourLoaderTest {
             overview = "",
             indexNumber = number,
             indexNumberEnd = null,
-            parentIndexNumber = 1,
+            parentIndexNumber = seasonNumber,
             sources = emptyList(),
             played = false,
             favorite = false,
@@ -253,14 +282,33 @@ class NeighbourLoaderTest {
             premiereDate = null,
             seriesId = seriesId,
             seriesName = "Show",
-            seasonId = seasonId,
-            seasonName = "Season 1",
+            seasonId = season,
+            seasonName = "Season $seasonNumber",
             communityRating = null,
             people = emptyList(),
             missing = false,
             images = FindroidImages(),
             chapters = emptyList(),
             trickplayInfo = null,
+        )
+
+    private fun season(id: UUID, number: Int) =
+        FindroidSeason(
+            id = id,
+            name = "Season $number",
+            seriesId = seriesId,
+            seriesName = "Show",
+            originalTitle = null,
+            overview = "",
+            sources = emptyList(),
+            indexNumber = number,
+            episodes = emptyList(),
+            played = false,
+            favorite = false,
+            canPlay = true,
+            canDownload = false,
+            unplayedItemCount = null,
+            images = FindroidImages(),
         )
 
     private fun source() =
