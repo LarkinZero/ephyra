@@ -61,6 +61,11 @@ class SubtitleDelayMediaPeriodTest {
         val streams = mutableListOf<FakeStream>()
         var buffered = Long.MAX_VALUE
 
+        /** When set, every seek lands on a multiple of it, as a period that adjusts seeks would. */
+        var snapUs = 0L
+
+        fun snap(positionUs: Long) = if (snapUs > 0) positionUs / snapUs * snapUs else positionUs
+
         override fun prepare(callback: MediaPeriod.Callback, positionUs: Long) {
             callback.onPrepared(this)
         }
@@ -77,6 +82,7 @@ class SubtitleDelayMediaPeriodTest {
             positionUs: Long,
         ): Long {
             selectPositions += positionUs
+            val landedUs = snap(positionUs)
             for (i in selections.indices) {
                 val old = streams[i] as FakeStream?
                 if (old != null && (selections[i] == null || !mayRetainStreamFlags[i])) {
@@ -88,13 +94,13 @@ class SubtitleDelayMediaPeriodTest {
                     val stream =
                         if (selection.trackGroup === video) FakeStream(1, keyFrameEvery = 2)
                         else FakeStream(5, keyFrameEvery = 1, id = selection.trackGroup.id)
-                    stream.seekTo(positionUs)
+                    stream.seekTo(landedUs)
                     this.streams += stream
                     streams[i] = stream
                     streamResetFlags[i] = true
                 }
             }
-            return positionUs
+            return landedUs
         }
 
         override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) = Unit
@@ -103,8 +109,8 @@ class SubtitleDelayMediaPeriodTest {
 
         override fun seekToUs(positionUs: Long): Long {
             seeks += positionUs
-            streams.forEach { it.seekTo(positionUs) }
-            return positionUs
+            streams.forEach { it.seekTo(snap(positionUs)) }
+            return snap(positionUs)
         }
 
         override fun getAdjustedSeekPositionUs(positionUs: Long, seekParameters: SeekParameters) =
@@ -218,6 +224,47 @@ class SubtitleDelayMediaPeriodTest {
         assertEquals(listOf(2_800_000L), inner.seeks)
         assertEquals(listOf(0.0, 5.0, 10.0), List(3) { next(textStream) })
         assertEquals(14.0, next(videoStream))
+    }
+
+    @Test
+    fun `a period that lands elsewhere is seeked where the player asked, without the lead`() {
+        select(0)
+        period.discardBuffer(0L, false)
+        inner.snapUs = 10_000_000L
+        delayUs = 2_700_000L
+        // Asked for 12.8 s it lands on 10 s: playback must not start there, 5.5 s early, but
+        // where the period puts a seek to 15.5 s.
+        assertEquals(10_000_000L, period.seekToUs(15_500_000L))
+        assertEquals(listOf(12_800_000L, 15_500_000L), inner.seeks)
+        // Nothing waits for 15.5 s to be buffered.
+        inner.buffered = 0L
+        assertTrue(videoStream!!.isReady())
+        assertEquals(10.0, next(videoStream))
+    }
+
+    @Test
+    fun `a subtitle switch on a period that lands elsewhere is seeked where the player asked`() {
+        select(0)
+        inner.snapUs = 10_000_000L
+        inner.buffered = 0L
+        delayUs = 2_700_000L
+        val switched: Array<ExoTrackSelection?> =
+            arrayOf(selections[0], FixedTrackSelection(dutch, 0))
+        val resetFlags = BooleanArray(2)
+        val positionUs =
+            period.selectTracks(
+                switched,
+                booleanArrayOf(true, false),
+                streams,
+                resetFlags,
+                16_000_000L,
+            )
+        assertEquals(10_000_000L, positionUs)
+        assertEquals(listOf(16_000_000L), inner.seeks)
+        // The seek moved every stream, so the renderers have to reset them all; none is held.
+        assertTrue(resetFlags.all { it })
+        assertTrue(videoStream!!.isReady())
+        assertEquals(10.0, next(videoStream))
     }
 
     @Test

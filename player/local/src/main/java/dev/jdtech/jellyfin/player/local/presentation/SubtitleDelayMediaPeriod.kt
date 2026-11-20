@@ -86,7 +86,7 @@ class SubtitleDelayMediaPeriod(val inner: MediaPeriod, private val delayUsProvid
         val leadUs =
             if (newTextStream) leadUs().let { if (it > 0) it + RELOAD_LOOKBACK_US else 0 } else 0L
         val innerPositionUs = (positionUs - leadUs).coerceAtLeast(0L)
-        val selectedPositionUs =
+        var selectedPositionUs =
             inner.selectTracks(
                 selections,
                 mayRetainStreamFlags,
@@ -95,6 +95,11 @@ class SubtitleDelayMediaPeriod(val inner: MediaPeriod, private val delayUsProvid
                 innerPositionUs,
             )
         val moved = innerPositionUs != positionUs && selectedPositionUs == innerPositionUs
+        if (innerPositionUs != positionUs && !moved) {
+            // [inner] put itself somewhere else than asked: start where the player asked instead.
+            selectedPositionUs = inner.seekToUs(positionUs)
+            for (i in innerStreams.indices) if (innerStreams[i] != null) streamResetFlags[i] = true
+        }
 
         heldStreams.clear()
         hasTextStream = false
@@ -128,11 +133,17 @@ class SubtitleDelayMediaPeriod(val inner: MediaPeriod, private val delayUsProvid
             leadUs += RELOAD_LOOKBACK_US
         }
         val innerPositionUs = (positionUs - leadUs).coerceAtLeast(0L)
-        val seekedPositionUs = inner.seekToUs(innerPositionUs)
-        // An unseekable source goes to 0 whatever it is asked: then there is nothing to hold.
-        if (seekedPositionUs != innerPositionUs || innerPositionUs == positionUs) {
+        if (innerPositionUs == positionUs) {
             heldStreams.forEach { it.holdUntil(C.TIME_UNSET) }
-            return forget(seekedPositionUs)
+            return forget(inner.seekToUs(positionUs))
+        }
+        // A period may put itself somewhere else than asked (the MediaPeriod contract allows it;
+        // of ours only an unseekable progressive source does, to 0). Then the earlier position is
+        // given up and [inner] is seeked where the player asked, so playback never starts the lead
+        // early: the player gets the position [inner] gives for P, and nothing is held.
+        if (inner.seekToUs(innerPositionUs) != innerPositionUs) {
+            heldStreams.forEach { it.holdUntil(C.TIME_UNSET) }
+            return forget(inner.seekToUs(positionUs))
         }
         heldStreams.forEach { it.holdUntil(positionUs) }
         return remember(innerPositionUs, positionUs)
