@@ -14,11 +14,11 @@ import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
 import kotlin.coroutines.intrinsics.intercepted
 import kotlin.coroutines.resume
 import kotlin.random.Random
+import kotlin.test.assertEquals
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**

@@ -388,10 +388,13 @@ class PlayerInvariantsTest {
         val viewModel = source("presentation/PlayerViewModel.kt")
         val transition =
             Regex("""override fun onMediaItemTransition\([\s\S]*?\n    }""").find(viewModel)
-        assertTrue("PlayerViewModel.onMediaItemTransition not found", transition != null)
+        assertTrue(transition != null, message = "PlayerViewModel.onMediaItemTransition not found")
         val body = transition!!.value
         val stopWait = body.indexOf("stopJob?.join()")
-        assertTrue("onMediaItemTransition no longer waits for the stop report", stopWait >= 0)
+        assertTrue(
+            stopWait >= 0,
+            message = "onMediaItemTransition no longer waits for the stop report",
+        )
         for (setup in
             listOf(
                 "playlistManager.setCurrentMediaItemIndex(item.itemId)",
@@ -399,8 +402,8 @@ class PlayerInvariantsTest {
                 "runDeferredWork()",
             )) {
             val at = body.indexOf(setup)
-            assertTrue("onMediaItemTransition must call $setup (#657)", at >= 0)
-            assertTrue("$setup must come before stopJob?.join() (#657)", at < stopWait)
+            assertTrue(at >= 0, message = "onMediaItemTransition must call $setup (#657)")
+            assertTrue(at < stopWait, message = "$setup must come before stopJob?.join() (#657)")
         }
     }
 }
