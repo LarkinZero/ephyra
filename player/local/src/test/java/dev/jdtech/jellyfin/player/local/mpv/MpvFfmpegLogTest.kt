@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.player.local.mpv
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #707: FFmpeg's lines reach only the mpv instance that holds FFmpeg's log, so they are passed on

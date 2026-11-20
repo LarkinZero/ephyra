@@ -12,7 +12,7 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** An unfinished download's partial file is never what plays (#454). */
 class PlaylistManagerUnfinishedDownloadTest {

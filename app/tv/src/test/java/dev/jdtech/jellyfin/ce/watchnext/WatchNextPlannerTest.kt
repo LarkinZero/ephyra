@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.ce.watchnext
 
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class WatchNextPlannerTest {
     private val now = 1_000_000L

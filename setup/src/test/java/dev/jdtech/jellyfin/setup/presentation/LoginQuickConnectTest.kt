@@ -19,9 +19,9 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.jellyfin.sdk.model.api.QuickConnectResult
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#382): pressing Quick Connect again cancels it. The code must go with the polling, so the
@@ -33,12 +33,12 @@ class LoginQuickConnectTest {
     private var initiated = 0
     private var polls = 0
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher(scheduler))
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

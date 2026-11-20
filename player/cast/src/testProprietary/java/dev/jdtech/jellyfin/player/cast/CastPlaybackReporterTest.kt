@@ -11,7 +11,7 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for [CastPlaybackReporter]: which playback reports the server gets for what the

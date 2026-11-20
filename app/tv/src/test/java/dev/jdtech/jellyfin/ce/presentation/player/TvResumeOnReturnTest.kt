@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.ce.presentation.player
 
 import dev.jdtech.jellyfin.ce.presentation.player.TvResumeOnReturn.Action
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #462: after Home (or standby) and back, the TV player sat paused with nothing on screen. It now

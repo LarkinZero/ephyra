@@ -7,7 +7,7 @@ import java.util.Locale
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.MediaStreamType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #510: the media info sheet's content, from the source the page already has. */
 class MediaInfoTest {

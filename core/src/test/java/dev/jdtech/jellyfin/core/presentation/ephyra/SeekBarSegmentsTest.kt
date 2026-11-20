@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.core.presentation.ephyra
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidSegmentType
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class SeekBarSegmentsTest {
     private fun segment(type: FindroidSegmentType, start: Long, end: Long) =

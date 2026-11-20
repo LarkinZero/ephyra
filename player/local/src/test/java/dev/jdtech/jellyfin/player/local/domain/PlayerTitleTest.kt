@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #452: the phone player's title was "S1:E3 - Name" without the series. It is now the series name

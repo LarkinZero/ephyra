@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.player.local.mpv
 
 import dev.jdtech.jellyfin.player.local.mpv.MpvStallWatch.Verdict
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #460: on a stalled connection mpv reported READY after its last buffering cycle and then nothing,

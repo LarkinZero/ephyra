@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin
 
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #447: the PiP button passes its params to enterPictureInPictureMode, and the system keeps them.

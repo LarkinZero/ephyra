@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class VideoMetadataParserTest {
     private fun audio(

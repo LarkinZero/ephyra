@@ -19,9 +19,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * Regression test for the offline crash documented in BUGREPORT_ANALYSIS.md.
@@ -39,14 +39,14 @@ class HomeViewModelOfflineCrashTest {
 
     private var originalUncaughtHandler: Thread.UncaughtExceptionHandler? = null
 
-    @Before
+    @BeforeEach
     fun setUp() {
         // viewModelScope is built with Dispatchers.Main.immediate; provide one.
         Dispatchers.setMain(StandardTestDispatcher())
         originalUncaughtHandler = Thread.getDefaultUncaughtExceptionHandler()
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Thread.setDefaultUncaughtExceptionHandler(originalUncaughtHandler)
         Dispatchers.resetMain()

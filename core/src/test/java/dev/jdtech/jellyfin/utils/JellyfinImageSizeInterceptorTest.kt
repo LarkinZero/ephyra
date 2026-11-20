@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.utils
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class JellyfinImageSizeInterceptorTest {
     private val poster = "https://demo.example/items/abc/Images/Primary?tag=t1"

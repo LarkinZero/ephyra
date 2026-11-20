@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** The player's top row starts at its end when it does not fit, and stays there until moved. */
 class PlayerTopRowTest {

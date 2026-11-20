@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.core.presentation.downloader
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Unit tests for [nextDownloadSpeed] — the fix for the queue speed/ETA flashing. */
 class DownloadSpeedTest {

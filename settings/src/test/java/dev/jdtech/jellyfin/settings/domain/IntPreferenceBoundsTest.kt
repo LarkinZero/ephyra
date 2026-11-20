@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.settings.domain
 import android.content.SharedPreferences
 import java.lang.reflect.Proxy
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #559: the still-watching prompt timeout is saved and shown as at least 5 seconds. */
 class IntPreferenceBoundsTest {

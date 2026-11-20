@@ -4,7 +4,7 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.PlayMethod
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class PlaySessionsTest {
     private val item = UUID.fromString("00000000-0000-0000-0000-000000000001")

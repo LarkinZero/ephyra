@@ -5,7 +5,7 @@ import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #596: a movie has no saved track choice, so a track picked by hand was lost whenever the stream

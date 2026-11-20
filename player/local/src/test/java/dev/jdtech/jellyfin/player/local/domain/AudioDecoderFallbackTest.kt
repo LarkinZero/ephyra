@@ -4,7 +4,7 @@ import androidx.media3.common.MimeTypes
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Unit tests for what [AudioDecoderFallback] remembers and which decoders it leaves to ffmpeg. */
 class AudioDecoderFallbackTest {

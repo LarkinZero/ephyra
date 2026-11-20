@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin
 
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #477: with background audio on, the player screen gave back the playWhenReady saved when it was

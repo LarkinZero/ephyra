@@ -4,7 +4,7 @@ import dev.jdtech.jellyfin.player.cast.devices.Chromecast
 import dev.jdtech.jellyfin.player.cast.devices.ChromecastH265
 import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.MediaStreamProtocol
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * The server encodes an HLS transcode to the first video codec of the transcoding profile and

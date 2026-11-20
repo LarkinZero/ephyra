@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.UserItemDataDto
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#633): the sync sends a row's LastPlayedDate only when it is newer than the server's, so a

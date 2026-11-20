@@ -14,7 +14,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#594): the episode a show's Play starts is the next-up one, which the server sends without

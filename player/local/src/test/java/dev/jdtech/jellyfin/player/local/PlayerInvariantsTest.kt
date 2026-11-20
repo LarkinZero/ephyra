@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.player.local
 import java.io.File
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Source-level invariants for the player that a compile cannot catch and a device test is easy to

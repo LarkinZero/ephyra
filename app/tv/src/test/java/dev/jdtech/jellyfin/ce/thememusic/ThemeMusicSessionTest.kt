@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.ce.thememusic
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class ThemeMusicSessionTest {
 
