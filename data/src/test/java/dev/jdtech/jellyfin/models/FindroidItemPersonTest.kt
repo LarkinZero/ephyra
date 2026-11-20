@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.models
 import java.util.UUID
 import kotlin.test.assertEquals
 import org.jellyfin.sdk.model.api.PersonKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class FindroidItemPersonTest {
     private val tomKane = UUID.fromString("0bc3e80a-9daa-0c55-1914-59f19cd90460")

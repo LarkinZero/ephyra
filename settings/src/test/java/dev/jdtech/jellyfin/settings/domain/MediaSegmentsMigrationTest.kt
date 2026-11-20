@@ -9,7 +9,7 @@ import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.PREVIEW
 import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.RECAP
 import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.SKIP
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class MediaSegmentsMigrationTest {
     private fun migrate(

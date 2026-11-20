@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.presentation.utils
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #622: which windows show the backdrop at 16:9 beside the text, and how wide. */
 class HeroBackdropWidthTest {

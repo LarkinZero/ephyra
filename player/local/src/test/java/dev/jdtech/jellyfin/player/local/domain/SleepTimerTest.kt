@@ -4,7 +4,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Unit tests for [SleepTimer] (#298). Drives the wall clock manually. */
 class SleepTimerTest {

@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.ce.presentation.player
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #458: the TV player never reported progress. It now reports every few seconds, when playback

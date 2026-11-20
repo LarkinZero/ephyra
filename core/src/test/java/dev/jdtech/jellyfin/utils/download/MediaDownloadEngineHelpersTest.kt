@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.utils.download
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for the three pure helper functions in MediaDownloadEngine.kt: [shouldPauseTransfer],

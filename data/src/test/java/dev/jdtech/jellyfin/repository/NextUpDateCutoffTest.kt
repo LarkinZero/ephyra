@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class NextUpDateCutoffTest {
     private val now = LocalDateTime.of(2026, 11, 1, 12, 0)

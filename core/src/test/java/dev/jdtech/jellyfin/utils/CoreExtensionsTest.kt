@@ -4,7 +4,7 @@ import java.util.Locale
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.DateTime
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class CoreExtensionsTest {
     @Test

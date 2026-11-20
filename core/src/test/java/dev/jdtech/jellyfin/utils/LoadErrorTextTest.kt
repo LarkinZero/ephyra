@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.exception.TimeoutException
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** CE (#377): a failed load is explained in plain words, and Share never sends a token. */
 class LoadErrorTextTest {

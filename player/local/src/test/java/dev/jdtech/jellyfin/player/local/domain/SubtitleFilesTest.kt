@@ -7,7 +7,7 @@ import dev.jdtech.jellyfin.models.FindroidSourceType
 import kotlin.test.assertEquals
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #597: a transcode does not carry the subtitle tracks that are inside the file, and only the

@@ -15,7 +15,7 @@ import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRange
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for [castTracks]: the tracks the receiver and the track dialogs get for a media source

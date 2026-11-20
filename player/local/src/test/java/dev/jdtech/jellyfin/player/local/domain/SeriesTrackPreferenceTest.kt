@@ -4,7 +4,7 @@ import dev.jdtech.jellyfin.models.FindroidMediaStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.MediaStreamType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for matching a remembered series audio or subtitle choice to another file's tracks.

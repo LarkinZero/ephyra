@@ -4,7 +4,7 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#635): what the sync copies from the server into the rows of downloads, and how often the app

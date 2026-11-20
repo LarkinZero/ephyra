@@ -7,7 +7,7 @@ import org.jellyfin.sdk.model.api.DeviceProfile
 import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.ProfileConditionValue
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Tests the pure profile-assembly half of [DeviceProfileBuilder]. The `MediaCodecList` hardware

@@ -25,9 +25,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.model.api.QuickConnectResult
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#606): a Quick Connect that fails for a reason other than the connection showed the
@@ -42,12 +42,12 @@ class LoginQuickConnectErrorTest {
     private val failures = mutableMapOf<String, Exception>()
     private var approved = false
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher(scheduler))
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

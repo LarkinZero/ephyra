@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class IndexedItemsPagingSourceTest {
     private class Request(val start: Int, val limit: Int, val includeTotal: Boolean)

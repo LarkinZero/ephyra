@@ -25,9 +25,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /** CE (#505): the season page can tell a season without episodes from one that is still loading. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,12 +38,12 @@ class SeasonLoadingTest {
     private var episodesFail = false
     private var storedEpisodes = emptyList<Any>()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

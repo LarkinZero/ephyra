@@ -4,7 +4,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** CE (#281): the rules that say whether the server answers, and how sure that is. */
 class ServerReachabilityTrackerTest {

@@ -5,7 +5,7 @@ import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.models.UiText
 import java.util.UUID
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class HomeRowsOrderTest {
     private val suggestions = HomeItem.Suggestions(UUID.randomUUID(), emptyList())

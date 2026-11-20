@@ -16,7 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Mechanism-level proof for the crash documented in BUGREPORT_ANALYSIS.md.

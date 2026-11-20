@@ -6,7 +6,7 @@ import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import java.util.UUID
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #373: a season or show download queues only the episodes the server allows to be downloaded,

@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.ce.presentation.film
 import java.util.Locale
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** The language in the season page's audio chip (#415). */
 class AudioLanguageNameTest {

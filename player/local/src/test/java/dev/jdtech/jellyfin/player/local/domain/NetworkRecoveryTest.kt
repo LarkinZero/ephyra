@@ -6,7 +6,7 @@ import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery.OnError
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * #450: after the network came back, ExoPlayer stayed stopped until Play was pressed. The player

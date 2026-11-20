@@ -5,7 +5,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#363): a display that ignores orientation requests answers "Keep the player in landscape"

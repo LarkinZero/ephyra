@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.DeviceProfile
 import org.jellyfin.sdk.model.api.DirectPlayProfile
 import org.jellyfin.sdk.model.api.DlnaProfileType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Sanity checks for the JSON snapshot the diagnostic export produces. The Android-specific bits

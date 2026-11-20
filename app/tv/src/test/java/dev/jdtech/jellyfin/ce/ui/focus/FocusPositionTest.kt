@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.ce.ui.focus
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class FocusPositionTest {
     private val keys = listOf("a", "b", "c", "d")

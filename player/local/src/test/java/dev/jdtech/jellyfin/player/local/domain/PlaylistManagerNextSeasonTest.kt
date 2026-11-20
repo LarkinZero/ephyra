@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Unit tests for how [PlaylistManager] continues into the next season. */
 class PlaylistManagerNextSeasonTest {

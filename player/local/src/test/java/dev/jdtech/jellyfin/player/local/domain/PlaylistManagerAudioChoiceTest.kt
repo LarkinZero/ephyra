@@ -15,7 +15,7 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.MediaStreamType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#580): a transcode carries one audio track, so the user's track goes to the server with the

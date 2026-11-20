@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.player.cast
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for the URLs the receiver is given (#626). The receiver fetches whatever it gets from

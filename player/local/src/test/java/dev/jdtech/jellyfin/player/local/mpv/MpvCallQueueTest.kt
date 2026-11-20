@@ -7,8 +7,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.After
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
 
 /**
  * #460: libmpv calls on the main thread waited for mpv's core, and a core stuck on a wedged decoder
@@ -22,7 +22,7 @@ class MpvCallQueueTest {
     /** Lets a call stand in for a stuck mpv core until the test ends. */
     private val unstick = CountDownLatch(1)
 
-    @After
+    @AfterEach
     fun tearDown() {
         unstick.countDown()
         queue.close {}
