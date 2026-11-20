@@ -322,18 +322,25 @@ class ShowLoadingTest {
                 SharedPreferences::class.java.classLoader,
                 arrayOf(SharedPreferences::class.java),
             ) { _, method, args ->
-                when (method.name) {
-                    "getBoolean",
-                    "getString",
-                    "getInt",
-                    "getLong",
-                    "getFloat",
-                    "getStringSet" -> args!![1]
-                    else -> throw UnsupportedOperationException("SharedPreferences.${method.name}")
+                when {
+                    // CE (#718): the stored episode counts are the current server's.
+                    method.name == "getString" && args!![0] == "pref_current_server" -> "server"
+                    else -> defaultValue(method.name, args)
                 }
             } as SharedPreferences
         return AppPreferences(preferences)
     }
+
+    private fun defaultValue(name: String, args: Array<Any?>?): Any? =
+        when (name) {
+            "getBoolean",
+            "getString",
+            "getInt",
+            "getLong",
+            "getFloat",
+            "getStringSet" -> args!![1]
+            else -> throw UnsupportedOperationException("SharedPreferences.$name")
+        }
 
     private inline fun <reified T : Any> unused(): T =
         Proxy.newProxyInstance(T::class.java.classLoader, arrayOf(T::class.java)) { _, method, _ ->

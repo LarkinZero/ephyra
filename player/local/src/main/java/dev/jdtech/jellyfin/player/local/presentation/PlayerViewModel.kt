@@ -86,6 +86,7 @@ import dev.jdtech.jellyfin.player.local.domain.isNewEndOfItem
 import dev.jdtech.jellyfin.player.local.domain.matchSeriesTrack
 import dev.jdtech.jellyfin.player.local.domain.playbackStopReport
 import dev.jdtech.jellyfin.player.local.domain.playerTitle
+import dev.jdtech.jellyfin.player.local.domain.rebuildQueue
 import dev.jdtech.jellyfin.player.local.domain.resolveAutoPlayNext
 import dev.jdtech.jellyfin.player.local.domain.seriesTrackChoice
 import dev.jdtech.jellyfin.player.local.domain.toTrackPick
@@ -2375,7 +2376,8 @@ constructor(
                     // An episode's pick is saved for its series: once it is written, the other
                     // queued episodes are requested with it as well.
                     if (item.seriesId != null) trackPreferences?.second?.await()
-                    items.toList().map {
+                    // CE (#721): with the items the neighbour lookup adds meanwhile.
+                    rebuildQueue({ items }, playlistManager::forget) {
                         playlistManager.recreatePlayerItem(
                             it,
                             audioStreamIndex = track.index.takeIf { _ -> it.itemId == item.itemId },
@@ -2397,7 +2399,8 @@ constructor(
 
     /**
      * Swaps the whole queue for [rebuilt], the same items with new streams, keeping the item, the
-     * position and the pause state.
+     * position and the pause state. [rebuilt] comes from [rebuildQueue] with no suspension since,
+     * so it is in the order the player's current index counts (#721).
      */
     private fun reloadQueue(rebuilt: List<PlayerItem>) {
         val currentIndex = player.currentMediaItemIndex
@@ -2445,7 +2448,9 @@ constructor(
             val playingAudio = selectedAudioChoice()
             val rebuilt =
                 try {
-                    items.map {
+                    // CE (#721): with the items the neighbour lookup adds meanwhile. Walking
+                    // [items] itself threw when one came in, which rolled the switch back.
+                    rebuildQueue({ items }, playlistManager::forget) {
                         playlistManager.recreatePlayerItem(
                             it,
                             playingAudio.takeIf { _ -> it.itemId.toString() == playingId },

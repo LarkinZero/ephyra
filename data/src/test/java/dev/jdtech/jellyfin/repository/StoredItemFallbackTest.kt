@@ -118,10 +118,10 @@ class StoredItemFallbackTest {
             val id = args?.firstOrNull() as? UUID
             when (method.name) {
                 "observeHasSources" -> flowOf(true)
-                "getEpisodeOrNull" -> episode.takeIf { it.id == id }
-                "getMovieOrNull" -> movie.takeIf { it.id == id }
-                "getShowOrNull" -> show.takeIf { it.id == id }
-                "getSeasonOrNull" -> season.takeIf { it.id == id }
+                "getEpisodeOfServer" -> episode.takeIf { it.id == id }
+                "getMovieOfServer" -> movie.takeIf { it.id == id }
+                "getShowOfServer" -> show.takeIf { it.id == id }
+                "getSeasonOfServer" -> season.takeIf { it.id == id }
                 "getUserDataOrCreateNew" ->
                     FindroidUserDataDto(
                         userId = userId,
@@ -130,7 +130,8 @@ class StoredItemFallbackTest {
                         favorite = false,
                         playbackPositionTicks = 1_200_000_000L,
                     )
-                "getSourcesForItems" ->
+                "getSourcesForItems",
+                "getSourcesForItemsOfServer" ->
                     @Suppress("UNCHECKED_CAST")
                     (args!![0] as List<UUID>)
                         .filter { it == episodeId || it == movieId }
@@ -151,7 +152,9 @@ class StoredItemFallbackTest {
             context,
             api,
             database,
-            AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE)),
+            AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE)).apply {
+                setValue(currentServer, "server")
+            },
             DeviceProfileBuilder(context),
         )
     }

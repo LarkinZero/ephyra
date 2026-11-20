@@ -74,7 +74,9 @@ constructor(
     /** Runs [check] for every series that has a completed download. */
     suspend fun checkAll() {
         if (!isActive()) return
-        for (seriesId in database.getSeriesIdsWithCompletedDownloads()) {
+        // CE (#718): the current server's series; another server's downloads are not its to manage.
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return
+        for (seriesId in database.getSeriesIdsWithCompletedDownloads(serverId)) {
             check(seriesId, finishedRecently = false)
         }
     }
@@ -130,9 +132,13 @@ constructor(
             return
         }
 
+        // CE (#718): only this server's downloads count as downloaded here.
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return
         val sourcesByEpisode = episodes.associate { episode ->
             episode.id to
-                database.getSources(episode.id).filter { it.type == FindroidSourceType.LOCAL }
+                database.getSourcesOfServer(episode.id, serverId).filter {
+                    it.type == FindroidSourceType.LOCAL
+                }
         }
         val completed =
             sourcesByEpisode
