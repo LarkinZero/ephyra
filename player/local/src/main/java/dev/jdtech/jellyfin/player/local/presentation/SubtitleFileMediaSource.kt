@@ -30,8 +30,10 @@ import androidx.media3.exoplayer.upstream.Allocator
 import androidx.media3.exoplayer.upstream.Loader
 import androidx.media3.extractor.text.CueEncoder
 import androidx.media3.extractor.text.SubtitleParser
+import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InterruptedIOException
 import timber.log.Timber
 
 /**
@@ -125,10 +127,10 @@ class SubtitleFileMediaSource(
             } else {
                 null
             }
-        return SubtitleFileMediaPeriod(trackFormat, parse) {
+        return SubtitleFileMediaPeriod(trackFormat, parse) { canceled ->
             val dataSource = dataSourceFactory.createDataSource()
             transferListener?.let(dataSource::addTransferListener)
-            readSubtitleFile(dataSource, uri)
+            readSubtitleFile(dataSource, uri, canceled)
         }
     }
 
@@ -137,17 +139,35 @@ class SubtitleFileMediaSource(
     }
 }
 
-/** Reads the whole file at [uri] from [dataSource]. */
+/**
+ * Reads the whole file at [uri] from [dataSource], until [canceled]. A cancel while the request
+ * still waits for the server ends that wait too: media3's Loader interrupts the loading thread, and
+ * OkHttpDataSource cancels its call when interrupted.
+ */
 @OptIn(UnstableApi::class)
-internal fun readSubtitleFile(dataSource: DataSource, uri: Uri): ByteArray {
+internal fun readSubtitleFile(
+    dataSource: DataSource,
+    uri: Uri,
+    canceled: () -> Boolean = { false },
+): ByteArray {
     val stats = StatsDataSource(dataSource)
     try {
         stats.open(DataSpec(uri))
-        return DataSourceUtil.readToEnd(stats)
+        val out = ByteArrayOutputStream()
+        val buffer = ByteArray(READ_BUFFER_BYTES)
+        while (true) {
+            if (canceled()) throw InterruptedIOException("Subtitle file load canceled")
+            val read = stats.read(buffer, 0, buffer.size)
+            if (read == C.RESULT_END_OF_INPUT) break
+            out.write(buffer, 0, read)
+        }
+        return out.toByteArray()
     } finally {
         DataSourceUtil.closeQuietly(stats)
     }
 }
+
+private const val READ_BUFFER_BYTES = 16 * 1024
 
 /**
  * Parses [data] into samples of encoded cues, as media3's SubtitleExtractor does, in time order.
@@ -187,6 +207,10 @@ internal fun parseSubtitleFile(
  * says it never will (a 4xx, a file that does not parse). The track then has no cues; selecting it
  * again tries again. A failure never stops playback: the video does not depend on it.
  *
+ * Only the file's cues are kept, encoded, for as long as the period lives (media3's own route keeps
+ * them twice: in SubtitleExtractor for seeks and in the sample queue). The file's bytes are dropped
+ * once they are parsed. Releasing the period ends a load that still runs, see [readSubtitleFile].
+ *
  * Only the playback thread uses it, apart from [read] and [parse].
  */
 @OptIn(UnstableApi::class)
@@ -194,7 +218,8 @@ class SubtitleFileMediaPeriod(
     private val format: Format,
     private val parse: ((ByteArray) -> List<Sample>)?,
     private val loader: FileLoader = MediaLoader(),
-    private val read: () -> ByteArray,
+    /** Reads the file; the argument says when the load was canceled. */
+    private val read: (canceled: () -> Boolean) -> ByteArray,
 ) : MediaPeriod {
 
     /** One parsed cue change: [data] is the encoded cues, [endUs] may be [C.TIME_UNSET]. */
@@ -204,8 +229,15 @@ class SubtitleFileMediaPeriod(
     interface FileLoader {
         val isLoading: Boolean
 
-        /** Runs [load] off the calling thread and calls back on it. */
-        fun start(load: () -> List<Sample>, callback: (Result<List<Sample>>) -> Boolean)
+        /**
+         * Runs [load] off the calling thread, with whether it was canceled, and calls back on the
+         * calling thread with the result and, for an error, the number of errors so far. The
+         * callback returns whether to try again.
+         */
+        fun start(
+            load: (canceled: () -> Boolean) -> List<Sample>,
+            callback: (result: Result<List<Sample>>, errorCount: Int) -> Boolean,
+        )
 
         fun release()
     }
@@ -261,11 +293,12 @@ class SubtitleFileMediaPeriod(
         val parse = parse ?: return
         if (released || samples != null || failed || loader.isLoading) return
         Timber.d("Subtitle file loading (${format.label ?: format.language})")
-        loader.start(load = { parse(read()) }, callback = ::onLoadResult)
+        // The bytes go out of scope once parsed; only the samples are kept.
+        loader.start(load = { canceled -> parse(read(canceled)) }, callback = ::onLoadResult)
     }
 
-    /** Returns whether to try again. */
-    private fun onLoadResult(result: Result<List<Sample>>): Boolean {
+    /** Returns whether to try again; when not, a failed load leaves the track without cues. */
+    private fun onLoadResult(result: Result<List<Sample>>, errorCount: Int): Boolean {
         if (released) return false
         result.onSuccess {
             Timber.d("Subtitle file loaded (${format.label ?: format.language}): ${it.size} cues")
@@ -274,7 +307,7 @@ class SubtitleFileMediaPeriod(
         }
         val error = result.exceptionOrNull()
         Timber.w(error, "Subtitle file did not load (${format.label ?: format.language})")
-        if (error is IOException && isRetriable(error)) return true
+        if (error is IOException && isRetriable(error) && errorCount < MAX_ERRORS) return true
         failed = true
         return false
     }
@@ -371,22 +404,29 @@ class SubtitleFileMediaPeriod(
     /** Runs the load on a media3 [Loader] thread, trying again with media3's default delay. */
     private class MediaLoader : FileLoader, Loader.Callback<MediaLoader.Load> {
         private val loader = Loader("SubtitleFile")
-        private var callback: ((Result<List<Sample>>) -> Boolean)? = null
+        private var callback: ((Result<List<Sample>>, Int) -> Boolean)? = null
 
-        class Load(private val load: () -> List<Sample>) : Loader.Loadable {
+        class Load(private val load: (canceled: () -> Boolean) -> List<Sample>) : Loader.Loadable {
             @Volatile var result: List<Sample>? = null
+            @Volatile private var canceled = false
 
-            override fun cancelLoad() = Unit
+            /** Ends a read that runs; Loader interrupts one that waits for the server. */
+            override fun cancelLoad() {
+                canceled = true
+            }
 
             override fun load() {
-                result = load.invoke()
+                result = load.invoke { canceled }
             }
         }
 
         override val isLoading: Boolean
             get() = loader.isLoading
 
-        override fun start(load: () -> List<Sample>, callback: (Result<List<Sample>>) -> Boolean) {
+        override fun start(
+            load: (canceled: () -> Boolean) -> List<Sample>,
+            callback: (result: Result<List<Sample>>, errorCount: Int) -> Boolean,
+        ) {
             this.callback = callback
             loader.startLoading(Load(load), this, /* defaultMinRetryCount= */ 0)
         }
@@ -396,7 +436,7 @@ class SubtitleFileMediaPeriod(
             elapsedRealtimeMs: Long,
             loadDurationMs: Long,
         ) {
-            callback?.invoke(Result.success(loadable.result.orEmpty()))
+            callback?.invoke(Result.success(loadable.result.orEmpty()), 0)
         }
 
         override fun onLoadCanceled(
@@ -404,7 +444,9 @@ class SubtitleFileMediaPeriod(
             elapsedRealtimeMs: Long,
             loadDurationMs: Long,
             released: Boolean,
-        ) = Unit
+        ) {
+            Timber.d("Subtitle file load canceled after $loadDurationMs ms")
+        }
 
         override fun onLoadError(
             loadable: Load,
@@ -413,7 +455,7 @@ class SubtitleFileMediaPeriod(
             error: IOException,
             errorCount: Int,
         ): Loader.LoadErrorAction {
-            val retry = callback?.invoke(Result.failure(error)) == true && errorCount < MAX_ERRORS
+            val retry = callback?.invoke(Result.failure(error), errorCount) == true
             return if (retry) Loader.RETRY else Loader.DONT_RETRY
         }
 
@@ -434,7 +476,9 @@ class SubtitleFileMediaPeriod(
         fun isRetriable(error: IOException): Boolean =
             when (error) {
                 is ParserException,
-                is FileNotFoundException -> false
+                is FileNotFoundException,
+                // A bug in the load or the parser, which a retry repeats.
+                is Loader.UnexpectedLoaderException -> false
                 is HttpDataSource.InvalidResponseCodeException -> error.responseCode !in 400..499
                 else -> true
             }

@@ -1,9 +1,13 @@
 package dev.jdtech.jellyfin.player.local.presentation
 
+import android.net.Uri
+import android.os.Looper
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.ParserException
+import androidx.media3.common.text.Cue
+import androidx.media3.datasource.ByteArrayDataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.decoder.DecoderInputBuffer
@@ -15,16 +19,25 @@ import androidx.media3.exoplayer.source.SampleStream
 import androidx.media3.exoplayer.source.SequenceableLoader
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection
 import androidx.media3.exoplayer.trackselection.FixedTrackSelection
+import androidx.media3.extractor.text.CueDecoder
+import androidx.media3.extractor.text.CueEncoder
 import androidx.media3.extractor.text.DefaultSubtitleParserFactory
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
+import java.time.Duration
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
@@ -43,34 +56,40 @@ class SubtitleFileMediaPeriodTest {
             .setLanguage("en")
             .build()
 
-    /** Cues every 5 s, each 4 s long, as on the test server's Big Subs Movie. */
+    /** "Line 1" to "Line 6", every 5 s, each 4 s long, as on the test server's Big Subs Movie. */
     private val cues =
         (0 until 6).map {
             SubtitleFileMediaPeriod.Sample(
                 timeUs = it * 5_000_000L,
                 endUs = it * 5_000_000L + 4_000_000L,
-                data = byteArrayOf(it.toByte()),
+                data =
+                    CueEncoder()
+                        .encode(listOf(Cue.Builder().setText("Line ${it + 1}").build()), 4_000_000L),
             )
         }
 
     /** A load that ends when the test says so, as a server still extracting. */
     private class HeldLoader : SubtitleFileMediaPeriod.FileLoader {
         var starts = 0
-        private var callback: ((Result<List<SubtitleFileMediaPeriod.Sample>>) -> Boolean)? = null
+        private var errors = 0
+        private var callback: ((Result<List<SubtitleFileMediaPeriod.Sample>>, Int) -> Boolean)? =
+            null
         override var isLoading = false
 
         override fun start(
-            load: () -> List<SubtitleFileMediaPeriod.Sample>,
-            callback: (Result<List<SubtitleFileMediaPeriod.Sample>>) -> Boolean,
+            load: (canceled: () -> Boolean) -> List<SubtitleFileMediaPeriod.Sample>,
+            callback: (Result<List<SubtitleFileMediaPeriod.Sample>>, Int) -> Boolean,
         ) {
             starts++
+            errors = 0
             isLoading = true
             this.callback = callback
         }
 
         /** Ends the load with [result]; returns whether the period asked to try again. */
         fun finish(result: Result<List<SubtitleFileMediaPeriod.Sample>>): Boolean {
-            val retry = callback!!.invoke(result)
+            if (result.isFailure) errors++
+            val retry = callback!!.invoke(result, errors)
             isLoading = retry
             return retry
         }
@@ -105,6 +124,13 @@ class SubtitleFileMediaPeriodTest {
     private fun SampleStream.read(): Pair<Int, DecoderInputBuffer> {
         val buffer = DecoderInputBuffer(DecoderInputBuffer.BUFFER_REPLACEMENT_MODE_NORMAL)
         return readData(FormatHolder(), buffer, 0) to buffer
+    }
+
+    /** The text of the cues in a sample the stream handed out, as the renderer decodes it. */
+    private fun DecoderInputBuffer.text(): String {
+        val data = data!!.duplicate().apply { flip() }
+        val bytes = ByteArray(data.remaining()).also(data::get)
+        return CueDecoder().decode(timeUs, bytes, 0, bytes.size).cues.joinToString { "${it.text}" }
     }
 
     /** Reads the format, which the renderer takes first, and returns the stream. */
@@ -176,6 +202,7 @@ class SubtitleFileMediaPeriodTest {
 
         assertEquals(C.RESULT_BUFFER_READ, result, "the cues are there")
         assertEquals(10_000_000L, buffer.timeUs, "the cue showing at 12 s comes first")
+        assertEquals("Line 3", buffer.text(), "with its text")
     }
 
     @Test
@@ -186,7 +213,7 @@ class SubtitleFileMediaPeriodTest {
         period.seekToUs(21_000_000L)
         loader.finish(Result.success(cues))
 
-        assertEquals(20_000_000L, stream.read().second.timeUs, "the cue showing at 21 s")
+        assertEquals("Line 5", stream.read().second.text(), "the cue showing at 21 s")
     }
 
     @Test
@@ -198,7 +225,7 @@ class SubtitleFileMediaPeriodTest {
 
         period.seekToUs(6_000_000L)
 
-        assertEquals(5_000_000L, stream.read().second.timeUs, "the cue showing at 6 s")
+        assertEquals("Line 2", stream.read().second.text(), "the cue showing at 6 s")
     }
 
     @Test
@@ -215,13 +242,17 @@ class SubtitleFileMediaPeriodTest {
     }
 
     @Test
-    fun `a read that times out is tried again`() {
+    fun `a read that times out is tried again, up to the limit, then the track has no cues`() {
         val period = period()
-        period.select()
+        val stream = period.select().afterFormat()
 
-        val retry = loader.finish(Result.failure(SocketTimeoutException("timeout")))
+        val retries =
+            (1..SubtitleFileMediaPeriod.MAX_ERRORS).map {
+                loader.finish(Result.failure(SocketTimeoutException("timeout")))
+            }
 
-        assertTrue(retry, "the server may still be extracting")
+        assertEquals(SubtitleFileMediaPeriod.MAX_ERRORS - 1, retries.count { it }, "retries")
+        assertTrue(stream.read().second.isEndOfStream, "no longer pending: the track ends")
     }
 
     @Test
@@ -261,6 +292,92 @@ class SubtitleFileMediaPeriodTest {
         )
     }
 
+    /** Lets media3's Loader run: its thread loads, the main looper gets its callbacks. */
+    private fun runLoaderUntil(what: String, done: () -> Boolean) {
+        repeat(1_000) {
+            if (done()) return
+            Thread.sleep(5)
+            // Also runs the retry delays, which are main looper messages.
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(1))
+        }
+        fail("timed out waiting for: $what")
+    }
+
+    @Test
+    fun `the real loader starts a new load after a timeout and delivers the cues`() {
+        val reads = AtomicInteger()
+        val period =
+            SubtitleFileMediaPeriod(format, parse = { cues }) {
+                    if (reads.incrementAndGet() <= 2) throw SocketTimeoutException("timeout")
+                    ByteArray(0)
+                }
+                .also { it.prepare(NoCallback, 0L) }
+        val stream = period.select(positionUs = 12_000_000L).afterFormat()
+
+        runLoaderUntil("the cues") { stream.read().first == C.RESULT_BUFFER_READ }
+
+        assertEquals(3, reads.get(), "two reads timed out, the third one got the file")
+        period.seekToUs(12_000_000L)
+        assertEquals("Line 3", stream.read().second.text(), "the cue that is due")
+        period.release()
+    }
+
+    @Test
+    fun `the real loader gives up after the limit, and the track ends without cues`() {
+        val reads = AtomicInteger()
+        val period =
+            SubtitleFileMediaPeriod(format, parse = { cues }) {
+                    reads.incrementAndGet()
+                    throw SocketTimeoutException("timeout")
+                }
+                .also { it.prepare(NoCallback, 0L) }
+        val stream = period.select().afterFormat()
+
+        runLoaderUntil("the end of the track") { stream.read().second.isEndOfStream }
+
+        assertEquals(SubtitleFileMediaPeriod.MAX_ERRORS, reads.get(), "every try was made")
+        assertFalse(period.isLoading, "and nothing loads any more")
+        period.release()
+    }
+
+    @Test
+    fun `releasing the period ends a load that waits for the server`() {
+        val started = CountDownLatch(1)
+        val ended = CountDownLatch(1)
+        val period =
+            SubtitleFileMediaPeriod(format, parse = { cues }) { canceled ->
+                    started.countDown()
+                    try {
+                        // As a request the server holds while it extracts.
+                        while (!canceled()) Thread.sleep(10)
+                        throw IOException("canceled")
+                    } finally {
+                        ended.countDown()
+                    }
+                }
+                .also { it.prepare(NoCallback, 0L) }
+        period.select()
+        assertTrue(started.await(5, TimeUnit.SECONDS), "the load started")
+
+        period.release()
+
+        assertTrue(ended.await(5, TimeUnit.SECONDS), "the load ended with the period")
+    }
+
+    @Test
+    fun `a read gets the whole file, and stops when the load is canceled`() {
+        val file = ByteArray(100_000) { it.toByte() }
+        val uri = Uri.parse("http://server/Stream.srt")
+
+        val read = readSubtitleFile(ByteArrayDataSource(file), uri) { false }
+        val error =
+            runCatching { readSubtitleFile(ByteArrayDataSource(file), uri) { true } }
+                .exceptionOrNull()
+
+        assertTrue(read.contentEquals(file), "the whole file")
+        assertTrue(error is InterruptedIOException, "canceled, not read to the end")
+    }
+
     @Test
     fun `the first cue for a position includes a long one that still shows`() {
         val samples =
@@ -276,7 +393,7 @@ class SubtitleFileMediaPeriodTest {
     }
 
     @Test
-    fun `a file is parsed into its cues in time order`() {
+    fun `a file is parsed into its cues in time order, with their text`() {
         val srt =
             "1\n00:00:05,000 --> 00:00:09,000\nLine 2\n\n2\n00:00:00,000 --> 00:00:04,000\nLine 1\n"
         val parser =
@@ -287,6 +404,12 @@ class SubtitleFileMediaPeriodTest {
 
         assertEquals(listOf(0L, 5_000_000L), samples.map { it.timeUs }, "both cues, in order")
         assertEquals(4_000_000L, samples[0].endUs, "with their end")
+        val texts = samples.map { sample ->
+            CueDecoder().decode(sample.timeUs, sample.data, 0, sample.data.size).cues.joinToString {
+                "${it.text}"
+            }
+        }
+        assertEquals(listOf("Line 1", "Line 2"), texts, "and their text")
     }
 
     private class FakeLoader(private val positionUs: Long) : SequenceableLoader {
