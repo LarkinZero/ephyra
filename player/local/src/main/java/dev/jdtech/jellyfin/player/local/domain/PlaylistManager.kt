@@ -259,16 +259,22 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         }
     }
 
-    suspend fun getPreviousPlayerItem(): PlayerItem? {
+    /**
+     * The item before [itemId] in the queue, the current item by default, or `null` when it has
+     * none or the player already has it. CE (#657): the caller names the item, as the current one
+     * can change while this is fetched.
+     */
+    suspend fun getPreviousPlayerItem(itemId: UUID? = null): PlayerItem? {
         Timber.d("Retrieving previous player item")
 
         loadQueue()
-        val itemIndex = currentItemIndex - 1
+        val index = queueIndex(itemId)
+        val itemIndex = index - 1
         val playerItem =
             when (startItem) {
                 is FindroidMovie -> null
                 is FindroidEpisode -> {
-                    if (currentItemIndex == 0) {
+                    if (index <= 0) {
                         null
                     } else {
                         val item = items[itemIndex]
@@ -294,20 +300,22 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         return playerItem
     }
 
-    suspend fun getNextPlayerItem(): PlayerItem? {
+    /** The item after [itemId], as [getPreviousPlayerItem] is the item before it. */
+    suspend fun getNextPlayerItem(itemId: UUID? = null): PlayerItem? {
         Timber.d("Retrieving next player item")
 
         loadQueue()
-        val itemIndex = currentItemIndex + 1
+        val index = queueIndex(itemId)
+        val itemIndex = index + 1
         val playerItem =
             when (startItem) {
                 is FindroidMovie -> null
                 is FindroidEpisode -> {
-                    if (currentItemIndex == items.lastIndex && !shuffled) {
+                    if (index >= 0 && index == items.lastIndex && !shuffled) {
                         appendNextSeason()
                     }
 
-                    if (currentItemIndex == items.lastIndex) {
+                    if (index < 0 || index == items.lastIndex) {
                         null
                     } else {
                         val item = items[itemIndex]
@@ -370,6 +378,18 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         } catch (e: Exception) {
             Timber.e("Failed to retrieve next season: $e")
         }
+    }
+
+    /** The index of [itemId] in the queue, or of the current item; -1 when it is not queued. */
+    private fun queueIndex(itemId: UUID?): Int =
+        if (itemId == null) currentItemIndex else items.indexOfFirst { it.id == itemId }
+
+    /**
+     * CE (#657): [itemId] was fetched as a neighbour but did not go into the player (the item it
+     * was fetched for had left the playlist), so the next lookup fetches it again.
+     */
+    fun forget(itemId: UUID) {
+        playerItems.removeAll { it.itemId == itemId }
     }
 
     fun setCurrentMediaItemIndex(itemId: UUID) {
