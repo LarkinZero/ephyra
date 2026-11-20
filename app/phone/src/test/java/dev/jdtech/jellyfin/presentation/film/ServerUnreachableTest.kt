@@ -36,9 +36,9 @@ import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ServerStatusUi
 import dev.jdtech.jellyfin.setup.R as SetupR
 import java.net.ConnectException
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -196,7 +196,7 @@ class ServerUnreachableTest {
         val bannerBottom =
             rule.onNodeWithText(string(CoreR.string.title_download)).getBoundsInRoot().bottom
         val rowTop = rule.onNodeWithText("Continue watching").getBoundsInRoot().top
-        assertTrue("rows at $rowTop, banner ends at $bannerBottom", rowTop > bannerBottom)
+        assertTrue(rowTop > bannerBottom, message = "rows at $rowTop, banner ends at $bannerBottom")
     }
 
     @Test

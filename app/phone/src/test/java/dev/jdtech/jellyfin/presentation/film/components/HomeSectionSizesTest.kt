@@ -21,8 +21,8 @@ import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,9 +85,9 @@ class HomeSectionSizesTest {
         rule.mainClock.autoAdvance = true
         rule.waitForIdle()
 
-        assertTrue("$halfway should be past $start", halfway > start)
-        assertTrue("$halfway should be short of $second", halfway < second)
-        assertEquals(second, leftOf("Movie A"), 1f)
+        assertTrue(halfway > start, message = "$halfway should be past $start")
+        assertTrue(halfway < second, message = "$halfway should be short of $second")
+        assertEquals(second, leftOf("Movie A"), absoluteTolerance = 1f)
         rule.onNodeWithText("Movie C").assertLeftPositionInRootIsEqualTo(24.dp)
     }
 

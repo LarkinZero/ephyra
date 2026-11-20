@@ -26,7 +26,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.requestFocus
 import androidx.core.content.getSystemService
 import dev.jdtech.jellyfin.utils.copyOnLongClick
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
