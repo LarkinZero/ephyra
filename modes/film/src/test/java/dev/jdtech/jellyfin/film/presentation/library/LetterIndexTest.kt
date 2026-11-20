@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.film.presentation.library
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class LetterIndexTest {
     /**

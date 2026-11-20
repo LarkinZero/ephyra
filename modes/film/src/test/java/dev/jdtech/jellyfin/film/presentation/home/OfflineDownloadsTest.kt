@@ -5,7 +5,7 @@ import java.lang.reflect.Proxy
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Offline Home says nothing is downloaded only when the server has no downloaded item. */
 class OfflineDownloadsTest {

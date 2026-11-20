@@ -23,9 +23,9 @@ import kotlinx.coroutines.withTimeout
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.CollectionType
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /** One Home row or library failing must leave the rest of [HomeViewModel] on screen. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -45,13 +45,13 @@ class HomeViewModelPartialFailureTest {
         )
     }
 
-    @Before
+    @BeforeEach
     fun setUp() {
         // viewModelScope is built with Dispatchers.Main.immediate; provide one.
         Dispatchers.setMain(StandardTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

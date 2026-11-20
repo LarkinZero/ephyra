@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.film.presentation.season
 
 import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.ItemFields
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Regression test for the missing season-level download button.
