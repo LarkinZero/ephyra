@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.player.cast
 
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 
 /**
