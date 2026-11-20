@@ -50,8 +50,8 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -134,7 +134,7 @@ class DetailOverviewTest {
 
     private fun assertOnScreen(text: String) {
         val bounds = rule.onNodeWithText(text).getUnclippedBoundsInRoot()
-        assertTrue("$text is above the screen: $bounds", bounds.top >= 0.dp)
+        assertTrue(bounds.top >= 0.dp, message = "$text is above the screen: $bounds")
     }
 
     /** Focus is on one of the cast cards. */
@@ -209,7 +209,7 @@ class DetailOverviewTest {
         press(Key.DirectionUp)
         rule.onNode(overview).assertIsFocused()
         val focused = ringPixelsAroundOverview(primary)
-        assertTrue("$focused ring pixels around the focused overview", focused > 100)
+        assertTrue(focused > 100, message = "$focused ring pixels around the focused overview")
 
         press(Key.DirectionCenter)
         rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertIsFocused()

@@ -4,8 +4,8 @@ import android.app.Application
 import android.net.Uri
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.models.FindroidImages
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

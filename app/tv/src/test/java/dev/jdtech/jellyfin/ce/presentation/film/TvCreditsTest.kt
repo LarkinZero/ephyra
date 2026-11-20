@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.width
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +57,7 @@ class TvCreditsTest {
         val label = rule.onNodeWithText("Studios").assertIsDisplayed()
         // One line, as wide as the text needs: not squeezed to a few letters per line.
         val bounds = studios.getBoundsInRoot()
-        assertTrue("studios is ${bounds.width} wide", bounds.width > 100.dp)
+        assertTrue(bounds.width > 100.dp, message = "studios is ${bounds.width} wide")
         assertTrue(bounds.right <= 864.dp)
         assertTrue(bounds.height < label.getBoundsInRoot().height * 1.5f)
         rule.onNodeWithText(longWriters).assertIsDisplayed()

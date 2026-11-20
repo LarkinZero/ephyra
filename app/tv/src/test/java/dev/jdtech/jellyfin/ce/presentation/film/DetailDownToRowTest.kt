@@ -29,7 +29,7 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,7 +113,7 @@ class DetailDownToRowTest {
 
     private fun assertOnScreen(text: String) {
         val bounds = rule.onNodeWithText(text).getUnclippedBoundsInRoot()
-        assertTrue("$text is above the screen: $bounds", bounds.top >= 0.dp)
+        assertTrue(bounds.top >= 0.dp, message = "$text is above the screen: $bounds")
     }
 
     @Test
