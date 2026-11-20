@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player
 
 import android.app.Application
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

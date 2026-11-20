@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.api
 
 import android.app.Application
 import android.provider.Settings
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

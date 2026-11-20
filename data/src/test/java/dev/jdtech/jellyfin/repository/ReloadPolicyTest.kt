@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.repository
 
 import java.util.UUID
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class ReloadPolicyTest {

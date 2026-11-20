@@ -1,12 +1,12 @@
 package dev.jdtech.jellyfin.player
 
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.DeviceProfile
 import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.ProfileConditionValue
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -55,10 +55,10 @@ class DeviceProfileBuilderTest {
 
         for (codec in listOf("hevc", "av1")) {
             val rangeTypes = rangeTypes(profile, codec)
-            assertTrue("$codec must allow HDR10", "HDR10" in rangeTypes)
+            assertTrue("HDR10" in rangeTypes, message = "$codec must allow HDR10")
             assertFalse(
-                "DV ranges leaked into $codec direct play: $rangeTypes",
                 rangeTypes.any { it.startsWith("DOVI") },
+                message = "DV ranges leaked into $codec direct play: $rangeTypes",
             )
             assertEquals(emptyList<Any>(), dolbyVisionLimits(profile, codec))
         }
@@ -78,13 +78,13 @@ class DeviceProfileBuilderTest {
                 DeviceProfileBuilder.buildDeviceProfile(probedWithDolbyVision(dvProfile to uhd60))
 
             assertEquals(
-                "hevc range types for DV profile $dvProfile",
                 expected,
                 rangeTypes(profile, "hevc").filter { it.startsWith("DOVI") },
+                message = "hevc range types for DV profile $dvProfile",
             )
             assertFalse(
-                "an HEVC DV decoder says nothing about AV1",
                 rangeTypes(profile, "av1").any { it.startsWith("DOVI") },
+                message = "an HEVC DV decoder says nothing about AV1",
             )
         }
     }
@@ -159,7 +159,7 @@ class DeviceProfileBuilderTest {
                     limit.conditions.associate { it.property to it.value }
             }
 
-        assertEquals(
+        assertEquals<Map<*, *>>(
             mapOf(
                 "DOVI" to
                     mapOf(
@@ -200,10 +200,10 @@ class DeviceProfileBuilderTest {
 
         val rangeCondition = hevcRangeCondition(probed)
 
-        assertTrue("hevc must carry a VIDEO_RANGE_TYPE condition", rangeCondition != null)
+        assertTrue(rangeCondition != null, message = "hevc must carry a VIDEO_RANGE_TYPE condition")
         val value = rangeCondition!!.value.orEmpty()
         // Dolby Vision must never be advertised as direct-playable.
-        assertFalse("DV ranges leaked into direct play: $value", value.contains("DOVI"))
+        assertFalse(value.contains("DOVI"), message = "DV ranges leaked into direct play: $value")
         // Regular HDR/SDR ranges stay direct-playable so they are not needlessly transcoded.
         assertTrue(value.contains("HDR10"))
         assertTrue(value.contains("SDR"))
@@ -218,8 +218,8 @@ class DeviceProfileBuilderTest {
             )
 
         assertTrue(
-            "DV must be excluded even with no enumerable hevc profiles",
             hevcRangeCondition(probed) != null,
+            message = "DV must be excluded even with no enumerable hevc profiles",
         )
     }
 
@@ -252,14 +252,14 @@ class DeviceProfileBuilderTest {
         val profile = DeviceProfileBuilder.buildDeviceProfile(probed)
 
         assertTrue(
-            "hevc should be a direct-play video codec",
             profile.directPlayProfiles.any { it.videoCodec?.contains("hevc") == true },
+            message = "hevc should be a direct-play video codec",
         )
         assertTrue(
-            "an h264 HLS transcoding profile is required for the DV fallback",
             profile.transcodingProfiles.any {
                 it.videoCodec?.startsWith("h264") == true && it.protocol == MediaStreamProtocol.HLS
             },
+            message = "an h264 HLS transcoding profile is required for the DV fallback",
         )
     }
 
@@ -284,7 +284,10 @@ class DeviceProfileBuilderTest {
                     .audioCodec
                     .orEmpty()
                     .split(",")
-            assertTrue("eac3 missing from $container: $audioCodecs", "eac3" in audioCodecs)
+            assertTrue(
+                "eac3" in audioCodecs,
+                message = "eac3 missing from $container: $audioCodecs",
+            )
         }
     }
 
@@ -327,8 +330,8 @@ class DeviceProfileBuilderTest {
         val rangeTypes = rangeTypes(profile, "hevc", container = "ts")
         assertTrue("HDR10" in rangeTypes && "SDR" in rangeTypes)
         assertFalse(
-            "DV ranges leaked into the HLS copy: $rangeTypes",
             rangeTypes.any { it.startsWith("DOVI") },
+            message = "DV ranges leaked into the HLS copy: $rangeTypes",
         )
         val videoProfiles =
             profile.codecProfiles
@@ -350,8 +353,8 @@ class DeviceProfileBuilderTest {
         val profile = DeviceProfileBuilder.buildDeviceProfile(probed)
 
         assertFalse(
-            "hevc must not be direct-play when the device cannot decode it",
             profile.directPlayProfiles.any { it.videoCodec?.contains("hevc") == true },
+            message = "hevc must not be direct-play when the device cannot decode it",
         )
         assertTrue(profile.codecProfiles.none { it.codec == "hevc" })
     }
@@ -372,22 +375,22 @@ class DeviceProfileBuilderTest {
         // the burn-in fallback when the server can't embed or sidecar.
         for (format in listOf("pgssub", "dvdsub", "dvbsub")) {
             assertTrue(
-                "$format must be deliverable embedded",
                 subtitleProfiles.any {
                     it.format == format && it.method == SubtitleDeliveryMethod.EMBED
                 },
+                message = "$format must be deliverable embedded",
             )
             assertTrue(
-                "$format must be deliverable as external sidecar",
                 subtitleProfiles.any {
                     it.format == format && it.method == SubtitleDeliveryMethod.EXTERNAL
                 },
+                message = "$format must be deliverable as external sidecar",
             )
             assertTrue(
-                "$format must have a burn-in (Encode) fallback",
                 subtitleProfiles.any {
                     it.format == format && it.method == SubtitleDeliveryMethod.ENCODE
                 },
+                message = "$format must have a burn-in (Encode) fallback",
             )
         }
     }
@@ -449,10 +452,10 @@ class DeviceProfileBuilderTest {
         assertTrue(profile.subtitleProfiles.none { it.method == SubtitleDeliveryMethod.ENCODE })
         for (format in listOf("srt", "ass", "pgssub", "dvdsub", "dvbsub")) {
             assertTrue(
-                "$format must be delivered as a file",
                 profile.subtitleProfiles.any {
                     it.format == format && it.method == SubtitleDeliveryMethod.EXTERNAL
                 },
+                message = "$format must be delivered as a file",
             )
         }
     }
@@ -462,8 +465,8 @@ class DeviceProfileBuilderTest {
         val profile = DeviceProfileBuilder.buildDirectPlayProfile()
 
         assertTrue(
-            "mpv profile must direct-play any container",
             profile.directPlayProfiles.all { it.container == "" },
+            message = "mpv profile must direct-play any container",
         )
         assertEquals(emptyList<Any>(), profile.transcodingProfiles)
         assertEquals(emptyList<Any>(), profile.codecProfiles)
@@ -483,7 +486,7 @@ class DeviceProfileBuilderTest {
                 .filter { it.codec == "hevc" }
                 .flatMap { it.conditions }
                 .firstOrNull { it.property == ProfileConditionValue.VIDEO_RANGE_TYPE }
-        assertTrue("DV must be excluded from direct play", rangeCondition != null)
+        assertTrue(rangeCondition != null, message = "DV must be excluded from direct play")
         assertFalse(rangeCondition!!.value.orEmpty().contains("DOVI"))
 
         // The transcode must be a single progressive HTTP stream — DownloadManager
