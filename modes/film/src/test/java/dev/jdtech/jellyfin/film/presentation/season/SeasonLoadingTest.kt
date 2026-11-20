@@ -11,6 +11,10 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -21,10 +25,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -68,8 +68,11 @@ class SeasonLoadingTest {
 
         // Every state before the last one, the season shown early included, is still loading.
         val loading = seen.drop(1).dropLast(1)
-        assertTrue("no state while loading: $seen", loading.isNotEmpty())
-        assertTrue("not loading before the episodes came: $seen", loading.all { it.isLoading })
+        assertTrue(loading.isNotEmpty(), message = "no state while loading: $seen")
+        assertTrue(
+            loading.all { it.isLoading },
+            message = "not loading before the episodes came: $seen",
+        )
         assertFalse(seen.last().isLoading)
     }
 

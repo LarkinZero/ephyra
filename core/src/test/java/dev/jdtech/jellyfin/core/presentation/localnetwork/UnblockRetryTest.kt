@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.core.presentation.localnetwork
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /**

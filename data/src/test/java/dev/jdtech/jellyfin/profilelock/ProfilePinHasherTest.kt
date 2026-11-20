@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.profilelock
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class ProfilePinHasherTest {

@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin.film.presentation.downloads
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadProgress
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /** #546: the Downloads header counts failed downloads apart from the ones still on their way. */

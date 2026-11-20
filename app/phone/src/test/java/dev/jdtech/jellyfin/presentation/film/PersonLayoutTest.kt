@@ -13,7 +13,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyPersonDetail
 import dev.jdtech.jellyfin.film.presentation.person.PersonState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,7 +43,7 @@ class PersonLayoutTest {
 
         // The name is at the top of the row, level with the photo.
         assertBelowTopBar()
-        assertTrue("biography ${biography().width} wide", biography().width <= 720.dp)
+        assertTrue(biography().width <= 720.dp, message = "biography ${biography().width} wide")
     }
 
     @Test
@@ -60,13 +60,16 @@ class PersonLayoutTest {
         show()
 
         // The centred 320 dp photo sits between the buttons and the name, as before.
-        assertTrue("name at ${name().top}", name().top >= 320.dp)
+        assertTrue(name().top >= 320.dp, message = "name at ${name().top}")
     }
 
     private fun assertBelowTopBar() {
         val name = name()
         val back = back()
-        assertTrue("name at ${name.top}, buttons end at ${back.bottom}", name.top >= back.bottom)
+        assertTrue(
+            name.top >= back.bottom,
+            message = "name at ${name.top}, buttons end at ${back.bottom}",
+        )
     }
 
     private fun name(): DpRect = rule.onNodeWithText(person.name).getUnclippedBoundsInRoot()

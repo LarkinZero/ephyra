@@ -1,13 +1,13 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** CE (#672): the thumb's position, its target and how often a drag jumps. */
@@ -45,7 +45,7 @@ class LetterFastScrollerTest {
         assertEquals(590, timed.last().second)
         assertEquals(0, timed.first().second)
         // 60 events over ~1 s: about ten jumps, never two within the interval.
-        assertTrue("jumps: ${timed.size}", timed.size in 9..12)
+        assertTrue(timed.size in 9..12, message = "jumps: ${timed.size}")
         timed.zipWithNext().forEach { (a, b) -> assertTrue(b.first - a.first >= JUMP_INTERVAL_MS) }
     }
 

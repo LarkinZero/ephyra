@@ -4,9 +4,9 @@ import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import java.util.Locale
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.MediaStreamType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 /** #510: the media info sheet's content, from the source the page already has. */

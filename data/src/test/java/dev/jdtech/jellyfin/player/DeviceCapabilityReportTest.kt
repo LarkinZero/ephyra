@@ -1,14 +1,14 @@
 package dev.jdtech.jellyfin.player
 
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.DeviceProfile
 import org.jellyfin.sdk.model.api.DirectPlayProfile
 import org.jellyfin.sdk.model.api.DlnaProfileType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -123,14 +123,17 @@ class DeviceCapabilityReportTest {
 
         val json = DeviceCapabilityReportBuilder.toJson(withId)
 
-        assertTrue("UUID hex must appear in the JSON output", json.contains(deviceId.toString()))
+        assertTrue(
+            json.contains(deviceId.toString()),
+            message = "UUID hex must appear in the JSON output",
+        )
     }
 
     @Test
     fun `json output is pretty-printed and exposes the top-level fields a bug report needs`() {
         val json = DeviceCapabilityReportBuilder.toJson(sampleReport())
 
-        assertTrue("must be pretty-printed (contains newlines)", json.contains("\n"))
+        assertTrue(json.contains("\n"), message = "must be pretty-printed (contains newlines)")
         // The fields the issue calls out by name must be present so users can grep
         // a pasted report quickly.
         listOf(
@@ -150,7 +153,7 @@ class DeviceCapabilityReportTest {
                 "directPlayDolbyVision",
             )
             .forEach { field ->
-                assertTrue("expected JSON to contain $field", json.contains("\"$field\""))
+                assertTrue(json.contains("\"$field\""), message = "expected JSON to contain $field")
             }
     }
 
@@ -215,8 +218,8 @@ class DeviceCapabilityReportTest {
         assertEquals(listOf("aac", "ac3"), sorted.probedCodecs.audioCodecs)
         // And the JSON should put "Main" before "Main 10" textually.
         assertTrue(
-            "expected hevc profiles ordered Main, Main 10 in JSON",
             json.indexOf("\"Main\"") < json.indexOf("\"Main 10\""),
+            message = "expected hevc profiles ordered Main, Main 10 in JSON",
         )
     }
 }

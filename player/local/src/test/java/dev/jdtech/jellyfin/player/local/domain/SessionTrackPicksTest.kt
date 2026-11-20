@@ -3,8 +3,8 @@ package dev.jdtech.jellyfin.player.local.domain
 import androidx.media3.common.C
 import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import org.junit.Test
 
 /**

@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import dev.jdtech.jellyfin.models.FindroidMediaStream
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.MediaStreamType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**

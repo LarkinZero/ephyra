@@ -6,9 +6,9 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import dev.jdtech.jellyfin.models.FindroidSegmentDto
 import dev.jdtech.jellyfin.models.FindroidSegmentType
 import java.util.UUID
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

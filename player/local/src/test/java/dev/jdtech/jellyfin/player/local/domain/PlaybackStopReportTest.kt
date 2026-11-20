@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import androidx.media3.common.C
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 
 /** Unit tests for [playbackStopReport]: which stop an item that is left gets (#461). */

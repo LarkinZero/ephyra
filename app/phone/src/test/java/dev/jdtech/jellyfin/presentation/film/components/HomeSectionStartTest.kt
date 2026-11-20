@@ -23,9 +23,9 @@ import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -147,9 +147,9 @@ class HomeSectionStartTest {
         rule.waitForIdle()
 
         // Halfway through, the old first card is on its way to the second place, not there yet.
-        assertTrue("$halfway should be past $start", halfway > start)
-        assertTrue("$halfway should be short of $next", halfway < next)
-        assertEquals(next, leftOf("Movie A"), 1f)
+        assertTrue(halfway > start, message = "$halfway should be past $start")
+        assertTrue(halfway < next, message = "$halfway should be short of $next")
+        assertEquals(next, leftOf("Movie A"), absoluteTolerance = 1f)
         rule.onNodeWithText("New movie").assertLeftPositionInRootIsEqualTo(24.dp)
     }
 
@@ -166,6 +166,6 @@ class HomeSectionStartTest {
 
         // The cards the user scrolled to stay put; the new one is off to the left, out of view.
         assertNotEquals(0f, shown)
-        assertEquals(shown, leftOf("Movie 3"), 1f)
+        assertEquals(shown, leftOf("Movie 3"), absoluteTolerance = 1f)
     }
 }

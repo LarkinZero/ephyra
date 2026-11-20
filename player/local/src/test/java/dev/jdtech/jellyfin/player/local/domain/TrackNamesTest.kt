@@ -4,7 +4,7 @@ import androidx.media3.common.C
 import androidx.media3.common.Format
 import dev.jdtech.jellyfin.player.core.domain.models.ServerAudioTrack
 import java.util.Locale
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -70,8 +70,8 @@ class TrackNamesTest {
             .build()
 
     private fun assertBoth(expected: String, exo: Format, mpv: Format) {
-        assertEquals("ExoPlayer", expected, name(exo))
-        assertEquals("mpv", expected, name(mpv))
+        assertEquals(expected, name(exo), message = "ExoPlayer")
+        assertEquals(expected, name(mpv), message = "mpv")
     }
 
     @Test
@@ -183,9 +183,9 @@ class TrackNamesTest {
     fun `codes for no language are left out`() {
         for (code in listOf("und", "mul", "zxx", "mis", "")) {
             assertEquals(
-                code,
                 "Opus 2.0",
                 name(exoAudio(language = code, mime = "audio/opus", channels = 2)),
+                message = code,
             )
         }
     }

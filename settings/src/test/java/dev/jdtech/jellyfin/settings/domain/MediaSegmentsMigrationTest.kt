@@ -8,7 +8,7 @@ import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.OUTRO
 import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.PREVIEW
 import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.RECAP
 import dev.jdtech.jellyfin.settings.domain.MediaSegmentsMigration.SKIP
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class MediaSegmentsMigrationTest {

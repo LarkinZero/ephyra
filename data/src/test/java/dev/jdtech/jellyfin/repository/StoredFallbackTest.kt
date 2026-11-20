@@ -1,12 +1,12 @@
 package dev.jdtech.jellyfin.repository
 
 import java.io.IOException
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 
 /** CE (#281): the server's answer when it comes, Room's copy when it doesn't. */

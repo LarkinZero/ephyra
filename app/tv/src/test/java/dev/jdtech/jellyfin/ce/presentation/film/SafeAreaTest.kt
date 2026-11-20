@@ -21,9 +21,9 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryState
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.flowOf
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,7 +43,10 @@ class SafeAreaTest {
         (0 until 6).map { dummyMovie.copy(id = UUID(0, it.toLong()), name = "$title $it") }
 
     private fun assertAboveSafeBottom(bottom: Dp, what: String) {
-        assertTrue("$what ends at $bottom, below the safe area ($safeBottom)", bottom <= safeBottom)
+        assertTrue(
+            bottom <= safeBottom,
+            message = "$what ends at $bottom, below the safe area ($safeBottom)",
+        )
     }
 
     /**

@@ -2,9 +2,9 @@ package dev.jdtech.jellyfin.player.local.mpv
 
 import androidx.media3.common.PlaybackException
 import java.io.File
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class MpvErrorRecoveryTest {
@@ -159,16 +159,16 @@ class MpvErrorRecoveryTest {
             File("src/main/java/dev/jdtech/jellyfin/player/local/mpv/MPVPlayer.kt").readText()
         val commands =
             Regex("""permanentAvailableCommands: Commands =[\s\S]*?\.build\(\)""").find(source)
-        assertTrue("permanentAvailableCommands not found", commands != null)
+        assertTrue(commands != null, message = "permanentAvailableCommands not found")
         assertTrue(
-            "MPVPlayer must offer COMMAND_PREPARE (#474)",
             commands!!.value.contains("COMMAND_PREPARE,"),
+            message = "MPVPlayer must offer COMMAND_PREPARE (#474)",
         )
         val prepare = Regex("""override fun prepare\(\) \{[\s\S]*?\n    }""").find(source)
-        assertTrue("MPVPlayer.prepare() not found", prepare != null)
+        assertTrue(prepare != null, message = "MPVPlayer.prepare() not found")
         assertTrue(
-            "MPVPlayer.prepare() must reload after an error (#474)",
             prepare!!.value.contains("errorRecovery.onPrepare("),
+            message = "MPVPlayer.prepare() must reload after an error (#474)",
         )
     }
 

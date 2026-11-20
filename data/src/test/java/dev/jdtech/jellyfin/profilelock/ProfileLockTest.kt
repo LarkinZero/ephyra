@@ -5,12 +5,13 @@ import dev.jdtech.jellyfin.models.ProfileLockType
 import dev.jdtech.jellyfin.models.User
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ProfileLockTest {
@@ -38,8 +39,10 @@ class ProfileLockTest {
         assertNull(users.getValue(alice.id).pinSalt)
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `a PIN of three digits is refused`() = runBlocking { lock.setPin(alice.id, "123") }
+    @Test
+    fun `a PIN of three digits is refused`(): Unit = runBlocking {
+        assertFailsWith<IllegalArgumentException> { lock.setPin(alice.id, "123") }
+    }
 
     @Test
     fun `setting a PIN unlocks that profile`() = runBlocking {
@@ -105,14 +108,14 @@ class ProfileLockTest {
         assertNull(users.getValue(alice.id).pinHash)
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `a pattern of three dots is refused`() = runBlocking {
-        lock.setPattern(alice.id, listOf(0, 1, 2))
+    @Test
+    fun `a pattern of three dots is refused`(): Unit = runBlocking {
+        assertFailsWith<IllegalArgumentException> { lock.setPattern(alice.id, listOf(0, 1, 2)) }
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `a pattern that uses a dot twice is refused`() = runBlocking {
-        lock.setPattern(alice.id, listOf(0, 1, 2, 1))
+    @Test
+    fun `a pattern that uses a dot twice is refused`(): Unit = runBlocking {
+        assertFailsWith<IllegalArgumentException> { lock.setPattern(alice.id, listOf(0, 1, 2, 1)) }
     }
 
     @Test

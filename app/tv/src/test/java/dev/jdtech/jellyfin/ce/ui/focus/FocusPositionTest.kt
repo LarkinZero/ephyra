@@ -1,6 +1,6 @@
 package dev.jdtech.jellyfin.ce.ui.focus
 
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class FocusPositionTest {

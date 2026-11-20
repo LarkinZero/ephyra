@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.utils
 
 import androidx.media3.ui.CaptionStyleCompat
 import dev.jdtech.jellyfin.settings.domain.Constants
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /**

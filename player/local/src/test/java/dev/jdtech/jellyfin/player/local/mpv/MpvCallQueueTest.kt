@@ -3,11 +3,11 @@ package dev.jdtech.jellyfin.player.local.mpv
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -64,7 +64,7 @@ class MpvCallQueueTest {
         var start = System.nanoTime()
         assertNull(queue.read(timeoutMs = 200L) { 1 })
         val first = elapsedMs(start)
-        assertTrue("waited $first ms", first in 150..1_500)
+        assertTrue(first in 150..1_500, message = "waited $first ms")
         start = System.nanoTime()
         repeat(5) { assertNull(queue.read(timeoutMs = 200L) { 1 }) }
         assertTrue(elapsedMs(start) < 150)
@@ -79,7 +79,7 @@ class MpvCallQueueTest {
         // the thread got there still returns at once, so poll until one is answered.
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
         while (!queue.runBounded(2_000L) {}) {
-            assertTrue("mpv thread did not recover", System.nanoTime() < deadline)
+            assertTrue(System.nanoTime() < deadline, message = "mpv thread did not recover")
             Thread.sleep(10)
         }
         assertEquals(7, queue.read(timeoutMs = 2_000L) { 7 })

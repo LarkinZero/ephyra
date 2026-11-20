@@ -12,10 +12,10 @@ import dev.jdtech.jellyfin.models.MediaSegmentAction
 import dev.jdtech.jellyfin.models.MediaSegmentAction.ASK
 import dev.jdtech.jellyfin.models.MediaSegmentAction.IGNORE
 import dev.jdtech.jellyfin.models.MediaSegmentAction.SKIP
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Test
 
 class SegmentTrackerTest {
@@ -76,7 +76,7 @@ class SegmentTrackerTest {
         assertEquals(first, (t.at(19_000L) as SegmentDecision.Ask).segment)
         val next = t.at(20_000L) as SegmentDecision.Ask
         assertEquals(second, next.segment)
-        assertTrue("entering the second segment opens a new window", next.inButtonWindow)
+        assertTrue(next.inButtonWindow, message = "entering the second segment opens a new window")
     }
 
     // --- actions ----------------------------------------------------------------------------
@@ -106,7 +106,11 @@ class SegmentTrackerTest {
         assertTrue((t.at(64_999L) as SegmentDecision.Ask).inButtonWindow)
         val late = t.at(65_000L) as SegmentDecision.Ask
         assertFalse(late.inButtonWindow)
-        assertEquals("still in the segment, so the controls can offer it", intro, late.segment)
+        assertEquals(
+            intro,
+            late.segment,
+            message = "still in the segment, so the controls can offer it",
+        )
     }
 
     @Test
@@ -156,9 +160,12 @@ class SegmentTrackerTest {
     fun `auto-skip fires once per entry`() {
         val t = tracker(actions = mapOf(INTRO to SKIP))
         assertEquals(SegmentDecision.AutoSkip(intro, SkipTarget.SeekTo(150_000L)), t.at(60_500L))
-        assertEquals("the seek has not landed yet", SegmentDecision.None, t.at(61_500L))
+        assertEquals(SegmentDecision.None, t.at(61_500L), message = "the seek has not landed yet")
         t.at(200_000L)
-        assertTrue("seeking back in skips again", t.at(70_000L) is SegmentDecision.AutoSkip)
+        assertTrue(
+            t.at(70_000L) is SegmentDecision.AutoSkip,
+            message = "seeking back in skips again",
+        )
     }
 
     @Test

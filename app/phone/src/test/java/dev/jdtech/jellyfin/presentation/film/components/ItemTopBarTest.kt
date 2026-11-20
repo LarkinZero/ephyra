@@ -12,8 +12,8 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

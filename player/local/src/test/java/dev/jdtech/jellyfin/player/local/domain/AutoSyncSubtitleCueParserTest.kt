@@ -1,6 +1,6 @@
 package dev.jdtech.jellyfin.player.local.domain
 
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class AutoSyncSubtitleCueParserTest {

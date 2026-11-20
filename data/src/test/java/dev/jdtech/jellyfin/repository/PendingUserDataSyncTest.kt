@@ -14,13 +14,13 @@ import dev.jdtech.jellyfin.models.FindroidUserDataDto
 import dev.jdtech.jellyfin.player.DeviceProfileBuilder
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -166,7 +166,7 @@ class PendingUserDataSyncTest {
     }
 
     @Test
-    fun `a synced row of a stored download stays`() = runBlocking {
+    fun `a synced row of a stored download stays`(): Unit = runBlocking {
         storeMovie(positionTicks = 600_000_000L)
 
         database.deleteUserDataIfOrphaned(userId, movieId)
@@ -207,7 +207,7 @@ class PendingUserDataSyncTest {
     }
 
     @Test
-    fun `marking played without a last played time sets one`() = runBlocking {
+    fun `marking played without a last played time sets one`(): Unit = runBlocking {
         storeMovie()
 
         repository.markAsPlayed(movieId)
@@ -230,7 +230,7 @@ class PendingUserDataSyncTest {
     }
 
     @Test
-    fun `marking unplayed without the server or a last played time sets one`() = runBlocking {
+    fun `marking unplayed without the server or a last played time sets one`(): Unit = runBlocking {
         // CE (#635): a download from before 2.6.0 that no refresh has filled in yet. Without a
         // time the mark would always count as older than the server's play.
         storeMovie()

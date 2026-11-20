@@ -9,10 +9,10 @@ import androidx.sqlite.execSQL
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.UUID
 import kotlin.math.abs
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,7 +92,7 @@ class ServerDatabaseMigrationTest {
                     it.readText()
                 }
             val actual = Regex("\"identityHash\": \"([0-9a-f]+)\"").find(json)!!.groupValues[1]
-            assertEquals("identity hash of schema $version", hash, actual)
+            assertEquals(hash, actual, message = "identity hash of schema $version")
         }
     }
 
@@ -204,8 +204,8 @@ class ServerDatabaseMigrationTest {
         // CE (#633): progress waiting to be sent gets the time of the upgrade as its last play.
         val lastPlayed = long("SELECT lastPlayedDate FROM userdata")
         assertTrue(
-            "lastPlayedDate $lastPlayed is not about now",
             abs(System.currentTimeMillis() - lastPlayed) < 60_000L,
+            message = "lastPlayedDate $lastPlayed is not about now",
         )
         assertEquals(EPISODE, text("SELECT itemId FROM pending_downloads"))
         assertEquals(0L, long("SELECT smartQueued FROM sources"))

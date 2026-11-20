@@ -3,6 +3,9 @@ package dev.jdtech.jellyfin.player.cast
 import dev.jdtech.jellyfin.player.cast.models.CastMediaItem
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.api.AudioSpatialFormat
 import org.jellyfin.sdk.model.api.MediaProtocol
 import org.jellyfin.sdk.model.api.MediaSourceInfo
@@ -12,9 +15,6 @@ import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRange
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
