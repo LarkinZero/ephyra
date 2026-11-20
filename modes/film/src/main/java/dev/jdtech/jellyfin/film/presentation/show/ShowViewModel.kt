@@ -207,10 +207,13 @@ constructor(
         }
     }
 
-    /** Stored and downloaded episodes per season, from Room only. */
+    /** Stored and downloaded episodes per season, from Room only, of the current server (#718). */
     private suspend fun getLocalEpisodeCounts(showId: UUID): Map<UUID, SeasonEpisodeCounts> =
         withContext(Dispatchers.IO) {
-            database.getSeasonEpisodeCounts(showId).associateBy { it.seasonId }
+            val serverId =
+                appPreferences.getValue(appPreferences.currentServer)
+                    ?: return@withContext emptyMap()
+            database.getSeasonEpisodeCounts(showId, serverId).associateBy { it.seasonId }
         }
 
     private data class SeasonEpisodeTotals(val total: Int = 0, val canDownload: Boolean = false)

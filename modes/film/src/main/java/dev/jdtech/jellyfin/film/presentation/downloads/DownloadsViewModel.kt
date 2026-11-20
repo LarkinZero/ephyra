@@ -257,7 +257,8 @@ constructor(
             for (item in items) {
                 if (item is FindroidShow) {
                     val userId = repository.getUserId()
-                    for (epDto in database.getEpisodesByShowId(item.id)) {
+                    // CE (#718): this server's episodes; another server's of the same show stay.
+                    for (epDto in storedEpisodes(item.id)) {
                         deleteLocalCopy(epDto.toFindroidEpisode(database, userId))
                     }
                 } else {
@@ -267,6 +268,12 @@ constructor(
             storageDirty = true
             loadItems()
         }
+    }
+
+    /** CE (#718): the stored episodes of [showId] that the current server downloaded. */
+    private suspend fun storedEpisodes(showId: UUID): List<FindroidEpisodeDto> {
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return emptyList()
+        return database.getEpisodesByShowIdOfServer(showId, serverId)
     }
 
     private suspend fun deleteLocalCopy(item: FindroidItem) {
@@ -343,7 +350,7 @@ constructor(
         withContext(Dispatchers.IO) {
             val items = repository.getDownloads()
             val shows = items.filterIsInstance<FindroidShow>()
-            val episodesByShow = shows.associate { it.id to database.getEpisodesByShowId(it.id) }
+            val episodesByShow = shows.associate { it.id to storedEpisodes(it.id) }
             // One batched read for every movie and episode instead of a query per item
             // (and per pass).
             val sourcesByItem =

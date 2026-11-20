@@ -116,36 +116,41 @@ class JellyfinRepositoryImpl(
         }
 
     // CE (#281): the item getters fall back to the copy in Room (a download, or the show and season
-    // of a downloaded episode) when the server fails or is slow, see serverOrStored.
+    // of a downloaded episode) when the server fails or is slow, see serverOrStored. CE (#718):
+    // only
+    // a copy stored for the current server: another server can have the same item ids.
     override suspend fun getEpisode(itemId: UUID): FindroidEpisode =
         withContext(Dispatchers.IO) {
-            val stored = database.getEpisodeOrNull(itemId)
+            val stored = currentServerId()?.let { database.getEpisodeOfServer(itemId, it) }
             serverOrStored(
                 stored?.let { dto -> suspend { dto.toFindroidEpisode(database, currentUserId) } }
             ) {
                 jellyfinApi.libraryApi
                     .getItem(itemId, currentUserId)
                     .content
-                    .toFindroidEpisode(this@JellyfinRepositoryImpl, database)!!
+                    .toFindroidEpisode(
+                        this@JellyfinRepositoryImpl,
+                        localSourcesFor(listOf(itemId)),
+                    )!!
             }
         }
 
     override suspend fun getMovie(itemId: UUID): FindroidMovie =
         withContext(Dispatchers.IO) {
-            val stored = database.getMovieOrNull(itemId)
+            val stored = currentServerId()?.let { database.getMovieOfServer(itemId, it) }
             serverOrStored(
                 stored?.let { dto -> suspend { dto.toFindroidMovie(database, currentUserId) } }
             ) {
                 jellyfinApi.libraryApi
                     .getItem(itemId, currentUserId)
                     .content
-                    .toFindroidMovie(this@JellyfinRepositoryImpl, database)
+                    .toFindroidMovie(this@JellyfinRepositoryImpl, localSourcesFor(listOf(itemId)))
             }
         }
 
     override suspend fun getShow(itemId: UUID): FindroidShow =
         withContext(Dispatchers.IO) {
-            val stored = database.getShowOrNull(itemId)
+            val stored = currentServerId()?.let { database.getShowOfServer(itemId, it) }
             serverOrStored(
                 stored?.let { dto -> suspend { dto.toFindroidShow(database, currentUserId) } }
             ) {
@@ -158,7 +163,7 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getSeason(itemId: UUID): FindroidSeason =
         withContext(Dispatchers.IO) {
-            val stored = database.getSeasonOrNull(itemId)
+            val stored = currentServerId()?.let { database.getSeasonOfServer(itemId, it) }
             serverOrStored(
                 stored?.let { dto -> suspend { dto.toFindroidSeason(database, currentUserId) } }
             ) {
@@ -186,18 +191,22 @@ class JellyfinRepositoryImpl(
             }
         }
 
-    /** CE (#281): builds [itemId] from Room, or null when Room doesn't have it. */
+    /**
+     * CE (#281): builds [itemId] from Room, or null when Room doesn't have it for the current
+     * server (#718).
+     */
     private suspend fun storedItem(itemId: UUID): (suspend () -> FindroidItem)? {
-        database.getMovieOrNull(itemId)?.let {
+        val serverId = currentServerId() ?: return null
+        database.getMovieOfServer(itemId, serverId)?.let {
             return suspend { it.toFindroidMovie(database, currentUserId) }
         }
-        database.getEpisodeOrNull(itemId)?.let {
+        database.getEpisodeOfServer(itemId, serverId)?.let {
             return suspend { it.toFindroidEpisode(database, currentUserId) }
         }
-        database.getShowOrNull(itemId)?.let {
+        database.getShowOfServer(itemId, serverId)?.let {
             return suspend { it.toFindroidShow(database, currentUserId) }
         }
-        database.getSeasonOrNull(itemId)?.let {
+        database.getSeasonOfServer(itemId, serverId)?.let {
             return suspend { it.toFindroidSeason(database, currentUserId) }
         }
         return null
@@ -485,7 +494,9 @@ class JellyfinRepositoryImpl(
                     it.toFindroidSeason(this@JellyfinRepositoryImpl)
                 }
             } else {
-                database.getSeasonsByShowId(seriesId).map {
+                // CE (#718): the current server's stored seasons only.
+                val serverId = currentServerId() ?: return@withContext emptyList()
+                database.getSeasonsByShowIdOfServer(seriesId, serverId).map {
                     it.toFindroidSeason(database, currentUserId)
                 }
             }
@@ -543,9 +554,11 @@ class JellyfinRepositoryImpl(
                         }
                     }
             } else {
+                // CE (#718): the current server's stored episodes only.
+                val serverId = currentServerId() ?: return@withContext emptyList()
                 val episodes =
-                    if (seasonId != null) database.getEpisodesBySeasonId(seasonId)
-                    else database.getEpisodesByShowId(seriesId)
+                    if (seasonId != null) database.getEpisodesBySeasonIdOfServer(seasonId, serverId)
+                    else database.getEpisodesByShowIdOfServer(seriesId, serverId)
                 episodes.map { it.toFindroidEpisode(database, currentUserId) }
             }
         }
@@ -587,7 +600,14 @@ class JellyfinRepositoryImpl(
                     .mediaSources
                     .map { it.toFindroidSource(this@JellyfinRepositoryImpl, itemId, includePath) }
             )
-            sources.addAll(database.getSources(itemId).map { it.toFindroidSource(database) })
+            // CE (#718): the current server's download of the item, not another server's.
+            currentServerId()?.let { serverId ->
+                sources.addAll(
+                    database.getSourcesOfServer(itemId, serverId).map {
+                        it.toFindroidSource(database)
+                    }
+                )
+            }
             sources
         }
 
@@ -599,9 +619,13 @@ class JellyfinRepositoryImpl(
         withContext(Dispatchers.IO) {
             // A downloaded copy wins over any server source (see PlaylistManager), so do not wait
             // for the server when it is the one that will play. Only a finished one: an unfinished
-            // download's partial file would play as far as it got, or not at all (#454).
+            // download's partial file would play as far as it got, or not at all (#454). CE (#718):
+            // and only a download stored for the current server.
             val localSources =
-                database.getCompletedSources(itemId).map { it.toFindroidSource(database) }
+                currentServerId()
+                    ?.let { database.getCompletedSources(itemId, it) }
+                    .orEmpty()
+                    .map { it.toFindroidSource(database) }
             if (
                 localSources.isNotEmpty() &&
                     (mediaSourceId == null || localSources.any { it.id == mediaSourceId })
@@ -1041,11 +1065,13 @@ class JellyfinRepositoryImpl(
 
     /**
      * The downloaded sources of [itemIds], or nothing without a query when the app has no sources
-     * at all (the usual case for a user who doesn't download).
+     * at all (the usual case for a user who doesn't download). CE (#718): only the current server's
+     * downloads.
      */
     private suspend fun localSourcesFor(itemIds: List<UUID>): Map<UUID, List<FindroidSource>> {
+        val serverId = currentServerId() ?: return emptyMap()
         val any = hasLocalSources.value ?: database.hasSources()
-        return if (any) database.getLocalSourcesForItems(itemIds) else emptyMap()
+        return if (any) database.getLocalSourcesForItems(itemIds, serverId) else emptyMap()
     }
 
     /** Maps a list with one batched lookup of downloaded sources instead of one query per item. */

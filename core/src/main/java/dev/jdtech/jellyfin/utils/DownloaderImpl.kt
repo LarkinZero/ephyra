@@ -228,10 +228,13 @@ class DownloaderImpl(
         // active source per item; constraining on sourceId here would miss the resume for
         // multi-source items (the 2-arg overload derives sourceId from the server's first
         // source, which may differ from the one originally downloaded) and would start a
-        // duplicate fresh download.
+        // duplicate fresh download. CE (#718): only this server's partial file; another
+        // server's copy of the item gives way in the fresh branch.
         val existingSource =
             try {
-                database.getSources(item.id).firstOrNull { source ->
+                val serverId = appPreferences.getValue(appPreferences.currentServer)
+                val stored = serverId?.let { database.getSourcesOfServer(item.id, it) }.orEmpty()
+                stored.firstOrNull { source ->
                     source.path.endsWith(".download") && source.downloadId != null
                 }
             } catch (e: Exception) {
@@ -294,6 +297,9 @@ class DownloaderImpl(
                     .getMediaSources(item.id, true, transcodeDolbyVision, maxBitrate)
                     .first { it.id == sourceId }
             val segments = jellyfinRepository.getServerSegments(item.id)
+            // CE (#718): once the server has given the source, and before the destination file is
+            // cleared: the other server's copy may have the same path.
+            releaseOtherServersCopy(item)
             val trickplayInfo =
                 if (item is FindroidSources) {
                     item.trickplayInfo?.get(sourceId)
@@ -491,7 +497,36 @@ class DownloaderImpl(
         dataChanges.onChanged()
     }
 
-    private suspend fun deleteItemRows(item: FindroidItem, source: FindroidSource) {
+    /**
+     * CE (#718): Room keeps one copy per item id, and another server can have the same ids (a
+     * server reinstalled over the same media paths and added again). When [item] is stored for
+     * another server, that copy goes, files included, so this server's download replaces it and
+     * nothing is left behind under the other server's name: the item belongs to the server that
+     * downloaded it last, and the other server shows it as not downloaded. Its progress still to be
+     * sent stays, and the sync sends it to that server.
+     */
+    internal suspend fun releaseOtherServersCopy(item: FindroidItem) {
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return
+        // A row from before rows carried a server ("") belongs to no server, so it goes too.
+        val storedFor =
+            when (item) {
+                is FindroidMovie -> database.getMovieOrNull(item.id)?.let { it.serverId.orEmpty() }
+                is FindroidEpisode ->
+                    database.getEpisodeOrNull(item.id)?.let { it.serverId.orEmpty() }
+                else -> null
+            }
+        if (storedFor == null || storedFor == serverId) return
+        Timber.i("Replacing the copy of ${item.id} stored for another server")
+        val sources = database.getSources(item.id)
+        for (source in sources) {
+            source.downloadId?.let { engine.cancel(it) }
+            deleteItemRows(item, source.toFindroidSource(database))
+        }
+        if (sources.isEmpty()) deleteItemRows(item, source = null)
+        dataChanges.onChanged()
+    }
+
+    private suspend fun deleteItemRows(item: FindroidItem, source: FindroidSource?) {
         when (item) {
             is FindroidMovie -> {
                 database.deleteMovie(item.id)
@@ -515,19 +550,21 @@ class DownloaderImpl(
             }
         }
 
-        database.deleteSource(source.id)
-        val sourceFile = File(source.path)
-        sourceFile.delete()
-        pruneEmptyParents(sourceFile)
+        if (source != null) {
+            database.deleteSource(source.id)
+            val sourceFile = File(source.path)
+            sourceFile.delete()
+            pruneEmptyParents(sourceFile)
 
-        val mediaStreams = database.getMediaStreamsBySourceId(source.id)
-        for (mediaStream in mediaStreams) {
-            // Cancel any still-running engine task for this external stream before
-            // removing the DB row, otherwise we leak in-flight downloads.
-            mediaStream.downloadId?.let { engine.cancel(it) }
-            File(mediaStream.path).delete()
+            val mediaStreams = database.getMediaStreamsBySourceId(source.id)
+            for (mediaStream in mediaStreams) {
+                // Cancel any still-running engine task for this external stream before
+                // removing the DB row, otherwise we leak in-flight downloads.
+                mediaStream.downloadId?.let { engine.cancel(it) }
+                File(mediaStream.path).delete()
+            }
+            database.deleteMediaStreamsBySourceId(source.id)
         }
-        database.deleteMediaStreamsBySourceId(source.id)
 
         // Progress watched offline that has not reached the server yet outlives the download:
         // the sync sends it and then removes the row (#281).

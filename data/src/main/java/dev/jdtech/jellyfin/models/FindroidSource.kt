@@ -90,9 +90,25 @@ fun FindroidSourceDto.toFindroidSource(streams: List<FindroidMediaStreamDto>): F
  */
 suspend fun ServerDatabaseDao.getLocalSourcesForItems(
     itemIds: Collection<UUID>
+): Map<UUID, List<FindroidSource>> =
+    localSourcesForItems(itemIds) { ids -> getSourcesForItems(ids) }
+
+/**
+ * CE (#718): [getLocalSourcesForItems], only the downloads stored for [serverId]: another server's
+ * download of the same item id is not this server's item downloaded.
+ */
+suspend fun ServerDatabaseDao.getLocalSourcesForItems(
+    itemIds: Collection<UUID>,
+    serverId: String,
+): Map<UUID, List<FindroidSource>> =
+    localSourcesForItems(itemIds) { ids -> getSourcesForItemsOfServer(ids, serverId) }
+
+private suspend fun ServerDatabaseDao.localSourcesForItems(
+    itemIds: Collection<UUID>,
+    read: suspend (List<UUID>) -> List<FindroidSourceDto>,
 ): Map<UUID, List<FindroidSource>> {
     if (itemIds.isEmpty()) return emptyMap()
-    val dtos = itemIds.distinct().chunked(SQL_CHUNK).flatMap { getSourcesForItems(it) }
+    val dtos = itemIds.distinct().chunked(SQL_CHUNK).flatMap { read(it) }
     if (dtos.isEmpty()) return emptyMap()
     val streams =
         dtos
