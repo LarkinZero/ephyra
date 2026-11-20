@@ -27,6 +27,30 @@ import dev.jdtech.jellyfin.models.User
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 
+/*
+ * CE (#718): which stored rows belong to the server `:serverId`. One row per item id, whichever
+ * server stored it: Jellyfin derives ids from the media's type and path, so a second server over
+ * the same paths (a reinstalled server, added again) has the same ids. Movies and episodes carry
+ * the server. A show or a season has none of its own that holds (the first server to store it wins
+ * the row): it belongs to the servers whose episodes it holds, or to the show's server while it
+ * holds none.
+ */
+private const val SHOW_OF_SERVER =
+    "(EXISTS (SELECT 1 FROM episodes WHERE episodes.seriesId = shows.id " +
+        "AND episodes.serverId = :serverId) OR (shows.serverId = :serverId " +
+        "AND NOT EXISTS (SELECT 1 FROM episodes WHERE episodes.seriesId = shows.id)))"
+
+private const val SEASON_OF_SERVER =
+    "(EXISTS (SELECT 1 FROM episodes WHERE episodes.seasonId = seasons.id " +
+        "AND episodes.serverId = :serverId) OR (NOT EXISTS (SELECT 1 FROM episodes " +
+        "WHERE episodes.seasonId = seasons.id) AND EXISTS (SELECT 1 FROM shows " +
+        "WHERE shows.id = seasons.seriesId AND shows.serverId = :serverId)))"
+
+/** A source belongs to the server of its movie or episode. */
+private const val SOURCE_OF_SERVER =
+    "(sources.itemId IN (SELECT id FROM movies WHERE serverId = :serverId) " +
+        "OR sources.itemId IN (SELECT id FROM episodes WHERE serverId = :serverId))"
+
 @Dao
 interface ServerDatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertServer(server: Server)
@@ -137,6 +161,17 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM sources WHERE itemId IN (:itemIds)")
     suspend fun getSourcesForItems(itemIds: List<UUID>): List<FindroidSourceDto>
 
+    /** CE (#718): [getSourcesForItems], only the downloads of [serverId]. */
+    @Query("SELECT * FROM sources WHERE itemId IN (:itemIds) AND $SOURCE_OF_SERVER")
+    suspend fun getSourcesForItemsOfServer(
+        itemIds: List<UUID>,
+        serverId: String,
+    ): List<FindroidSourceDto>
+
+    /** CE (#718): [getSources], only when the item is stored for [serverId]. */
+    @Query("SELECT * FROM sources WHERE itemId = :itemId AND $SOURCE_OF_SERVER")
+    suspend fun getSourcesOfServer(itemId: UUID, serverId: String): List<FindroidSourceDto>
+
     @Query("SELECT EXISTS(SELECT 1 FROM sources)") suspend fun hasSources(): Boolean
 
     /** Emits again whenever the sources table changes. */
@@ -152,15 +187,19 @@ interface ServerDatabaseDao {
     suspend fun getCompletedDownloadSources(): List<FindroidSourceDto>
 
     /** The item's finished downloads: a `.download` file is still being written (#454). */
-    @Query("SELECT * FROM sources WHERE itemId = :itemId AND path NOT LIKE '%.download'")
-    suspend fun getCompletedSources(itemId: UUID): List<FindroidSourceDto>
+    @Query(
+        "SELECT * FROM sources WHERE itemId = :itemId AND path NOT LIKE '%.download' " +
+            "AND $SOURCE_OF_SERVER"
+    )
+    suspend fun getCompletedSources(itemId: UUID, serverId: String): List<FindroidSourceDto>
 
     @Query(
         "SELECT DISTINCT episodes.seriesId FROM episodes " +
             "JOIN sources ON sources.itemId = episodes.id " +
-            "WHERE sources.type = 'LOCAL' AND sources.path NOT LIKE '%.download'"
+            "WHERE sources.type = 'LOCAL' AND sources.path NOT LIKE '%.download' " +
+            "AND episodes.serverId = :serverId"
     )
-    suspend fun getSeriesIdsWithCompletedDownloads(): List<UUID>
+    suspend fun getSeriesIdsWithCompletedDownloads(serverId: String): List<UUID>
 
     @Query("UPDATE sources SET downloadId = :downloadId WHERE id = :id")
     suspend fun setSourceDownloadId(id: String, downloadId: Long)
@@ -264,22 +303,26 @@ interface ServerDatabaseDao {
     @Query("SELECT COUNT(*) FROM movies WHERE serverId = :serverId")
     suspend fun countMoviesByServerId(serverId: String): Int
 
+    /** Whichever server stored it; what serves the current server is [getMovieOfServer]. */
     @Query("SELECT * FROM movies WHERE id = :id")
     suspend fun getMovieOrNull(id: UUID): FindroidMovieDto?
+
+    @Query("SELECT * FROM movies WHERE id = :id AND serverId = :serverId")
+    suspend fun getMovieOfServer(id: UUID, serverId: String): FindroidMovieDto?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertShow(show: FindroidShowDto)
 
     @Query("SELECT * FROM shows WHERE id = :id") suspend fun getShow(id: UUID): FindroidShowDto
 
-    @Query("SELECT * FROM shows WHERE id = :id")
-    suspend fun getShowOrNull(id: UUID): FindroidShowDto?
+    @Query("SELECT * FROM shows WHERE id = :id AND $SHOW_OF_SERVER")
+    suspend fun getShowOfServer(id: UUID, serverId: String): FindroidShowDto?
 
     @Query("SELECT * FROM shows ORDER BY name ASC") suspend fun getShows(): List<FindroidShowDto>
 
-    @Query("SELECT * FROM shows WHERE serverId = :serverId ORDER BY name ASC")
+    @Query("SELECT * FROM shows WHERE $SHOW_OF_SERVER ORDER BY name ASC")
     suspend fun getShowsByServerId(serverId: String): List<FindroidShowDto>
 
-    @Query("SELECT COUNT(*) FROM shows WHERE serverId = :serverId")
+    @Query("SELECT COUNT(*) FROM shows WHERE $SHOW_OF_SERVER")
     suspend fun countShowsByServerId(serverId: String): Int
 
     @Query("DELETE FROM shows WHERE id = :id") suspend fun deleteShow(id: UUID)
@@ -290,11 +333,21 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM seasons WHERE id = :id")
     suspend fun getSeason(id: UUID): FindroidSeasonDto
 
-    @Query("SELECT * FROM seasons WHERE id = :id")
-    suspend fun getSeasonOrNull(id: UUID): FindroidSeasonDto?
+    @Query("SELECT * FROM seasons WHERE id = :id AND $SEASON_OF_SERVER")
+    suspend fun getSeasonOfServer(id: UUID, serverId: String): FindroidSeasonDto?
 
+    /** Every server's: what serves the current server is [getSeasonsByShowIdOfServer]. */
     @Query("SELECT * FROM seasons WHERE seriesId = :seriesId ORDER BY indexNumber ASC")
     suspend fun getSeasonsByShowId(seriesId: UUID): List<FindroidSeasonDto>
+
+    @Query(
+        "SELECT * FROM seasons WHERE seriesId = :seriesId AND $SEASON_OF_SERVER " +
+            "ORDER BY indexNumber ASC"
+    )
+    suspend fun getSeasonsByShowIdOfServer(
+        seriesId: UUID,
+        serverId: String,
+    ): List<FindroidSeasonDto>
 
     @Query("DELETE FROM seasons WHERE id = :id") suspend fun deleteSeason(id: UUID)
 
@@ -304,16 +357,34 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM episodes WHERE id = :id")
     suspend fun getEpisode(id: UUID): FindroidEpisodeDto
 
+    /** Whichever server stored it; what serves the current server is [getEpisodeOfServer]. */
     @Query("SELECT * FROM episodes WHERE id = :id")
     suspend fun getEpisodeOrNull(id: UUID): FindroidEpisodeDto?
 
-    @Query(
-        "SELECT * FROM episodes WHERE seriesId = :seriesId ORDER BY parentIndexNumber ASC, indexNumber ASC"
-    )
-    suspend fun getEpisodesByShowId(seriesId: UUID): List<FindroidEpisodeDto>
+    @Query("SELECT * FROM episodes WHERE id = :id AND serverId = :serverId")
+    suspend fun getEpisodeOfServer(id: UUID, serverId: String): FindroidEpisodeDto?
 
+    @Query(
+        "SELECT * FROM episodes WHERE seriesId = :seriesId AND serverId = :serverId " +
+            "ORDER BY parentIndexNumber ASC, indexNumber ASC"
+    )
+    suspend fun getEpisodesByShowIdOfServer(
+        seriesId: UUID,
+        serverId: String,
+    ): List<FindroidEpisodeDto>
+
+    /** Every server's: what serves the current server is [getEpisodesBySeasonIdOfServer]. */
     @Query("SELECT * FROM episodes WHERE seasonId = :seasonId ORDER BY indexNumber ASC")
     suspend fun getEpisodesBySeasonId(seasonId: UUID): List<FindroidEpisodeDto>
+
+    @Query(
+        "SELECT * FROM episodes WHERE seasonId = :seasonId AND serverId = :serverId " +
+            "ORDER BY indexNumber ASC"
+    )
+    suspend fun getEpisodesBySeasonIdOfServer(
+        seasonId: UUID,
+        serverId: String,
+    ): List<FindroidEpisodeDto>
 
     /** CE (#379): every stored item of every server and user, which may own downloaded artwork. */
     @Query(
@@ -325,16 +396,17 @@ interface ServerDatabaseDao {
     /**
      * CE (#252): per season of [seriesId], how many episodes are stored and how many of them are
      * downloaded, in one query. Downloaded means what `FindroidItem.isDownloaded()` means: a LOCAL
-     * source that is not a partial `.download` file.
+     * source that is not a partial `.download` file. CE (#718): only the episodes of [serverId].
      */
     @Query(
         "SELECT episodes.seasonId AS seasonId, COUNT(*) AS total, " +
             "SUM(CASE WHEN EXISTS (SELECT 1 FROM sources WHERE sources.itemId = episodes.id " +
             "AND sources.type = 'LOCAL' AND sources.path NOT LIKE '%.download') " +
             "THEN 1 ELSE 0 END) AS downloaded " +
-            "FROM episodes WHERE episodes.seriesId = :seriesId GROUP BY episodes.seasonId"
+            "FROM episodes WHERE episodes.seriesId = :seriesId " +
+            "AND episodes.serverId = :serverId GROUP BY episodes.seasonId"
     )
-    suspend fun getSeasonEpisodeCounts(seriesId: UUID): List<SeasonEpisodeCounts>
+    suspend fun getSeasonEpisodeCounts(seriesId: UUID, serverId: String): List<SeasonEpisodeCounts>
 
     @Query("DELETE FROM episodes WHERE id = :id") suspend fun deleteEpisode(id: UUID)
 
@@ -408,13 +480,15 @@ interface ServerDatabaseDao {
     /**
      * The user data rows of [userId] that still have to reach the server: those of the downloaded
      * movies and episodes of [serverId], which are the items the sync covers, and those of movies
-     * and episodes whose download was deleted before the sync ran.
+     * and episodes whose download was deleted before the sync ran. CE (#718): or whose stored copy
+     * another server's download of the same id took over.
      */
     @Query(
         "SELECT * FROM userdata WHERE userId = :userId AND toBeSynced = 1 AND (" +
             "itemId IN (SELECT id FROM movies WHERE serverId = :serverId) OR " +
             "itemId IN (SELECT id FROM episodes WHERE serverId = :serverId) OR (" +
-            "itemId NOT IN (SELECT id FROM movies) AND itemId NOT IN (SELECT id FROM episodes) " +
+            "itemId NOT IN (SELECT id FROM movies WHERE serverId = :serverId) " +
+            "AND itemId NOT IN (SELECT id FROM episodes WHERE serverId = :serverId) " +
             "AND itemId NOT IN (SELECT id FROM seasons) AND itemId NOT IN (SELECT id FROM shows)))"
     )
     suspend fun getAllUserDataToBeSynced(serverId: String, userId: UUID): List<FindroidUserDataDto>

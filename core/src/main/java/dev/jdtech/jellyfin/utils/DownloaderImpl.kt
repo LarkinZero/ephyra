@@ -221,6 +221,9 @@ class DownloaderImpl(
             appPreferences.getValue(appPreferences.downloadTranscodeDolbyVision)
         val allowMetered = appPreferences.getValue(appPreferences.downloadOverMobileData)
         val allowRoaming = appPreferences.getValue(appPreferences.downloadWhenRoaming)
+        // CE (#718): read once, so a server switch while this runs cannot store the download, or
+        // decide which copy gives way, under another server than the one it started for.
+        val serverId = appPreferences.getValue(appPreferences.currentServer)
 
         // ---- RESUME BRANCH -------------------------------------------------------
         // Match the first in-progress .download source row for this item, regardless of
@@ -228,12 +231,11 @@ class DownloaderImpl(
         // active source per item; constraining on sourceId here would miss the resume for
         // multi-source items (the 2-arg overload derives sourceId from the server's first
         // source, which may differ from the one originally downloaded) and would start a
-        // duplicate fresh download.
+        // duplicate fresh download. CE (#718): only this server's partial file; another
+        // server's copy of the item gives way in the fresh branch.
         val existingSource =
             try {
-                database.getSources(item.id).firstOrNull { source ->
-                    source.path.endsWith(".download") && source.downloadId != null
-                }
+                partialSourceOfServer(item, serverId)
             } catch (e: Exception) {
                 Timber.w(e, "Failed to query existing source for resume check")
                 null
@@ -294,6 +296,13 @@ class DownloaderImpl(
                     .getMediaSources(item.id, true, transcodeDolbyVision, maxBitrate)
                     .first { it.id == sourceId }
             val segments = jellyfinRepository.getServerSegments(item.id)
+            // CE (#718): what the rows below need from the server, asked before another server's
+            // copy gives way, so a server that stops answering here leaves that copy alone.
+            val showAndSeason =
+                (item as? FindroidEpisode)?.let {
+                    jellyfinRepository.getShow(it.seriesId) to
+                        jellyfinRepository.getSeason(it.seasonId)
+                }
             val trickplayInfo =
                 if (item is FindroidSources) {
                     item.trickplayInfo?.get(sourceId)
@@ -324,10 +333,6 @@ class DownloaderImpl(
             val extension = guessExtension(source.path)
             val relativePath = buildDownloadPath(item, source.id, extension)
             val destFile = File(storageLocation, "downloads/$relativePath.download")
-            destFile.parentFile?.mkdirs()
-            // A leftover .download file from a previous failed/cancelled attempt with no DB
-            // row is an orphan. Drop it before starting so the engine starts at byte 0.
-            if (destFile.exists()) destFile.delete()
             // source.size is always the original file size, even when a quality cap
             // makes the server transcode to a smaller file — estimate the capped
             // download's size from the bitrate cap instead of flagging false positives.
@@ -349,6 +354,17 @@ class DownloaderImpl(
                 )
             }
 
+            // CE (#718): the download can no longer be refused, and nothing is written yet: another
+            // server's copy of the item gives way now (it may have the same path). What can still
+            // fail after this is local (the engine start, the Room inserts), and the catch below
+            // removes this download then.
+            releaseOtherServersCopy(item, serverId)
+
+            destFile.parentFile?.mkdirs()
+            // A leftover .download file from a previous failed/cancelled attempt with no DB
+            // row is an orphan. Drop it before starting so the engine starts at byte 0.
+            if (destFile.exists()) destFile.delete()
+
             // Mint a new id and start the engine transfer.
             val downloadId = idCounter.incrementAndGet().also { mintedDownloadId = it }
             engine.start(
@@ -364,26 +380,13 @@ class DownloaderImpl(
 
             when (item) {
                 is FindroidMovie -> {
-                    database.insertMovie(
-                        item.toFindroidMovieDto(
-                            appPreferences.getValue(appPreferences.currentServer)
-                        )
-                    )
+                    database.insertMovie(item.toFindroidMovieDto(serverId))
                 }
                 is FindroidEpisode -> {
-                    val show = jellyfinRepository.getShow(item.seriesId)
-                    database.insertShow(
-                        show.toFindroidShowDto(
-                            appPreferences.getValue(appPreferences.currentServer)
-                        )
-                    )
-                    val season = jellyfinRepository.getSeason(item.seasonId)
+                    val (show, season) = showAndSeason!!
+                    database.insertShow(show.toFindroidShowDto(serverId))
                     database.insertSeason(season.toFindroidSeasonDto())
-                    database.insertEpisode(
-                        item.toFindroidEpisodeDto(
-                            appPreferences.getValue(appPreferences.currentServer)
-                        )
-                    )
+                    database.insertEpisode(item.toFindroidEpisodeDto(serverId))
 
                     startImagesDownloader(show)
                     startImagesDownloader(season)
@@ -436,8 +439,13 @@ class DownloaderImpl(
                 }
             }
             try {
-                val source = jellyfinRepository.getMediaSources(item.id).first { it.id == sourceId }
-                deleteItem(item, source)
+                // CE (#718): a download that failed before another server's copy gave way has
+                // nothing of its own in Room; deleting by the item's id would take that copy.
+                if (!isStoredForAnotherServer(item, serverId)) {
+                    val source =
+                        jellyfinRepository.getMediaSources(item.id).first { it.id == sourceId }
+                    deleteItem(item, source)
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to clean up failed download")
             }
@@ -486,12 +494,58 @@ class DownloaderImpl(
         deleteItem(item, source)
     }
 
+    /**
+     * The item's download in progress, when it is [serverId]'s (#718): another server's partial
+     * file is not resumed or completed with this server's URLs.
+     */
+    private suspend fun partialSourceOfServer(item: FindroidItem, serverId: String?) =
+        serverId
+            ?.let { database.getSourcesOfServer(item.id, it) }
+            .orEmpty()
+            .firstOrNull { source ->
+                source.path.endsWith(".download") && source.downloadId != null
+            }
+
     override suspend fun deleteItem(item: FindroidItem, source: FindroidSource) {
         deleteItemRows(item, source)
         dataChanges.onChanged()
     }
 
-    private suspend fun deleteItemRows(item: FindroidItem, source: FindroidSource) {
+    /**
+     * CE (#718): Room keeps one copy per item id, and another server can have the same ids (a
+     * server reinstalled over the same media paths and added again). When [item] is stored for
+     * another server, that copy goes, files included, so this server's download replaces it and
+     * nothing is left behind under the other server's name: the item belongs to the server that
+     * downloaded it last, and the other server shows it as not downloaded. Its progress still to be
+     * sent stays, and the sync sends it to that server.
+     */
+    internal suspend fun releaseOtherServersCopy(item: FindroidItem, serverId: String?) {
+        if (!isStoredForAnotherServer(item, serverId)) return
+        Timber.i("Replacing the copy of ${item.id} stored for another server")
+        val sources = database.getSources(item.id)
+        for (source in sources) {
+            source.downloadId?.let { engine.cancel(it) }
+            deleteItemRows(item, source.toFindroidSource(database))
+        }
+        if (sources.isEmpty()) deleteItemRows(item, source = null)
+        dataChanges.onChanged()
+    }
+
+    /** CE (#718): whether Room holds [item] for a server other than [serverId]. */
+    private suspend fun isStoredForAnotherServer(item: FindroidItem, serverId: String?): Boolean {
+        if (serverId == null) return false
+        // A row from before rows carried a server ("") belongs to no server: another one.
+        val storedFor =
+            when (item) {
+                is FindroidMovie -> database.getMovieOrNull(item.id)?.let { it.serverId.orEmpty() }
+                is FindroidEpisode ->
+                    database.getEpisodeOrNull(item.id)?.let { it.serverId.orEmpty() }
+                else -> null
+            }
+        return storedFor != null && storedFor != serverId
+    }
+
+    private suspend fun deleteItemRows(item: FindroidItem, source: FindroidSource?) {
         when (item) {
             is FindroidMovie -> {
                 database.deleteMovie(item.id)
@@ -515,19 +569,21 @@ class DownloaderImpl(
             }
         }
 
-        database.deleteSource(source.id)
-        val sourceFile = File(source.path)
-        sourceFile.delete()
-        pruneEmptyParents(sourceFile)
+        if (source != null) {
+            database.deleteSource(source.id)
+            val sourceFile = File(source.path)
+            sourceFile.delete()
+            pruneEmptyParents(sourceFile)
 
-        val mediaStreams = database.getMediaStreamsBySourceId(source.id)
-        for (mediaStream in mediaStreams) {
-            // Cancel any still-running engine task for this external stream before
-            // removing the DB row, otherwise we leak in-flight downloads.
-            mediaStream.downloadId?.let { engine.cancel(it) }
-            File(mediaStream.path).delete()
+            val mediaStreams = database.getMediaStreamsBySourceId(source.id)
+            for (mediaStream in mediaStreams) {
+                // Cancel any still-running engine task for this external stream before
+                // removing the DB row, otherwise we leak in-flight downloads.
+                mediaStream.downloadId?.let { engine.cancel(it) }
+                File(mediaStream.path).delete()
+            }
+            database.deleteMediaStreamsBySourceId(source.id)
         }
-        database.deleteMediaStreamsBySourceId(source.id)
 
         // Progress watched offline that has not reached the server yet outlives the download:
         // the sync sends it and then removes the row (#281).
@@ -731,9 +787,7 @@ class DownloaderImpl(
     override suspend fun retryFailedMediaStreams(item: FindroidItem) {
         val dbSourceDto =
             try {
-                database.getSources(item.id).firstOrNull { source ->
-                    source.path.endsWith(".download") && source.downloadId != null
-                }
+                partialSourceOfServer(item, appPreferences.getValue(appPreferences.currentServer))
             } catch (e: Exception) {
                 Timber.w(e, "Failed to load source for media-stream retry check on ${item.name}")
                 return

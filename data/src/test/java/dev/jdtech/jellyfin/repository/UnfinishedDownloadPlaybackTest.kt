@@ -49,7 +49,7 @@ class UnfinishedDownloadPlaybackTest {
             when (method.name) {
                 "observeHasSources" -> flowOf(true)
                 // The queries' SQL, on the one row this item has.
-                "getSources" -> listOf(partial).filter { it.itemId == id }
+                "getSourcesOfServer" -> listOf(partial).filter { it.itemId == id }
                 "getCompletedSources" ->
                     listOf(partial).filter { it.itemId == id && !it.path.endsWith(".download") }
                 "getMediaStreamsBySourceId" -> emptyList<Any>()
@@ -68,7 +68,9 @@ class UnfinishedDownloadPlaybackTest {
         JellyfinApi(context).apply { userId = this@UnfinishedDownloadPlaybackTest.userId }
 
     private fun preferences() =
-        AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE))
+        AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE)).apply {
+            setValue(currentServer, "server")
+        }
 
     @Test
     fun `online, an unfinished download is not played and the server is asked instead`() =
