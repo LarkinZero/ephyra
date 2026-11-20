@@ -255,13 +255,72 @@ class MpvSubtitleFilesTest {
     }
 
     @Test
-    fun `a download that ends after the next item started is kept for it`() {
+    fun `the state keeps a URL's download across a reset to an item that has the same URL`() {
+        // A quality switch or a reload after an error loads the same item again.
         val files = files(pgs, srt)
         files.downloadStarted(pgs.url)
         files.reset(listOf(pgs), null)
 
         files.downloaded(pgs.url, "/cache/0-Stream.pgssub")
 
+        assertTrue(files.isFileOfItem(pgs.url), "the player keeps a download of this item's")
         assertEquals(listOf(0 to "/cache/0-Stream.pgssub"), files.takeToAdd(), "the same URL")
+        assertEquals(emptyList(), files.dropOtherDownloads(), "and does not delete it")
+    }
+
+    @Test
+    fun `the next item drops the downloads of the one before`() {
+        val files = files(pgs, srt)
+        files.downloaded(pgs.url, "/cache/0-Stream.pgssub")
+        files.downloaded(srt.url, "/cache/1-Stream.srt")
+        val next = srt.copy(url = "$server/9/0/Stream.srt?ApiKey=k")
+
+        files.reset(listOf(next), null)
+
+        assertFalse(files.isFileOfItem(pgs.url), "a late download of it is not kept")
+        assertEquals(
+            setOf("/cache/0-Stream.pgssub", "/cache/1-Stream.srt"),
+            files.dropOtherDownloads().toSet(),
+            "both go",
+        )
+        assertEquals(emptyList(), files.dropOtherDownloads(), "once")
+    }
+
+    @Test
+    fun `with subtitles off nothing is fetched or shown until a file is picked`() {
+        val files = MpvSubtitleFiles().apply { reset(listOf(pgs, srt), null, textOff = true) }
+
+        assertEquals(emptyList(), files.toFetch(), "not the default file")
+        assertFalse(files.isWaitingFor(0), "and it is not listed as coming")
+        files.downloaded(pgs.url, "/cache/0-Stream.pgssub")
+        val show =
+            files.onTrackList(
+                mpvTracks(trackList(subtitle(1, "/cache/0-Stream.pgssub", "eng", "pgs", false)))
+            )
+        assertNull(show, "a file that arrives anyway stays off")
+        files.select(files.id(1))
+        assertEquals(listOf(srt.url), files.toFetch(), "a pick fetches")
+    }
+
+    @Test
+    fun `a file the server turns down is not tried again by itself`() {
+        val files = files(pgs, srt)
+        files.downloadStarted(pgs.url)
+
+        assertFalse(files.downloadFailed(pgs.url, retriable = false), "a 4xx: no retry")
+        assertFalse(files.isWaitingFor(0), "no longer listed as coming")
+        files.select(files.id(0))
+        assertEquals(listOf(pgs.url), files.toFetch(), "picking it again fetches it again")
+    }
+
+    @Test
+    fun `a canceled download is fetched again when wanted, and does not count as a failure`() {
+        val files = files(pgs, srt)
+        files.downloadStarted(pgs.url)
+
+        files.downloadCanceled(pgs.url)
+
+        assertEquals(listOf(pgs.url), files.toFetch(), "still wanted")
+        assertTrue(files.isWaitingFor(0), "and still listed as coming")
     }
 }

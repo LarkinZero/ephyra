@@ -78,16 +78,35 @@ internal class MpvSubtitleFiles {
     private var selection: Selection = Selection.Auto
     private var defaultShown = false
 
-    /** Starts over with the files of a new item (or of the same one, loaded again). */
-    fun reset(files: List<SubtitleFile>, preferredLanguage: String?) {
+    /**
+     * Starts over with the files of a new item (or of the same one, loaded again). With [textOff]
+     * (subtitles turned off in the track selection parameters) nothing is fetched or shown until a
+     * file is picked, as mpv's `sid=no` did before.
+     */
+    fun reset(files: List<SubtitleFile>, preferredLanguage: String?, textOff: Boolean = false) {
         this.files = files
         defaultFile = defaultSubtitleFile(files, preferredLanguage)
         added.clear()
         trackIds.clear()
-        selection = Selection.Auto
+        selection = if (textOff) Selection.Off else Selection.Auto
         defaultShown = false
         for (file in files) if (!file.remote) paths[file.url] = file.url
     }
+
+    /**
+     * Forgets the downloads that are not files of the current item, and returns their paths to
+     * delete: one item's files do not pile up over a whole queue. An item loaded again (a quality
+     * switch, a reload after an error) keeps its own.
+     */
+    fun dropOtherDownloads(): List<String> {
+        val current = files.mapTo(HashSet()) { it.url }
+        val dropped = paths.filter { (url, path) -> url !in current && url != path }
+        dropped.keys.forEach { paths -= it }
+        return dropped.values.toList()
+    }
+
+    /** Whether [url] is one of the current item's files. */
+    fun isFileOfItem(url: String): Boolean = files.any { it.url == url }
 
     /** The id the track list gives file [index], whether or not mpv has it. */
     fun id(index: Int): String = "$ID_PREFIX$index"
@@ -145,12 +164,21 @@ internal class MpvSubtitleFiles {
         paths[url] = path
     }
 
-    /** The download of [url] failed. Returns whether to try again by itself. */
-    fun downloadFailed(url: String): Boolean {
+    /**
+     * The download of [url] failed. Returns whether to try again by itself: not after
+     * [MAX_AUTOMATIC_RETRIES] failures, not for a file no longer wanted, and not when the server
+     * said it never will ([retriable] false: a 4xx). Picking the file again always tries again.
+     */
+    fun downloadFailed(url: String, retriable: Boolean = true): Boolean {
         downloading -= url
-        val count = (failures[url] ?: 0) + 1
+        val count = if (retriable) (failures[url] ?: 0) + 1 else MAX_AUTOMATIC_RETRIES
         failures[url] = count
         return count < MAX_AUTOMATIC_RETRIES && url in toFetch()
+    }
+
+    /** The player dropped the download of [url]; it is fetched again when wanted. */
+    fun downloadCanceled(url: String) {
+        downloading -= url
     }
 
     /** The files mpv can be given now and does not have, in order; they count as given after it. */
@@ -219,10 +247,6 @@ internal class MpvSubtitleFiles {
             }
         }
     }
-
-    /** The downloads to drop with the player: every path of a file the player downloaded. */
-    fun downloadedPaths(): List<String> =
-        paths.filter { (url, path) -> url != path }.values.toList()
 
     companion object {
         const val ID_PREFIX = "file:"

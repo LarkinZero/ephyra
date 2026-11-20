@@ -46,6 +46,7 @@ import dev.jdtech.mpv.MPVLib.MpvFormat
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 import okhttp3.Call
@@ -284,8 +285,8 @@ class MPVPlayer(
         }
 
         /**
-         * CE (#711): downloads the subtitle files, see [MpvSubtitleFiles]. Without it mpv opens
-         * them itself, with its own network timeout.
+         * CE (#711): downloads the subtitle files, see [MpvSubtitleFiles]: the API's client, so
+         * they go the way the API calls go. Without it a client of its own downloads them.
          */
         fun setSubtitleHttpClient(client: OkHttpClient) = apply { this.subtitleHttpClient = client }
 
@@ -520,18 +521,28 @@ class MPVPlayer(
     /** The last track list mpv sent, so the tracks can be listed again when a pick changes them. */
     private var lastTrackList: String? = null
 
-    private val subtitleHttpClient: OkHttpClient? =
-        subtitleHttpClient
-            ?.newBuilder()
+    private val subtitleHttpClient: OkHttpClient =
+        (subtitleHttpClient ?: OkHttpClient())
+            .newBuilder()
             // The server answers once it has extracted the file's subtitle tracks: minutes on a
             // slow disk. A read that times out is tried again (see onSubtitleDownloaded).
-            ?.readTimeout(SUBTITLE_READ_TIMEOUT_MINUTES, TimeUnit.MINUTES)
-            ?.build()
+            .readTimeout(SUBTITLE_READ_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+            .build()
 
     /** The subtitle downloads that run, by URL. */
     private val subtitleDownloads = HashMap<String, Call>()
-    /** This player's own folder: a new player can start while the old one is still released. */
-    private val subtitleDir = File(context.cacheDir, "mpv-subtitles/${UUID.randomUUID()}")
+
+    /**
+     * This player's own folder of downloaded subtitle files, under [SUBTITLE_DIR] in the cache: a
+     * new player can start while the old one is still being released. Each item's files go when the
+     * next item starts, the folder goes with the player, and folders left by a process that died
+     * are removed when the next player starts (see [removeStaleSubtitleDirs]).
+     */
+    private val subtitleDir =
+        File(File(context.cacheDir, SUBTITLE_DIR), UUID.randomUUID().toString()).also {
+            liveSubtitleDirs += it.name
+            removeStaleSubtitleDirs(it.parentFile!!)
+        }
     private var subtitleDownloadCount = 0
     private var initialIndex: Int = 0
     private var initialSeekTo: Long = 0L
@@ -1078,37 +1089,38 @@ class MPVPlayer(
 
     /** CE (#711): starts the downloads of the subtitle files that are wanted and not there. */
     private fun fetchSubtitleFiles() {
-        val client = subtitleHttpClient
         for (url in subtitles.toFetch()) {
-            if (client == null) {
-                // mpv opens it itself, as before #711.
-                subtitles.downloaded(url, url)
-                continue
-            }
             subtitles.downloadStarted(url)
             val name = subtitleFileName(url)
             val target = File(subtitleDir, "${subtitleDownloadCount++}-$name")
             Timber.d("Subtitle file downloading: $name")
-            val call = client.newCall(Request.Builder().url(url).build())
+            val call = subtitleHttpClient.newCall(Request.Builder().url(url).build())
             subtitleDownloads[url] = call
             call.enqueue(
                 object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
-                        post { onSubtitleDownloaded(url, null, e) }
+                        post { onSubtitleDownloadFailed(url, call, e, retriable = true) }
                     }
 
                     override fun onResponse(call: Call, response: Response) {
                         try {
                             response.use {
-                                if (!it.isSuccessful) throw IOException("HTTP ${it.code}")
+                                if (!it.isSuccessful) {
+                                    // The server turned it down for good: no retries (as on
+                                    // ExoPlayer, SubtitleFileMediaPeriod.isRetriable).
+                                    val retriable = it.code !in 400..499
+                                    val error = IOException("HTTP ${it.code}")
+                                    post { onSubtitleDownloadFailed(url, call, error, retriable) }
+                                    return
+                                }
                                 subtitleDir.mkdirs()
                                 val body = it.body ?: throw IOException("No body")
                                 target.outputStream().use { out -> body.byteStream().copyTo(out) }
                             }
-                            post { onSubtitleDownloaded(url, target.path, null) }
+                            post { onSubtitleDownloaded(url, target) }
                         } catch (e: IOException) {
                             target.delete()
-                            post { onSubtitleDownloaded(url, null, e) }
+                            post { onSubtitleDownloadFailed(url, call, e, retriable = true) }
                         }
                     }
                 }
@@ -1116,19 +1128,49 @@ class MPVPlayer(
         }
     }
 
-    private fun onSubtitleDownloaded(url: String, path: String?, error: IOException?) {
+    private fun onSubtitleDownloaded(url: String, target: File) {
         subtitleDownloads.remove(url)
         val name = subtitleFileName(url)
-        if (path != null) {
-            Timber.d("Subtitle file downloaded: $name")
-            subtitles.downloaded(url, path)
-            addSubtitleFiles()
+        if (!subtitles.isFileOfItem(url)) {
+            // The item it was for is gone (its download ended as the next one started).
+            Thread { target.delete() }.start()
+            subtitles.downloadCanceled(url)
             return
         }
-        Timber.w("Subtitle file download failed: $name: ${error?.message}")
-        if (subtitles.downloadFailed(url)) {
+        Timber.d("Subtitle file downloaded: $name")
+        subtitles.downloaded(url, target.path)
+        addSubtitleFiles()
+    }
+
+    private fun onSubtitleDownloadFailed(
+        url: String,
+        call: Call,
+        error: IOException,
+        retriable: Boolean,
+    ) {
+        subtitleDownloads.remove(url)
+        val name = subtitleFileName(url)
+        if (call.isCanceled()) {
+            Timber.d("Subtitle file download canceled: $name")
+            subtitles.downloadCanceled(url)
+            return
+        }
+        Timber.w("Subtitle file download failed: $name: ${error.message}")
+        if (subtitles.downloadFailed(url, retriable)) {
             handler.postDelayed({ if (!released) fetchSubtitleFiles() }, SUBTITLE_RETRY_DELAY_MS)
         }
+    }
+
+    /**
+     * CE (#711): stops the subtitle downloads that are not for the current item's files and deletes
+     * the files of the item before, so they do not pile up over a queue.
+     */
+    private fun dropOtherSubtitleFiles() {
+        val calls = subtitleDownloads.filterKeys { !subtitles.isFileOfItem(it) }
+        if (calls.isNotEmpty()) Timber.d("Subtitle file downloads canceled: ${calls.size}")
+        calls.values.forEach { it.cancel() }
+        val stale = subtitles.dropOtherDownloads()
+        if (stale.isNotEmpty()) Thread { stale.forEach { File(it).delete() } }.start()
     }
 
     /** CE (#711): gives mpv the subtitle files that are there and that it does not have. */
@@ -1905,7 +1947,10 @@ class MPVPlayer(
                     )
                 },
                 preferredLanguage = trackSelectionParameters.preferredTextLanguages.firstOrNull(),
+                // Subtitles off stay off: mpv had sid=no, so it showed none of the files.
+                textOff = C.TRACK_TYPE_TEXT in trackSelectionParameters.disabledTrackTypes,
             )
+            dropOtherSubtitleFiles()
             fetchSubtitleFiles()
             // Only set the playlist index when the index is not the currently playing item.
             // Otherwise
@@ -1983,9 +2028,16 @@ class MPVPlayer(
         setBecomingNoisyRegistered(false)
         resetInternalState()
         // CE (#711): the subtitle downloads go with the player.
+        if (subtitleDownloads.isNotEmpty()) {
+            Timber.d("Subtitle file downloads canceled: ${subtitleDownloads.size}")
+        }
         subtitleDownloads.values.forEach { it.cancel() }
         subtitleDownloads.clear()
-        Thread { subtitleDir.deleteRecursively() }.start()
+        Thread {
+                subtitleDir.deleteRecursively()
+                liveSubtitleDirs -= subtitleDir.name
+            }
+            .start()
         playbackState = STATE_IDLE
         currentPlayWhenReady = false
         mpvLib.removeObserver(this)
@@ -2549,6 +2601,27 @@ class MPVPlayer(
 
         /** CE (#711): how long a failed subtitle download waits before it is tried again. */
         private const val SUBTITLE_RETRY_DELAY_MS = 5_000L
+
+        /** CE (#711): the cache folder that holds a folder of downloaded subtitles per player. */
+        private const val SUBTITLE_DIR = "mpv-subtitles"
+
+        /** CE (#711): the subtitle folders of the players of this process that are not released. */
+        private val liveSubtitleDirs: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+        /**
+         * CE (#711): removes the subtitle folders in [parent] that no player of this process uses:
+         * those of a process that died (a crash, a kill in the background) before it released its
+         * player. A live player's folder is in [liveSubtitleDirs] from before it is created.
+         */
+        private fun removeStaleSubtitleDirs(parent: File) {
+            Thread {
+                    parent
+                        .listFiles()
+                        ?.filter { it.name !in liveSubtitleDirs }
+                        ?.forEach { it.deleteRecursively() }
+                }
+                .start()
+        }
 
         private val permanentAvailableCommands: Commands =
             Commands.Builder()
