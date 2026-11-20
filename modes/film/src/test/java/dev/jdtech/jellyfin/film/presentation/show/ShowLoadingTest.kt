@@ -14,6 +14,9 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -26,9 +29,6 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.jellyfin.sdk.model.api.ItemFields
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -185,7 +185,7 @@ class ShowLoadingTest {
         collector.cancel()
 
         assertTrue(seen.isNotEmpty())
-        assertTrue("Download vanished during a reload: $seen", seen.all { it })
+        assertTrue(seen.all { it }, message = "Download vanished during a reload: $seen")
     }
 
     private fun viewModel(vararg counts: SeasonEpisodeCounts): ShowViewModel {

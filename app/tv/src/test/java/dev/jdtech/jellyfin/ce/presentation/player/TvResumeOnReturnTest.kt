@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.ce.presentation.player
 
 import dev.jdtech.jellyfin.ce.presentation.player.TvResumeOnReturn.Action
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /**

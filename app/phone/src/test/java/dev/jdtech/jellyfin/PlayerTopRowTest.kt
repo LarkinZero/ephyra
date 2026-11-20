@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /** The player's top row starts at its end when it does not fit, and stays there until moved. */

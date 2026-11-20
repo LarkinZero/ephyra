@@ -19,7 +19,7 @@ import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,10 +57,10 @@ class DownloadsWidthCapTest {
             rule
                 .onNodeWithContentDescription(rule.activity.getString(CoreR.string.cancel_download))
                 .getUnclippedBoundsInRoot()
-        assertTrue("speed ends at ${speed.right}", speed.right <= capRightEdge)
-        assertTrue("cancel ends at ${cancel.right}", cancel.right <= capRightEdge)
+        assertTrue(speed.right <= capRightEdge, message = "speed ends at ${speed.right}")
+        assertTrue(cancel.right <= capRightEdge, message = "cancel ends at ${cancel.right}")
         // Aligned to the start like the columns below, not centred.
-        assertTrue("cancel starts at ${cancel.left}", cancel.left < 720.dp)
+        assertTrue(cancel.left < 720.dp, message = "cancel starts at ${cancel.left}")
     }
 
     @Test
@@ -72,7 +72,7 @@ class DownloadsWidthCapTest {
             movies.take(2).map { movie ->
                 rule.onNodeWithText(movie.name).getUnclippedBoundsInRoot()
             }
-        assertTrue("second column starts at ${titles[1].left}", titles[1].left > 600.dp)
+        assertTrue(titles[1].left > 600.dp, message = "second column starts at ${titles[1].left}")
     }
 
     @Test
@@ -84,7 +84,7 @@ class DownloadsWidthCapTest {
             rule
                 .onNodeWithContentDescription(rule.activity.getString(CoreR.string.cancel_download))
                 .getUnclippedBoundsInRoot()
-        assertTrue("cancel ends at ${cancel.right}", cancel.right <= capRightEdge)
+        assertTrue(cancel.right <= capRightEdge, message = "cancel ends at ${cancel.right}")
     }
 
     private fun show() {

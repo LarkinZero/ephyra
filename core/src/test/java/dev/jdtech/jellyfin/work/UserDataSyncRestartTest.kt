@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.work
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 
 /** CE (#552): what a sign of the server being back does to the user data sync. */

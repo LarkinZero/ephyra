@@ -5,8 +5,8 @@ import dev.jdtech.jellyfin.models.UiText
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import kotlin.test.assertEquals
 import org.jellyfin.sdk.api.client.exception.TimeoutException
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /** CE (#530): a download that cannot start because the server is out of reach says so. */

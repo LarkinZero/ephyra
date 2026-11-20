@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.ce.presentation.player
 
 import androidx.media3.common.Player
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 
 /**

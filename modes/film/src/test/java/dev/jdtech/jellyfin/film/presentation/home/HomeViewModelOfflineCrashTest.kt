@@ -6,6 +6,10 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.IOException
 import java.lang.reflect.Proxy
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,10 +20,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -80,17 +80,20 @@ class HomeViewModelOfflineCrashTest {
 
         // The fix: nothing escapes -> the app does not crash.
         assertNull(
-            "HomeViewModel.loadData() must not leak an uncaught exception while offline",
             runBlocking { withTimeoutOrNull(500) { uncaught.await() } },
+            message = "HomeViewModel.loadData() must not leak an uncaught exception while offline",
         )
 
         // The offline failure is surfaced in HomeState instead, for the UI to show.
-        assertNotNull("loadData() should have settled within the timeout", state)
-        assertFalse("loadData() should finish loading", state!!.isLoading)
-        assertNotNull("loadData() should surface the offline error in HomeState", state.error)
+        assertNotNull(state, message = "loadData() should have settled within the timeout")
+        assertFalse(state!!.isLoading, message = "loadData() should finish loading")
+        assertNotNull(
+            state.error,
+            message = "loadData() should surface the offline error in HomeState",
+        )
         assertTrue(
-            "the surfaced error should be the offline IOException",
             generateSequence<Throwable>(state.error) { it.cause }.any { it is IOException },
+            message = "the surfaced error should be the offline IOException",
         )
     }
 

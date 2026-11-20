@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +46,10 @@ class EpisodeTopBarLinksTest {
 
         rule.onNodeWithText(dummyEpisode.seriesName).performClick()
 
-        assertEquals(listOf(EpisodeAction.NavigateToSeries(dummyEpisode.seriesId)), actions)
+        assertEquals<List<EpisodeAction>>(
+            listOf(EpisodeAction.NavigateToSeries(dummyEpisode.seriesId)),
+            actions,
+        )
     }
 
     @Test
@@ -57,7 +60,7 @@ class EpisodeTopBarLinksTest {
 
         rule.onNodeWithText(dummyEpisode.seasonName!!).performClick()
 
-        assertEquals(
+        assertEquals<List<EpisodeAction>>(
             listOf(EpisodeAction.NavigateToSeason(dummyEpisode.seasonId, dummyEpisode.seriesId)),
             actions,
         )

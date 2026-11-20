@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.repository
 
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.PlayMethod
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class PlaySessionsTest {

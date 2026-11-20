@@ -7,9 +7,9 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,8 +110,8 @@ class EpisodeSheetCoverTest {
         // The sheet is offered from 840 dp wide, where it takes the largest share of the window.
         for (width in listOf(840, 841, 1024, 1067, 1280, 1400, 1600)) {
             val hidden = controlsUnderEpisodeSheet(lowerControls(width, 600), sheetIn(width, 600))
-            assertFalse("at $width dp", "play/pause" in hidden)
-            assertFalse("at $width dp", "rewind" in hidden)
+            assertFalse("play/pause" in hidden, message = "at $width dp")
+            assertFalse("rewind" in hidden, message = "at $width dp")
         }
     }
 

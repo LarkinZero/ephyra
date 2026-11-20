@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.mpv
 
 import dev.jdtech.jellyfin.player.local.mpv.MpvStallWatch.Verdict
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 /**
@@ -37,7 +37,9 @@ class MpvStallWatchTest {
     @Test
     fun `a stall that goes on gives up after a minute`() {
         tick(617_000L)
-        repeat(59) { assertEquals("second ${it + 1}", true, tick(617_000L) != Verdict.GIVE_UP) }
+        repeat(59) {
+            assertEquals(true, tick(617_000L) != Verdict.GIVE_UP, message = "second ${it + 1}")
+        }
         assertEquals(Verdict.GIVE_UP, tick(617_000L))
     }
 

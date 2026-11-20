@@ -3,14 +3,10 @@ package dev.jdtech.jellyfin.presentation.film
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -62,6 +58,7 @@ import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.utils.Layout
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 
 /** The downloaded episodes of one show, by season, with per-episode and remove-all actions. */
@@ -136,12 +133,12 @@ fun DownloadedShowScreen(
                         )
                     }
                 },
-                windowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+                windowInsets = topAndSideInsets,
                 scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets = topAndSideInsets,
     ) { innerPadding ->
         val rowWidth = Modifier.widthIn(max = Layout.textMaxWidth).fillMaxWidth()
         LazyColumn(

@@ -95,13 +95,15 @@ subprojects {
     // The unit tests run on the JUnit Platform (#699). The tests are still JUnit 4 and run through
     // the Vintage engine; Jupiter is there for tests that move to it. The launcher is listed
     // because Gradle 9 no longer adds it. Set here, so no module can run on the platform without
-    // the engines (and then find no tests).
+    // the engines (and then find no tests). The assertions are kotlin.test's, which work under
+    // both engines.
     listOf("com.android.application", "com.android.library").forEach { id ->
         pluginManager.withPlugin(id) {
             val libs = rootProject.libs
             dependencies {
                 "testImplementation"(platform(libs.junit.bom))
                 "testImplementation"(libs.junit.jupiter)
+                "testImplementation"(libs.kotlin.test)
                 "testRuntimeOnly"(libs.junit.vintage.engine)
                 "testRuntimeOnly"(libs.junit.platform.launcher)
             }

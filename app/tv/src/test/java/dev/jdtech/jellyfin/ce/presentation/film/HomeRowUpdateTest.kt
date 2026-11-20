@@ -20,7 +20,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,8 +64,11 @@ class HomeRowUpdateTest {
 
     private fun assertOnScreen(item: FindroidItem) {
         val bounds = rule.onNode(card(item)).getBoundsInRoot()
-        assertTrue("${item.name} starts at ${bounds.left}", bounds.left >= TvSafeArea.horizontal)
-        assertTrue("${item.name} ends at ${bounds.right}", bounds.right <= 960.dp)
+        assertTrue(
+            bounds.left >= TvSafeArea.horizontal,
+            message = "${item.name} starts at ${bounds.left}",
+        )
+        assertTrue(bounds.right <= 960.dp, message = "${item.name} ends at ${bounds.right}")
     }
 
     @Test

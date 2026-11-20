@@ -23,8 +23,8 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import dev.jdtech.jellyfin.film.presentation.search.SearchState
 import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

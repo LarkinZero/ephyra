@@ -17,9 +17,9 @@ import java.lang.reflect.Proxy
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

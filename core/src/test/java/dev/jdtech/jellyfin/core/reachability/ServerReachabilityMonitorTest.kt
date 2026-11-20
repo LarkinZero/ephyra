@@ -1,5 +1,8 @@
 package dev.jdtech.jellyfin.core.reachability
 
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
@@ -8,9 +11,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -59,7 +59,7 @@ class ServerReachabilityMonitorTest {
             advanceTimeBy(2)
             runCurrent()
             assertEquals(Reachability.Unreachable, monitor.reachability)
-            assertFalse("one slow probe does not confirm", monitor.state.value.confirmed)
+            assertFalse(monitor.state.value.confirmed, message = "one slow probe does not confirm")
         }
 
     @Test
@@ -185,7 +185,10 @@ class ServerReachabilityMonitorTest {
         runCurrent()
         assertEquals(1, probes)
         assertTrue(monitor.state.value.unreachable)
-        assertFalse("the request itself has not failed yet", monitor.state.value.confirmed)
+        assertFalse(
+            monitor.state.value.confirmed,
+            message = "the request itself has not failed yet",
+        )
 
         // The request gives up after its own timeout: that confirms.
         monitor.onUnanswered()
@@ -346,7 +349,7 @@ class ServerReachabilityMonitorTest {
         monitor.reset()
         advanceTimeBy(1_001)
         runCurrent()
-        assertFalse("the old server's answer", monitor.state.value.unreachable)
+        assertFalse(monitor.state.value.unreachable, message = "the old server's answer")
 
         advanceTimeBy(250 + 1_001)
         runCurrent()

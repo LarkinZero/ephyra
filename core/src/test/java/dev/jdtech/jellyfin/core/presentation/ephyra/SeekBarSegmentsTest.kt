@@ -2,7 +2,7 @@ package dev.jdtech.jellyfin.core.presentation.ephyra
 
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidSegmentType
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 
 class SeekBarSegmentsTest {

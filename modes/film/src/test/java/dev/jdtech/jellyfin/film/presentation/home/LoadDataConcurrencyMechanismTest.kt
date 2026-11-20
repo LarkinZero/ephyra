@@ -1,6 +1,9 @@
 package dev.jdtech.jellyfin.film.presentation.home
 
 import java.io.IOException
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -13,9 +16,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -74,18 +74,18 @@ class LoadDataConcurrencyMechanismTest {
         job.join()
 
         // The developer DID add a try/catch, and it even caught something...
-        assertNotNull("try/catch around awaitAll caught an exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch around awaitAll caught an exception")
         // ...but the async-child failure ALSO propagated to the parent Job and
         // reached the scope's exception handler. In the real viewModelScope — which
         // installs no handler — this is the app's uncaught exception handler == crash.
         val escapedException = withTimeoutOrNull(2_000) { escaped.await() }
         assertNotNull(
-            "async-child failure escaped the try/catch and would crash the app",
             escapedException,
+            message = "async-child failure escaped the try/catch and would crash the app",
         )
         assertTrue(
-            "the escaped exception is the offline IOException",
             escapedException is IOException,
+            message = "the escaped exception is the offline IOException",
         )
     }
 
@@ -116,10 +116,10 @@ class LoadDataConcurrencyMechanismTest {
             }
         job.join()
 
-        assertNotNull("try/catch caught the exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch caught the exception")
         assertNull(
-            "nothing escaped: sequential calls do not crash the app",
             withTimeoutOrNull(500) { escaped.await() },
+            message = "nothing escaped: sequential calls do not crash the app",
         )
     }
 
@@ -155,10 +155,10 @@ class LoadDataConcurrencyMechanismTest {
             }
         job.join()
 
-        assertNotNull("try/catch caught the exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch caught the exception")
         assertNull(
-            "nothing escaped: coroutineScope { } contains the failure",
             withTimeoutOrNull(500) { escaped.await() },
+            message = "nothing escaped: coroutineScope { } contains the failure",
         )
     }
 
@@ -191,9 +191,9 @@ class LoadDataConcurrencyMechanismTest {
             }
         job.join()
 
-        assertTrue("the failing row reports its failure", results[0].isFailure)
-        assertTrue("the other row finished", results[1].getOrNull() == "loaded")
-        assertNull("nothing escaped", withTimeoutOrNull(500) { escaped.await() })
+        assertTrue(results[0].isFailure, message = "the failing row reports its failure")
+        assertTrue(results[1].getOrNull() == "loaded", message = "the other row finished")
+        assertNull(withTimeoutOrNull(500) { escaped.await() }, message = "nothing escaped")
     }
 
     /** Models a network call that fails because the device is offline. */
