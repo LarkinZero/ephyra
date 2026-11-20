@@ -49,7 +49,6 @@ constructor(
             scope = scope,
             probe = { jellyfinApi.probeServer() },
             hasNetwork = ::hasNetwork,
-            enabled = { !appPreferences.getValue(appPreferences.offlineMode) },
             now = SystemClock::elapsedRealtime,
             probeTimeoutMs = JellyfinApi.PROBE_TIMEOUT_MS,
         )

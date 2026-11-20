@@ -167,7 +167,6 @@ constructor(
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
-                    appPreferences.observe(appPreferences.offlineMode),
                     appPreferences.observe(appPreferences.showFavoritesTab),
                     askUserOnStart,
                     profileLocked,
@@ -176,21 +175,17 @@ constructor(
                 ) { values ->
                     val flags = values[0] as SetupFlags
                     val dynamicColors = values[1] as Boolean
-                    val offlineMode = values[2] as Boolean
-                    val showFavoritesTab = values[3] as Boolean
-                    val askUserOnStart = values[4] as Boolean
-                    val profileLocked = values[5] as Boolean
-                    val hideSpoilers = values[6] as Boolean
-                    val sideBackdrop = values[7] as Boolean
+                    val showFavoritesTab = values[2] as Boolean
+                    val askUserOnStart = values[3] as Boolean
+                    val profileLocked = values[4] as Boolean
+                    val hideSpoilers = values[5] as Boolean
+                    val sideBackdrop = values[6] as Boolean
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
                         hasServers = flags.hasServers,
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
-                        // CE (#281): only the setting. Without a connection the UI stays as
-                        // it is and the reachability banner says so.
-                        isOfflineMode = offlineMode,
                         showFavoritesTab = showFavoritesTab,
                         askUserOnStart = askUserOnStart,
                         profileLocked = profileLocked,
@@ -215,7 +210,6 @@ data class MainState(
     val hasServers: Boolean = false,
     val hasCurrentServer: Boolean = false,
     val hasCurrentUser: Boolean = false,
-    val isOfflineMode: Boolean = false,
     val showFavoritesTab: Boolean = true,
     val askUserOnStart: Boolean = false,
     /** CE (#299): the current profile asks for its PIN before Home shows. */

@@ -59,7 +59,7 @@ const val CAST_DEVICE_SHEET_TAG = "cast_device_sheet"
 @Composable
 fun CastDeviceSheet(
     state: CastUiState,
-    isOfflineMode: Boolean,
+    serverUnreachable: Boolean,
     onConnect: (Device) -> Unit,
     onDisconnect: () -> Unit,
     onSearchAgain: () -> Unit,
@@ -72,7 +72,7 @@ fun CastDeviceSheet(
     ) {
         CastDeviceSheetContent(
             state = state,
-            isOfflineMode = isOfflineMode,
+            serverUnreachable = serverUnreachable,
             onConnect = onConnect,
             onDisconnect = onDisconnect,
             onSearchAgain = onSearchAgain,
@@ -85,7 +85,7 @@ fun CastDeviceSheet(
 @Composable
 internal fun CastDeviceSheetContent(
     state: CastUiState,
-    isOfflineMode: Boolean,
+    serverUnreachable: Boolean,
     onConnect: (Device) -> Unit,
     onDisconnect: () -> Unit,
     onSearchAgain: () -> Unit,
@@ -101,8 +101,8 @@ internal fun CastDeviceSheetContent(
                 .padding(bottom = MaterialTheme.spacings.default)
     ) {
         when {
-            state.availability != CastAvailability.AVAILABLE || isOfflineMode ->
-                Unavailable(state.availability, isOfflineMode)
+            state.availability != CastAvailability.AVAILABLE || serverUnreachable ->
+                Unavailable(state.availability, serverUnreachable)
             device != null && (state.isConnected || state.isReconnecting) ->
                 Connected(state, device, onDisconnect, onOpenPlayer)
             else -> Devices(state, onConnect, onSearchAgain)
@@ -132,7 +132,7 @@ private fun SheetBody(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Unavailable(availability: CastAvailability, isOfflineMode: Boolean) {
+private fun Unavailable(availability: CastAvailability, serverUnreachable: Boolean) {
     SheetTitle(stringResource(CoreR.string.ce_cast_unavailable_title))
     Spacer(Modifier.height(MaterialTheme.spacings.small))
     SheetBody(
@@ -140,7 +140,7 @@ private fun Unavailable(availability: CastAvailability, isOfflineMode: Boolean) 
             when {
                 availability == CastAvailability.NO_PLAY_SERVICES ->
                     CoreR.string.ce_cast_unavailable_play_services
-                isOfflineMode -> CoreR.string.ce_cast_unavailable_offline
+                serverUnreachable -> CoreR.string.ce_cast_unavailable_offline
                 else -> CoreR.string.ce_cast_unavailable_play_services
             }
         )
@@ -370,7 +370,7 @@ private fun CastDeviceSheetPreview(@PreviewParameter(CastStateProvider::class) s
         Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             CastDeviceSheetContent(
                 state = state,
-                isOfflineMode = false,
+                serverUnreachable = false,
                 onConnect = {},
                 onDisconnect = {},
                 onSearchAgain = {},

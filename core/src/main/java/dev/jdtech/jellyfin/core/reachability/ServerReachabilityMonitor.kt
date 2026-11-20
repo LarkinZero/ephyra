@@ -23,13 +23,11 @@ import kotlinx.coroutines.withTimeoutOrNull
  *
  * @param probe true when the server answered, false when it did not, null when no server is set
  * @param hasNetwork whether the device has a network at all
- * @param enabled false while the Offline Mode setting is on: then nothing is probed or shown
  */
 class ServerReachabilityMonitor(
     private val scope: CoroutineScope,
     private val probe: suspend () -> Boolean?,
     private val hasNetwork: () -> Boolean,
-    private val enabled: () -> Boolean,
     private val now: () -> Long,
     private val probeTimeoutMs: Long,
     private val settleMs: Long = NETWORK_SETTLE_MS,
@@ -49,9 +47,8 @@ class ServerReachabilityMonitor(
 
     /**
      * Emits when it is worth sending the server what is waiting for it: a probe reached it, or the
-     * app came to the foreground and the server answered a moment ago. While Offline Mode is on
-     * nothing is probed, and the foreground and network signs are passed on as they come. (The
-     * server answering a request again after failed ones is `JellyfinApi.serverReturned`.)
+     * app came to the foreground and the server answered a moment ago. (The server answering a
+     * request again after failed ones is `JellyfinApi.serverReturned`.)
      */
     val serverConfirmed: SharedFlow<Unit> = _serverConfirmed.asSharedFlow()
 
@@ -67,7 +64,7 @@ class ServerReachabilityMonitor(
     override fun onStarted() {
         synchronized(lock) {
             tracker.onRequestStarted()
-            if (slowRequestJob?.isActive != true && enabled()) {
+            if (slowRequestJob?.isActive != true) {
                 slowRequestJob = scope.launch { watchSlowRequest() }
             }
         }
@@ -76,7 +73,7 @@ class ServerReachabilityMonitor(
     override fun onAnswered() {
         synchronized(lock) {
             tracker.onRequestAnswered()
-            if (enabled()) publish()
+            publish()
         }
     }
 
@@ -84,8 +81,8 @@ class ServerReachabilityMonitor(
         val wantsProbe =
             synchronized(lock) {
                 val wanted = tracker.onRequestFailed()
-                if (enabled()) publish()
-                wanted && enabled()
+                publish()
+                wanted
             }
         if (wantsProbe) requestProbe()
     }
@@ -117,16 +114,9 @@ class ServerReachabilityMonitor(
         val wantsProbe =
             synchronized(lock) {
                 foreground = true
-                val enabled = enabled()
-                if (!enabled) {
-                    // Offline Mode was switched on: what was known is not shown or kept.
-                    tracker.reset()
-                    publish()
-                }
-                enabled && tracker.wantsProbe()
+                tracker.wantsProbe()
             }
-        // Without a probe (the server answered a moment ago, or Offline Mode is on and nothing
-        // is probed) the sign itself is passed on, as before #281.
+        // Without a probe (the server answered a moment ago) the sign itself is passed on.
         if (wantsProbe) requestProbe() else _serverConfirmed.tryEmit(Unit)
     }
 
@@ -190,14 +180,6 @@ class ServerReachabilityMonitor(
     }
 
     private suspend fun runProbe() {
-        if (!enabled()) {
-            synchronized(lock) {
-                tracker.reset()
-                publish()
-            }
-            _serverConfirmed.tryEmit(Unit)
-            return
-        }
         if (!hasNetwork()) {
             synchronized(lock) {
                 tracker.onNoNetwork()

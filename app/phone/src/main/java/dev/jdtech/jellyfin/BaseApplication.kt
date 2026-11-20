@@ -86,6 +86,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
         appPreferences.migrateMpvAudioOutput()
         // CE (#271): the old media segment switches become one action per segment type.
         appPreferences.migrateMediaSegmentActions()
+        // CE (#281): the Offline Mode setting is gone; its stored value goes too.
+        appPreferences.removeOfflineMode()
 
         // Smart Downloads reacts to the player reporting a stop, which can happen at any time.
         smartDownloads.start()

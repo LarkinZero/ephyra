@@ -78,7 +78,6 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
@@ -261,12 +260,8 @@ private fun SeasonScreenLayout(
         remember(state.episodeDownloadProgress, hiddenIds) {
             state.episodeDownloadProgress - hiddenIds
         }
-    val offlineMode = LocalOfflineMode.current
     // These only depend on the episode list, so a progress tick must not redo them.
-    val episodes =
-        remember(state.episodes, hiddenIds, offlineMode) {
-            if (offlineMode) state.episodes.filterNot { it.id in hiddenIds } else state.episodes
-        }
+    val episodes = state.episodes
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
     val anyCanDownload = remember(episodes) { episodes.any { it.canDownload } }

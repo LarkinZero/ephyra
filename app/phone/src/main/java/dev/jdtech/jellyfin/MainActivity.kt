@@ -21,7 +21,6 @@ import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.LocalNotificationPermissionRequest
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPlaybackStopped
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.LocalSideBackdrop
@@ -63,24 +62,18 @@ class MainActivity : AppCompatActivity() {
             // CE (#281): whether the server answers, for the banner and the error pages.
             val server by viewModel.serverStatus.collectAsStateWithLifecycle()
             val serverStatus =
-                remember(server, state.isOfflineMode) {
-                    if (state.isOfflineMode) {
-                        // Offline Mode shows its own chip and asks nothing of the server.
-                        ServerStatusUi()
-                    } else {
-                        ServerStatusUi(
-                            unreachable = server.unreachable,
-                            confirmedUnreachable = server.confirmedUnreachable,
-                            hasDownloads = server.hasDownloads,
-                            check = viewModel::checkServer,
-                        )
-                    }
+                remember(server) {
+                    ServerStatusUi(
+                        unreachable = server.unreachable,
+                        confirmedUnreachable = server.confirmedUnreachable,
+                        hasDownloads = server.hasDownloads,
+                        check = viewModel::checkServer,
+                    )
                 }
 
             FindroidTheme(dynamicColor = state.isDynamicColors) {
                 if (!state.isLoading) {
                     CompositionLocalProvider(
-                        LocalOfflineMode provides state.isOfflineMode,
                         LocalSpoilers provides Spoilers(state.hideSpoilers),
                         LocalSideBackdrop provides state.sideBackdrop,
                         LocalServerStatus provides serverStatus,

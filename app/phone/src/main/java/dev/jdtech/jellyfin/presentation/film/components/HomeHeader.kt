@@ -38,7 +38,6 @@ import dev.jdtech.jellyfin.presentation.cast.CastHeaderButton
 import dev.jdtech.jellyfin.presentation.components.UserAvatar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 
 @Composable
 fun HomeHeader(
@@ -50,8 +49,6 @@ fun HomeHeader(
     user: User? = null,
     baseUrl: String? = null,
 ) {
-    val isOfflineMode = LocalOfflineMode.current
-
     Row(
         modifier = modifier.fillMaxWidth().height(56.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,48 +82,21 @@ fun HomeHeader(
         Spacer(Modifier.width(MaterialTheme.spacings.medium))
 
         Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-            if (isOfflineMode) {
-                Surface(
-                    modifier = Modifier.fillMaxHeight(),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+            Surface(
+                onClick = onSearchClick,
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_server_off),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Text(
-                            text = stringResource(CoreR.string.offline),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                    }
-                }
-            }
-            if (!isOfflineMode) {
-                Surface(
-                    onClick = onSearchClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_search),
-                            contentDescription = stringResource(CoreR.string.search),
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_search),
+                        contentDescription = stringResource(CoreR.string.search),
+                    )
                 }
             }
 

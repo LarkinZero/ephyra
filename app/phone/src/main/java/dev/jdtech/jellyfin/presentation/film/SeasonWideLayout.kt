@@ -110,7 +110,6 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -321,11 +320,7 @@ fun SeasonWideLayout(
         remember(state.episodeDownloadProgress, hiddenIds) {
             state.episodeDownloadProgress - hiddenIds
         }
-    val offlineMode = LocalOfflineMode.current
-    val episodes =
-        remember(state.episodes, hiddenIds, offlineMode) {
-            if (offlineMode) state.episodes.filterNot { it.id in hiddenIds } else state.episodes
-        }
+    val episodes = state.episodes
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
     val anyCanDownload = remember(episodes) { episodes.any { it.canDownload } }
@@ -732,7 +727,7 @@ private fun SeasonEpisodeDetailPane(
 ) {
     val context = LocalContext.current
     val castPlayback = LocalCastPlayback.current
-    val isOfflineMode = LocalOfflineMode.current || LocalServerStatus.current.unreachable
+    val serverAway = LocalServerStatus.current.unreachable
     val viewModel: EpisodeViewModel = hiltViewModel(key = "season-detail-episode-$episodeId")
     val downloaderViewModel: DownloaderViewModel =
         hiltViewModel(key = "season-detail-downloader-$episodeId")
@@ -761,8 +756,9 @@ private fun SeasonEpisodeDetailPane(
                 currentOnDownloadChanged()
             }
             is DownloaderEvent.Deleted -> {
-                // Offline, the season drops the episode and the selection moves on.
-                if (!isOfflineMode) viewModel.loadEpisode(episodeId = episodeId)
+                // With the server away the season (from Room) drops the episode and the
+                // selection moves on.
+                if (!serverAway) viewModel.loadEpisode(episodeId = episodeId)
                 currentOnDownloadChanged()
             }
             is DownloaderEvent.Failed -> {

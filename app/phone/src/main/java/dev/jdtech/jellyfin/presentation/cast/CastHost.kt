@@ -67,7 +67,7 @@ import dev.jdtech.jellyfin.utils.ObserveAsEvents
 fun CastHost(
     route: Any?,
     showBottomBar: Boolean,
-    isOfflineMode: Boolean,
+    serverUnreachable: Boolean,
     content: @Composable () -> Unit,
 ) {
     // The activity's: every screen and both sheets see one session.
@@ -218,7 +218,7 @@ fun CastHost(
         }
         CastDeviceSheet(
             state = state,
-            isOfflineMode = isOfflineMode,
+            serverUnreachable = serverUnreachable,
             onConnect = viewModel::connect,
             onDisconnect = {
                 viewModel.disconnect()
