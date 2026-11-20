@@ -30,9 +30,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#299): the profile switch, the start lock and the Profile PIN settings, on a fake server with
@@ -49,7 +49,7 @@ class ProfilePinSwitchTest {
     private val lock = ProfileLock(fakeDao(), Dispatchers.Unconfined)
     private val repository = fakeRepository()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         runBlocking {
@@ -59,7 +59,7 @@ class ProfilePinSwitchTest {
         }
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
