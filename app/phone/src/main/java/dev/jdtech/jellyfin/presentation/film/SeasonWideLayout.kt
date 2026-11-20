@@ -320,7 +320,14 @@ fun SeasonWideLayout(
         remember(state.episodeDownloadProgress, hiddenIds) {
             state.episodeDownloadProgress - hiddenIds
         }
-    val episodes = state.episodes
+    // CE (#281): a list of stored episodes drops a removed one at once, as the Downloads tab
+    // does; it would leave the list once the removal is done. A list from the server keeps it, as
+    // not downloaded.
+    val episodes =
+        remember(state.episodes, state.storedOnly, hiddenIds) {
+            if (state.storedOnly) state.episodes.filterNot { it.id in hiddenIds }
+            else state.episodes
+        }
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
     val anyCanDownload = remember(episodes) { episodes.any { it.canDownload } }
@@ -440,7 +447,7 @@ fun SeasonWideLayout(
                                 item {
                                     DownloadSummary(
                                         state = state,
-                                        totalCount = episodes.size,
+                                        totalCount = state.episodes.size,
                                         modifier =
                                             Modifier.padding(
                                                 start = paddingStart,

@@ -167,15 +167,18 @@ constructor(
                                 seasonId = seasonId,
                                 offline = true,
                             )
-                        if (downloadsOnly) stored
-                        else
-                            serverOrStoredList(stored) {
-                                repository.getEpisodes(
-                                    seriesId = resolvedSeriesId,
-                                    seasonId = seasonId,
-                                    fields = seasonEpisodeFields,
-                                )
-                            }
+                        val episodes =
+                            if (downloadsOnly) stored
+                            else
+                                serverOrStoredList(stored) {
+                                    repository.getEpisodes(
+                                        seriesId = resolvedSeriesId,
+                                        seasonId = seasonId,
+                                        fields = seasonEpisodeFields,
+                                    )
+                                }
+                        // The fallback hands back the stored list itself.
+                        episodes to (downloadsOnly || episodes === stored)
                     }
                     val seriesSeasonsAsync = async {
                         if (!includeSeriesSeasons) {
@@ -190,12 +193,13 @@ constructor(
                         }
                     }
                     val season = seasonAsync.await()
-                    val episodes = episodesAsync.await()
+                    val (episodes, storedOnly) = episodesAsync.await()
                     val seriesSeasons = seriesSeasonsAsync.await()
                     _state.emit(
                         _state.value.copy(
                             season = season,
                             episodes = episodes,
+                            storedOnly = storedOnly,
                             seriesSeasons = seriesSeasons,
                             episodeDownloadProgress =
                                 buildDownloadProgressMap(episodes, downloadQueue.entries.value),

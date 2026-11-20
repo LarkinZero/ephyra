@@ -261,7 +261,14 @@ private fun SeasonScreenLayout(
             state.episodeDownloadProgress - hiddenIds
         }
     // These only depend on the episode list, so a progress tick must not redo them.
-    val episodes = state.episodes
+    // CE (#281): a list of stored episodes drops a removed one at once, as the Downloads tab
+    // does; it would leave the list once the removal is done. A list from the server keeps it, as
+    // not downloaded.
+    val episodes =
+        remember(state.episodes, state.storedOnly, hiddenIds) {
+            if (state.storedOnly) state.episodes.filterNot { it.id in hiddenIds }
+            else state.episodes
+        }
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
     val anyCanDownload = remember(episodes) { episodes.any { it.canDownload } }
@@ -370,7 +377,8 @@ private fun SeasonScreenLayout(
                             it.status == DownloadStatus.QUEUED ||
                             it.status == DownloadStatus.PAUSED
                     }
-                val totalCount = episodes.size
+                // Counts an episode behind the Undo snackbar, as the downloaded count does.
+                val totalCount = state.episodes.size
 
                 if (downloadedCount > 0 || downloadingCount > 0) {
                     item {
