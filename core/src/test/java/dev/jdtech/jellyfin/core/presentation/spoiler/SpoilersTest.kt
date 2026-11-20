@@ -5,7 +5,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import java.util.UUID
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** #618: what "Hide spoilers" hides, and that a press and hold reveals one episode. */
 class SpoilersTest {

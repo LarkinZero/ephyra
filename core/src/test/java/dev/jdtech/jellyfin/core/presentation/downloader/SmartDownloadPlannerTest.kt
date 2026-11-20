@@ -8,7 +8,7 @@ import java.time.ZoneId
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** Unit tests for what Smart Downloads queues and removes. */
 class SmartDownloadPlannerTest {

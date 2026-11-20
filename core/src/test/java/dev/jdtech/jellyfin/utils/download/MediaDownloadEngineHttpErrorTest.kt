@@ -10,8 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.After
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#383): a download the server answers with an HTTP error fails at once with that status. It
@@ -20,7 +20,7 @@ import org.junit.Test
 class MediaDownloadEngineHttpErrorTest {
     private val dir: File = Files.createTempDirectory("engine-http-error").toFile()
 
-    @After
+    @AfterEach
     fun cleanUp() {
         dir.deleteRecursively()
     }

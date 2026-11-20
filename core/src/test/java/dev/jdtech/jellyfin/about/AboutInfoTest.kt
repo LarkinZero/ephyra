@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.about
 
 import kotlin.test.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class AboutInfoTest {
 

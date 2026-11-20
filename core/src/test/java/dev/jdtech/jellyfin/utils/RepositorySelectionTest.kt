@@ -5,7 +5,7 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * [useOfflineRepository]: since #281 only the Offline Mode setting picks the offline repository.
