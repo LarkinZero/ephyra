@@ -14,4 +14,24 @@
             domain="sharedpref"
             path="." />
     </cloud-backup>
+    <!--
+        CE (#731): a device-to-device transfer (setting up a new phone from this one, Android 12+)
+        leaves out the same as a cloud backup: the access tokens in the servers database and in the
+        preferences, and the MDBList key. Android 11 and earlier use backup_rules.xml for both.
+        DeviceTransferRulesTest keeps the two sections the same.
+    -->
+    <device-transfer>
+        <exclude
+            domain="database"
+            path="servers" />
+        <exclude
+            domain="database"
+            path="servers-wal" />
+        <exclude
+            domain="database"
+            path="servers-shm" />
+        <exclude
+            domain="sharedpref"
+            path="." />
+    </device-transfer>
 </data-extraction-rules>
