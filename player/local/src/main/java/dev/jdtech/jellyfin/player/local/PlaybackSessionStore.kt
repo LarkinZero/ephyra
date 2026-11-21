@@ -17,9 +17,9 @@ import timber.log.Timber
  * [PlaybackService] keeps the session, the notification and the progress reports going. The
  * activity attaches to the same view model again when the notification brings it back.
  *
- * The session is released by [clear], which clears the view model: when the user closes the
- * player, when the activity goes away without anything left to play in the background, or when a
- * session has been paused with no player screen for [IDLE_RELEASE_MS].
+ * The session is released by [clear], which clears the view model: when the user closes the player,
+ * when the activity goes away without anything left to play in the background, or when a session
+ * has been paused with no player screen for [IDLE_RELEASE_MS].
  */
 @Singleton
 class PlaybackSessionStore @Inject constructor() : ViewModelStoreOwner {
@@ -41,6 +41,20 @@ class PlaybackSessionStore @Inject constructor() : ViewModelStoreOwner {
     var isUiAttached: Boolean = false
         private set
 
+    /**
+     * How many player activities are started, i.e. visible, PiP included. Counted rather than
+     * flagged, because a new activity can start before the one it replaces has stopped. It follows
+     * the activities, not the session, so [clear] leaves it alone.
+     */
+    private var startedUiCount: Int = 0
+
+    /**
+     * CE (#677): whether a player screen is started, so its own loop reports progress. After Home
+     * the activity is stopped but still attached, and the session reports from the background.
+     */
+    val isUiStarted: Boolean
+        get() = startedUiCount > 0
+
     fun onSessionCreated() {
         hasSession = true
     }
@@ -48,6 +62,14 @@ class PlaybackSessionStore @Inject constructor() : ViewModelStoreOwner {
     fun onUiAttached() {
         isUiAttached = true
         handler.removeCallbacks(idleRelease)
+    }
+
+    fun onUiStarted() {
+        startedUiCount++
+    }
+
+    fun onUiStopped() {
+        startedUiCount = (startedUiCount - 1).coerceAtLeast(0)
     }
 
     /** The player activity went away, without the session being released. */

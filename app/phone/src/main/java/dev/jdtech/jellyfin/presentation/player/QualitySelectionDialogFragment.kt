@@ -7,8 +7,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.BasePlayerActivity
+import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.utils.VideoQualities
 import java.lang.IllegalStateException
@@ -26,7 +26,7 @@ class QualitySelectionDialogFragment : DialogFragment() {
                         R.string.video_quality_no_limit
                     } else {
                         R.string.video_quality_original
-                    },
+                    }
                 )
         }
 
@@ -38,7 +38,7 @@ class QualitySelectionDialogFragment : DialogFragment() {
                         R.string.select_transcode_quality
                     } else {
                         R.string.select_video_quality
-                    },
+                    }
                 )
             builder.setTitle(title).setSingleChoiceItems(
                 qualityTexts.toTypedArray(),

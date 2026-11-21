@@ -6,10 +6,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,9 +17,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * #394: Home's search button opens the search on the My media tab. Leaving that search returned
- * to My media instead of Home. The rules are the same with or without the rail beside a docked
- * search (#439); the rail only makes tab picks possible while the search is open.
+ * #394: Home's search button opens the search on the My media tab. Leaving that search returned to
+ * My media instead of Home. The rules are the same with or without the rail beside a docked search
+ * (#439); the rail only makes tab picks possible while the search is open.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class)

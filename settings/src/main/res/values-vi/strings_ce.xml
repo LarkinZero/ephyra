@@ -192,4 +192,21 @@
     <string name="ce_number_off">Tắt</string>
     <string name="ce_pref_player_keep_landscape">Giữ trình phát ở chế độ ngang</string>
     <string name="ce_pref_player_keep_landscape_summary">Phát video ở chế độ ngang, kể cả khi bạn xoay máy tính bảng theo chiều dọc</string>
+    <string name="ce_pref_home_episode_images">Dùng hình ảnh của tập</string>
+    <string name="ce_pref_home_episode_images_summary">Hiển thị hình ảnh của tập thay cho hình ảnh của phim bộ trong Tiếp tục xem và Tiếp theo</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Truyền tới TV</string>
+    <string name="ce_pref_cast_enabled_summary">Hiện nút Truyền và tìm thiết bị Chromecast trên mạng của bạn</string>
+    <string name="ce_pref_cast_max_bitrate">Tốc độ bit tối đa</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Khi truyền, máy chủ sẽ giảm chất lượng của mọi nội dung vượt quá mức này</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">TV phát được HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Gửi video HEVC (H.265) nguyên bản thay vì chuyển đổi sang H.264. Chromecast 4K tự động nhận như vậy; hãy bật cho TV hoặc đầu phát khác phát được HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Hiển thị hình ảnh của tập thay cho hình ảnh của phim bộ trong Tiếp tục xem, Tiếp theo và ở đầu trang của tập</string>
+    <string name="pref_player_media_segments_on_seek_bar">Phân đoạn trên thanh tua</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Hiển thị phần mở đầu, tóm tắt, kết thúc, xem trước và quảng cáo thành các phần có màu trên thanh tua</string>
+    <string name="ce_pref_hide_spoilers">Ẩn nội dung tiết lộ</string>
+    <string name="ce_pref_hide_spoilers_summary">Làm mờ hình ảnh và ẩn tên cùng phần tóm tắt của các tập bạn chưa xem. Nhấn giữ một tập để hiện nó</string>
+    <string name="ce_pref_side_backdrop">Ảnh nền cạnh văn bản</string>
+    <string name="ce_pref_side_backdrop_summary">Trên máy tính bảng ở chế độ ngang, hiển thị ảnh nền của mục theo đúng hình dạng bên cạnh tiêu đề thay vì trải hết chiều rộng</string>
 </resources>

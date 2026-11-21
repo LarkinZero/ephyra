@@ -17,15 +17,14 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyCollections
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyUser
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,7 +65,11 @@ class MainScreenTest {
                         Box(Modifier.fillMaxSize().testTag("placeholder_favorites").focusable())
                     },
                     libraryContent = {
-                        Box(Modifier.fillMaxSize().testTag("library_screen_content_${it.id}").focusable())
+                        Box(
+                            Modifier.fillMaxSize()
+                                .testTag("library_screen_content_${it.id}")
+                                .focusable()
+                        )
                     },
                 )
             }
@@ -231,9 +234,7 @@ class MainScreenTest {
         pressBack()
         rule.onNodeWithTag("home_screen_content").assertIsFocused()
 
-        rule.onNodeWithTag("home_screen_content").performKeyInput {
-            pressKey(Key.DirectionLeft)
-        }
+        rule.onNodeWithTag("home_screen_content").performKeyInput { pressKey(Key.DirectionLeft) }
         rule.waitForIdle()
         rule.onNodeWithTag("drawer_item_home").assertIsFocused()
     }
@@ -268,7 +269,11 @@ class MainScreenTest {
                         Box(Modifier.fillMaxSize().testTag("placeholder_favorites").focusable())
                     },
                     libraryContent = {
-                        Box(Modifier.fillMaxSize().testTag("library_screen_content_${it.id}").focusable())
+                        Box(
+                            Modifier.fillMaxSize()
+                                .testTag("library_screen_content_${it.id}")
+                                .focusable()
+                        )
                     },
                 )
             }
@@ -286,9 +291,7 @@ class MainScreenTest {
     }
 
     private fun pressDpadLeft() {
-        rule.runOnIdle {
-            focusManager?.moveFocus(androidx.compose.ui.focus.FocusDirection.Left)
-        }
+        rule.runOnIdle { focusManager?.moveFocus(androidx.compose.ui.focus.FocusDirection.Left) }
         rule.waitForIdle()
     }
 

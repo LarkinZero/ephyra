@@ -1,10 +1,14 @@
 package dev.jdtech.jellyfin.setup.presentation
 
+import dev.jdtech.jellyfin.setup.domain.FakeLocalNetworkAccess
+import dev.jdtech.jellyfin.setup.domain.ServerLocalNetworkBlock
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import dev.jdtech.jellyfin.setup.presentation.login.LoginAction
 import dev.jdtech.jellyfin.setup.presentation.login.LoginViewModel
 import java.lang.reflect.Proxy
 import java.time.LocalDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -15,11 +19,9 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.jellyfin.sdk.model.api.QuickConnectResult
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#382): pressing Quick Connect again cancels it. The code must go with the polling, so the
@@ -31,12 +33,12 @@ class LoginQuickConnectTest {
     private var initiated = 0
     private var polls = 0
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher(scheduler))
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
@@ -44,7 +46,11 @@ class LoginQuickConnectTest {
     @Test
     fun `a second press cancels the code and a third press starts a new one`() =
         runTest(scheduler) {
-            val viewModel = LoginViewModel(fakeRepository())
+            val viewModel =
+                LoginViewModel(
+                    fakeRepository(),
+                    ServerLocalNetworkBlock(FakeLocalNetworkAccess(), { null }),
+                )
 
             viewModel.onAction(LoginAction.OnQuickConnectClick)
             runCurrent()
@@ -74,7 +80,11 @@ class LoginQuickConnectTest {
     @Test
     fun `a fast double press leaves no code and nothing polling`() =
         runTest(scheduler) {
-            val viewModel = LoginViewModel(fakeRepository())
+            val viewModel =
+                LoginViewModel(
+                    fakeRepository(),
+                    ServerLocalNetworkBlock(FakeLocalNetworkAccess(), { null }),
+                )
 
             // Both presses land before the first one has asked the server for a code.
             viewModel.onAction(LoginAction.OnQuickConnectClick)

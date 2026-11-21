@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.player.local.domain
 
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidSegmentType
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class DebugSegmentsTest {
     @Test

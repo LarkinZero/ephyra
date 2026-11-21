@@ -5,12 +5,12 @@ import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.SpatialAudio
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class VideoMetadataParserTest {
     private fun audio(
@@ -123,8 +123,7 @@ class VideoMetadataParserTest {
 
     @Test
     fun `dolby vision with hdr10 plus reports both profiles`() = runTest {
-        val metadata =
-            VideoMetadataParser.parse(source(video(VideoRangeType.DOVI_WITH_HDR10_PLUS)))
+        val metadata = VideoMetadataParser.parse(source(video(VideoRangeType.DOVI_WITH_HDR10_PLUS)))
 
         assertEquals(
             listOf(DisplayProfile.DOLBY_VISION, DisplayProfile.HDR10_PLUS),

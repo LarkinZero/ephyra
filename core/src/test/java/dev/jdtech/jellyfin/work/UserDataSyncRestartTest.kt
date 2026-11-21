@@ -2,9 +2,9 @@ package dev.jdtech.jellyfin.work
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
 /** CE (#552): what a sign of the server being back does to the user data sync. */
 class UserDataSyncRestartTest {
@@ -32,7 +32,10 @@ class UserDataSyncRestartTest {
     @Test
     fun `rows waiting without any work start one`() {
         for (state in listOf(null, WorkInfo.State.SUCCEEDED, WorkInfo.State.CANCELLED)) {
-            assertEquals(ExistingWorkPolicy.REPLACE, restartPolicy(hasPending = true, state = state))
+            assertEquals(
+                ExistingWorkPolicy.REPLACE,
+                restartPolicy(hasPending = true, state = state),
+            )
         }
     }
 }

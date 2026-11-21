@@ -4,12 +4,12 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.models.UiText
 import java.net.ConnectException
 import java.net.UnknownHostException
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.exception.TimeoutException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /** CE (#377): a failed load is explained in plain words, and Share never sends a token. */
 class LoadErrorTextTest {
@@ -78,7 +78,7 @@ class LoadErrorTextTest {
         assertTrue(shared.contains("IllegalArgumentException"))
         assertTrue(shared.contains("\tat "))
         listOf("abc123", "def456", "ghi789", "jkl012").forEach {
-            assertFalse("$it leaked", shared.contains(it))
+            assertFalse(shared.contains(it), message = "$it leaked")
         }
         assertTrue(shared.contains("userId=1"))
         assertTrue(shared.contains("Client=\"Ephyra\""))

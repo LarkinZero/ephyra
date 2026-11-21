@@ -17,8 +17,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -123,10 +123,11 @@ class ModeSwitchEntryStateTest {
 
     @Test
     fun theContentKeyIsTheOneTheEntriesUse() {
-        val provider = entryProvider<NavKey> {
-            entry<LoginRoute> {}
-            entry<UsersRoute> {}
-        }
+        val provider =
+            entryProvider<NavKey> {
+                entry<LoginRoute> {}
+                entry<UsersRoute> {}
+            }
         for (key in listOf(LoginRoute(), LoginRoute("demo"), UsersRoute)) {
             assertEquals(provider(key).contentKey, entryContentKey(key))
         }

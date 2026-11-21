@@ -22,15 +22,15 @@ internal class MpvItemTransitions(private val listeners: ListenerSet<Player.List
     /**
      * mpv's `playlist-current-pos` moved to [index], playing [item]. Queues a transition when the
      * item changed. When only the index changed, the timeline is sent again instead, so the media
-     * session takes the new index: setMediaItems resets the index to 0 until mpv reports where it
-     * plays, and a quality switch reloads the same item at its old index, so without this the
-     * session kept index 0 and showed the previous episode's title.
+     * session takes the new index (an item put in front of the playing one moves it). Before #723,
+     * setMediaItems reported index 0 until mpv said where it played, and the session kept index 0
+     * and showed the previous episode's title.
+     *
+     * mpv must only report entries it plays: one it reports on the way to another is taken as an
+     * item change. [MPVPlayer.prepare] loads a playlist without starting any entry before the
+     * wanted one for that (#723).
      */
-    fun currentPositionChanged(
-        timeline: Timeline,
-        item: MediaItem?,
-        indexChanged: Boolean,
-    ) {
+    fun currentPositionChanged(timeline: Timeline, item: MediaItem?, indexChanged: Boolean) {
         if (transitionIfChanged(item, Player.MEDIA_ITEM_TRANSITION_REASON_AUTO)) return
         if (indexChanged) {
             listeners.queueEvent(Player.EVENT_TIMELINE_CHANGED) { listener ->
@@ -60,8 +60,8 @@ internal class MpvItemTransitions(private val listeners: ListenerSet<Player.List
      * The playlist was replaced by [items], to start at [startIndex]. Sends the new [timeline] at
      * once, as ExoPlayer does inside setMediaItems: the media session checks its cached position
      * against its cached timeline on the next event, and [MPVPlayer]'s timeline is a live view of
-     * the playlist, so a shorter list with the old position crashed the app. Then the transition
-     * to the item that will play, if it is another item. mpv's own `playlist-count` and
+     * the playlist, so a shorter list with the old position crashed the app. Then the transition to
+     * the item that will play, if it is another item. mpv's own `playlist-count` and
      * `playlist-current-pos` events come later, or not at all when the index stays the same.
      */
     fun playlistReplaced(timeline: Timeline, items: List<MediaItem>, startIndex: Int) {

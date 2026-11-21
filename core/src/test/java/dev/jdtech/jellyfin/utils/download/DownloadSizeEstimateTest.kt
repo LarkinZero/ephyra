@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.utils.download
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 /** Unit tests for [estimateCappedDownloadSize]. */
 class DownloadSizeEstimateTest {

@@ -16,11 +16,11 @@ import dev.jdtech.jellyfin.utils.download.DownloadStatus
 import java.lang.reflect.Proxy
 import java.util.UUID
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -106,9 +106,9 @@ class DownloadQueueNetworkTest {
     private fun queue(): DownloadQueue {
         val context = RuntimeEnvironment.getApplication()
         val preferences =
-            context.getSharedPreferences("download-queue-network-test", Context.MODE_PRIVATE).apply {
-                edit().clear().putInt("pref_downloads_max_concurrent", 1).commit()
-            }
+            context
+                .getSharedPreferences("download-queue-network-test", Context.MODE_PRIVATE)
+                .apply { edit().clear().putInt("pref_downloads_max_concurrent", 1).commit() }
         return DownloadQueue(
             downloader = downloader,
             appPreferences = AppPreferences(preferences),
@@ -171,8 +171,9 @@ class DownloadQueueNetworkTest {
 
         override suspend fun getProgress(downloadId: Long?) = running
 
-        override suspend fun getProgress(downloadIds: List<Long>) =
-            downloadIds.associateWith { running }
+        override suspend fun getProgress(downloadIds: List<Long>) = downloadIds.associateWith {
+            running
+        }
 
         override suspend fun getActiveDownloads() = emptyList<Downloader.ActiveDownload>()
 
@@ -187,6 +188,8 @@ class DownloadQueueNetworkTest {
         override suspend fun getPendingDownloads() = emptyList<Downloader.PendingDownload>()
 
         override suspend fun sweepOrphans() = Unit
+
+        override suspend fun finalizeFinishedMediaStreams() = Unit
 
         override suspend fun finalizeDownload(downloadId: Long) = false
 

@@ -194,4 +194,21 @@
     <string name="ce_number_off">Uit</string>
     <string name="ce_pref_player_keep_landscape">Speler liggend houden</string>
     <string name="ce_pref_player_keep_landscape_summary">Video\'s liggend afspelen, ook als je de tablet rechtop draait</string>
+    <string name="ce_pref_home_episode_images">Afleveringsafbeeldingen gebruiken</string>
+    <string name="ce_pref_home_episode_images_summary">Toon in Verder kijken en Volgende de afbeelding van de aflevering in plaats van die van de serie</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Casten naar een tv</string>
+    <string name="ce_pref_cast_enabled_summary">Toon de Cast-knop en zoek naar Chromecast-apparaten in je netwerk</string>
+    <string name="ce_pref_cast_max_bitrate">Maximale bitrate</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Tijdens het casten verlaagt de server de kwaliteit van alles wat daarboven zit</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">De tv speelt HEVC af</string>
+    <string name="ce_pref_cast_hevc_summary">Stuur HEVC-video (H.265) ongewijzigd in plaats van die om te zetten naar H.264. Een 4K-Chromecast krijgt dit vanzelf; zet het aan voor een andere tv of box die HEVC afspeelt</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Toon in Verder kijken, in Volgende en bovenaan de pagina van een aflevering de afbeelding van de aflevering in plaats van die van de serie</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmenten op de tijdbalk</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Toon de intro, terugblik, aftiteling, vooruitblik en reclames als gekleurde delen van de tijdbalk</string>
+    <string name="ce_pref_hide_spoilers">Spoilers verbergen</string>
+    <string name="ce_pref_hide_spoilers_summary">Maak de afbeelding wazig en verberg de titel en beschrijving van afleveringen die je nog niet hebt gezien. Houd er een ingedrukt om hem te tonen</string>
+    <string name="ce_pref_side_backdrop">Achtergrond naast de tekst</string>
+    <string name="ce_pref_side_backdrop_summary">Toon op een tablet in liggende stand de achtergrond van een item in zijn eigen vorm naast de titel in plaats van over de volle breedte</string>
 </resources>

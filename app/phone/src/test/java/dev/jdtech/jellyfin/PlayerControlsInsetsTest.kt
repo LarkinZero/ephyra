@@ -3,7 +3,7 @@ package dev.jdtech.jellyfin
 import android.app.Application
 import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

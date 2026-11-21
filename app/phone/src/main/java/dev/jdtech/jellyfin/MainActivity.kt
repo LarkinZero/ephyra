@@ -16,22 +16,31 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadPumpService
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.KeyboardShortcuts
 import dev.jdtech.jellyfin.presentation.utils.LocalNotificationPermissionRequest
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPlaybackStopped
+import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
+import dev.jdtech.jellyfin.presentation.utils.LocalSideBackdrop
+import dev.jdtech.jellyfin.presentation.utils.ProvideLocalNetworkBlock
+import dev.jdtech.jellyfin.presentation.utils.ServerStatusUi
+import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.utils.shouldRequestNotificationPermission
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     @Inject lateinit var playbackEvents: PlaybackEvents
+
+    @Inject lateinit var dataChangeEvents: DataChangeEvents
 
     // CE (#372): registered here rather than in the download quality dialog, which closes on the
     // tap that asks. The download has already started; once allowed, its notification is posted
@@ -48,23 +57,41 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
-            val stopped = remember { playbackEvents.stopped.map {} }
+            // CE (#633): a sync that sent offline progress reloads the screen on display too.
+            val stopped = remember { merge(playbackEvents.stopped.map {}, dataChangeEvents.synced) }
+            // CE (#281): whether the server answers, for the banner and the error pages.
+            val server by viewModel.serverStatus.collectAsStateWithLifecycle()
+            val serverStatus =
+                remember(server) {
+                    ServerStatusUi(
+                        unreachable = server.unreachable,
+                        confirmedUnreachable = server.confirmedUnreachable,
+                        hasDownloads = server.hasDownloads,
+                        check = viewModel::checkServer,
+                    )
+                }
 
             FindroidTheme(dynamicColor = state.isDynamicColors) {
                 if (!state.isLoading) {
                     CompositionLocalProvider(
-                        LocalOfflineMode provides state.isOfflineMode,
+                        LocalSpoilers provides Spoilers(state.hideSpoilers),
+                        LocalSideBackdrop provides state.sideBackdrop,
+                        LocalServerStatus provides serverStatus,
                         LocalPlaybackStopped provides stopped,
                         LocalNotificationPermissionRequest provides ::requestNotificationPermission,
                     ) {
-                        NavigationRoot(
-                            hasServers = state.hasServers,
-                            hasCurrentServer = state.hasCurrentServer,
-                            hasCurrentUser = state.hasCurrentUser,
-                            showFavoritesTab = state.showFavoritesTab,
-                            askUserOnStart = state.askUserOnStart,
-                            profileLocked = state.profileLocked,
-                        )
+                        // CE (#571): the error screens know when local network access is what
+                        // keeps the server out of reach, and can ask for it.
+                        ProvideLocalNetworkBlock {
+                            NavigationRoot(
+                                hasServers = state.hasServers,
+                                hasCurrentServer = state.hasCurrentServer,
+                                hasCurrentUser = state.hasCurrentUser,
+                                showFavoritesTab = state.showFavoritesTab,
+                                askUserOnStart = state.askUserOnStart,
+                                profileLocked = state.profileLocked,
+                            )
+                        }
                     }
                 }
             }

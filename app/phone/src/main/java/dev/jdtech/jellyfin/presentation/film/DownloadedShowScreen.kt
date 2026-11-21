@@ -3,14 +3,10 @@ package dev.jdtech.jellyfin.presentation.film
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -50,6 +46,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadedShowViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -60,6 +58,7 @@ import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.utils.Layout
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 
 /** The downloaded episodes of one show, by season, with per-episode and remove-all actions. */
@@ -97,13 +96,17 @@ fun DownloadedShowScreen(
     }
     val seasons =
         state.seasons
-            .map { season -> season.copy(episodes = season.episodes.filterNot { it.id in undo.hiddenIds }) }
+            .map { season ->
+                season.copy(episodes = season.episodes.filterNot { it.id in undo.hiddenIds })
+            }
             .filter { it.episodes.isNotEmpty() }
     val episodes = seasons.flatMap { it.episodes }
 
     val removeEpisodes: (List<FindroidEpisode>) -> Unit = { removed ->
         val message =
-            removed.singleOrNull()?.let { context.getString(CoreR.string.download_removed, it.name) }
+            removed.singleOrNull()?.let {
+                context.getString(CoreR.string.download_removed, it.name)
+            }
                 ?: context.resources.getQuantityString(
                     CoreR.plurals.downloads_removed,
                     removed.size,
@@ -130,12 +133,12 @@ fun DownloadedShowScreen(
                         )
                     }
                 },
-                windowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+                windowInsets = topAndSideInsets,
                 scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets = topAndSideInsets,
     ) { innerPadding ->
         val rowWidth = Modifier.widthIn(max = Layout.textMaxWidth).fillMaxWidth()
         LazyColumn(
@@ -155,7 +158,8 @@ fun DownloadedShowScreen(
                                 episodes.size,
                                 episodes.size,
                             ) + " · " + Formatter.formatShortFileSize(context, totalBytes),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                        style =
+                            MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = rowWidth.padding(horizontal = 4.dp).animateItem(),
                     )
@@ -164,12 +168,12 @@ fun DownloadedShowScreen(
             for (season in seasons) {
                 item(key = "season:${season.number}") {
                     Text(
-                        text = season.name ?: stringResource(CoreR.string.season_number, season.number),
+                        text =
+                            season.name
+                                ?: stringResource(CoreR.string.season_number, season.number),
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
-                            rowWidth
-                                .padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
-                                .animateItem(),
+                            rowWidth.padding(start = 4.dp, top = 20.dp, bottom = 8.dp).animateItem(),
                     )
                 }
                 itemsIndexed(items = season.episodes, key = { _, ep -> ep.id }) { index, episode ->
@@ -234,17 +238,24 @@ private fun EpisodeRow(
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
-        backgroundContent = { SwipeActionBackground(icon = CoreR.drawable.ic_trash, shape = shape) },
+        backgroundContent = {
+            SwipeActionBackground(icon = CoreR.drawable.ic_trash, shape = shape)
+        },
         modifier = modifier,
     ) {
+        // CE (#618): a hidden episode is "Episode 5" until held.
+        val spoilers = LocalSpoilers.current
+        val hidden = spoilers.hides(episode)
         DownloadRow(
             item = episode,
-            title = episode.name,
+            title = spoilerFreeName(episode, hidden),
             meta = meta,
             shape = shape,
             showPlaybackProgress = true,
             onPlayClick = onPlayClick,
             onClick = onClick,
+            onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
+            onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         )
     }
 }

@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.utils
 
 import java.util.UUID
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for the pure helper functions extracted from [DownloaderImpl.sweepOrphans]:
@@ -189,9 +189,10 @@ class OrphanSweepHelpersTest {
     fun `path not under any mounted root returns false`() {
         assertFalse(
             isUnderMountedRoot(
-                path = "/storage/sdcard1/Android/data/nl.midasvo.findroid.ce/files/downloads/Movie.mkv",
+                path =
+                    "/storage/sdcard1/Android/data/nl.midasvo.findroid.ce/files/downloads/Movie.mkv",
                 mountedRoots = listOf(root),
-            ),
+            )
         )
     }
 

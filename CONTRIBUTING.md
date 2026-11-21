@@ -14,11 +14,22 @@ You need JDK 21 and the Android SDK. There is one flavour, `libre`.
 
 The debug build installs next to the release as **Ephyra Debug**, with its own data.
 
+## Something to test on
+
+No Jellyfin server or Android device at hand? [docs/dev-environment.md](docs/dev-environment.md)
+sets up a throwaway server in Docker, with generated media for the awkward cases and test users,
+and emulators for phone, tablet and Android TV:
+
+```bash
+tools/test-server/setup.sh       # Jellyfin at http://localhost:8096
+scripts/avds.sh create ce_phone  # then: start ce_phone, install ce_phone
+```
+
 ## Before you open a pull request
 
 ```bash
 ./gradlew ktfmtFormat          # CI fails on unformatted code
-./gradlew testDebugUnitTest    # CI does not run the tests, so run them yourself
+./gradlew testDebugUnitTest    # CI runs them too, but a local run is quicker to fix
 ```
 
 - **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/):

@@ -10,11 +10,12 @@ import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.BaseItemKind
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -64,14 +65,17 @@ class ScreensaverItemsTest {
 
     @Test
     fun `a failing server gives an empty list`() = runBlocking {
-        val items = loadScreensaverItems(repository { throw IllegalStateException("offline") }, "random")
+        val items =
+            loadScreensaverItems(repository { throw IllegalStateException("offline") }, "random")
 
         assertTrue(items.isEmpty())
     }
 
-    @Test(expected = CancellationException::class)
+    @Test
     fun `cancellation is not swallowed`(): Unit = runBlocking {
-        loadScreensaverItems(repository { throw CancellationException("stopped") }, "random")
+        assertFailsWith<CancellationException> {
+            loadScreensaverItems(repository { throw CancellationException("stopped") }, "random")
+        }
     }
 
     /** A repository whose item calls are recorded and answered by [answer]. */

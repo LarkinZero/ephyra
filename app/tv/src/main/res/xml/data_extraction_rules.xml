@@ -13,5 +13,55 @@
         <exclude
             domain="sharedpref"
             path="." />
+        <!--
+            CE (#731): the downloads and what was cached for a login. Their index is in the
+            servers database, so without it the app cannot list or play them and the orphan
+            sweep removes them: copying them would only cost time and space.
+        -->
+        <exclude
+            domain="external"
+            path="downloads" />
+        <exclude
+            domain="file"
+            path="images" />
+        <exclude
+            domain="file"
+            path="trickplay" />
+        <exclude
+            domain="file"
+            path="home-cache" />
     </cloud-backup>
+    <!--
+        CE (#731): a device-to-device transfer (setting up a new phone from this one, Android 12+)
+        leaves out the same as a cloud backup: the access tokens in the servers database and in the
+        preferences, the MDBList key, and the downloads that are of no use without that database.
+        Android 11 and earlier use backup_rules.xml for both. DeviceTransferRulesTest keeps the three
+        sets of rules the same.
+    -->
+    <device-transfer>
+        <exclude
+            domain="database"
+            path="servers" />
+        <exclude
+            domain="database"
+            path="servers-wal" />
+        <exclude
+            domain="database"
+            path="servers-shm" />
+        <exclude
+            domain="sharedpref"
+            path="." />
+        <exclude
+            domain="external"
+            path="downloads" />
+        <exclude
+            domain="file"
+            path="images" />
+        <exclude
+            domain="file"
+            path="trickplay" />
+        <exclude
+            domain="file"
+            path="home-cache" />
+    </device-transfer>
 </data-extraction-rules>

@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.models
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class MediaSegmentActionTest {
     @Test

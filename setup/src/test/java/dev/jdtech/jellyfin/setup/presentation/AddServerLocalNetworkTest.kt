@@ -11,6 +11,10 @@ import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerAction
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerViewModel
 import java.lang.reflect.Proxy
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -21,10 +25,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.jellyfin.sdk.model.api.ServerDiscoveryInfo
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,8 +33,8 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 /**
- * CE (#376): with local network access denied on Android 17, Add server searched without a word
- * and answered a LAN address with "Server not found". The state now says that access is denied, the
+ * CE (#376): with local network access denied on Android 17, Add server searched without a word and
+ * answered a LAN address with "Server not found". The state now says that access is denied, the
  * search waits for it, and the error for a local address names the permission.
  */
 @OptIn(ExperimentalCoroutinesApi::class)

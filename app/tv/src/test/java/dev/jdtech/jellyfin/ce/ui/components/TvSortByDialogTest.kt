@@ -16,7 +16,7 @@ import androidx.compose.ui.test.requestFocus
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +52,8 @@ class TvSortByDialogTest {
     fun eachOptionIsOneFocusStop() {
         setUp()
         // The radio button inside a row is not a focus stop of its own.
-        rule.onAllNodes(focusableInside(sortOptionTag(SortBy.NAME)), useUnmergedTree = true)
+        rule
+            .onAllNodes(focusableInside(sortOptionTag(SortBy.NAME)), useUnmergedTree = true)
             .assertCountEquals(0)
 
         rule.onNodeWithTag(sortOptionTag(SortBy.NAME)).requestFocus()

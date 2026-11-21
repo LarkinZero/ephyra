@@ -8,15 +8,11 @@ import dagger.hilt.components.SingletonComponent
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.player.DeviceProfileBuilder
+import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.JellyfinRepositoryImpl
-import dev.jdtech.jellyfin.repository.JellyfinRepositoryOfflineImpl
-import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import dev.jdtech.jellyfin.utils.NetworkConnectivity
-import dev.jdtech.jellyfin.utils.UiOfflineDecision
-import dev.jdtech.jellyfin.utils.useOfflineRepository
 import dev.jdtech.jellyfin.work.UserDataSync
 import javax.inject.Singleton
 
@@ -29,9 +25,7 @@ object RepositoryModule {
     fun provideDeviceProfileBuilder(application: Application): DeviceProfileBuilder =
         DeviceProfileBuilder(application)
 
-    @Singleton
-    @Provides
-    fun provideDataChangeEvents(): DataChangeEvents = DataChangeEvents()
+    @Singleton @Provides fun provideDataChangeEvents(): DataChangeEvents = DataChangeEvents()
 
     @Singleton
     @Provides
@@ -59,38 +53,9 @@ object RepositoryModule {
         )
     }
 
-    @Singleton
-    @Provides
-    fun provideJellyfinRepositoryOfflineImpl(
-        application: Application,
-        jellyfinApi: JellyfinApi,
-        serverDatabase: ServerDatabaseDao,
-        appPreferences: AppPreferences,
-        userDataSync: UserDataSync,
-    ): JellyfinRepositoryOfflineImpl {
-
-        return JellyfinRepositoryOfflineImpl(
-            application,
-            jellyfinApi,
-            serverDatabase,
-            appPreferences,
-            userDataSync,
-        )
-    }
-
+    /** CE (#281): one repository; downloaded items fall back to Room when the server is away. */
     @Provides
     fun provideJellyfinRepository(
-        jellyfinRepositoryImpl: JellyfinRepositoryImpl,
-        jellyfinRepositoryOfflineImpl: JellyfinRepositoryOfflineImpl,
-        appPreferences: AppPreferences,
-        networkConnectivity: NetworkConnectivity,
-        uiOfflineDecision: UiOfflineDecision,
-    ): JellyfinRepository {
-
-        return if (useOfflineRepository(uiOfflineDecision, appPreferences, networkConnectivity)) {
-            jellyfinRepositoryOfflineImpl
-        } else {
-            jellyfinRepositoryImpl
-        }
-    }
+        jellyfinRepositoryImpl: JellyfinRepositoryImpl
+    ): JellyfinRepository = jellyfinRepositoryImpl
 }

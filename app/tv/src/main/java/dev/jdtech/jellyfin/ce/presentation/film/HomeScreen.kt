@@ -15,13 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,15 +33,18 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -72,6 +75,11 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSuggestions
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeView
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.core.presentation.ephyra.backdropCrossfadeMillis
+import dev.jdtech.jellyfin.core.presentation.rows.animateRowItem
+import dev.jdtech.jellyfin.core.presentation.rows.rememberLazyListStateAtStart
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
@@ -153,10 +161,7 @@ fun HomeScreen(
 
 /** The focused card. Written on focus changes and read only by the hero and its prefetch. */
 @Stable
-private class HeroFocus(
-    initialRow: List<FindroidItem> = emptyList(),
-    initialColumn: Int = 0,
-) {
+private class HeroFocus(initialRow: List<FindroidItem> = emptyList(), initialColumn: Int = 0) {
     var item by mutableStateOf<FindroidItem?>(initialRow.getOrNull(initialColumn))
         private set
 
@@ -179,14 +184,24 @@ private class HomeRow(
     val title: UiText,
     val items: List<FindroidItem>,
     val direction: Direction,
+    // #608: Continue Watching and Next Up show the thumb, unless the user chose episode images.
+    val preferThumb: Boolean = false,
 )
 
-/** The rows in the order the user chose (#142). Keyed on the row, so focus restore follows a move. */
+/**
+ * The rows in the order the user chose (#142). Keyed on the row, so focus restore follows a move.
+ */
 private fun HomeState.rows(): List<HomeRow> =
     orderedRows().mapNotNull {
         when (it) {
             is HomeItem.Section ->
-                HomeRow(it.id, it.homeSection.name, it.homeSection.items, Direction.HORIZONTAL)
+                HomeRow(
+                    it.id,
+                    it.homeSection.name,
+                    it.homeSection.items,
+                    Direction.HORIZONTAL,
+                    preferThumb = !useEpisodeImages,
+                )
             is HomeItem.ViewItem ->
                 HomeRow(
                     it.id,
@@ -219,10 +234,9 @@ internal fun HomeScreenLayout(
         remember(rows.isNotEmpty()) {
             val savedKey = focusPosition.key
             val match =
-                if (savedKey != null && rows.isNotEmpty()) {
-                    rows.firstNotNullOfOrNull { r ->
-                        val cIndex = r.items.indexOfFirst { it.id.toString() == savedKey }
-                        if (cIndex >= 0) r.items to cIndex else null
+                if (savedKey != null) {
+                    findCard(rows, focusPosition.row, savedKey)?.let { (r, c) ->
+                        rows[r].items to c
                     }
                 } else null
             val (row, col) =
@@ -264,7 +278,8 @@ internal fun HomeScreenLayout(
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (error != null) {
-                // #405: nothing remembered and the server failed, so say so instead of a blank page.
+                // #405: nothing remembered and the server failed, so say so instead of a blank
+                // page.
                 TvLoadError(
                     error = error,
                     onRetry = { onAction(HomeAction.OnRetryClick) },
@@ -300,7 +315,7 @@ internal fun HomeScreenLayout(
                                     hero = hero,
                                     rowStates = rowStates,
                                     onAction = onAction,
-                                    modifier = Modifier.animateItem(),
+                                    modifier = animateRowItem(),
                                 )
                             }
                         }
@@ -321,13 +336,7 @@ internal fun HomeScreenLayout(
     ) { position ->
         // The saved card may have moved, even to another row (Next up to Continue watching).
         val (leftRow, leftColumn, key) = left
-        val found =
-            rows.withIndex().firstNotNullOfOrNull { (r, row) ->
-                row.items
-                    .indexOfFirst { it.id.toString() == key }
-                    .takeIf { it >= 0 }
-                    ?.let { c -> r to c }
-            }
+        val found = key?.let { findCard(rows, leftRow, it) }
         if (found != null) {
             position.save(found.first, found.second, key)
         } else {
@@ -350,10 +359,47 @@ private fun HomeRowContent(
     onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val rowState = rememberLazyListState()
+    // #393: a card that lands in front of a row at its start shows, instead of sitting out of view.
+    val rowState = rememberLazyListStateAtStart(firstKey = row.items.firstOrNull()?.id)
     DisposableEffect(row.key, rowState) {
         rowStates[row.key] = rowState
         onDispose { if (rowStates[row.key] === rowState) rowStates.remove(row.key) }
+    }
+    val rowFocus = remember { RowFocus() }
+    val cardRequesters = remember { mutableMapOf<UUID, FocusRequester>() }
+    val currentItems by rememberUpdatedState(row.items)
+    // #688: when the row changes under the focused card, focus follows the card, not the place it
+    // was in. The row scrolls to keep it in view while the cards slide, and the saved position and
+    // the hero point at its new place. A focused card that leaves the row hands focus to the card
+    // that takes its place, so focus is not lost with it.
+    LaunchedEffect(row.items) {
+        if (row.items.isEmpty()) return@LaunchedEffect
+        val handover = rowFocus.takeHandover()
+        val key = rowFocus.key
+        val column =
+            when {
+                handover != null -> handover.coerceIn(0, row.items.lastIndex)
+                key != null && rowFocus.hasFocus ->
+                    row.items.indexOfFirst { it.id == key }.takeIf { it >= 0 }
+                        ?: rowFocus.column.coerceIn(0, row.items.lastIndex)
+                else -> return@LaunchedEffect
+            }
+        val item = row.items[column]
+        val refocus = handover != null || item.id != key
+        rowFocus.focus(item.id, column)
+        focusPosition.save(rowIndex, column, item.id.toString())
+        hero.focus(row.items, column)
+        // The new order is laid out on the next frame.
+        withFrameNanos {}
+        if (!rowState.isFullyVisible(column)) rowState.animateScrollToItem(column)
+        if (refocus) {
+            withFrameNanos {}
+            try {
+                cardRequesters[item.id]?.requestFocus()
+            } catch (_: IllegalStateException) {
+                // Not laid out after all: focusRestorer() picks a card when the row is entered.
+            }
+        }
     }
     Column(modifier = modifier) {
         Text(
@@ -361,27 +407,48 @@ private fun HomeRowContent(
             style = MaterialTheme.typography.titleLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier =
-                Modifier.height(ROW_TITLE_HEIGHT).padding(horizontal = TvSafeArea.horizontal),
+            modifier = Modifier.height(ROW_TITLE_HEIGHT).padding(horizontal = TvSafeArea.horizontal),
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
         LazyRow(
             state = rowState,
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
             contentPadding = PaddingValues(horizontal = TvSafeArea.horizontal),
-            modifier = Modifier.focusRestorer(),
+            modifier = Modifier.focusRestorer().onFocusChanged { rowFocus.hasFocus = it.hasFocus },
         ) {
             itemsIndexed(row.items, key = { _, item -> item.id }) { column, item ->
+                val requester = remember { FocusRequester() }
+                DisposableEffect(item.id, requester) {
+                    cardRequesters[item.id] = requester
+                    onDispose {
+                        if (cardRequesters[item.id] === requester) cardRequesters.remove(item.id)
+                    }
+                }
                 ItemCard(
                     item = item,
                     direction = row.direction,
+                    preferThumb = row.preferThumb,
                     showSeriesName = row.direction == Direction.VERTICAL,
                     // #423: a row of posters with two title lines runs into the bottom safe area.
                     titleMaxLines = 1,
                     onClick = { onAction(HomeAction.OnItemClick(it)) },
+                    // #688: cards fade in where they land and slide over, like on the phone (#640).
                     modifier =
-                        Modifier.focusPosition(focusPosition, rowIndex, column, item.id.toString())
-                            .onFocusChanged { if (it.hasFocus) hero.focus(row.items, column) }
+                        animateRowItem()
+                            .focusPosition(focusPosition, rowIndex, column, item.id.toString())
+                            .focusRequester(requester)
+                            .onFocusChanged { state ->
+                                if (state.hasFocus) {
+                                    rowFocus.focus(item.id, column)
+                                    hero.focus(row.items, column)
+                                } else if (
+                                    rowFocus.key == item.id &&
+                                        currentItems.none { it.id == item.id }
+                                ) {
+                                    // Removed while focused: focus went with it.
+                                    rowFocus.handOver(column)
+                                }
+                            }
                             .testTag(homeCardTag(item.id)),
                 )
             }
@@ -427,9 +494,11 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
                 .testTag("ce_home_hero"),
     ) {
         HeroTitle(item = shown, images = images)
+        // CE (#618): a hidden episode is "Episode 5", without its overview.
+        val hidden = LocalSpoilers.current.hides(shown)
         if (shown is FindroidEpisode) {
             Text(
-                text = shown.name,
+                text = spoilerFreeName(shown, hidden),
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -446,7 +515,7 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
         if (shown.overview.isNotBlank()) {
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
             Text(
-                text = shown.overview,
+                text = spoilerFreeOverview(shown.overview, hidden),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = .8f),
                 maxLines = 3,
@@ -468,12 +537,13 @@ private fun HomeHero(hero: HeroFocus, images: HeroImages) {
 private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
     val previous = remember { PreviousImage() }
     val crossfadeMillis = backdropCrossfadeMillis()
+    val hideStill = LocalSpoilers.current.hides(item)
     // Counts the candidates that turned out to be missing, so the next one is asked for.
     var missing by remember(item) { mutableIntStateOf(0) }
     val request =
-        remember(item, images, crossfadeMillis, missing) {
+        remember(item, images, crossfadeMillis, missing, hideStill) {
             images
-                .backdrop(item)
+                .backdrop(item, hideStill)
                 ?.newBuilder()
                 ?.placeholderMemoryCacheKey(previous.key)
                 ?.transitionFactory(heroCrossfade(crossfadeMillis))
@@ -492,19 +562,17 @@ private fun HeroBackdrop(item: FindroidItem, images: HeroImages) {
             onSuccess = { previous.key = it.result.memoryCacheKey },
             // Only when the failure moved the hero on to another candidate: any other error would
             // ask for the same image again, for ever.
-            onError = { if (images.backdrop(item)?.data != request.data) missing++ },
+            onError = { if (images.backdrop(item, hideStill)?.data != request.data) missing++ },
             modifier =
-                Modifier.fillMaxWidth(HERO_BACKDROP_WIDTH)
-                    .aspectRatio(16f / 9f)
-                    .drawWithCache {
-                        val fadeLeft = backdropFadeLeft(background)
-                        val fadeBottom = backdropFadeBottom(background)
-                        onDrawWithContent {
-                            drawContent()
-                            drawRect(fadeLeft)
-                            drawRect(fadeBottom)
-                        }
-                    },
+                Modifier.fillMaxWidth(HERO_BACKDROP_WIDTH).aspectRatio(16f / 9f).drawWithCache {
+                    val fadeLeft = backdropFadeLeft(background)
+                    val fadeBottom = backdropFadeBottom(background)
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(fadeLeft)
+                        drawRect(fadeBottom)
+                    }
+                },
         )
     }
 }
@@ -535,7 +603,8 @@ private fun HeroTitle(item: FindroidItem, images: HeroImages) {
         val style = MaterialTheme.typography.displayMedium
         BasicText(
             text = title,
-            style = style.copy(color = LocalContentColor.current, lineHeight = HERO_TITLE_LINE_HEIGHT),
+            style =
+                style.copy(color = LocalContentColor.current, lineHeight = HERO_TITLE_LINE_HEIGHT),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             autoSize =
@@ -553,7 +622,8 @@ private fun HeroTitle(item: FindroidItem, images: HeroImages) {
             contentScale = ContentScale.Fit,
             alignment = Alignment.BottomStart,
             onError = { logoFailed = true },
-            modifier = Modifier.widthIn(max = HERO_LOGO_MAX_WIDTH).heightIn(max = HERO_LOGO_MAX_HEIGHT),
+            modifier =
+                Modifier.widthIn(max = HERO_LOGO_MAX_WIDTH).heightIn(max = HERO_LOGO_MAX_HEIGHT),
         )
     }
 }
@@ -571,6 +641,54 @@ private fun rowAtTopSpec(titleSpace: Float) =
             containerSize: Float,
         ): Float = offset - titleSpace
     }
+
+/**
+ * The card of a row that has or last had focus. Plain fields, written on focus changes and read
+ * only when the row's items change: nothing recomposes on focus.
+ */
+private class RowFocus {
+    var hasFocus = false
+    var key: UUID? = null
+        private set
+
+    var column = 0
+        private set
+
+    /**
+     * The column of a focused card that was removed, so the card that takes its place gets focus.
+     */
+    private var handover: Int? = null
+
+    fun focus(key: UUID, column: Int) {
+        this.key = key
+        this.column = column
+    }
+
+    fun handOver(column: Int) {
+        handover = column
+    }
+
+    fun takeHandover(): Int? = handover.also { handover = null }
+}
+
+/** True when the item at [index] is laid out whole between the content padding. */
+private fun LazyListState.isFullyVisible(index: Int): Boolean {
+    val info = layoutInfo
+    val item = info.visibleItemsInfo.firstOrNull { it.index == index } ?: return false
+    return item.offset >= 0 &&
+        item.offset + item.size <= info.viewportEndOffset - info.afterContentPadding
+}
+
+/**
+ * The `(row, column)` of the card with [key]: in [preferredRow] if it's there, since the same item
+ * can be in two rows (#688: a movie in Continue Watching that the refresh also put in Suggestions),
+ * otherwise in the first row that has it.
+ */
+private fun findCard(rows: List<HomeRow>, preferredRow: Int, key: String): Pair<Int, Int>? {
+    fun columnIn(r: Int) = rows[r].items.indexOfFirst { it.id.toString() == key }.takeIf { it >= 0 }
+    val order = listOf(preferredRow).filter { it in rows.indices } + rows.indices
+    return order.firstNotNullOfOrNull { r -> columnIn(r)?.let { r to it } }
+}
 
 /** Scrolls only when [index] isn't on screen, so a return keeps the old scroll position. */
 private suspend fun LazyListState.scrollIntoView(index: Int) {

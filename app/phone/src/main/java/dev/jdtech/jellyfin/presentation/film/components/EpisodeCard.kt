@@ -20,6 +20,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadProgress
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import kotlin.math.roundToInt
@@ -52,9 +55,12 @@ fun EpisodeCard(
             }
             .joinToString(" · ")
 
+    // CE (#618): a hidden episode is "Episode 5" without its overview, until held.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(episode)
     DownloadRow(
         item = episode,
-        title = episode.name,
+        title = spoilerFreeName(episode, hidden),
         // The download control leaves little width; a smaller title keeps long words whole.
         titleStyle = MaterialTheme.typography.titleSmall,
         meta = meta,
@@ -63,7 +69,9 @@ fun EpisodeCard(
         showPlayedBadge = true,
         onPlayClick = onPlayClick,
         onClick = onClick,
-        footer = episode.overview.takeIf { it.isNotBlank() },
+        onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
+        onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
+        footer = spoilerFreeOverview(episode.overview, hidden).takeIf { it.isNotBlank() },
         trailing = {
             EpisodeDownloadControl(
                 downloadProgress = downloadProgress,

@@ -194,4 +194,21 @@
     <string name="ce_number_off">Desactivat</string>
     <string name="ce_pref_player_keep_landscape">Mantén el reproductor en horitzontal</string>
     <string name="ce_pref_player_keep_landscape_summary">Reprodueix els vídeos en horitzontal, encara que posis la tauleta en vertical</string>
+    <string name="ce_pref_home_episode_images">Utilitza imatges dels episodis</string>
+    <string name="ce_pref_home_episode_images_summary">Mostra la imatge de l\'episodi en lloc de la imatge de la sèrie a Continua mirant i Següent</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Emet a un televisor</string>
+    <string name="ce_pref_cast_enabled_summary">Mostra el botó d\'emissió i cerca dispositius Chromecast a la xarxa</string>
+    <string name="ce_pref_cast_max_bitrate">Taxa de bits màxima</string>
+    <string name="ce_pref_cast_max_bitrate_summary">El servidor redueix la qualitat de tot el que la superi mentre emets</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">El televisor reprodueix HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Envia el vídeo HEVC (H.265) tal com és en lloc de convertir-lo a H.264. Un Chromecast 4K el rep així automàticament; activa-ho per a un altre televisor o descodificador que reprodueixi HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Mostra la imatge de l\'episodi en lloc de la imatge de la sèrie a Continua mirant, a Següent i a la part superior de la pàgina de l\'episodi</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segments a la barra de progrés</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Mostra la introducció, el resum, el final, l\'avançament i els anuncis com a parts de color de la barra de progrés</string>
+    <string name="ce_pref_hide_spoilers">Amaga els spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Difumina la imatge i amaga el títol i la sinopsi dels episodis que no has vist. Mantén premut un episodi per mostrar-lo</string>
+    <string name="ce_pref_side_backdrop">Fons al costat del text</string>
+    <string name="ce_pref_side_backdrop_summary">En una tauleta en horitzontal, mostra el fons d\'un element amb la seva forma pròpia al costat del títol en lloc d\'ocupar tota l\'amplada</string>
 </resources>

@@ -16,14 +16,21 @@ data class FindroidSource(
     val mediaStreams: List<FindroidMediaStream>,
     val downloadId: Long? = null,
     /**
-     * True when [path] points at a server-side transcode rather than the original
-     * file: an HLS manifest on the playback path, or a progressive stream on the
-     * download path (Dolby Vision conversion or a user-picked quality cap).
+     * True when [path] points at a server-side transcode rather than the original file: an HLS
+     * manifest on the playback path, or a progressive stream on the download path (Dolby Vision
+     * conversion or a user-picked quality cap).
      */
     val transcoded: Boolean = false,
     /** CE (#510): for the media info sheet. A downloaded source has neither. */
     val container: String? = null,
     val bitrate: Int? = null,
+    /** CE (#580): the audio stream the server plays, and puts in a transcode, for this source. */
+    val defaultAudioStreamIndex: Int? = null,
+    /**
+     * CE (#728): the play session of a transcode on the playback path, which the playback reports
+     * name once the player loads it. Null for anything else.
+     */
+    val playSessionId: String? = null,
 )
 
 suspend fun MediaSourceInfo.toFindroidSource(
@@ -64,14 +71,15 @@ suspend fun MediaSourceInfo.toFindroidSource(
         transcoded = transcoded,
         container = container,
         bitrate = bitrate,
+        defaultAudioStreamIndex = defaultAudioStreamIndex,
     )
 }
 
 /**
- * Pins a transcode to at most [maxWidth]×[maxHeight], keeping the source aspect
- * ratio. The server honors `MaxWidth`/`MaxHeight` on both the HLS manifest and
- * the progressive stream, and copies them into the sub-playlists it hands the
- * player; a lowered bitrate alone makes it keep the source resolution.
+ * Pins a transcode to at most [maxWidth]×[maxHeight], keeping the source aspect ratio. The server
+ * honors `MaxWidth`/`MaxHeight` on both the HLS manifest and the progressive stream, and copies
+ * them into the sub-playlists it hands the player; a lowered bitrate alone makes it keep the source
+ * resolution.
  */
 internal fun String.withMaxResolution(maxWidth: Int?, maxHeight: Int?): String {
     if (maxWidth == null || maxHeight == null) return this
@@ -102,9 +110,25 @@ fun FindroidSourceDto.toFindroidSource(streams: List<FindroidMediaStreamDto>): F
  */
 suspend fun ServerDatabaseDao.getLocalSourcesForItems(
     itemIds: Collection<UUID>
+): Map<UUID, List<FindroidSource>> =
+    localSourcesForItems(itemIds) { ids -> getSourcesForItems(ids) }
+
+/**
+ * CE (#718): [getLocalSourcesForItems], only the downloads stored for [serverId]: another server's
+ * download of the same item id is not this server's item downloaded.
+ */
+suspend fun ServerDatabaseDao.getLocalSourcesForItems(
+    itemIds: Collection<UUID>,
+    serverId: String,
+): Map<UUID, List<FindroidSource>> =
+    localSourcesForItems(itemIds) { ids -> getSourcesForItemsOfServer(ids, serverId) }
+
+private suspend fun ServerDatabaseDao.localSourcesForItems(
+    itemIds: Collection<UUID>,
+    read: suspend (List<UUID>) -> List<FindroidSourceDto>,
 ): Map<UUID, List<FindroidSource>> {
     if (itemIds.isEmpty()) return emptyMap()
-    val dtos = itemIds.distinct().chunked(SQL_CHUNK).flatMap { getSourcesForItems(it) }
+    val dtos = itemIds.distinct().chunked(SQL_CHUNK).flatMap { read(it) }
     if (dtos.isEmpty()) return emptyMap()
     val streams =
         dtos

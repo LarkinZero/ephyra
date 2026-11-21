@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.player.local.domain
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /** Unit tests for [resolveAutoPlayNext] — the "Play next episode automatically" resolution. */
 class AutoPlayNextTest {

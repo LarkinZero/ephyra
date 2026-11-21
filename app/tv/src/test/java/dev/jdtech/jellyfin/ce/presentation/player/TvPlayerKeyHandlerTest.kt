@@ -10,16 +10,16 @@ import android.view.KeyEvent.KEYCODE_DPAD_LEFT
 import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_ENTER
-import android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
 import android.view.KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK
 import android.view.KeyEvent.KEYCODE_MEDIA_FAST_FORWARD
 import android.view.KeyEvent.KEYCODE_MEDIA_NEXT
 import android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
 import android.view.KeyEvent.KEYCODE_MEDIA_STOP
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class TvPlayerKeyHandlerTest {
     private class FakeControls : TvPlayerControls {
@@ -131,22 +131,27 @@ class TvPlayerKeyHandlerTest {
             time += 50
             handler.onKeyEvent(KEYCODE_DPAD_RIGHT, ACTION_DOWN, repeat)
         }
-        assertEquals("only the first press seeks while held", 1, controls.seeks.size)
+        assertEquals(1, controls.seeks.size, message = "only the first press seeks while held")
 
         handler.onKeyEvent(KEYCODE_DPAD_RIGHT, ACTION_UP, 0)
         val moved = controls.seeks.last() - 600_000L
         // Faster than one 30 s step per second, and the indicator showed the same target.
-        assertTrue("moved $moved", moved > 3 * 30_000L)
+        assertTrue(moved > 3 * 30_000L, message = "moved $moved")
         assertEquals(controls.seeks.last(), controls.indicator)
     }
 
     @Test
     fun holdSpeedScalesWithTheVideoLength() {
-        val episode = TvPlayerKeyHandler.holdSeekMs(30_000L, 1_500_000L, heldMs = 3_000, sinceLastMs = 50)
-        val film = TvPlayerKeyHandler.holdSeekMs(30_000L, 7_200_000L, heldMs = 3_000, sinceLastMs = 50)
+        val episode =
+            TvPlayerKeyHandler.holdSeekMs(30_000L, 1_500_000L, heldMs = 3_000, sinceLastMs = 50)
+        val film =
+            TvPlayerKeyHandler.holdSeekMs(30_000L, 7_200_000L, heldMs = 3_000, sinceLastMs = 50)
         assertTrue(film > episode)
         // Before the speed-up, a step-based floor applies: two steps a second.
-        assertEquals(3_000L, TvPlayerKeyHandler.holdSeekMs(30_000L, 0L, heldMs = 0, sinceLastMs = 50))
+        assertEquals(
+            3_000L,
+            TvPlayerKeyHandler.holdSeekMs(30_000L, 0L, heldMs = 0, sinceLastMs = 50),
+        )
     }
 
     @Test
@@ -261,7 +266,7 @@ class TvPlayerKeyHandlerTest {
             controls.calls.clear()
 
             assertTrue(handler.onKeyEvent(ok, ACTION_DOWN, 0))
-            assertTrue("the up of $ok must not reach Play/Pause", up(ok))
+            assertTrue(up(ok), message = "the up of $ok must not reach Play/Pause")
             assertEquals(listOf("show"), controls.calls)
         }
     }
@@ -297,7 +302,7 @@ class TvPlayerKeyHandlerTest {
         // The up was lost; the next key goes to the shown controls.
         handler.onKeyEvent(KEYCODE_DPAD_UP, ACTION_DOWN, 0)
 
-        assertFalse("a later OK-up must not be swallowed", up(KEYCODE_DPAD_CENTER))
+        assertFalse(up(KEYCODE_DPAD_CENTER), message = "a later OK-up must not be swallowed")
     }
 
     @Test

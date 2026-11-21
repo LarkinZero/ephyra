@@ -12,6 +12,7 @@ import dev.jdtech.jellyfin.film.domain.homerows.HomeRowsProfile
 import dev.jdtech.jellyfin.film.domain.homerows.HomeRowsStore
 import dev.jdtech.jellyfin.film.domain.homerows.LegacyHomeSwitches
 import dev.jdtech.jellyfin.film.domain.homerows.homeLibraries
+import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.HomeSection
@@ -19,7 +20,6 @@ import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.repository.DataChangeEvents
 import dev.jdtech.jellyfin.repository.JellyfinRepository
-import dev.jdtech.jellyfin.repository.JellyfinRepositoryOfflineImpl
 import dev.jdtech.jellyfin.repository.ReloadPolicy
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.toView
@@ -55,12 +55,9 @@ constructor(
     private val uiTextNextUp = UiText.StringResource(FilmR.string.next_up)
 
     companion object {
-        private val UUID_SUGGESTIONS =
-            UUID.fromString("31e47044-9b79-4bb0-99d0-0e477ed65420")
-        private val UUID_CONTINUE_WATCHING =
-            UUID.fromString("44845958-8326-4e83-beb4-c4f42e9eeb95")
-        private val UUID_NEXT_UP =
-            UUID.fromString("18bfced5-f237-4d42-aa72-d9d7fed19279")
+        private val UUID_SUGGESTIONS = UUID.fromString("31e47044-9b79-4bb0-99d0-0e477ed65420")
+        private val UUID_CONTINUE_WATCHING = UUID.fromString("44845958-8326-4e83-beb4-c4f42e9eeb95")
+        private val UUID_NEXT_UP = UUID.fromString("18bfced5-f237-4d42-aa72-d9d7fed19279")
     }
 
     private val homeRowsStore = HomeRowsStore(appPreferences, database)
@@ -71,14 +68,24 @@ constructor(
     private var cachedLibrariesKey: Pair<String?, UUID?>? = null
     private var cacheChecked = false
 
-    /** The repository is chosen when this view model is made, so this holds for its whole life. */
-    private val offline = repository is JellyfinRepositoryOfflineImpl
+    init {
+        syncPreferences()
+    }
+
+    /**
+     * CE (#608): settings Home draws from without loading anything. Read when Home comes back into
+     * view, so a change in Settings shows without a reload.
+     */
+    private fun syncPreferences() {
+        val useEpisodeImages = appPreferences.getValue(appPreferences.homeEpisodeImages)
+        _state.update { it.copy(useEpisodeImages = useEpisodeImages) }
+    }
 
     /**
      * With [silent] the refresh indicator stays hidden, for reloads the user didn't ask for. The
-     * returned job ends once every row has loaded, for screens that wait for that (TV Home puts focus
-     * back only then, so it lands on the item in its new place). A load that starts while another
-     * is running replaces it (#251).
+     * returned job ends once every row has loaded, for screens that wait for that (TV Home puts
+     * focus back only then, so it lands on the item in its new place). A load that starts while
+     * another is running replaces it (#251).
      */
     fun loadData(silent: Boolean = false): Job {
         Timber.i("Loading data")
@@ -89,8 +96,10 @@ constructor(
     }
 
     /** Whether coming back to Home needs a load (#251), see [ReloadPolicy]. */
-    fun shouldReload(stopEventFollows: Boolean = false): Boolean =
-        reloadPolicy.shouldReload(stopEventFollows)
+    fun shouldReload(stopEventFollows: Boolean = false): Boolean {
+        syncPreferences()
+        return reloadPolicy.shouldReload(stopEventFollows)
+    }
 
     /** [loadData] when [shouldReload] says so, else a job that is already done. */
     fun loadDataIfNeeded(silent: Boolean = false): Job =
@@ -110,10 +119,6 @@ constructor(
                 val user = logFailure("user") { database.getServerCurrentUser(server.id) }
                 _state.update { it.copy(user = user.getOrNull()) }
                 showCachedRows(server.id, user.getOrNull()?.id)
-                if (offline) {
-                    val none = logFailure("downloads") { nothingDownloaded(database, server.id) }
-                    _state.update { it.copy(nothingDownloaded = none.getOrDefault(false)) }
-                }
             }
             // CE (#142): the rows this user chose for this server, in their order.
             val stored = homeRowsStore.read(HomeRowsProfile.of(server))
@@ -127,35 +132,34 @@ constructor(
             // and crashes the app, even with this try/catch around awaitAll.
             // See BUGREPORT_ANALYSIS.md. Each row catches its own failures, so one
             // row can't cancel the others; this stays for whatever gets past that.
-            val rows =
-                coroutineScope {
-                    // The user image only feeds the avatar: it must not hold the rows back.
-                    val avatar = server?.let { s -> async { refreshUserImage(s.id) } }
-                    // CE (#543): neither does the server's name.
-                    val name = server?.let { s -> async { refreshServerName(s) } }
-                    val results =
-                        awaitAll(
-                            async {
-                                logFailure("suggestions") {
-                                    loadSuggestions(show(HomeRowType.SUGGESTIONS))
-                                }
-                            },
-                            async {
-                                logFailure("resume items") {
-                                    loadResumeItems(show(HomeRowType.CONTINUE_WATCHING))
-                                }
-                            },
-                            async {
-                                logFailure("next up items") {
-                                    loadNextUpItems(show(HomeRowType.NEXT_UP))
-                                }
-                            },
-                            async { logFailure("views") { loadViews(stored, legacy) } },
-                        )
-                    avatar?.await()
-                    name?.await()
-                    results
-                }
+            val rows = coroutineScope {
+                // The user image only feeds the avatar: it must not hold the rows back.
+                val avatar = server?.let { s -> async { refreshUserImage(s.id) } }
+                // CE (#543): neither does the server's name.
+                val name = server?.let { s -> async { refreshServerName(s) } }
+                val results =
+                    awaitAll(
+                        async {
+                            logFailure("suggestions") {
+                                loadSuggestions(show(HomeRowType.SUGGESTIONS))
+                            }
+                        },
+                        async {
+                            logFailure("resume items") {
+                                loadResumeItems(show(HomeRowType.CONTINUE_WATCHING))
+                            }
+                        },
+                        async {
+                            logFailure("next up items") {
+                                loadNextUpItems(show(HomeRowType.NEXT_UP))
+                            }
+                        },
+                        async { logFailure("views") { loadViews(stored, legacy) } },
+                    )
+                avatar?.await()
+                name?.await()
+                results
+            }
             val error = errorIfAllFailed(rows)
             _state.update { it.copy(error = error) }
             loaded = error == null
@@ -182,11 +186,10 @@ constructor(
     }
 
     /**
-     * CE (#543): a server renamed on the server is renamed here too, on the next load. Offline, or
-     * when the server does not answer, the stored name stays.
+     * CE (#543): a server renamed on the server is renamed here too, on the next load. When the
+     * server does not answer, the stored name stays.
      */
     private suspend fun refreshServerName(server: Server) {
-        if (offline) return
         logFailure("server name") {
             val renamed = server.renamedTo(repository.getPublicSystemInfo()) ?: return@logFailure
             database.updateServer(renamed)
@@ -200,8 +203,6 @@ constructor(
      */
     private suspend fun showCachedRows(serverId: String, userId: UUID?) {
         val cache = homeCache ?: return
-        // CE (#428): offline, the rows are the downloads; the remembered ones can't be opened.
-        if (offline) return
         if (userId == null || cacheChecked || !_state.value.isEmpty) return
         cacheChecked = true
         if (!appPreferences.getValue(appPreferences.homeCache)) {
@@ -226,11 +227,11 @@ constructor(
         }
     }
 
-    /** Offline, the rows are the downloads: not worth showing on the next online start. */
+    /** The rows of a full load, for the next cold start (#251). */
     private suspend fun saveRows(server: Server?) {
         val cache = homeCache ?: return
         val user = _state.value.user ?: return
-        if (server == null || offline) return
+        if (server == null) return
         if (!appPreferences.getValue(appPreferences.homeCache)) return
         cache.write(server.id, user.id, _state.value)
     }
@@ -375,8 +376,7 @@ constructor(
         val shown = layout.filter { it.visible }.mapNotNullTo(mutableSetOf()) { it.libraryId }
         val views = libraries.filter { it.id in shown }
         if (views.isEmpty()) {
-            // CE (#428): no Latest row to load, so none of the old ones may stay: offline with
-            // nothing downloaded, the rows remembered from an online start would.
+            // CE (#428): no Latest row to load, so none of the old ones may stay.
             _state.update { it.copy(views = emptyList()) }
             return
         }
@@ -403,7 +403,13 @@ constructor(
                 .mapIndexed { i, view ->
                     async {
                         val result =
-                            logFailure("library ${view.id}") { repository.getLatestMedia(view.id) }
+                            logFailure("library ${view.id}") {
+                                repository.getLatestMedia(
+                                    view.id,
+                                    CollectionType.fromString(view.collectionType?.serialName)
+                                        .latestItemTypes,
+                                )
+                            }
                         synchronized(results) {
                             results[i] = result
                             _state.update { it.copy(views = items()) }
@@ -417,7 +423,6 @@ constructor(
             throw results.first()!!.exceptionOrNull()!!
         }
     }
-
 
     fun onAction(action: HomeAction) {
         when (action) {

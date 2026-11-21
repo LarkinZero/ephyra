@@ -4,8 +4,8 @@ import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.models.UiText
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class HomeRowsOrderTest {
     private val suggestions = HomeItem.Suggestions(UUID.randomUUID(), emptyList())
@@ -16,11 +16,7 @@ class HomeRowsOrderTest {
         HomeItem.Section(HomeSection(UUID.randomUUID(), UiText.DynamicString(""), emptyList()))
 
     private val state =
-        HomeState(
-            suggestionsSection = suggestions,
-            resumeSection = resume,
-            nextUpSection = nextUp,
-        )
+        HomeState(suggestionsSection = suggestions, resumeSection = resume, nextUpSection = nextUp)
 
     @Test
     fun `without an order the rows keep the default order`() {

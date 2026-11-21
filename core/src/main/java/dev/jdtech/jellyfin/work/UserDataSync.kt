@@ -1,11 +1,5 @@
 package dev.jdtech.jellyfin.work
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
@@ -13,8 +7,8 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.api.JellyfinApi
+import dev.jdtech.jellyfin.core.reachability.ServerReachability
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.UserDataSyncRequester
 import java.util.concurrent.TimeUnit
@@ -30,17 +24,20 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 /**
- * Enqueues [SyncWorker], which sends the watch progress, played state and favourites that could
- * not reach the server (#552).
+ * Enqueues [SyncWorker], which sends the watch progress, played state and favourites that could not
+ * reach the server (#552).
  * - [request]: at app start and whenever a write is marked to be synced. The work is unique and
  *   kept, so asking while a run is waiting for the network or for a retry does nothing.
- * - [start] watches for signs that the server may be reachable again: the app coming to the
- *   foreground, the device changing network (home Wi-Fi after mobile data), and a request of the
- *   app's own reaching the server after failed ones. With rows waiting, each of those starts the
- *   sync over, so it does not sit out the delay of a retry.
+ * - [start] watches for signs that the server is reachable again: a request of the app's own
+ *   reaching the server after failed ones, and [ServerReachability] finding it there when the app
+ *   comes to the foreground or the device changes network (home Wi-Fi after mobile data). With rows
+ *   waiting, each of those starts the sync over, so it does not sit out the delay of a retry.
  *
- * With the process gone only the retries are left, which is why they back off linearly: after a
- * day without the server the next try is at most about 40 minutes away, not 5 hours.
+ * - CE (#635): with nothing waiting, those signs still run the sync now and then, at most every 15
+ *   minutes and only with downloads, so it refreshes their user data from the server.
+ *
+ * With the process gone only the retries are left, which is why they back off linearly: after a day
+ * without the server the next try is at most about 40 minutes away, not 5 hours.
  *
  * Call [request] off the main thread, because the first call sets up WorkManager (#250).
  */
@@ -48,13 +45,14 @@ import timber.log.Timber
 class UserDataSync
 @Inject
 constructor(
-    @ApplicationContext private val context: Context,
     private val workManager: Provider<WorkManager>,
     private val database: ServerDatabaseDao,
     private val jellyfinApi: JellyfinApi,
+    private val serverReachability: ServerReachability,
 ) : UserDataSyncRequester {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var started = false
+    @Volatile private var lastRefreshRequestAt: Long? = null
 
     override fun request() = enqueue(ExistingWorkPolicy.KEEP, initialDelaySeconds = 0)
 
@@ -67,38 +65,20 @@ constructor(
 
         scope.launch { jellyfinApi.serverReturned.collect { restartIfWaiting("server answered") } }
 
-        scope.launch(Dispatchers.Main) {
-            ProcessLifecycleOwner.get()
-                .lifecycle
-                .addObserver(
-                    object : DefaultLifecycleObserver {
-                        override fun onStart(owner: LifecycleOwner) {
-                            scope.launch { restartIfWaiting("app in foreground") }
-                        }
-                    }
-                )
-        }
-
-        try {
-            context
-                .getSystemService(ConnectivityManager::class.java)
-                ?.registerDefaultNetworkCallback(
-                    object : ConnectivityManager.NetworkCallback() {
-                        override fun onAvailable(network: Network) {
-                            scope.launch { restartIfWaiting("network changed") }
-                        }
-                    }
-                )
-        } catch (e: RuntimeException) {
-            // Too many callbacks registered, or a device that refuses: the other signs remain.
-            Timber.w(e, "No network callback for the user data sync")
+        // CE (#281): the foreground and the network are watched in one place. It probes the server
+        // on those signs, so the sync starts over when the server is there, not on the sign alone.
+        scope.launch {
+            serverReachability.serverConfirmed.collect { restartIfWaiting("server reachable") }
         }
     }
 
     private suspend fun restartIfWaiting(reason: String) {
         try {
             // First, and without WorkManager: most of the time nothing is waiting.
-            if (!database.hasUserDataToBeSynced()) return
+            if (!database.hasUserDataToBeSynced()) {
+                refreshIfDue(reason)
+                return
+            }
             val state =
                 withContext(Dispatchers.IO) {
                     workManager
@@ -116,6 +96,21 @@ constructor(
         } catch (e: Exception) {
             Timber.e(e, "Failed to restart the user data sync")
         }
+    }
+
+    /**
+     * CE (#635): with nothing waiting to be sent, runs the sync anyway now and then, for its
+     * refresh of the downloads' user data from the server. That way progress made on another device
+     * reaches the downloads while the app is used, not only at app start. Only with downloads, and
+     * at most once per [REFRESH_INTERVAL_MILLIS].
+     */
+    private suspend fun refreshIfDue(reason: String) {
+        val now = System.currentTimeMillis()
+        if (!refreshDue(lastRefreshRequestAt, now, REFRESH_INTERVAL_MILLIS)) return
+        if (!database.hasSyncedUserData()) return
+        lastRefreshRequestAt = now
+        Timber.d("User data sync: %s, refreshing downloads", reason)
+        enqueue(ExistingWorkPolicy.KEEP, RESTART_DELAY_SECONDS)
     }
 
     private fun enqueue(policy: ExistingWorkPolicy, initialDelaySeconds: Long) {
@@ -143,10 +138,13 @@ constructor(
         private const val BACKOFF_SECONDS = 30L
 
         /**
-         * Long enough for a burst of signs (a network change comes with several) to end in one
-         * run, and for a cold start to leave the first seconds to the Home screen (#250).
+         * Long enough for a burst of signs (a network change comes with several) to end in one run,
+         * and for a cold start to leave the first seconds to the Home screen (#250).
          */
         private const val RESTART_DELAY_SECONDS = 5L
+
+        /** CE (#635): the least time between two refreshes asked for by [restartIfWaiting]. */
+        private const val REFRESH_INTERVAL_MILLIS = 15 * 60 * 1000L
     }
 }
 
@@ -161,3 +159,10 @@ internal fun restartPolicy(hasPending: Boolean, state: WorkInfo.State?): Existin
         state == WorkInfo.State.RUNNING -> null
         else -> ExistingWorkPolicy.REPLACE
     }
+
+/**
+ * CE (#635): whether a refresh of the downloads' user data may be asked for at [now], the last one
+ * having been asked for at [lastAt] (null: never in this process).
+ */
+internal fun refreshDue(lastAt: Long?, now: Long, intervalMillis: Long): Boolean =
+    lastAt == null || now - lastAt >= intervalMillis

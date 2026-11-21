@@ -19,9 +19,9 @@ import dev.jdtech.jellyfin.models.FindroidSourceDto
 import dev.jdtech.jellyfin.models.FindroidTrickplayInfoDto
 import dev.jdtech.jellyfin.models.FindroidUserDataDto
 import dev.jdtech.jellyfin.models.PendingDownloadDto
+import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.ServerAddress
-import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import dev.jdtech.jellyfin.models.User
 
 @Database(
@@ -42,7 +42,7 @@ import dev.jdtech.jellyfin.models.User
             PendingDownloadDto::class,
             SeriesTrackPreferenceDto::class,
         ],
-    version = 18,
+    version = 20,
     autoMigrations =
         [
             AutoMigration(from = 2, to = 3),
@@ -60,6 +60,8 @@ import dev.jdtech.jellyfin.models.User
             AutoMigration(from = 15, to = 16),
             AutoMigration(from = 16, to = 17),
             AutoMigration(from = 17, to = 18),
+            AutoMigration(from = 18, to = 19, spec = ServerDatabase.LastPlayedDateMigration::class),
+            AutoMigration(from = 19, to = 20, spec = ServerDatabase.SegmentsKeyMigration::class),
         ],
 )
 @ColumnTypeConverters(Converters::class)
@@ -69,6 +71,32 @@ abstract class ServerDatabase : RoomDatabase() {
     @DeleteTable(tableName = "trickPlayManifests") class TrickplayMigration : AutoMigrationSpec
 
     @DeleteTable(tableName = "intros") class IntrosMigration : AutoMigrationSpec
+
+    /**
+     * CE (#633): rows with playback waiting to be sent from before `lastPlayedDate` existed get the
+     * time of the upgrade, so their sync still moves the item up in Continue Watching. Close
+     * enough: the playback happened before the upgrade, and usually shortly before.
+     */
+    class LastPlayedDateMigration : AutoMigrationSpec {
+        override suspend fun onPostMigrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                "UPDATE userdata SET lastPlayedDate = CAST(strftime('%s', 'now') AS INTEGER) * 1000 " +
+                    "WHERE toBeSynced = 1 AND (playbackPositionTicks > 0 OR played = 1)"
+            )
+        }
+    }
+
+    /**
+     * CE (#693): segments of items that are no longer downloaded go. Deleting a download left them
+     * behind, and `getSegments` prefers stored rows over the server's, also online.
+     */
+    class SegmentsKeyMigration : AutoMigrationSpec {
+        override suspend fun onPostMigrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                "DELETE FROM segments WHERE itemId NOT IN (SELECT itemId FROM sources)"
+            )
+        }
+    }
 }
 
 val MIGRATION_6_7 =

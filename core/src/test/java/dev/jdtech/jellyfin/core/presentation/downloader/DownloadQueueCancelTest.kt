@@ -17,9 +17,9 @@ import java.lang.reflect.Proxy
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -166,8 +166,9 @@ class DownloadQueueCancelTest {
         override suspend fun getProgress(downloadId: Long?) =
             Downloader.Progress(progressStatus, 0, 0L, -1L)
 
-        override suspend fun getProgress(downloadIds: List<Long>) =
-            downloadIds.associateWith { Downloader.Progress(progressStatus, 0, 0L, -1L) }
+        override suspend fun getProgress(downloadIds: List<Long>) = downloadIds.associateWith {
+            Downloader.Progress(progressStatus, 0, 0L, -1L)
+        }
 
         override suspend fun getActiveDownloads() = active
 
@@ -182,6 +183,8 @@ class DownloadQueueCancelTest {
         override suspend fun getPendingDownloads() = emptyList<Downloader.PendingDownload>()
 
         override suspend fun sweepOrphans() = Unit
+
+        override suspend fun finalizeFinishedMediaStreams() = Unit
 
         override suspend fun finalizeDownload(downloadId: Long) = false
     }

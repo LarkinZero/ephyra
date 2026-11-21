@@ -10,7 +10,6 @@ import dev.jdtech.jellyfin.repository.PlaybackEvents
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import dev.jdtech.jellyfin.utils.NetworkConnectivity
-import dev.jdtech.jellyfin.utils.isOfflineModeActive
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
@@ -30,8 +29,8 @@ import timber.log.Timber
  * removes the ones Smart Downloads queued itself once you have watched them. What to queue and
  * remove is decided by [planSmartDownloads]; this class gathers its input and carries it out.
  *
- * It runs after playback stops and after the sync that pushes offline progress, so episodes
- * watched offline or on another device are covered too.
+ * It runs after playback stops and after the sync that pushes offline progress, so episodes watched
+ * offline or on another device are covered too.
  */
 @Singleton
 class SmartDownloads
@@ -75,7 +74,9 @@ constructor(
     /** Runs [check] for every series that has a completed download. */
     suspend fun checkAll() {
         if (!isActive()) return
-        for (seriesId in database.getSeriesIdsWithCompletedDownloads()) {
+        // CE (#718): the current server's series; another server's downloads are not its to manage.
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return
+        for (seriesId in database.getSeriesIdsWithCompletedDownloads(serverId)) {
             check(seriesId, finishedRecently = false)
         }
     }
@@ -101,8 +102,7 @@ constructor(
 
     /** Smart Downloads needs the server to say what is watched, so it never runs offline. */
     private fun isActive(): Boolean =
-        appPreferences.getValue(appPreferences.smartDownloads) &&
-            !isOfflineModeActive(appPreferences, networkConnectivity)
+        appPreferences.getValue(appPreferences.smartDownloads) && networkConnectivity.isOnline()
 
     private suspend fun run(seriesId: UUID, finishedRecently: Boolean) {
         // Smart Downloads that was already on before the moment was recorded: only what is watched
@@ -118,7 +118,11 @@ constructor(
         val episodes =
             repository.getSeasons(seriesId).flatMap { season ->
                 // Without CanDownload every episode reads as not downloadable.
-                repository.getEpisodes(seriesId, season.id, fields = listOf(ItemFields.CAN_DOWNLOAD))
+                repository.getEpisodes(
+                    seriesId,
+                    season.id,
+                    fields = listOf(ItemFields.CAN_DOWNLOAD),
+                )
             }
 
         // The server decides what counts as watched, so wait until our own progress has reached
@@ -128,22 +132,24 @@ constructor(
             return
         }
 
-        val sourcesByEpisode =
-            episodes.associate { episode ->
-                episode.id to
-                    database.getSources(episode.id).filter { it.type == FindroidSourceType.LOCAL }
-            }
+        // CE (#718): only this server's downloads count as downloaded here.
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: return
+        val sourcesByEpisode = episodes.associate { episode ->
+            episode.id to
+                database.getSourcesOfServer(episode.id, serverId).filter {
+                    it.type == FindroidSourceType.LOCAL
+                }
+        }
         val completed =
             sourcesByEpisode
                 .mapValues { (_, sources) -> sources.filter { !it.path.endsWith(".download") } }
                 .filterValues { it.isNotEmpty() }
-        val downloads =
-            completed.mapValues { (_, sources) ->
-                SmartDownload(
-                    downloadedAt = sources.first().downloadedAt,
-                    smartQueued = sources.first().smartQueued,
-                )
-            }
+        val downloads = completed.mapValues { (_, sources) ->
+            SmartDownload(
+                downloadedAt = sources.first().downloadedAt,
+                smartQueued = sources.first().smartQueued,
+            )
+        }
         val inFlightIds =
             downloadQueue.entries.value
                 .filter {
@@ -159,7 +165,9 @@ constructor(
                 downloads = downloads,
                 inFlightIds = inFlightIds,
                 keepReady =
-                    appPreferences.getValue(appPreferences.smartDownloadsKeepReady).coerceAtLeast(1),
+                    appPreferences
+                        .getValue(appPreferences.smartDownloadsKeepReady)
+                        .coerceAtLeast(1),
                 since = since,
                 finishedRecently = finishedRecently,
                 playingItemId = playbackEvents.playingItemId.value,

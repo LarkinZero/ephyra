@@ -6,7 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadProgress
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
+import dev.jdtech.jellyfin.film.presentation.DownloadPrompt
+import dev.jdtech.jellyfin.film.presentation.EpisodeDownloadPrompts
 import dev.jdtech.jellyfin.film.presentation.downloads.downloadDeletionScope
+import dev.jdtech.jellyfin.film.presentation.inFlightIds
 import dev.jdtech.jellyfin.film.presentation.selectEpisodesToDownload
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSourceType
@@ -25,6 +28,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -89,29 +93,28 @@ constructor(
                         }
                 }
                 .collect { entries ->
-                val episodes = _state.value.episodes
-                if (episodes.isEmpty()) return@collect
-                val progressMap = buildDownloadProgressMap(episodes, entries)
-                if (progressMap != _state.value.episodeDownloadProgress) {
-                    _state.update { it.copy(episodeDownloadProgress = progressMap) }
-                }
-                // Refresh season data once all of this season's downloads have settled,
-                // so episode.sources gets the new LOCAL entry. Firing per-episode would
-                // cause N network roundtrips.
-                val episodeIds = episodes.map { it.id }.toSet()
-                val isBusy =
-                    entries.any {
+                    val episodes = _state.value.episodes
+                    if (episodes.isEmpty()) return@collect
+                    val progressMap = buildDownloadProgressMap(episodes, entries)
+                    if (progressMap != _state.value.episodeDownloadProgress) {
+                        _state.update { it.copy(episodeDownloadProgress = progressMap) }
+                    }
+                    // Refresh season data once all of this season's downloads have settled,
+                    // so episode.sources gets the new LOCAL entry. Firing per-episode would
+                    // cause N network roundtrips.
+                    val episodeIds = episodes.map { it.id }.toSet()
+                    val isBusy = entries.any {
                         it.id in episodeIds &&
                             (it.state is DownloadQueue.EntryState.Downloading ||
                                 it.state is DownloadQueue.EntryState.Pending)
                     }
-                if (isBusy) {
-                    wasBusy = true
-                } else if (wasBusy && ::seasonId.isInitialized) {
-                    wasBusy = false
-                    loadSeason(seasonId)
+                    if (isBusy) {
+                        wasBusy = true
+                    } else if (wasBusy && ::seasonId.isInitialized) {
+                        wasBusy = false
+                        loadSeason(seasonId)
+                    }
                 }
-            }
         }
     }
 
@@ -164,15 +167,18 @@ constructor(
                                 seasonId = seasonId,
                                 offline = true,
                             )
-                        if (downloadsOnly) stored
-                        else
-                            serverOrStoredList(stored) {
-                                repository.getEpisodes(
-                                    seriesId = resolvedSeriesId,
-                                    seasonId = seasonId,
-                                    fields = seasonEpisodeFields,
-                                )
-                            }
+                        val episodes =
+                            if (downloadsOnly) stored
+                            else
+                                serverOrStoredList(stored) {
+                                    repository.getEpisodes(
+                                        seriesId = resolvedSeriesId,
+                                        seasonId = seasonId,
+                                        fields = seasonEpisodeFields,
+                                    )
+                                }
+                        // The fallback hands back the stored list itself.
+                        episodes to (downloadsOnly || episodes === stored)
                     }
                     val seriesSeasonsAsync = async {
                         if (!includeSeriesSeasons) {
@@ -187,12 +193,13 @@ constructor(
                         }
                     }
                     val season = seasonAsync.await()
-                    val episodes = episodesAsync.await()
+                    val (episodes, storedOnly) = episodesAsync.await()
                     val seriesSeasons = seriesSeasonsAsync.await()
                     _state.emit(
                         _state.value.copy(
                             season = season,
                             episodes = episodes,
+                            storedOnly = storedOnly,
                             seriesSeasons = seriesSeasons,
                             episodeDownloadProgress =
                                 buildDownloadProgressMap(episodes, downloadQueue.entries.value),
@@ -210,9 +217,9 @@ constructor(
     }
 
     /**
-     * Marks the season played or unplayed and updates the season in place (#252) instead of
-     * loading the page again. Only the episodes are fetched again: the server marks them too, the
-     * offline repository doesn't, so their state has to come from the repository.
+     * Marks the season played or unplayed and updates the season in place (#252) instead of loading
+     * the page again. Only the episodes are fetched again: the server marks them too, so their
+     * state has to come from the repository.
      */
     private fun setPlayed(played: Boolean) {
         viewModelScope.launch {
@@ -222,12 +229,16 @@ constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Timber.e(e, if (played) "Failed to mark as played" else "Failed to unmark as played")
+                Timber.e(
+                    e,
+                    if (played) "Failed to mark as played" else "Failed to unmark as played",
+                )
                 return@launch
             }
             reloadPolicy.changedHere()
             _state.update { state -> state.copy(season = state.season?.copy(played = played)) }
-            val seriesId = _state.value.season?.takeIf { it.id == seasonId }?.seriesId ?: return@launch
+            val seriesId =
+                _state.value.season?.takeIf { it.id == seasonId }?.seriesId ?: return@launch
             try {
                 val episodes =
                     repository.getEpisodes(
@@ -271,33 +282,62 @@ constructor(
         }
     }
 
-    fun downloadSeason(maxBitrate: Int? = null) {
+    /** CE (#636): the questions of a download, see [EpisodeDownloadPrompts]. */
+    private val downloadPrompts = EpisodeDownloadPrompts()
+
+    /** CE (#636): the open question of a download (which episodes, then the quality), or null. */
+    val downloadPrompt: StateFlow<DownloadPrompt?> = downloadPrompts.prompt
+
+    /** CE (#636): the answer to [DownloadPrompt.Episodes]. */
+    fun chooseEpisodes(unwatchedOnly: Boolean) = downloadPrompts.chooseEpisodes(unwatchedOnly)
+
+    /** CE (#636): the answer to [DownloadPrompt.Quality], which starts the download. */
+    fun chooseQuality(maxBitrate: Int?) {
+        val answer = downloadPrompts.chooseQuality(maxBitrate) ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            // An episode already enqueued (pending/downloading/paused) is "in
-            // progress" from the user's perspective, so count it as skipped rather
-            // than re-enqueuing. enqueueAll dedupes too, but without this the
-            // "Started N downloads" toast would overstate the count.
-            val liveQueuedIds =
-                downloadQueue.entries.value
-                    .filter {
-                        it.state is DownloadQueue.EntryState.Pending ||
-                            it.state is DownloadQueue.EntryState.Downloading ||
-                            it.state is DownloadQueue.EntryState.Paused
-                    }
-                    .map { it.id }
-                    .toSet()
-            val (toQueue, skipped) = selectEpisodesToDownload(_state.value.episodes, liveQueuedIds)
-
-            if (toQueue.isEmpty()) {
-                eventsChannel.send(SeasonEvent.DownloadResult(0, skipped, 0))
-                return@launch
-            }
-
-            downloadQueue.enqueueAll(toQueue, maxBitrate)
-            eventsChannel.send(
-                SeasonEvent.DownloadResult(started = toQueue.size, skipped = skipped, failed = 0)
-            )
+            enqueue(answer.episodes, answer.maxBitrate, answer.unwatchedOnly)
         }
+    }
+
+    /** CE (#636): the open question was cancelled, so nothing is downloaded. */
+    fun dismissDownloadPrompt() = downloadPrompts.dismiss()
+
+    /**
+     * CE (#636): asks the questions of a download of [episodes], or, when every one of them is
+     * downloaded or in flight already, says so at once without asking anything.
+     */
+    private suspend fun startDownload(episodes: List<FindroidEpisode>) {
+        val inFlightIds = downloadQueue.inFlightIds()
+        if (selectEpisodesToDownload(episodes, inFlightIds).toQueue.isEmpty()) {
+            enqueue(episodes, maxBitrate = null, unwatchedOnly = false)
+        } else {
+            downloadPrompts.start(episodes, inFlightIds)
+        }
+    }
+
+    fun downloadSeason() {
+        viewModelScope.launch(Dispatchers.IO) { startDownload(_state.value.episodes) }
+    }
+
+    private suspend fun enqueue(
+        episodes: List<FindroidEpisode>,
+        maxBitrate: Int?,
+        unwatchedOnly: Boolean,
+    ) {
+        // An episode already enqueued (pending/downloading/paused) is "in progress" from the
+        // user's perspective, so it counts as skipped rather than being enqueued again.
+        val (toQueue, skipped) =
+            selectEpisodesToDownload(episodes, downloadQueue.inFlightIds(), unwatchedOnly)
+
+        if (toQueue.isEmpty()) {
+            eventsChannel.send(SeasonEvent.DownloadResult(0, skipped, 0))
+            return
+        }
+
+        downloadQueue.enqueueAll(toQueue, maxBitrate)
+        eventsChannel.send(
+            SeasonEvent.DownloadResult(started = toQueue.size, skipped = skipped, failed = 0)
+        )
     }
 
     fun deleteSeasonDownloads() {
@@ -335,7 +375,8 @@ constructor(
                             status = DownloadStatus.PAUSED,
                             progress = entry.progress / 100f,
                         )
-                    is DownloadQueue.EntryState.Failed -> DownloadProgress(status = DownloadStatus.FAILED)
+                    is DownloadQueue.EntryState.Failed ->
+                        DownloadProgress(status = DownloadStatus.FAILED)
                     is DownloadQueue.EntryState.Completed ->
                         DownloadProgress(status = DownloadStatus.COMPLETED, progress = 1f)
                     null ->

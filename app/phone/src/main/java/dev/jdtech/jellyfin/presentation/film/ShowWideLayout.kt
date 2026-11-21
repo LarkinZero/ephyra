@@ -33,15 +33,16 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeEpisodeLine
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.AirScheduleText
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
-import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.HeroMetadataLine
 import dev.jdtech.jellyfin.presentation.film.components.HeroSubtitle
 import dev.jdtech.jellyfin.presentation.film.components.HeroTitle
@@ -54,6 +55,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.SeasonSelectionDialog
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -75,7 +77,7 @@ import java.util.UUID
 fun ShowWideLayout(
     state: ShowState,
     onAction: (ShowAction) -> Unit,
-    onDownloadSeasons: (seasonIds: Set<UUID>, maxBitrate: Int?) -> Unit,
+    onDownloadSeasons: (seasonIds: Set<UUID>) -> Unit,
     onDeleteShowDownloads: () -> Unit,
 ) {
     val widthClass = currentWidthClass()
@@ -90,8 +92,6 @@ fun ShowWideLayout(
     val artwork = rememberArtworkState(state.show, ArtworkPlacement.Hero)
 
     var seasonSelectionDialogOpen by remember { mutableStateOf(false) }
-    // Seasons picked in the selection dialog, awaiting a quality choice.
-    var pendingDownloadSeasonIds by remember { mutableStateOf<Set<UUID>?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.show?.let { show ->
@@ -131,6 +131,7 @@ fun ShowWideLayout(
                         onPlayClick = { startFromBeginning ->
                             onAction(ShowAction.Play(startFromBeginning = startFromBeginning))
                         },
+                        onShuffleClick = { onAction(ShowAction.Shuffle) },
                         onMarkAsPlayedClick = {
                             when (show.played) {
                                 true -> onAction(ShowAction.UnmarkAsPlayed)
@@ -256,20 +257,11 @@ fun ShowWideLayout(
             SeasonSelectionDialog(
                 seasons = state.downloadableSeasons,
                 onConfirm = { selectedSeasonIds ->
-                    pendingDownloadSeasonIds = selectedSeasonIds
+                    onDownloadSeasons(selectedSeasonIds)
                     seasonSelectionDialogOpen = false
                 },
                 onDismiss = { seasonSelectionDialogOpen = false },
                 seasonDownloadInfo = state.seasonDownloadInfo,
-            )
-        }
-        pendingDownloadSeasonIds?.let { seasonIds ->
-            DownloadQualityDialog(
-                onSelect = { maxBitrate ->
-                    onDownloadSeasons(seasonIds, maxBitrate)
-                    pendingDownloadSeasonIds = null
-                },
-                onDismiss = { pendingDownloadSeasonIds = null },
             )
         }
     }
@@ -286,11 +278,16 @@ private fun RowTitle(text: String, contentPadding: PaddingValues) {
 /** Next Up as a row card of `cardHorizontal` width instead of the compact page's lone card. */
 @Composable
 private fun NextUpCard(episode: FindroidEpisode, widthClass: WidthClass, onClick: () -> Unit) {
+    // CE (#618): a hidden Next Up is only its number, until held.
+    val hidden = LocalSpoilers.current.hides(episode)
     Column(
         modifier =
             Modifier.width(Layout.cardHorizontal(widthClass))
                 .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = onClick)
+                .then(
+                    if (hidden) Modifier.revealOnLongClick(episode, onClick)
+                    else Modifier.clickable(onClick = onClick)
+                )
     ) {
         ItemPoster(
             item = episode,
@@ -299,13 +296,7 @@ private fun NextUpCard(episode: FindroidEpisode, widthClass: WidthClass, onClick
         )
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(
-            text =
-                stringResource(
-                    id = CoreR.string.episode_name_extended,
-                    episode.parentIndexNumber,
-                    episode.indexNumber,
-                    episode.name,
-                ),
+            text = spoilerFreeEpisodeLine(episode, hidden),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -322,7 +313,7 @@ private fun ShowWideLayoutPreview() {
         ShowWideLayout(
             state = ShowState(show = dummyShow, nextUp = dummyEpisode),
             onAction = {},
-            onDownloadSeasons = { _, _ -> },
+            onDownloadSeasons = {},
             onDeleteShowDownloads = {},
         )
     }

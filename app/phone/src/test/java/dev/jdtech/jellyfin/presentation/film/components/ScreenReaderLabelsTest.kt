@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -18,7 +17,6 @@ import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.View
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
@@ -27,8 +25,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * #441: what a screen reader says for the Home buttons and the badges on a card. Every button has
- * a label, and the watched tick no longer says "Episode watched indicator" on a movie.
+ * #441: what a screen reader says for the Home buttons and the badges on a card. Every button has a
+ * label, and the watched tick no longer says "Episode watched indicator" on a movie.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class, qualifiers = "en-rUS-w411dp-h914dp")
@@ -41,15 +39,13 @@ class ScreenReaderLabelsTest {
     fun `the Home header buttons say what they do`() {
         rule.setContent {
             FindroidTheme {
-                CompositionLocalProvider(LocalOfflineMode provides false) {
-                    HomeHeader(
-                        serverName = "Ephyra Test",
-                        onServerClick = {},
-                        onSearchClick = {},
-                        onUserClick = {},
-                        user = dummyUser,
-                    )
-                }
+                HomeHeader(
+                    serverName = "Ephyra Test",
+                    onServerClick = {},
+                    onSearchClick = {},
+                    onUserClick = {},
+                    user = dummyUser,
+                )
             }
         }
 

@@ -13,11 +13,11 @@ import java.io.File
 import java.lang.reflect.Proxy
 import java.util.UUID
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,9 +27,9 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowEnvironment
 
 /**
- * CE (#379): after a database reset the downloaded files and their artwork stayed on disk for
- * good. The sweep now removes what no row refers to once it is a day old, and nothing when the
- * database cannot be read.
+ * CE (#379): after a database reset the downloaded files and their artwork stayed on disk for good.
+ * The sweep now removes what no row refers to once it is a day old, and nothing when the database
+ * cannot be read.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class)
@@ -89,7 +89,7 @@ class OrphanSweepTest {
 
         assertTrue(tracked.exists())
         assertFalse(orphan.exists())
-        assertFalse("its emptied folders go too", File(root, "Pioneer One").exists())
+        assertFalse(File(root, "Pioneer One").exists(), message = "its emptied folders go too")
         assertTrue(freshOrphan.exists())
         assertFalse(File(root, "Bluey").exists())
         assertTrue(root.isDirectory)
@@ -102,8 +102,11 @@ class OrphanSweepTest {
         val orphan = file("Pioneer One/S01/S01E01 - Earthfall.mkv")
         val orphanArtwork = artwork(orphanId)
 
-        val failure =
-            runCatching { runBlocking { downloader(database(failOn = "getCompletedDownloadSources")).sweepOrphans() } }
+        val failure = runCatching {
+            runBlocking {
+                downloader(database(failOn = "getCompletedDownloadSources")).sweepOrphans()
+            }
+        }
 
         assertTrue(failure.isFailure)
         assertTrue(orphan.exists())
@@ -116,8 +119,9 @@ class OrphanSweepTest {
         val partial = file("Parasite (2019)/Parasite (2019).mkv.download")
         val orphanArtwork = artwork(orphanId)
 
-        val failure =
-            runCatching { runBlocking { downloader(database(failOn = "getAllItemIds")).sweepOrphans() } }
+        val failure = runCatching {
+            runBlocking { downloader(database(failOn = "getAllItemIds")).sweepOrphans() }
+        }
 
         assertTrue(failure.isFailure)
         assertTrue(orphan.exists())
@@ -125,10 +129,7 @@ class OrphanSweepTest {
         assertTrue(orphanArtwork.exists())
     }
 
-    private fun database(
-        sources: List<FindroidSourceDto> = emptyList(),
-        failOn: String? = null,
-    ) =
+    private fun database(sources: List<FindroidSourceDto> = emptyList(), failOn: String? = null) =
         Proxy.newProxyInstance(
             ServerDatabaseDao::class.java.classLoader,
             arrayOf(ServerDatabaseDao::class.java),

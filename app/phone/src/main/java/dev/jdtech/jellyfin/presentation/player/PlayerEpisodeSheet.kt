@@ -33,10 +33,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -53,11 +57,15 @@ import java.util.UUID
 import kotlin.math.roundToInt
 
 /**
- * CE (R10, design §9): the player's episode sheet at expanded width. The current season's
- * episodes in a side sheet over the right 30 % of the window (320 to 420 dp), the playing one
- * highlighted as the selected row of the Season list-detail. A tap anywhere outside the sheet
- * calls [onDismiss]; [onClosed] runs once the sheet has gone, so the host can hide its view.
- * [onBoundsChanged] gets the bounds the open sheet takes in the window (#456).
+ * CE (R10, design §9): the player's episode sheet at expanded width. The current season's episodes
+ * in a side sheet over the right 30 % of the window (320 to 420 dp), the playing one highlighted as
+ * the selected row of the Season list-detail. A tap anywhere outside the sheet calls [onDismiss];
+ * [onClosed] runs once the sheet has gone, so the host can hide its view. [onBoundsChanged] gets
+ * the bounds the open sheet takes in the window (#456).
+ *
+ * CE (#588): with [wantsFocus] (the sheet was opened from the keyboard) focus moves to the playing
+ * episode's row as soon as the rows are there, which on the first open is after the season has
+ * loaded. [mayTakeFocus] is asked right before, and [onFocusSettled] hears whether the row got it.
  */
 @Composable
 fun PlayerEpisodeSheet(
@@ -69,6 +77,9 @@ fun PlayerEpisodeSheet(
     onDismiss: () -> Unit,
     onClosed: () -> Unit,
     onBoundsChanged: (Rect) -> Unit = {},
+    wantsFocus: Boolean = false,
+    mayTakeFocus: () -> Boolean = { true },
+    onFocusSettled: (Boolean) -> Unit = {},
 ) {
     val currentOnClosed by rememberUpdatedState(onClosed)
     LaunchedEffect(visibleState) {
@@ -103,9 +114,7 @@ fun PlayerEpisodeSheet(
         if (visibleState.targetState) {
             Box(
                 modifier =
-                    Modifier.fillMaxSize().pointerInput(Unit) {
-                        detectTapGestures { onDismiss() }
-                    }
+                    Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { onDismiss() } }
             )
         }
 
@@ -115,7 +124,9 @@ fun PlayerEpisodeSheet(
             enter =
                 slideInHorizontally(
                     tween(EphyraMotion.DURATION_MEDIUM, easing = EphyraMotion.EasingEnter)
-                ) { it },
+                ) {
+                    it
+                },
             exit = fadeOut(tween(EphyraMotion.DURATION_SHORT, easing = EphyraMotion.EasingExit)),
         ) {
             Surface(
@@ -129,6 +140,9 @@ fun PlayerEpisodeSheet(
                     currentEpisodeId = currentEpisodeId,
                     scrollToCurrent = visibleState.targetState,
                     onEpisodeClick = onEpisodeClick,
+                    wantsFocus = wantsFocus,
+                    mayTakeFocus = mayTakeFocus,
+                    onFocusSettled = onFocusSettled,
                 )
             }
         }
@@ -142,12 +156,36 @@ private fun EpisodeSheetContent(
     currentEpisodeId: UUID?,
     scrollToCurrent: Boolean,
     onEpisodeClick: (FindroidEpisode) -> Unit,
+    wantsFocus: Boolean,
+    mayTakeFocus: () -> Boolean,
+    onFocusSettled: (Boolean) -> Unit,
 ) {
     val episodes = state.episodes
     val listState = rememberLazyListState()
     LaunchedEffect(scrollToCurrent, episodes.isNotEmpty()) {
         val index = episodes.indexOfFirst { it.id == currentEpisodeId }
         if (scrollToCurrent && index > 0) listState.scrollToItem(index - 1)
+    }
+
+    // CE (#588): the row focus goes to when the sheet is opened from the keyboard: the playing
+    // episode's, or the first when the season shown does not have it.
+    val focusIndex = episodes.indexOfFirst { it.id == currentEpisodeId }.coerceAtLeast(0)
+    val focusRow = remember { FocusRequester() }
+    val currentMayTakeFocus by rememberUpdatedState(mayTakeFocus)
+    val currentOnFocusSettled by rememberUpdatedState(onFocusSettled)
+    LaunchedEffect(wantsFocus, episodes.isNotEmpty()) {
+        if (!wantsFocus || episodes.isEmpty()) return@LaunchedEffect
+        // A lazy list only has the rows on screen: bring the row in, and wait for it.
+        listState.scrollToItem((focusIndex - 1).coerceAtLeast(0))
+        withFrameNanos {}
+        val focused =
+            currentMayTakeFocus() &&
+                try {
+                    focusRow.requestFocus()
+                } catch (_: IllegalStateException) {
+                    false
+                }
+        currentOnFocusSettled(focused)
     }
 
     Column(
@@ -193,6 +231,8 @@ private fun EpisodeSheetContent(
                     shape = groupedItemShape(index, episodes.size),
                     onClick = { onEpisodeClick(episode) },
                     showDownloadControl = false,
+                    modifier =
+                        if (index == focusIndex) Modifier.focusRequester(focusRow) else Modifier,
                 )
             }
         }

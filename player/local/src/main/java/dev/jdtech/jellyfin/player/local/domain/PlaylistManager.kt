@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import androidx.core.net.toUri
-import androidx.media3.common.MimeTypes
+import androidx.media3.common.C
 import dev.jdtech.jellyfin.models.FindroidChapter
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -14,10 +14,12 @@ import dev.jdtech.jellyfin.player.core.domain.models.ExternalSubtitle
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerStreamInfo
+import dev.jdtech.jellyfin.player.core.domain.models.ServerAudioTrack
 import dev.jdtech.jellyfin.player.core.domain.models.TrickplayInfo
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -31,6 +33,21 @@ import timber.log.Timber
 class PlaylistManager @Inject internal constructor(private val repository: JellyfinRepository) {
     private var startItem: FindroidItem? = null
     private var items: List<FindroidItem> = emptyList()
+
+    /** CE (#638): the order of a shuffle; tests set a seeded one. */
+    internal var random: Random = Random.Default
+
+    /** CE (#638): a queue in random order does not go on with the next season at its end. */
+    private var shuffled = false
+
+    /**
+     * CE (#638): the queue was fetched without trickplay and chapters (a whole series is too slow
+     * with them), so each item is fetched in full when it is about to play.
+     */
+    private var lightQueue = false
+
+    /** CE (#638): the items of a light queue that have been fetched in full. */
+    private val fetchedInFull = mutableSetOf<UUID>()
     private val playerItems: MutableList<PlayerItem> = mutableListOf()
     var currentItemIndex: Int = 0
 
@@ -43,6 +60,16 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
     private var queueLoader: (suspend () -> List<FindroidItem>)? = null
     private val queueMutex = Mutex()
 
+    /** CE (#657): one [appendNextSeason] at a time; see [getNextPlayerItem]. */
+    private val nextSeasonMutex = Mutex()
+
+    /**
+     * CE (#580): the audio stream each item was last requested with, by the server's index. The
+     * stream of a transcode does not say which track it carries, so a quality switch from one
+     * transcode to another has only this to keep the track.
+     */
+    private val requestedAudio = HashMap<UUID, Int>()
+
     private suspend fun fetchEpisodes(seriesId: UUID, seasonId: UUID): List<FindroidEpisode> =
         repository
             .getEpisodes(
@@ -53,9 +80,23 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             .filter { !it.missing }
 
     /**
-     * Resolves the item to start playing. For a movie or episode, the item and its playback
-     * sources are fetched concurrently, and the episode list for the queue is not fetched at all:
-     * call [loadQueue] after the player is prepared (the neighbour lookups also wait for it).
+     * CE (#594): [partial] as the server has it in full, with its trickplay and chapters. If that
+     * fails, [partial] itself: playback without thumbnails is better than none.
+     */
+    private suspend fun fullEpisode(partial: FindroidEpisode): FindroidEpisode =
+        try {
+            repository.getEpisode(partial.id)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e("Failed to retrieve episode ${partial.id}: $e")
+            partial
+        }
+
+    /**
+     * Resolves the item to start playing. For a movie or episode, the item and its playback sources
+     * are fetched concurrently, and the episode list for the queue is not fetched at all: call
+     * [loadQueue] after the player is prepared (the neighbour lookups also wait for it).
      */
     suspend fun getInitialItem(
         itemId: UUID,
@@ -67,6 +108,9 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         Timber.d("Retrieving initial player item")
 
         queueLoader = null
+        shuffled = shuffle
+        lightQueue = false
+        fetchedInFull.clear()
         // Playback sources fetched while the item itself was still loading.
         var prefetchedSources: List<FindroidSource>? = null
 
@@ -76,7 +120,9 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                     val (movie, sources) =
                         coroutineScope {
                             val movie = async { repository.getMovie(itemId) }
-                            val sources = async { repository.getPlaybackSources(itemId, mediaSourceId) }
+                            val sources = async {
+                                repository.getPlaybackSources(itemId, mediaSourceId)
+                            }
                             movie.await() to sources.await()
                         }
                     prefetchedSources = sources
@@ -86,30 +132,51 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                 }
                 BaseItemKind.SERIES -> {
                     if (shuffle) {
-                        val allSeasons = repository.getSeasons(itemId)
-                        val seasons = allSeasons.filter { it.indexNumber != 0 }.ifEmpty { allSeasons }
+                        // CE (#638): the whole series in one request, without trickplay and
+                        // chapters: 578 episodes take 0.4 s that way, and over 10 s one season at
+                        // a time with them. Specials are left out, unless the series has nothing
+                        // else.
+                        val all =
+                            repository.getEpisodes(seriesId = itemId, seasonId = null).filter {
+                                !it.missing
+                            }
                         val episodes =
-                            seasons
-                                .flatMap { season -> fetchEpisodes(itemId, season.id) }
-                                .shuffled()
+                            all.filter { it.parentIndexNumber != 0 }
+                                .ifEmpty { all }
+                                .shuffled(random)
 
                         if (episodes.isEmpty()) {
                             return null
                         }
 
-                        val episode = episodes.first()
-                        items = episodes
+                        lightQueue = true
+                        val episode = fullEpisode(episodes.first())
+                        fetchedInFull += episode.id
+                        items = listOf(episode) + episodes.drop(1)
                         episode
                     } else {
                         val nextUpEpisode = repository.getNextUp(itemId).firstOrNull()
 
                         if (nextUpEpisode != null) {
-                            // The next-up episode is enough to start; the season's list only fills
-                            // the queue.
-                            val seasonId = nextUpEpisode.seasonId
-                            items = listOf(nextUpEpisode)
+                            // CE (#594): next-up answers without trickplay and chapters (Home's
+                            // rows do not need them), so the episode itself is fetched, next to its
+                            // sources. The season's list only fills the queue.
+                            val (episode, sources) =
+                                coroutineScope {
+                                    val episode = async { fullEpisode(nextUpEpisode) }
+                                    val sources = async {
+                                        repository.getPlaybackSources(
+                                            nextUpEpisode.id,
+                                            mediaSourceId,
+                                        )
+                                    }
+                                    episode.await() to sources.await()
+                                }
+                            prefetchedSources = sources
+                            val seasonId = episode.seasonId
+                            items = listOf(episode)
                             queueLoader = { fetchEpisodes(itemId, seasonId) }
-                            nextUpEpisode
+                            episode
                         } else {
                             val seasons = repository.getSeasons(itemId)
                             if (seasons.isEmpty()) {
@@ -128,7 +195,9 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                 }
                 BaseItemKind.SEASON -> {
                     val season = repository.getSeason(itemId)
-                    val episodes = fetchEpisodes(season.seriesId, season.id)
+                    // CE (#638): shuffle a single season too, not only a whole series.
+                    val inOrder = fetchEpisodes(season.seriesId, season.id)
+                    val episodes = if (shuffle) inOrder.shuffled(random) else inOrder
 
                     if (episodes.isEmpty()) {
                         return null
@@ -143,7 +212,9 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                     val (episode, sources) =
                         coroutineScope {
                             val episode = async { repository.getEpisode(itemId) }
-                            val sources = async { repository.getPlaybackSources(itemId, mediaSourceId) }
+                            val sources = async {
+                                repository.getPlaybackSources(itemId, mediaSourceId)
+                            }
                             episode.await() to sources.await()
                         }
                     prefetchedSources = sources
@@ -166,7 +237,8 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
 
         val playbackPosition =
             if (shuffle || startFromBeginning) 0L else initialItem.playbackPositionTicks.div(10000)
-        val playerItem = initialItem.toPlayerItem(mediaSourceId, playbackPosition, prefetchedSources)
+        val playerItem =
+            initialItem.toPlayerItem(mediaSourceId, playbackPosition, prefetchedSources)
         playerItems.add(playerItem)
 
         return playerItem
@@ -193,22 +265,28 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         }
     }
 
-    suspend fun getPreviousPlayerItem(): PlayerItem? {
+    /**
+     * The item before [itemId] in the queue, the current item by default, or `null` when it has
+     * none or the player already has it. CE (#657): the caller names the item, as the current one
+     * can change while this is fetched.
+     */
+    suspend fun getPreviousPlayerItem(itemId: UUID? = null): PlayerItem? {
         Timber.d("Retrieving previous player item")
 
         loadQueue()
-        val itemIndex = currentItemIndex - 1
+        val index = queueIndex(itemId)
+        val itemIndex = index - 1
         val playerItem =
             when (startItem) {
                 is FindroidMovie -> null
                 is FindroidEpisode -> {
-                    if (currentItemIndex == 0) {
+                    if (index <= 0) {
                         null
                     } else {
                         val item = items[itemIndex]
                         if (playerItems.firstOrNull { it.itemId == item.id } == null) {
                             try {
-                                item.toPlayerItem(null, 0L)
+                                queued(item).toPlayerItem(null, 0L)
                             } catch (e: Exception) {
                                 Timber.e("Failed to retrieve previous player item: $e")
                                 null
@@ -228,26 +306,33 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         return playerItem
     }
 
-    suspend fun getNextPlayerItem(): PlayerItem? {
+    /** The item after [itemId], as [getPreviousPlayerItem] is the item before it. */
+    suspend fun getNextPlayerItem(itemId: UUID? = null): PlayerItem? {
         Timber.d("Retrieving next player item")
 
         loadQueue()
-        val itemIndex = currentItemIndex + 1
+        val index = queueIndex(itemId)
+        val itemIndex = index + 1
         val playerItem =
             when (startItem) {
                 is FindroidMovie -> null
                 is FindroidEpisode -> {
-                    if (currentItemIndex == items.lastIndex) {
-                        appendNextSeason()
+                    if (index >= 0 && index == items.lastIndex && !shuffled) {
+                        // CE (#657): two lookups for the last episode can overlap (the user left
+                        // it and came back while the first waited on the server). The second
+                        // checks again once the first is done, so the season goes in once.
+                        nextSeasonMutex.withLock {
+                            if (queueIndex(itemId) == items.lastIndex) appendNextSeason()
+                        }
                     }
 
-                    if (currentItemIndex == items.lastIndex) {
+                    if (index < 0 || index == items.lastIndex) {
                         null
                     } else {
                         val item = items[itemIndex]
                         if (playerItems.firstOrNull { it.itemId == item.id } == null) {
                             try {
-                                item.toPlayerItem(null, 0L)
+                                queued(item).toPlayerItem(null, 0L)
                             } catch (e: Exception) {
                                 Timber.e("Failed to retrieve next player item: $e")
                                 null
@@ -306,6 +391,18 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         }
     }
 
+    /** The index of [itemId] in the queue, or of the current item; -1 when it is not queued. */
+    private fun queueIndex(itemId: UUID?): Int =
+        if (itemId == null) currentItemIndex else items.indexOfFirst { it.id == itemId }
+
+    /**
+     * CE (#657): [itemId] was fetched as a neighbour but did not go into the player (the item it
+     * was fetched for had left the playlist), so the next lookup fetches it again.
+     */
+    fun forget(itemId: UUID) {
+        playerItems.removeAll { it.itemId == itemId }
+    }
+
     fun setCurrentMediaItemIndex(itemId: UUID) {
         currentItemId = itemId
         currentItemIndex = items.indexOfFirst { it.id == itemId }
@@ -322,7 +419,7 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
     suspend fun jumpTo(itemId: UUID): PlayerItem? {
         val index = items.indexOfFirst { it.id == itemId }
         if (index < 0) return null
-        val playerItem = items[index].toPlayerItem(null, 0L)
+        val playerItem = queued(items[index]).toPlayerItem(null, 0L)
         playerItems.clear()
         playerItems.add(playerItem)
         currentItemIndex = index
@@ -330,24 +427,56 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
     }
 
     /**
-     * Re-resolve an already-queued item's media sources — used when the user
-     * changes the max streaming bitrate mid-playback, which invalidates every
-     * queued stream URL. The cached entry is replaced (not just added) so the
-     * duplicate check in [getPreviousPlayerItem]/[getNextPlayerItem] keeps
-     * treating the item as already queued.
+     * Re-resolve an already-queued item's media sources — used when the user changes the max
+     * streaming bitrate mid-playback, which invalidates every queued stream URL. The cached entry
+     * is replaced (not just added) so the duplicate check in
+     * [getPreviousPlayerItem]/[getNextPlayerItem] keeps treating the item as already queued.
+     *
+     * CE (#580): [selectedAudio] is the audio track playing now, when the stream names it (a
+     * transcode's single track does not). It goes to the server with the request, so a transcode
+     * the switch leads to carries the same track.
+     *
+     * CE (#596): [audioStreamIndex] is the track the user picked in the audio dialog of a
+     * transcode, by the server's index ([ServerAudioTrack.index]). It wins over everything else.
      */
-    suspend fun recreatePlayerItem(playerItem: PlayerItem): PlayerItem {
+    suspend fun recreatePlayerItem(
+        playerItem: PlayerItem,
+        selectedAudio: StoredChoice? = null,
+        audioStreamIndex: Int? = null,
+    ): PlayerItem {
         val item = items.firstOrNull { it.id == playerItem.itemId } ?: return playerItem
-        val recreated = item.toPlayerItem(playerItem.mediaSourceId, playerItem.playbackPosition)
+        val recreated =
+            queued(item)
+                .toPlayerItem(
+                    playerItem.mediaSourceId,
+                    playerItem.playbackPosition,
+                    selectedAudio = selectedAudio,
+                    audioStreamIndex = audioStreamIndex,
+                )
         playerItems.removeAll { it.itemId == playerItem.itemId }
         playerItems.add(recreated)
         return recreated
+    }
+
+    /**
+     * CE (#638): [item] as it plays: in full when the queue was fetched without its details. The
+     * full episode replaces the light one in [items], so it is fetched once, however often the item
+     * is converted (Previous, Next, a jump in the queue, a quality or audio switch).
+     */
+    private suspend fun queued(item: FindroidItem): FindroidItem {
+        if (!lightQueue || item !is FindroidEpisode || item.id in fetchedInFull) return item
+        val full = fullEpisode(item)
+        fetchedInFull += full.id
+        items = items.map { if (it.id == full.id) full else it }
+        return full
     }
 
     private suspend fun FindroidItem.toPlayerItem(
         mediaSourceId: String?,
         playbackPosition: Long,
         prefetchedSources: List<FindroidSource>? = null,
+        selectedAudio: StoredChoice? = null,
+        audioStreamIndex: Int? = null,
     ): PlayerItem {
         Timber.d("Converting FindroidItem ${this.id} to PlayerItem")
 
@@ -359,45 +488,30 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         // Never an unfinished download (#454): its partial file plays as far as it got, or not at
         // all. With no other source (offline) there is nothing to play: the exception carries no
         // message, so the player shows its own error instead of a raw one.
-        val mediaSource =
-            mediaSources.firstOrNull {
-                it.type == FindroidSourceType.LOCAL && !it.path.endsWith(".download")
+        val local = mediaSources.firstOrNull {
+            it.type == FindroidSourceType.LOCAL && !it.path.endsWith(".download")
+        }
+        val remote =
+            if (local != null) {
+                null
+            } else {
+                mediaSources
+                    .firstOrNull { it.type != FindroidSourceType.LOCAL }
+                    ?.let { withChosenAudio(it, selectedAudio, audioStreamIndex) }
             }
-                ?: mediaSources.firstOrNull { it.type != FindroidSourceType.LOCAL }
-                ?: throw NoSuchElementException()
+        val mediaSource = local ?: remote?.source ?: throw NoSuchElementException()
         val externalSubtitles =
-            mediaSource.mediaStreams
-                .filter { mediaStream ->
-                    // isExternal reflects the *server's* original file layout, which only
-                    // matters for a REMOTE source riding along in the same stream ExoPlayer
-                    // is already playing. A LOCAL (downloaded) source only ever has a
-                    // mediastreams row for a subtitle that was saved as its own sidecar file
-                    // — downloadExternalMediaStreams never writes a row for a track that
-                    // stays muxed inside the downloaded video — so every row on a LOCAL
-                    // source is a real external file on disk, regardless of isExternal.
-                    (mediaSource.type == FindroidSourceType.LOCAL || mediaStream.isExternal) &&
-                        mediaStream.type == MediaStreamType.SUBTITLE &&
-                        !mediaStream.path.isNullOrBlank()
-                }
-                .map { mediaStream ->
-                    ExternalSubtitle(
-                        mediaStream.title,
-                        mediaStream.language,
-                        mediaStream.path!!.toUri(),
-                        when (mediaStream.codec) {
-                            "subrip" -> MimeTypes.APPLICATION_SUBRIP
-                            "webvtt" -> MimeTypes.TEXT_VTT
-                            "ass" -> MimeTypes.TEXT_SSA
-                            // Image-based subtitle sidecars. media3 ships native parsers
-                            // for these, so advertising the correct MIME lets the renderer
-                            // actually draw the bitmaps instead of dropping the track.
-                            "pgssub" -> MimeTypes.APPLICATION_PGS
-                            "dvdsub", "idx" -> MimeTypes.APPLICATION_VOBSUB
-                            "dvbsub" -> MimeTypes.APPLICATION_DVBSUBS
-                            else -> MimeTypes.TEXT_UNKNOWN
-                        },
-                    )
-                }
+            subtitleFiles(mediaSource).map {
+                ExternalSubtitle(
+                    title = it.title,
+                    language = it.language,
+                    uri = it.path.toUri(),
+                    mimeType = it.mimeType,
+                    embedded = it.embedded,
+                    forced = it.forced,
+                    default = it.default,
+                )
+            }
         val trickplayInfo =
             when (this) {
                 is FindroidSources -> {
@@ -429,6 +543,14 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             mediaSourceId = mediaSource.id,
             mediaSourceUri = mediaSource.path,
             isTranscoded = mediaSource.transcoded,
+            playSessionId = mediaSource.playSessionId,
+            audioTracks =
+                if (remote != null && mediaSource.transcoded) {
+                    serverAudioTracks(mediaSource.mediaStreams)
+                } else {
+                    emptyList()
+                },
+            audioStreamIndex = remote?.audioStreamIndex,
             originalContainer = mediaSource.container,
             originalVideo = originalVideo,
             originalAudio = originalAudio,
@@ -444,6 +566,65 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             seasonId = if (this is FindroidEpisode) seasonId else null,
             artworkUri = images.primary ?: images.showPrimary,
         )
+    }
+
+    /** A server source, and the audio stream the server put in it when it is a transcode. */
+    private class RemoteSource(val source: FindroidSource, val audioStreamIndex: Int?)
+
+    /**
+     * CE (#580): a transcode carries one audio track, the server's default unless the request names
+     * another. So when [source] is a transcode and the user's track is not that default, the source
+     * is asked for once more, with the track. In order: the track picked in the audio dialog of a
+     * transcode ([pickedIndex], #596), the track playing now ([selectedAudio], on a quality
+     * switch), the choice saved for the series, the track this item was last requested with. A
+     * source that plays directly is returned as it is: the player selects among its tracks itself.
+     */
+    private suspend fun FindroidItem.withChosenAudio(
+        source: FindroidSource,
+        selectedAudio: StoredChoice?,
+        pickedIndex: Int?,
+    ): RemoteSource {
+        if (!source.transcoded) return RemoteSource(source, null)
+        val default = RemoteSource(source, source.defaultAudioStreamIndex)
+        val index =
+            pickedIndex?.takeIf { picked ->
+                serverAudioTracks(source.mediaStreams).any { it.index == picked }
+            }
+                ?: selectedAudio?.let { audioStreamIndex(it, source.mediaStreams) }
+                ?: savedAudioChoice()?.let { audioStreamIndex(it, source.mediaStreams) }
+                ?: requestedAudio[id]
+                ?: return default
+        requestedAudio[id] = index
+        if (index == source.defaultAudioStreamIndex) return default
+        return try {
+            repository
+                .getPlaybackSources(id, source.id, audioStreamIndex = index)
+                .firstOrNull { it.id == source.id && it.type != FindroidSourceType.LOCAL }
+                ?.let { RemoteSource(it, index) } ?: default
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // The default track is better than no playback.
+            Timber.e("Failed to request audio stream $index: $e")
+            default
+        }
+    }
+
+    /** The audio track saved for this episode's series, or null: a movie has none. */
+    private suspend fun FindroidItem.savedAudioChoice(): StoredChoice? {
+        if (this !is FindroidEpisode) return null
+        val preference =
+            try {
+                repository.getSeriesTrackPreferences(seriesId).firstOrNull {
+                    it.trackType == C.TRACK_TYPE_AUDIO && !it.disabled
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e("Failed to read the series' track choice: $e")
+                null
+            } ?: return null
+        return StoredChoice(preference.language, preference.title, preference.positionInLanguage)
     }
 
     private fun List<FindroidChapter>.toPlayerChapters(): List<PlayerChapter> {

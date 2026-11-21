@@ -38,6 +38,7 @@ dependencies {
     implementation(projects.settings)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.core)
     implementation(libs.androidx.hilt.work)
@@ -63,5 +64,6 @@ dependencies {
     implementation(libs.slf4j.android)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
 }

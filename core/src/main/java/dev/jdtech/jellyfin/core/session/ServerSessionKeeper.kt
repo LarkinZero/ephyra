@@ -18,8 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
@@ -37,8 +35,8 @@ import timber.log.Timber
  * it. The token stays valid; the next request or socket opens a new session.
  *
  * It also notices when the server has revoked the current token (signed out from the dashboard, the
- * device deleted): after a 401 it checks `/Users/Me`, and when that is refused too it signs the user
- * out here, so the app shows the user selection instead of failing on every screen.
+ * device deleted): after a 401 it checks `/Users/Me`, and when that is refused too it signs the
+ * user out here, so the app shows the user selection instead of failing on every screen.
  */
 @Singleton
 class ServerSessionKeeper
@@ -67,17 +65,13 @@ constructor(
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                appPreferences.observe(appPreferences.offlineMode).distinctUntilChanged().collectLatest {
-                    offline ->
-                    if (offline) return@collectLatest
-                    // Any subscription keeps the socket open; the SDK closes it a few seconds after
-                    // the last one ends, and reconnects with the new token or address on a switch.
-                    // Play state messages need no start message, so nothing is streamed to us.
-                    jellyfinApi.api.webSocket
-                        .subscribe<PlaystateMessage>()
-                        .catch { e -> Timber.w(e, "Session socket failed") }
-                        .collect { message -> Timber.d("Ignoring play state command %s", message) }
-                }
+                // Any subscription keeps the socket open; the SDK closes it a few seconds after the
+                // last one ends, and reconnects with the new token or address on a switch. Play
+                // state messages need no start message, so nothing is streamed to us.
+                jellyfinApi.api.webSocket
+                    .subscribe<PlaystateMessage>()
+                    .catch { e -> Timber.w(e, "Session socket failed") }
+                    .collect { message -> Timber.d("Ignoring play state command %s", message) }
             }
         }
     }

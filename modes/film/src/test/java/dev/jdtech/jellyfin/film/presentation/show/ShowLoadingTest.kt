@@ -14,9 +14,12 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -24,13 +27,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
 import org.jellyfin.sdk.model.api.ItemFields
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#252): the show page asks for the series' episodes once, not once per season, and takes the
@@ -50,12 +50,12 @@ class ShowLoadingTest {
     private var season2CanDownload = true
     private var episodesFail = false
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
@@ -64,11 +64,18 @@ class ShowLoadingTest {
     fun `download counts come from one series request and Room`() = runBlocking {
         val viewModel = viewModel(SeasonEpisodeCounts(season1, total = 1, downloaded = 1))
         viewModel.loadShow(showId)
-        val state = withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
+        val state =
+            withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
 
         assertEquals(listOf<UUID?>(null), episodeSeasonIds)
-        assertEquals(SeasonDownloadInfo(downloadedCount = 1, totalCount = 3, canDownload = true), state.seasonDownloadInfo[season1])
-        assertEquals(SeasonDownloadInfo(downloadedCount = 0, totalCount = 2, canDownload = true), state.seasonDownloadInfo[season2])
+        assertEquals(
+            SeasonDownloadInfo(downloadedCount = 1, totalCount = 3, canDownload = true),
+            state.seasonDownloadInfo[season1],
+        )
+        assertEquals(
+            SeasonDownloadInfo(downloadedCount = 0, totalCount = 2, canDownload = true),
+            state.seasonDownloadInfo[season2],
+        )
         assertTrue(state.hasDownloads)
         assertNull(state.error)
     }
@@ -77,7 +84,8 @@ class ShowLoadingTest {
     fun `nothing downloaded`() = runBlocking {
         val viewModel = viewModel()
         viewModel.loadShow(showId)
-        val state = withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
+        val state =
+            withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
 
         assertEquals(false, state.hasDownloads)
         assertEquals(0, state.seasonDownloadInfo[season1]?.downloadedCount)
@@ -111,7 +119,8 @@ class ShowLoadingTest {
     fun `all allowed offers Download for every season`() = runBlocking {
         val viewModel = viewModel()
         viewModel.loadShow(showId)
-        val state = withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
+        val state =
+            withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
 
         assertTrue(state.canDownload)
         assertEquals(listOf(season1, season2), state.downloadableSeasons.map { it.id })
@@ -138,7 +147,8 @@ class ShowLoadingTest {
         season1CanDownload = false
         val viewModel = viewModel()
         viewModel.loadShow(showId)
-        val state = withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
+        val state =
+            withTimeout(5_000) { viewModel.state.first { it.seasonDownloadInfo.isNotEmpty() } }
 
         assertTrue(state.canDownload)
         assertEquals(listOf(season2), state.downloadableSeasons.map { it.id })
@@ -170,14 +180,12 @@ class ShowLoadingTest {
         calls.clear()
 
         viewModel.loadShow(showId)
-        withTimeout(5_000) {
-            while (synchronized(calls) { "getEpisodes" !in calls }) delay(10)
-        }
+        withTimeout(5_000) { while (synchronized(calls) { "getEpisodes" !in calls }) delay(10) }
         delay(100)
         collector.cancel()
 
         assertTrue(seen.isNotEmpty())
-        assertTrue("Download vanished during a reload: $seen", seen.all { it })
+        assertTrue(seen.all { it }, message = "Download vanished during a reload: $seen")
     }
 
     private fun viewModel(vararg counts: SeasonEpisodeCounts): ShowViewModel {
@@ -314,18 +322,25 @@ class ShowLoadingTest {
                 SharedPreferences::class.java.classLoader,
                 arrayOf(SharedPreferences::class.java),
             ) { _, method, args ->
-                when (method.name) {
-                    "getBoolean",
-                    "getString",
-                    "getInt",
-                    "getLong",
-                    "getFloat",
-                    "getStringSet" -> args!![1]
-                    else -> throw UnsupportedOperationException("SharedPreferences.${method.name}")
+                when {
+                    // CE (#718): the stored episode counts are the current server's.
+                    method.name == "getString" && args!![0] == "pref_current_server" -> "server"
+                    else -> defaultValue(method.name, args)
                 }
             } as SharedPreferences
         return AppPreferences(preferences)
     }
+
+    private fun defaultValue(name: String, args: Array<Any?>?): Any? =
+        when (name) {
+            "getBoolean",
+            "getString",
+            "getInt",
+            "getLong",
+            "getFloat",
+            "getStringSet" -> args!![1]
+            else -> throw UnsupportedOperationException("SharedPreferences.$name")
+        }
 
     private inline fun <reified T : Any> unused(): T =
         Proxy.newProxyInstance(T::class.java.classLoader, arrayOf(T::class.java)) { _, method, _ ->

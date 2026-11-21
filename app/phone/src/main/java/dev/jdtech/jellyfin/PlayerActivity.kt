@@ -36,12 +36,13 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModelProvider
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -57,6 +58,8 @@ import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
@@ -64,8 +67,8 @@ import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.R as PlayerR
 import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
-import dev.jdtech.jellyfin.player.local.presentation.toSections
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.player.local.presentation.toSections
 import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
 import dev.jdtech.jellyfin.presentation.player.PlayerUpNextCard
@@ -73,11 +76,13 @@ import dev.jdtech.jellyfin.presentation.player.QualitySelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SleepTimerDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.StillWatchingDialogFragment
+import dev.jdtech.jellyfin.presentation.player.SubtitleSyncDialogFragment
 import dev.jdtech.jellyfin.presentation.player.TrackSelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
+import dev.jdtech.jellyfin.utils.SegmentTimeBar
 import dev.jdtech.jellyfin.utils.applySubtitleStyle
 import java.util.UUID
 import javax.inject.Inject
@@ -143,8 +148,8 @@ class PlayerActivity : BasePlayerActivity() {
 
     /**
      * CE (#363): the display answered "Keep the player in landscape" with a letterboxed box
-     * ([refusesLandscape]). Latched for the life of this player, so it follows the device from
-     * then on instead of flipping between the box and full screen.
+     * ([refusesLandscape]). Latched for the life of this player, so it follows the device from then
+     * on instead of flipping between the box and full screen.
      */
     private var landscapeRefused = false
 
@@ -162,7 +167,8 @@ class PlayerActivity : BasePlayerActivity() {
     private fun updatePlayerOrientation() {
         val calculator = WindowMetricsCalculator.getOrCreate()
         val bounds = calculator.computeMaximumWindowMetrics(this).bounds
-        val shorterSideDp = minOf(bounds.width(), bounds.height()) / resources.displayMetrics.density
+        val shorterSideDp =
+            minOf(bounds.width(), bounds.height()) / resources.displayMetrics.density
         val keepLandscape = appPreferences.getValue(appPreferences.playerKeepLandscape)
         if (keepLandscape && !landscapeRefused) {
             val window = calculator.computeCurrentWindowMetrics(this).bounds
@@ -204,11 +210,10 @@ class PlayerActivity : BasePlayerActivity() {
 
     /**
      * CE (R9, #51): in tabletop posture the video (with its subtitles and the title bar) sits above
-     * the hinge, and the transport row, the time bar, the volume and brightness panels, the
-     * unlock button and the episode sheet (R10) sit below it. Done with margins on views that
-     * normally fill the player, so leaving the posture puts every margin back to 0 and the layout
-     * is the usual one. Only views move: the player and its surface stay attached, so playback
-     * carries on.
+     * the hinge, and the transport row, the time bar, the volume and brightness panels, the unlock
+     * button and the episode sheet (R10) sit below it. Done with margins on views that normally
+     * fill the player, so leaving the posture puts every margin back to 0 and the layout is the
+     * usual one. Only views move: the player and its surface stay attached, so playback carries on.
      *
      * Ignored in picture-in-picture, and when the hinge doesn't cross the player (a window on one
      * half of the screen).
@@ -272,11 +277,10 @@ class PlayerActivity : BasePlayerActivity() {
         fun px(id: Int) = resources.getDimensionPixelSize(id)
         fun View.size(width: Int = layoutParams.width, height: Int = layoutParams.height) {
             if (layoutParams.width == width && layoutParams.height == height) return
-            layoutParams =
-                layoutParams.also {
-                    it.width = width
-                    it.height = height
-                }
+            layoutParams = layoutParams.also {
+                it.width = width
+                it.height = height
+            }
         }
 
         val playerView = binding.playerView
@@ -360,8 +364,8 @@ class PlayerActivity : BasePlayerActivity() {
 
     /**
      * The episodes button is offered at expanded width (R7's bucket, read from the window, never
-     * the device type) while an episode plays, outside picture-in-picture. Leaving that closes
-     * the sheet at once.
+     * the device type) while an episode plays, outside picture-in-picture. Leaving that closes the
+     * sheet at once.
      */
     private fun updateEpisodesButton() {
         if (!::episodesButton.isInitialized) return
@@ -388,30 +392,52 @@ class PlayerActivity : BasePlayerActivity() {
                     val seasonState by seasonViewModel.state.collectAsStateWithLifecycle()
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     val currentItem = uiState.currentItem
-                    PlayerEpisodeSheet(
-                        visibleState = episodeSheetVisible,
-                        // Until the playing season has loaded, the sheet shows it loading rather
-                        // than the season it showed last.
-                        state =
-                            if (seasonState.season?.id == currentItem?.seasonId) seasonState
-                            else SeasonState(error = seasonState.error),
-                        seasonNumber = currentItem?.parentIndexNumber,
-                        currentEpisodeId = uiState.currentItemId,
-                        onEpisodeClick = { episode ->
-                            if (episode.id != uiState.currentItemId) {
-                                viewModel.playEpisode(episode.id)
-                            }
-                            closeEpisodeSheet()
-                        },
-                        onDismiss = { closeEpisodeSheet() },
-                        onClosed = { binding.episodeSheet.isVisible = false },
-                        onBoundsChanged = { bounds ->
-                            if (bounds != episodeSheetBounds) {
-                                episodeSheetBounds = bounds
-                                updateControlsUnderEpisodeSheet()
-                            }
-                        },
-                    )
+                    // CE (#618): the other episodes hide what they give away, as in the app.
+                    CompositionLocalProvider(
+                        LocalSpoilers provides
+                            Spoilers(appPreferences.getValue(appPreferences.hideSpoilers))
+                    ) {
+                        PlayerEpisodeSheet(
+                            visibleState = episodeSheetVisible,
+                            // Until the playing season has loaded, the sheet shows it loading
+                            // rather
+                            // than the season it showed last.
+                            state =
+                                if (seasonState.season?.id == currentItem?.seasonId) seasonState
+                                else SeasonState(error = seasonState.error),
+                            seasonNumber = currentItem?.parentIndexNumber,
+                            currentEpisodeId = uiState.currentItemId,
+                            onEpisodeClick = { episode ->
+                                if (episode.id != uiState.currentItemId) {
+                                    viewModel.playEpisode(episode.id)
+                                }
+                                closeEpisodeSheet()
+                            },
+                            onDismiss = { closeEpisodeSheet() },
+                            onClosed = { binding.episodeSheet.isVisible = false },
+                            onBoundsChanged = { bounds ->
+                                if (bounds != episodeSheetBounds) {
+                                    episodeSheetBounds = bounds
+                                    updateControlsUnderEpisodeSheet()
+                                }
+                            },
+                            wantsFocus = episodeSheetWantsFocus.value,
+                            mayTakeFocus = {
+                                episodeSheetTakesFocus(
+                                    requested = episodeSheetWantsFocus.value,
+                                    sheetOpen = episodeSheetBackCallback.isEnabled,
+                                    focusParked =
+                                        currentFocus.let { it == null || it === binding.playerView },
+                                )
+                            },
+                            onFocusSettled = { focused ->
+                                episodeSheetWantsFocus.value = false
+                                // The user opened the sheet from the keyboard, so the row is a
+                                // control they chose: the arrows and Space go to it (#448).
+                                if (focused) keyboardFocusChosen = true
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -428,12 +454,22 @@ class PlayerActivity : BasePlayerActivity() {
     private fun closeEpisodeSheet(animate: Boolean = true) {
         if (!episodeSheetBackCallback.isEnabled) return
         episodeSheetBackCallback.isEnabled = false
+        episodeSheetWantsFocus.value = false
+        val hadFocus = binding.episodeSheet.hasFocus()
         episodeSheetVisible.targetState = false
         if (!animate) binding.episodeSheet.isVisible = false
         // Restarts the hide timer when the controls are showing.
         binding.playerView.controllerShowTimeoutMs = controlsHideTimeoutMs
         updateControlsUnderEpisodeSheet(animate)
+        // CE (#588): focus goes back where it came from, not to whatever Android finds first.
+        if (hadFocus && !episodesButton.requestFocus()) parkFocusOnPlayerView(force = true)
     }
+
+    /**
+     * CE (#588): the sheet was opened from the keyboard and has yet to focus the playing episode's
+     * row. A Compose state: the sheet acts on it when its rows are there.
+     */
+    private val episodeSheetWantsFocus = mutableStateOf(false)
 
     /** CE (#456): the sheet's bounds in the window, from the sheet; null until it is laid out. */
     private var episodeSheetBounds: Rect? = null
@@ -489,10 +525,9 @@ class PlayerActivity : BasePlayerActivity() {
             followsEnd = topRowFollowsEnd(scrollX, maxScroll())
             if (episodeSheetBackCallback.isEnabled) updateControlsUnderEpisodeSheet()
         }
-        val keepAtEnd =
-            View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                if (followsEnd) topRow.scrollTo(maxScroll(), 0)
-            }
+        val keepAtEnd = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            if (followsEnd) topRow.scrollTo(maxScroll(), 0)
+        }
         topRow.addOnLayoutChangeListener(keepAtEnd)
         buttons.addOnLayoutChangeListener(keepAtEnd)
     }
@@ -511,10 +546,10 @@ class PlayerActivity : BasePlayerActivity() {
 
     /**
      * Hides [view] under the open episode sheet, or brings it back. The fade is the view's
-     * transition alpha, which multiplies its alpha: media3 sets the alpha of the transport
-     * buttons itself (a disabled Next is dimmed), and the visibility other code sets is not
-     * touched either. A hidden control takes no focus and is not in the accessibility tree.
-     * Nothing happens to a control that is already where it should be, so a fade goes on.
+     * transition alpha, which multiplies its alpha: media3 sets the alpha of the transport buttons
+     * itself (a disabled Next is dimmed), and the visibility other code sets is not touched either.
+     * A hidden control takes no focus and is not in the accessibility tree. Nothing happens to a
+     * control that is already where it should be, so a fade goes on.
      */
     private fun setUnderEpisodeSheet(view: View, covered: Boolean, animate: Boolean) {
         val changed =
@@ -531,12 +566,17 @@ class PlayerActivity : BasePlayerActivity() {
             }
         }
         if (covered && hadFocus) {
-            // Opened from the keyboard: the Episodes button has focus. It moves into the sheet
-            // once the sheet is laid out, or to the player view while the season is still
-            // loading, rather than to the first control.
+            // Opened from the keyboard: the Episodes button has focus. It moves to the player
+            // view, rather than to the first control.
+            // CE (#588): the sheet takes it from there, for the playing episode's row, once the
+            // rows are there. Asking the sheet's view for focus instead found nothing to focus
+            // on the first open, and the first row on a later one.
             binding.episodeSheet.post {
-                if (!binding.episodeSheet.requestFocus()) parkFocusOnPlayerView()
-                if (episodeSheetBackCallback.isEnabled) view.setFocusBlocked(true)
+                parkFocusOnPlayerView()
+                if (episodeSheetBackCallback.isEnabled) {
+                    view.setFocusBlocked(true)
+                    episodeSheetWantsFocus.value = true
+                }
             }
         } else {
             view.setFocusBlocked(covered)
@@ -620,6 +660,8 @@ class PlayerActivity : BasePlayerActivity() {
         val itemKind = intent.extras?.getString("itemKind")
         val startFromBeginning = intent.extras?.getBoolean("startFromBeginning") ?: false
         val mediaSourceId = intent.extras?.getString("mediaSourceId")
+        // CE (#638): a show or season played in random order, from the Shuffle button.
+        val shuffle = intent.extras?.getBoolean("shuffle") ?: false
 
         isControlsLocked = false
         updatePlayerOrientation()
@@ -702,9 +744,11 @@ class PlayerActivity : BasePlayerActivity() {
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
         val speedButton = binding.playerView.findViewById<ImageButton>(R.id.btn_speed)
         val sleepTimerButton = binding.playerView.findViewById<ImageButton>(R.id.btn_sleep_timer)
-        val sleepTimerRemaining = binding.playerView.findViewById<TextView>(R.id.sleep_timer_remaining)
+        val sleepTimerRemaining =
+            binding.playerView.findViewById<TextView>(R.id.sleep_timer_remaining)
         val qualityButton = binding.playerView.findViewById<ImageButton>(R.id.btn_quality)
-        val playbackInfoButton = binding.playerView.findViewById<ImageButton>(R.id.btn_playback_info)
+        val playbackInfoButton =
+            binding.playerView.findViewById<ImageButton>(R.id.btn_playback_info)
         val qualitySpace = binding.playerView.findViewById<Space>(R.id.space_quality)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         // CE (#523): the skip button can appear while the episode sheet is open, and never shows
@@ -760,8 +804,9 @@ class PlayerActivity : BasePlayerActivity() {
                                     ?.bounds
                             applyTabletopLayout()
                             // CE (#363): any orientation, see playerOrientation.
-                            foldHalfOpened =
-                                folds.any { it.state == FoldingFeature.State.HALF_OPENED }
+                            foldHalfOpened = folds.any {
+                                it.state == FoldingFeature.State.HALF_OPENED
+                            }
                             updatePlayerOrientation()
                         }
                 }
@@ -796,11 +841,13 @@ class PlayerActivity : BasePlayerActivity() {
                             binding.playbackInfoOriginalContent.isVisible = infoSections != null
                             binding.playbackInfoOutputContent.isVisible = infoSections != null
                             binding.playbackInfoOriginalContent.text =
-                                infoSections?.getOrNull(0)?.rows?.joinToString("\n") { (label, value) ->
+                                infoSections?.getOrNull(0)?.rows?.joinToString("\n") {
+                                    (label, value) ->
                                     "$label: $value"
                                 }
                             binding.playbackInfoOutputContent.text =
-                                infoSections?.getOrNull(1)?.rows?.joinToString("\n") { (label, value) ->
+                                infoSections?.getOrNull(1)?.rows?.joinToString("\n") {
+                                    (label, value) ->
                                     "$label: $value"
                                 }
 
@@ -813,6 +860,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             updateSkipSegmentButton(this)
+                            // CE (#681): every segment as a range of the seek bar.
+                            binding.playerView
+                                .findViewById<SegmentTimeBar>(R.id.exo_progress)
+                                .setSegments(currentSegments)
 
                             // Trickplay
                             previewScrubListener?.let { it.currentTrickplay = currentTrickplay }
@@ -985,15 +1036,8 @@ class PlayerActivity : BasePlayerActivity() {
         sleepTimerButton.isEnabled = false
         sleepTimerButton.imageAlpha = 75
 
-        // A bitrate cap only makes sense against the server; offline playback
-        // always plays the local file as-is.
-        if (appPreferences.getValue(appPreferences.offlineMode)) {
-            qualityButton.isVisible = false
-            qualitySpace.isVisible = false
-        } else {
-            qualityButton.isEnabled = false
-            qualityButton.imageAlpha = 75
-        }
+        qualityButton.isEnabled = false
+        qualityButton.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false
@@ -1040,13 +1084,12 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         subtitleButton.setOnClickListener {
-            TrackSelectionDialogFragment.newInstance(C.TRACK_TYPE_TEXT)
-                .show(supportFragmentManager, "trackselectiondialog")
+            SubtitleSyncDialogFragment.newInstance()
+                .show(supportFragmentManager, "subtitlesyncdialog")
         }
 
         speedButton.setOnClickListener {
-            SpeedSelectionDialogFragment()
-                .show(supportFragmentManager, "speedselectiondialog")
+            SpeedSelectionDialogFragment().show(supportFragmentManager, "speedselectiondialog")
         }
 
         sleepTimerButton.setOnClickListener {
@@ -1054,8 +1097,7 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         qualityButton.setOnClickListener {
-            QualitySelectionDialogFragment()
-                .show(supportFragmentManager, "qualityselectiondialog")
+            QualitySelectionDialogFragment().show(supportFragmentManager, "qualityselectiondialog")
         }
 
         playbackInfoButton.setOnClickListener {
@@ -1066,8 +1108,7 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playbackInfoClose.setOnClickListener { viewModel.setPlaybackInfoVisible(false) }
 
         chaptersButton.setOnClickListener {
-            ChapterListDialogFragment()
-                .show(supportFragmentManager, "chapterlistdialog")
+            ChapterListDialogFragment().show(supportFragmentManager, "chapterlistdialog")
         }
 
         pipButton.setOnClickListener { pictureInPicture() }
@@ -1091,6 +1132,7 @@ class PlayerActivity : BasePlayerActivity() {
                 itemKind = itemKind ?: "",
                 startFromBeginning = startFromBeginning,
                 mediaSourceId = mediaSourceId,
+                shuffle = shuffle,
             )
         }
         hideSystemUI()
@@ -1105,21 +1147,22 @@ class PlayerActivity : BasePlayerActivity() {
      * CE (R8, T15): the player's keyboard map. It runs before the view hierarchy, so media3's
      * `PlayerView` only gets the keys this leaves alone. Returns true when the key was handled.
      *
-     * | Key | Action |
-     * |---|---|
-     * | Space, media play/pause | play or pause |
-     * | Left / Right | seek back / forward by the TV steps |
-     * | Up / Down | volume one step up / down, in the swipe's volume indicator |
-     * | M | mute or unmute |
-     * | L | lock or unlock the controls |
-     * | Escape | close the episode sheet (R10), else leave the player, as Back does |
-     * | Media next / previous | next / previous item in the queue |
+     * |Key                    |Action                                                            |
+     * |-----------------------|------------------------------------------------------------------|
+     * |Space, media play/pause|play or pause                                                     |
+     * |Left / Right           |seek back / forward by the TV steps                               |
+     * |Up / Down              |volume one step up / down, in the swipe's volume indicator        |
+     * |M                      |mute or unmute                                                    |
+     * |L                      |lock or unlock the controls                                       |
+     * |Escape                 |close the episode sheet (R10), else leave the player, as Back does|
+     * |Media next / previous  |next / previous item in the queue                                 |
      *
      * Any key but the media keys and Escape also shows the controls, or keeps them up. While the
      * controls are showing and the user moved focus to one of them (with Tab), the arrows and Space
-     * go to that control; focus Android gave a control by itself does not count (#448). With the
-     * controls locked only L, Escape and the media keys do anything, and Space presses Unlock or a
-     * skip button only when the user moved to it.
+     * go to that control; focus Android gave a control by itself does not count (#448). A row of
+     * the open episode sheet is such a control too (#588). With the controls locked only L, Escape
+     * and the media keys do anything, and Space presses Unlock or a skip button only when the user
+     * moved to it.
      */
     private fun onPlayerKey(event: KeyEvent): Boolean {
         // A picture-in-picture window takes no keys; leave everything to the system.
@@ -1149,7 +1192,14 @@ class PlayerActivity : BasePlayerActivity() {
             keyGoesToFocusedControl(
                 focusChosenByKeyboard = keyboardFocusChosen,
                 focusOnControl =
-                    currentFocus.let { it != null && it !== playerView && it.isInside(playerView) },
+                    focusIsOnControl(
+                        insideControls =
+                            currentFocus.let {
+                                it != null && it !== playerView && it.isInside(playerView)
+                            },
+                        insideEpisodeSheet = currentFocus?.isInside(binding.episodeSheet) == true,
+                        episodeSheetOpen = episodeSheetBackCallback.isEnabled,
+                    ),
                 controlsShowing = playerView.isControllerFullyVisible,
             )
         viewModel.markUserInteraction()
@@ -1222,10 +1272,10 @@ class PlayerActivity : BasePlayerActivity() {
      * Moves focus from a control to the player view itself, not its first focusable child, so no
      * control has focus until the user moves to one (#448). Focus outside the player stays put.
      */
-    private fun parkFocusOnPlayerView() {
+    private fun parkFocusOnPlayerView(force: Boolean = false) {
         keyboardFocusChosen = false
         val playerView = binding.playerView
-        if (currentFocus?.isInside(playerView) != true) return
+        if (!force && currentFocus?.isInside(playerView) != true) return
         val focusability = playerView.descendantFocusability
         playerView.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
         playerView.requestFocus()
@@ -1264,11 +1314,21 @@ class PlayerActivity : BasePlayerActivity() {
     private fun mediaKeyAction(keyCode: Int): (() -> Unit)? {
         val player = viewModel.player
         return when (keyCode) {
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { -> togglePlayPause() }
-            KeyEvent.KEYCODE_MEDIA_PLAY -> { -> player.play() }
-            KeyEvent.KEYCODE_MEDIA_PAUSE -> { -> player.pause() }
-            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { -> seekByStep(forward = true) }
-            KeyEvent.KEYCODE_MEDIA_REWIND -> { -> seekByStep(forward = false) }
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { ->
+                togglePlayPause()
+            }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { ->
+                player.play()
+            }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { ->
+                player.pause()
+            }
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { ->
+                seekByStep(forward = true)
+            }
+            KeyEvent.KEYCODE_MEDIA_REWIND -> { ->
+                seekByStep(forward = false)
+            }
             KeyEvent.KEYCODE_MEDIA_NEXT -> { ->
                 if (player.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT)) player.seekToNext()
             }
@@ -1404,12 +1464,14 @@ class PlayerActivity : BasePlayerActivity() {
         val itemKind = intent.extras!!.getString("itemKind")
         val startFromBeginning = intent.extras!!.getBoolean("startFromBeginning")
         val mediaSourceId = intent.extras!!.getString("mediaSourceId")
+        val shuffle = intent.extras!!.getBoolean("shuffle")
 
         viewModel.initializePlayer(
             itemId = itemId,
             itemKind = itemKind ?: "",
             startFromBeginning = startFromBeginning,
             mediaSourceId = mediaSourceId,
+            shuffle = shuffle,
         )
     }
 
@@ -1441,7 +1503,8 @@ class PlayerActivity : BasePlayerActivity() {
 
         // videoSize is VideoSize.UNKNOWN (0x0) until the file is loaded, which would yield a NaN
         // Rational and crash setAspectRatio. Bail with IAE so the existing call-site catches
-        // (setPictureInPictureParams / enterPictureInPictureMode both wrap in try { } catch (_: IAE)).
+        // (setPictureInPictureParams / enterPictureInPictureMode both wrap in try { } catch (_:
+        // IAE)).
         val videoSize = binding.playerView.player?.videoSize
         val aspectRatio =
             if (videoSize != null && videoSize.width > 0 && videoSize.height > 0) {
@@ -1498,10 +1561,9 @@ class PlayerActivity : BasePlayerActivity() {
      * the last params set (also the PiP button's), so this runs on every play/pause change and
      * whenever the player returns, from PiP or from Settings, whatever the gesture setting.
      *
-     * Building the params reads the video size, which on mpv waits for its core and can hold up
-     * the main thread while mpv sets up its output again (an ANR on a return). So they are only
-     * built again when auto-enter changes, or on a play/pause change with the gesture on, as
-     * before.
+     * Building the params reads the video size, which on mpv waits for its core and can hold up the
+     * main thread while mpv sets up its output again (an ANR on a return). So they are only built
+     * again when auto-enter changes, or on a play/pause change with the gesture on, as before.
      */
     private fun updatePipParams(
         isPlaying: Boolean = viewModel.player.isPlaying,

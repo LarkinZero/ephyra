@@ -1,14 +1,17 @@
 package dev.jdtech.jellyfin.utils
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class JellyfinImageSizeInterceptorTest {
     private val poster = "https://demo.example/items/abc/Images/Primary?tag=t1"
 
     @Test
     fun `adds the size and quality to an item image`() {
-        assertEquals("$poster&fillWidth=320&fillHeight=480&quality=90", poster.withImageSize(300, 450))
+        assertEquals(
+            "$poster&fillWidth=320&fillHeight=480&quality=90",
+            poster.withImageSize(300, 450),
+        )
     }
 
     @Test

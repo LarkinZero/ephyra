@@ -24,6 +24,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.ephyra.backdropCrossfadeMillis
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -55,27 +56,43 @@ enum class ArtworkPlacement {
 }
 
 /** One image the artwork can show; a [standIn] is a poster, blurred into a backdrop. */
-@Immutable
-data class ArtworkSource(val uri: Uri, val standIn: Boolean = false)
+@Immutable data class ArtworkSource(val uri: Uri, val standIn: Boolean = false)
 
 /**
- * The images to try for [item] at [placement], best first: the backdrop, a season's show
- * backdrop, then the item's own poster as a stand-in when [canBlur]. An episode uses its still
- * and its show's backdrop, which are wide images of their own.
+ * The images to try for [item] at [placement], best first: the backdrop, a season's show backdrop,
+ * then the item's own poster as a stand-in when [canBlur]. An episode uses its still and its show's
+ * backdrop, which are wide images of their own.
+ *
+ * [episodeImageFirst] (#630): whether an episode's header starts with its still. The episode page
+ * passes the "Use episode images" setting, so the page opens on the kind of image its card had.
+ *
+ * [hideStill] (#618): an episode hidden by "Hide spoilers" leaves its still out, and shows its
+ * show's backdrop or no artwork.
  */
 fun artworkSources(
     item: FindroidItem,
     placement: ArtworkPlacement,
     canBlur: Boolean = HeroArtwork.canBlur,
+    episodeImageFirst: Boolean = true,
+    hideStill: Boolean = false,
 ): List<ArtworkSource> {
     val images = item.images
+    if (item is FindroidEpisode && hideStill) {
+        return listOfNotNull(images.showBackdrop).map { ArtworkSource(it) }
+    }
     val backdrops =
         when (item) {
             is FindroidEpisode ->
                 when (placement) {
                     // The hero shows the still beside the text, so the show's backdrop goes behind.
                     ArtworkPlacement.Hero -> listOf(images.showBackdrop, images.primary)
-                    else -> listOf(images.primary, images.showBackdrop)
+                    ArtworkPlacement.Header ->
+                        if (episodeImageFirst) {
+                            listOf(images.primary, images.showBackdrop)
+                        } else {
+                            listOf(images.showBackdrop, images.primary)
+                        }
+                    ArtworkPlacement.Carousel -> listOf(images.primary, images.showBackdrop)
                 }
             is FindroidSeason -> listOf(images.backdrop, images.showBackdrop)
             else -> listOf(images.backdrop)
@@ -115,20 +132,33 @@ class ArtworkState internal constructor(internal val sources: List<ArtworkSource
 
 /** The artwork of [item] at [placement]; none while there is no item (loading, an error). */
 @Composable
-fun rememberArtworkState(item: FindroidItem?, placement: ArtworkPlacement): ArtworkState {
+fun rememberArtworkState(
+    item: FindroidItem?,
+    placement: ArtworkPlacement,
+    episodeImageFirst: Boolean = true,
+): ArtworkState {
     val context = LocalContext.current
-    return remember(item?.id, item?.images, placement) {
+    val hideStill = LocalSpoilers.current.hides(item)
+    return remember(item?.id, item?.images, placement, episodeImageFirst, hideStill) {
         ArtworkState(
-            item?.let { artworkSources(it, placement) }.orEmpty().map {
-                it.copy(uri = it.uri.resolveIn(context))
-            }
+            item
+                ?.let {
+                    artworkSources(
+                        it,
+                        placement,
+                        episodeImageFirst = episodeImageFirst,
+                        hideStill = hideStill,
+                    )
+                }
+                .orEmpty()
+                .map { it.copy(uri = it.uri.resolveIn(context)) }
         )
     }
 }
 
 /**
- * The image of [state], cropped to fill [modifier]; a stand-in is blurred. Draws nothing when
- * there is no image: the caller shrinks or drops the space.
+ * The image of [state], cropped to fill [modifier]; a stand-in is blurred. Draws nothing when there
+ * is no image: the caller shrinks or drops the space.
  */
 @Composable
 fun ArtworkBackdrop(

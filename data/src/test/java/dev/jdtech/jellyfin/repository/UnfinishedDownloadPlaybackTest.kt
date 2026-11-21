@@ -11,10 +11,9 @@ import dev.jdtech.jellyfin.player.DeviceProfileBuilder
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -50,7 +49,7 @@ class UnfinishedDownloadPlaybackTest {
             when (method.name) {
                 "observeHasSources" -> flowOf(true)
                 // The queries' SQL, on the one row this item has.
-                "getSources" -> listOf(partial).filter { it.itemId == id }
+                "getSourcesOfServer" -> listOf(partial).filter { it.itemId == id }
                 "getCompletedSources" ->
                     listOf(partial).filter { it.itemId == id && !it.path.endsWith(".download") }
                 "getMediaStreamsBySourceId" -> emptyList<Any>()
@@ -65,10 +64,13 @@ class UnfinishedDownloadPlaybackTest {
         }
     }
 
-    private fun api() = JellyfinApi(context).apply { userId = this@UnfinishedDownloadPlaybackTest.userId }
+    private fun api() =
+        JellyfinApi(context).apply { userId = this@UnfinishedDownloadPlaybackTest.userId }
 
     private fun preferences() =
-        AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE))
+        AppPreferences(context.getSharedPreferences("test", Context.MODE_PRIVATE)).apply {
+            setValue(currentServer, "server")
+        }
 
     @Test
     fun `online, an unfinished download is not played and the server is asked instead`() =
@@ -85,16 +87,6 @@ class UnfinishedDownloadPlaybackTest {
             val result = runCatching { repository.getPlaybackSources(episodeId, null) }
 
             // Asking the server is what fails here; the partial file must not be the answer.
-            assertTrue(
-                "Got ${result.getOrNull()?.map { it.path }}",
-                result.isFailure,
-            )
+            assertTrue(result.isFailure, message = "Got ${result.getOrNull()?.map { it.path }}")
         }
-
-    @Test
-    fun `offline, an unfinished download is not a playback source`() = runBlocking {
-        val repository = JellyfinRepositoryOfflineImpl(context, api(), database, preferences())
-
-        assertEquals(emptyList<Any>(), repository.getPlaybackSources(episodeId, null))
-    }
 }

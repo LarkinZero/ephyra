@@ -5,11 +5,11 @@ import android.net.Uri
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -56,16 +56,25 @@ class FindroidImagesTest {
         val images =
             dto(BaseItemKind.EPISODE, listOf("bd", "bd2"), "lg").toFindroidImages(repository)
 
-        assertEquals(Uri.parse("$base/items/$seriesId/Images/Backdrop/0?tag=bd"), images.showBackdrop)
+        assertEquals(
+            Uri.parse("$base/items/$seriesId/Images/Backdrop/0?tag=bd"),
+            images.showBackdrop,
+        )
         assertEquals(Uri.parse("$base/items/$seriesId/Images/Logo?tag=lg"), images.showLogo)
-        assertEquals(Uri.parse("$base/items/$seriesId/Images/Primary?tag=poster"), images.showPrimary)
+        assertEquals(
+            Uri.parse("$base/items/$seriesId/Images/Primary?tag=poster"),
+            images.showPrimary,
+        )
     }
 
     @Test
     fun `season of a series with backdrop and logo uses the series own tags`() {
         val images = dto(BaseItemKind.SEASON, listOf("bd"), "lg").toFindroidImages(repository)
 
-        assertEquals(Uri.parse("$base/items/$seriesId/Images/Backdrop/0?tag=bd"), images.showBackdrop)
+        assertEquals(
+            Uri.parse("$base/items/$seriesId/Images/Backdrop/0?tag=bd"),
+            images.showBackdrop,
+        )
         assertEquals(Uri.parse("$base/items/$seriesId/Images/Logo?tag=lg"), images.showLogo)
     }
 
@@ -75,13 +84,17 @@ class FindroidImagesTest {
 
         assertNull(images.showBackdrop)
         assertNull(images.showLogo)
-        assertEquals(Uri.parse("$base/items/$seriesId/Images/Primary?tag=poster"), images.showPrimary)
+        assertEquals(
+            Uri.parse("$base/items/$seriesId/Images/Primary?tag=poster"),
+            images.showPrimary,
+        )
         assertEquals(Uri.parse("$base/items/$episodeId/Images/Primary?tag=own"), images.primary)
     }
 
     @Test
     fun `season of a series without backdrop or logo leaves them null despite a poster`() {
-        val images = dto(BaseItemKind.SEASON, backdropTags = emptyList()).toFindroidImages(repository)
+        val images =
+            dto(BaseItemKind.SEASON, backdropTags = emptyList()).toFindroidImages(repository)
 
         assertNull(images.showBackdrop)
         assertNull(images.showLogo)
@@ -90,10 +103,54 @@ class FindroidImagesTest {
     @Test
     fun `an image inherited from another item is addressed by its owner`() {
         val images =
-            dto(BaseItemKind.EPISODE, listOf("bd"), "lg", backdropItemId = otherId, logoItemId = otherId)
+            dto(
+                    BaseItemKind.EPISODE,
+                    listOf("bd"),
+                    "lg",
+                    backdropItemId = otherId,
+                    logoItemId = otherId,
+                )
                 .toFindroidImages(repository)
 
-        assertEquals(Uri.parse("$base/items/$otherId/Images/Backdrop/0?tag=bd"), images.showBackdrop)
+        assertEquals(
+            Uri.parse("$base/items/$otherId/Images/Backdrop/0?tag=bd"),
+            images.showBackdrop,
+        )
         assertEquals(Uri.parse("$base/items/$otherId/Images/Logo?tag=lg"), images.showLogo)
+    }
+
+    // #608
+    @Test
+    fun `an episode names its series thumb, a movie its own`() {
+        val episode =
+            dto(BaseItemKind.EPISODE).copy(seriesThumbImageTag = "th").toFindroidImages(repository)
+        assertEquals(Uri.parse("$base/items/$seriesId/Images/Thumb?tag=th"), episode.showThumb)
+        assertNull(episode.thumb)
+
+        val movie =
+            BaseItemDto(
+                    id = otherId,
+                    type = BaseItemKind.MOVIE,
+                    imageTags = mapOf(ImageType.THUMB to "mt"),
+                )
+                .toFindroidImages(repository)
+        assertEquals(Uri.parse("$base/items/$otherId/Images/Thumb?tag=mt"), movie.thumb)
+        assertNull(movie.showThumb)
+    }
+
+    @Test
+    fun `a thumb inherited from a parent is addressed by its owner`() {
+        val images =
+            dto(BaseItemKind.SEASON)
+                .copy(parentThumbImageTag = "pt", parentThumbItemId = otherId)
+                .toFindroidImages(repository)
+        assertEquals(Uri.parse("$base/items/$otherId/Images/Thumb?tag=pt"), images.showThumb)
+    }
+
+    @Test
+    fun `without thumb tags there is no thumb`() {
+        val images = dto(BaseItemKind.EPISODE, listOf("bd"), "lg").toFindroidImages(repository)
+        assertNull(images.thumb)
+        assertNull(images.showThumb)
     }
 }

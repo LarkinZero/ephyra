@@ -196,4 +196,21 @@
     <string name="ce_number_off">Dezactivat</string>
     <string name="ce_pref_player_keep_landscape">Păstrează playerul în modul peisaj</string>
     <string name="ce_pref_player_keep_landscape_summary">Redă videoclipurile în modul peisaj, chiar și când rotești tableta pe verticală</string>
+    <string name="ce_pref_home_episode_images">Folosește imaginile episoadelor</string>
+    <string name="ce_pref_home_episode_images_summary">Afișează imaginea episodului în locul imaginii serialului în Continuă vizionarea și Urmează</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Proiectează pe un televizor</string>
+    <string name="ce_pref_cast_enabled_summary">Afișează butonul de proiectare și caută dispozitive Chromecast în rețeaua ta</string>
+    <string name="ce_pref_cast_max_bitrate">Rată de biți maximă</string>
+    <string name="ce_pref_cast_max_bitrate_summary">În timpul proiectării, serverul reduce calitatea a tot ce o depășește</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">Televizorul redă HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Trimite videoclipurile HEVC (H.265) așa cum sunt, în loc să le convertească în H.264. Un Chromecast 4K le primește așa automat; activează pentru alt televizor sau box care redă HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Afișează imaginea episodului în locul imaginii serialului în Continuă vizionarea, în Urmează și în partea de sus a paginii episodului</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmente pe bara de derulare</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Afișează introducerea, rezumatul, finalul, previzualizarea și reclamele ca părți colorate ale barei de derulare</string>
+    <string name="ce_pref_hide_spoilers">Ascunde spoilerele</string>
+    <string name="ce_pref_hide_spoilers_summary">Estompează imaginea și ascunde titlul și descrierea episoadelor pe care nu le-ai văzut. Ține apăsat pe unul pentru a-l afișa</string>
+    <string name="ce_pref_side_backdrop">Fundal lângă text</string>
+    <string name="ce_pref_side_backdrop_summary">Pe o tabletă în modul peisaj, afișează fundalul unui element în forma sa proprie lângă titlu în loc de pe toată lățimea</string>
 </resources>

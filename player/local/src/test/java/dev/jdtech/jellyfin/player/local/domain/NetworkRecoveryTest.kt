@@ -3,10 +3,10 @@ package dev.jdtech.jellyfin.player.local.domain
 import androidx.media3.common.PlaybackException
 import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery.Check
 import dev.jdtech.jellyfin.player.local.domain.NetworkRecovery.OnError
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * #450: after the network came back, ExoPlayer stayed stopped until Play was pressed. The player
@@ -47,7 +47,10 @@ class NetworkRecoveryTest {
 
     @Test
     fun `nothing loaded shows the error`() {
-        assertEquals(OnError.SHOW_ERROR, recovery.onError(connectionFailed, null, canPrepare = true))
+        assertEquals(
+            OnError.SHOW_ERROR,
+            recovery.onError(connectionFailed, null, canPrepare = true),
+        )
     }
 
     @Test
@@ -63,7 +66,10 @@ class NetworkRecoveryTest {
     fun `a failed retry keeps waiting from the first error`() {
         recovery.onError(connectionFailed, "a", canPrepare = true)
         now = 5 * 60_000L
-        assertEquals(OnError.KEEP_WAITING, recovery.onError(connectionFailed, "a", canPrepare = true))
+        assertEquals(
+            OnError.KEEP_WAITING,
+            recovery.onError(connectionFailed, "a", canPrepare = true),
+        )
         now = NetworkRecovery.GIVE_UP_MS - 1
         assertEquals(Check.RETRY, recovery.check("a"))
     }

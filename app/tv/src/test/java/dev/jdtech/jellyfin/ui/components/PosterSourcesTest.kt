@@ -7,7 +7,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
 import dev.jdtech.jellyfin.models.FindroidImages
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -61,6 +61,64 @@ class PosterSourcesTest {
         assertEquals(
             listOf(own),
             posterSources(dummyShow.copy(images = images), Direction.VERTICAL),
+        )
+    }
+
+    // #608: the Continue Watching and Next Up rows.
+    @Test
+    fun `a card that prefers the thumb tries title art before the episode's frame`() {
+        val thumb = Uri.parse("https://demo.example/items/show/Images/Thumb?tag=t")
+        val showBackdrop = Uri.parse("https://demo.example/items/show/Images/Backdrop/0?tag=b")
+        val episode =
+            dummyEpisode.copy(
+                images =
+                    FindroidImages(primary = own, showBackdrop = showBackdrop, showThumb = thumb)
+            )
+        assertEquals(
+            listOf(thumb, showBackdrop, own),
+            posterSources(episode, Direction.HORIZONTAL, preferThumb = true),
+        )
+        assertEquals(listOf(own), posterSources(episode, Direction.HORIZONTAL))
+
+        val movie =
+            dummyMovie.copy(
+                images = FindroidImages(primary = own, backdrop = backdrop, thumb = thumb)
+            )
+        assertEquals(
+            listOf(thumb, backdrop),
+            posterSources(movie, Direction.HORIZONTAL, preferThumb = true),
+        )
+    }
+
+    @Test
+    fun `without a thumb the card falls back to the backdrop, then the episode's image`() {
+        val showBackdrop = Uri.parse("https://demo.example/items/show/Images/Backdrop/0?tag=b")
+        val episode =
+            dummyEpisode.copy(images = FindroidImages(primary = own, showBackdrop = showBackdrop))
+        assertEquals(
+            listOf(showBackdrop, own),
+            posterSources(episode, Direction.HORIZONTAL, preferThumb = true),
+        )
+        assertEquals(
+            listOf(own),
+            posterSources(
+                dummyEpisode.copy(images = FindroidImages(primary = own)),
+                Direction.HORIZONTAL,
+                preferThumb = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `preferring the thumb leaves vertical cards alone`() {
+        val images = FindroidImages(primary = own, showPrimary = show, showThumb = backdrop)
+        assertEquals(
+            listOf(show),
+            posterSources(
+                dummyEpisode.copy(images = images),
+                Direction.VERTICAL,
+                preferThumb = true,
+            ),
         )
     }
 }

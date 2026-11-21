@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.about
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class AboutInfoTest {
 
@@ -33,7 +33,10 @@ class AboutInfoTest {
 
     @Test
     fun `the channel follows the application ID suffix`() {
-        assertEquals(ReleaseChannel.STABLE, ReleaseChannel.fromPackageName("nl.midasvo.findroid.ce"))
+        assertEquals(
+            ReleaseChannel.STABLE,
+            ReleaseChannel.fromPackageName("nl.midasvo.findroid.ce"),
+        )
         assertEquals(
             ReleaseChannel.BETA,
             ReleaseChannel.fromPackageName("nl.midasvo.findroid.ce.staging"),

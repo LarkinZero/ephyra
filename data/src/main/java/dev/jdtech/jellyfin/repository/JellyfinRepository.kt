@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.FindroidSource
+import dev.jdtech.jellyfin.models.SeriesTrackPreferenceDto
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import java.util.UUID
@@ -53,9 +54,9 @@ interface JellyfinRepository {
     ): List<FindroidItem>
 
     /**
-     * CE: like [getItems], but with the number of items that match in total (ignoring
-     * [startIndex] and [limit]) when [includeTotal] is set, so a pager gets its length from its
-     * first page instead of a separate [getItemCount]. The server counts only when asked, so leave
+     * CE: like [getItems], but with the number of items that match in total (ignoring [startIndex]
+     * and [limit]) when [includeTotal] is set, so a pager gets its length from its first page
+     * instead of a separate [getItemCount]. The server counts only when asked, so leave
      * [includeTotal] off for later pages.
      */
     suspend fun getItemsPage(
@@ -117,8 +118,7 @@ interface JellyfinRepository {
 
     /**
      * Searches movies and shows. With [itemKinds], it searches those kinds instead, with a separate
-     * limit per kind so one kind (episodes) can't push the others out (CE, TV search). The offline
-     * repository ignores [itemKinds].
+     * limit per kind so one kind (episodes) can't push the others out (CE, TV search).
      */
     suspend fun getSearchItems(
         query: String,
@@ -129,7 +129,11 @@ interface JellyfinRepository {
 
     suspend fun getResumeItems(): List<FindroidItem>
 
-    suspend fun getLatestMedia(parentId: UUID): List<FindroidItem>
+    /** [includeItemTypes] null leaves the choice to the server. */
+    suspend fun getLatestMedia(
+        parentId: UUID,
+        includeItemTypes: List<BaseItemKind>? = null,
+    ): List<FindroidItem>
 
     suspend fun getSeasons(seriesId: UUID, offline: Boolean = false): List<FindroidSeason>
 
@@ -146,15 +150,14 @@ interface JellyfinRepository {
     ): List<FindroidEpisode>
 
     /**
-     * Resolves the sources for downloading an item. Always asks for the original
-     * file, except — when [transcodeDolbyVision] is set — Dolby Vision files, which
-     * the server then transcodes to a device-compatible H.264 copy so they play
-     * offline. Every non-DV file is still the original regardless of the flag.
+     * Resolves the sources for downloading an item. Always asks for the original file, except —
+     * when [transcodeDolbyVision] is set — Dolby Vision files, which the server then transcodes to
+     * a device-compatible H.264 copy so they play offline. Every non-DV file is still the original
+     * regardless of the flag.
      *
-     * [maxBitrate] (bits/sec) is the user-selected download quality cap. Files
-     * whose bitrate exceeds it get a progressive server-side transcode down to
-     * the cap; files under it still download as the original. Null = original
-     * quality for everything.
+     * [maxBitrate] (bits/sec) is the user-selected download quality cap. Files whose bitrate
+     * exceeds it get a progressive server-side transcode down to the cap; files under it still
+     * download as the original. Null = original quality for everything.
      */
     suspend fun getMediaSources(
         itemId: UUID,
@@ -164,22 +167,36 @@ interface JellyfinRepository {
     ): List<FindroidSource>
 
     /**
-     * Resolves the sources to play an item. Unlike [getMediaSources] (which always
-     * asks for the original file and is shared with the downloader), this sends an
-     * honest device profile so the server transcodes anything the player cannot
-     * direct-play — notably Dolby Vision on hardware without a working DV pipeline.
+     * Resolves the sources to play an item. Unlike [getMediaSources] (which always asks for the
+     * original file and is shared with the downloader), this sends an honest device profile so the
+     * server transcodes anything the player cannot direct-play — notably Dolby Vision on hardware
+     * without a working DV pipeline.
      *
      * When a downloaded copy exists and [mediaSourceId] is null or names it, the server is not
      * asked: the player plays the local copy then anyway, and waiting on the server only delays it.
+     *
+     * CE (#580): [audioStreamIndex] names the audio stream of [mediaSourceId] that a transcode has
+     * to carry, as a transcode carries one. The server only takes it together with the source's id.
+     * It means nothing for a source that plays directly or from a download.
      */
     suspend fun getPlaybackSources(
         itemId: UUID,
         mediaSourceId: String? = null,
+        audioStreamIndex: Int? = null,
     ): List<FindroidSource>
+
+    /** CE (#580): the tracks the user last picked by hand in [seriesId], one per track type. */
+    suspend fun getSeriesTrackPreferences(seriesId: UUID): List<SeriesTrackPreferenceDto>
 
     suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String
 
     suspend fun getSegments(itemId: UUID): List<FindroidSegment>
+
+    /**
+     * CE (#693): the item's segments as the server has them now, not the ones stored with a
+     * download. A new download saves these.
+     */
+    suspend fun getServerSegments(itemId: UUID): List<FindroidSegment> = getSegments(itemId)
 
     suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray?
 
@@ -193,8 +210,10 @@ interface JellyfinRepository {
      * CE (#332): up to [limit] items like [itemId], for "More like this". The detail pages load it
      * after they are shown. Offline there is nothing to compare with, so the default is empty.
      */
-    suspend fun getSimilarItems(itemId: UUID, limit: Int = SIMILAR_ITEMS_LIMIT): List<FindroidItem> =
-        emptyList()
+    suspend fun getSimilarItems(
+        itemId: UUID,
+        limit: Int = SIMILAR_ITEMS_LIMIT,
+    ): List<FindroidItem> = emptyList()
 
     /**
      * CE (#332): the extras of [itemId] — its local trailers, then its special features (behind the
@@ -216,16 +235,41 @@ interface JellyfinRepository {
 
     suspend fun postCapabilities()
 
-    suspend fun postPlaybackStart(itemId: UUID)
+    /**
+     * Records the play session of the stream that plays [itemId] now, which the start, progress and
+     * stop reports of [itemId] name: it is the one whose transcode the stop report ends.
+     * [transcodes] is whether that stream is the server's transcode.
+     *
+     * CE (#626): Cast asks with the receiver's device profile, not the phone's. CE (#728): the
+     * local player calls this for each stream it loads. [getPlaybackSources] records nothing: a
+     * quality or audio switch that fails after asking for the playing item's new stream keeps the
+     * old stream, whose session the reports must keep naming.
+     */
+    fun setPlaySession(itemId: UUID, playSessionId: String?, transcodes: Boolean) {}
 
     /**
-     * Report that [itemId] stopped playing at [positionTicks]. [playedPercentage] decides what the
-     * local database stores (see [stopUserData]); `null`, for an item left before its duration was
-     * known, leaves the local database as it is and only tells the server.
+     * Report that [itemId] started playing. [transcoded] says whether the stream playing is the
+     * server's transcode of it (`PlayerItem.isTranscoded`), which the server shows as the play
+     * method.
+     */
+    suspend fun postPlaybackStart(itemId: UUID, transcoded: Boolean)
+
+    /**
+     * Report that [itemId] stopped playing at [positionTicks]. What the local database stores
+     * follows the server's rules (see [stopUserData]): from the stored runtime of a downloaded item
+     * and the server's resume settings, or from [playedPercentage] when no runtime is stored.
+     * `null`, for an item left before its duration was known, leaves the local database as it is
+     * and only tells the server.
      */
     suspend fun postPlaybackStop(itemId: UUID, positionTicks: Long, playedPercentage: Int?)
 
-    suspend fun postPlaybackProgress(itemId: UUID, positionTicks: Long, isPaused: Boolean)
+    /** Report the position of [itemId]; [transcoded] as for [postPlaybackStart]. */
+    suspend fun postPlaybackProgress(
+        itemId: UUID,
+        positionTicks: Long,
+        isPaused: Boolean,
+        transcoded: Boolean,
+    )
 
     suspend fun markAsFavorite(itemId: UUID)
 

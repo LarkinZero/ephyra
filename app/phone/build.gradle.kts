@@ -65,7 +65,7 @@ android {
 
     defaultConfig {
         applicationId = "nl.midasvo.findroid.ce"
-        minSdk = Versions.MIN_SDK
+        minSdk = Versions.PHONE_MIN_SDK
         targetSdk = Versions.TARGET_SDK
 
         // CE-owned: Ephyra's own version (EphyraVersion.kt), not upstream's Versions.APP_*.
@@ -98,6 +98,10 @@ android {
         register("libre") {
             dimension = "variant"
             isDefault = true
+        }
+        register("proprietary") {
+            dimension = "variant"
+            matchingFallbacks += listOf("libre")
         }
     }
 
@@ -136,6 +140,14 @@ android {
 androidComponents {
     onVariants { variant ->
         if (variant.buildType != "release" && variant.buildType != "staging") return@onVariants
+        // CE-owned (#641): one committed baseline profile for every release-like variant. The
+        // plugin only reads src/<variant>/generated/baselineProfiles, which exists for
+        // libreRelease alone, so the proprietary flavor and staging would ship without it.
+        if (variant.name != "libreRelease") {
+            variant.sources.baselineProfiles?.addStaticSourceDirectory(
+                "src/libreRelease/generated/baselineProfiles"
+            )
+        }
         variant.outputs.forEach { output ->
             // Betas from different branches may carry an older version, so derive the code from
             // the run number instead. The beta is its own app, so only its own codes matter.
@@ -157,6 +169,7 @@ androidComponents {
 
 // CE-owned (#249): the profile is generated on demand (see baselineprofile/README.md) and
 // committed under src/libreRelease/generated/baselineProfiles; it never runs as part of a build.
+// The proprietary flavor and the staging builds use the same profile (onVariants above).
 baselineProfile { automaticGenerationDuringBuild = false }
 
 dependencies {
@@ -165,6 +178,7 @@ dependencies {
     implementation(projects.core)
     implementation(projects.data)
     implementation(projects.player.core)
+    implementation(projects.player.cast)
     implementation(projects.player.local)
     implementation(projects.setup)
     implementation(projects.modes.film)
@@ -220,6 +234,7 @@ dependencies {
     implementation(libs.androidx.savedstate.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

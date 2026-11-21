@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -73,13 +74,16 @@ import dev.jdtech.jellyfin.ce.ui.focus.RestoreFocus
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedGlow
-import dev.jdtech.jellyfin.ce.ui.itemInfoLine
 import dev.jdtech.jellyfin.ce.ui.focus.focusPosition
 import dev.jdtech.jellyfin.ce.ui.focus.rememberFocusPosition
+import dev.jdtech.jellyfin.ce.ui.itemInfoLine
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisodes
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
@@ -151,7 +155,8 @@ fun SeasonScreen(
             seasonViewModel.loadSeason(
                 UUID.fromString(it),
                 includeSeriesSeasons = true,
-                // Read from the flow, not the composable state: this effect runs outside composition.
+                // Read from the flow, not the composable state: this effect runs outside
+                // composition.
                 seriesId = seriesId ?: episodeViewModel.state.value.episode?.seriesId,
             )
         }
@@ -321,11 +326,11 @@ internal fun SeasonScreenLayout(
                         modifier =
                             Modifier.focusRequesterIf(item.id == season.id, seasonRequester)
                                 .focusPosition(
-                                focusPosition,
-                                ROW_SEASONS,
-                                index,
-                                item.id.toString(),
-                            ),
+                                    focusPosition,
+                                    ROW_SEASONS,
+                                    index,
+                                    item.id.toString(),
+                                ),
                     ) {
                         Text(text = item.name)
                     }
@@ -376,11 +381,11 @@ internal fun SeasonScreenLayout(
                         modifier =
                             Modifier.focusRequesterIf(isSelected, episodeRequester)
                                 .focusPosition(
-                                focusPosition,
-                                ROW_EPISODES,
-                                index,
-                                item.id.toString(),
-                            ),
+                                    focusPosition,
+                                    ROW_EPISODES,
+                                    index,
+                                    item.id.toString(),
+                                ),
                     )
                 }
             }
@@ -473,9 +478,11 @@ private fun EpisodeDetails(
     val versions = remember(episode.sources) { episode.getVersions() }
     var versionDialogOpen by remember { mutableStateOf(false) }
 
+    // CE (#618): a hidden episode is "Episode 5", without its overview, until OK is held on it.
+    val hidden = LocalSpoilers.current.hides(episode)
     Column(modifier = modifier) {
         Text(
-            text = episode.name,
+            text = spoilerFreeName(episode, hidden),
             style = MaterialTheme.typography.headlineMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -487,19 +494,28 @@ private fun EpisodeDetails(
             color = Color.White.copy(alpha = .8f),
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-        // CE (#545): a cut overview takes focus and opens in full on OK.
-        TvOverviewText(
-            title = episode.name,
-            text = episode.overview,
-            maxLines = 3,
-            modifier = Modifier.width(640.dp),
-        )
+        if (hidden) {
+            Text(
+                text = spoilerFreeOverview(episode.overview, hidden = true),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = .7f),
+                fontStyle = FontStyle.Italic,
+                maxLines = 3,
+                modifier = Modifier.width(640.dp),
+            )
+        } else {
+            // CE (#545): a cut overview takes focus and opens in full on OK.
+            TvOverviewText(
+                title = episode.name,
+                text = episode.overview,
+                maxLines = 3,
+                modifier = Modifier.width(640.dp),
+            )
+        }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
         // Reserve the chips' height, so the buttons don't jump when they load.
         Box(modifier = Modifier.height(24.dp)) {
-            loaded?.let {
-                TechnicalChips(chips = technicalChips(it.episode, it.videoMetadata))
-            }
+            loaded?.let { TechnicalChips(chips = technicalChips(it.episode, it.videoMetadata)) }
         }
         Spacer(modifier = Modifier.weight(1f))
         Row(
@@ -563,7 +579,9 @@ private fun EpisodeDetails(
                                 if (episode.played) CoreR.string.unmark_as_played
                                 else CoreR.string.mark_as_played
                         ),
-                    tint = if (episode.played) MaterialTheme.colorScheme.tertiary else LocalContentColor.current,
+                    tint =
+                        if (episode.played) MaterialTheme.colorScheme.tertiary
+                        else LocalContentColor.current,
                 )
             }
             IconButton(
@@ -590,7 +608,9 @@ private fun EpisodeDetails(
                                 if (episode.favorite) CoreR.string.remove_from_favorites
                                 else CoreR.string.add_to_favorites
                         ),
-                    tint = if (episode.favorite) MaterialTheme.colorScheme.tertiary else LocalContentColor.current,
+                    tint =
+                        if (episode.favorite) MaterialTheme.colorScheme.tertiary
+                        else LocalContentColor.current,
                 )
             }
             if (versions.size > 1) {
@@ -623,8 +643,8 @@ private fun EpisodeDetails(
 
 /**
  * Resolution, video codec, every HDR format (Dolby Vision and its HDR10+ fallback are separate
- * chips), and the language and format of the first audio track, with its spatial audio format
- * (e.g. "English Dolby TrueHD Atmos 7.1").
+ * chips), and the language and format of the first audio track, with its spatial audio format (e.g.
+ * "English Dolby TrueHD Atmos 7.1").
  */
 private fun technicalChips(episode: FindroidEpisode?, metadata: VideoMetadata?): List<String> {
     val source = episode?.sources?.firstOrNull() ?: return emptyList()
@@ -657,9 +677,9 @@ private fun resolutionName(height: Int): String =
     }
 
 /**
- * The name of an audio track's language in the app's language, or null when the track has none:
- * no code, "und" (undetermined, #415) or a code without a name. The server sends three-letter
- * codes ("nld"), which [Locale] only names by their two-letter form ("nl").
+ * The name of an audio track's language in the app's language, or null when the track has none: no
+ * code, "und" (undetermined, #415) or a code without a name. The server sends three-letter codes
+ * ("nld"), which [Locale] only names by their two-letter form ("nl").
  */
 internal fun audioLanguageName(code: String, locale: Locale = Locale.getDefault()): String? {
     val tag = code.trim().lowercase()
@@ -710,9 +730,13 @@ private fun EpisodeRowCard(
     onFocus: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(episode)
     Column(modifier = modifier.width(EPISODE_CARD_WIDTH)) {
         Surface(
             onClick = onClick,
+            // CE (#618): holding OK on a hidden episode reveals it.
+            onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
             shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
             border = ClickableSurfaceDefaults.border(focusedBorder = ephyraFocusedBorder()),
             glow = ClickableSurfaceDefaults.glow(focusedGlow = ephyraFocusedGlow()),
@@ -726,10 +750,14 @@ private fun EpisodeRowCard(
                     modifier =
                         Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.small),
                 )
-                if (episode.playbackPositionTicks > 0 && episode.runtimeTicks > 0 && !episode.played) {
+                if (
+                    episode.playbackPositionTicks > 0 && episode.runtimeTicks > 0 && !episode.played
+                ) {
                     val progress =
-                        (episode.playbackPositionTicks.toFloat() / episode.runtimeTicks)
-                            .coerceIn(0f, 1f)
+                        (episode.playbackPositionTicks.toFloat() / episode.runtimeTicks).coerceIn(
+                            0f,
+                            1f,
+                        )
                     Box(
                         modifier =
                             Modifier.align(Alignment.BottomStart)
@@ -744,7 +772,16 @@ private fun EpisodeRowCard(
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
         Text(
-            text = stringResource(id = CoreR.string.episode_name, episode.indexNumber, episode.name),
+            text =
+                if (hidden) {
+                    spoilerFreeName(episode, hidden = true)
+                } else {
+                    stringResource(
+                        id = CoreR.string.episode_name,
+                        episode.indexNumber,
+                        episode.name,
+                    )
+                },
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

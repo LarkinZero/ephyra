@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.setup.presentation
 import android.app.Application
 import android.provider.Settings
 import com.sun.net.httpserver.HttpServer
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.ServerAddress
@@ -16,6 +17,10 @@ import java.lang.reflect.Proxy
 import java.net.InetSocketAddress
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.Executors
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -25,9 +30,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,6 +51,9 @@ class ServerAddressesFeedbackTest {
     private val addresses = Collections.synchronizedList(mutableListOf(inUse, other))
     private val deleted = Collections.synchronizedList(mutableListOf<UUID>())
 
+    /** Thrown by getServerWithAddresses once set. */
+    @Volatile private var failure: RuntimeException? = null
+
     // The ViewModel calls only these; suspend functions that do not suspend can return directly.
     private val database =
         Proxy.newProxyInstance(
@@ -62,12 +67,14 @@ class ServerAddressesFeedbackTest {
                     addresses.removeAll { it.id == args[0] }
                     Unit
                 }
-                "getServerWithAddresses" ->
+                "getServerWithAddresses" -> {
+                    failure?.let { throw it }
                     ServerWithAddresses(
                         server = Server(serverId, "Ephyra Test", inUse.id, null),
                         addresses = addresses.toList(),
                         user = null,
                     )
+                }
                 "toString" -> "FakeServerDatabaseDao"
                 else -> throw UnsupportedOperationException(method.name)
             }
@@ -123,6 +130,10 @@ class ServerAddressesFeedbackTest {
             exchange.sendResponseHeaders(200, body.toByteArray().size.toLong())
             exchange.responseBody.use { it.write(body.toByteArray()) }
         }
+        // The SDK also tries https on the same port. On the default executor that handshake
+        // blocks the server's only thread until it times out, and the http request with it.
+        val executor = Executors.newCachedThreadPool()
+        server.executor = executor
         server.start()
         try {
             val stubAddress = "http://127.0.0.1:${server.address.port}"
@@ -136,6 +147,37 @@ class ServerAddressesFeedbackTest {
             assertEquals(3, addresses.size)
         } finally {
             server.stop(0)
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `any other failure is told in plain words, not the exception's text`() = runBlocking {
+        // CE (#606): the same stand-in server, then the address list cannot be read.
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+        server.createContext("/System/Info/Public") { exchange ->
+            val body =
+                """{"Id":"$serverId","ServerName":"Ephyra Test","Version":"10.11.0",""" +
+                    """"ProductName":"Jellyfin Server","StartupWizardCompleted":true}"""
+            exchange.responseHeaders.add("Content-Type", "application/json")
+            exchange.sendResponseHeaders(200, body.toByteArray().size.toLong())
+            exchange.responseBody.use { it.write(body.toByteArray()) }
+        }
+        val executor = Executors.newCachedThreadPool()
+        server.executor = executor
+        server.start()
+        try {
+            failure = IllegalStateException("Cannot access database on the main thread")
+
+            val stubAddress = "http://127.0.0.1:${server.address.port}"
+            viewModel.onAction(ServerAddressesAction.AddAddress(stubAddress))
+
+            val error = withTimeout(15_000) { viewModel.state.first { it.error != null } }.error!!
+            val message = error.single() as UiText.StringResource
+            assertEquals(CoreR.string.unknown_error, message.resId)
+        } finally {
+            server.stop(0)
+            executor.shutdownNow()
         }
     }
 

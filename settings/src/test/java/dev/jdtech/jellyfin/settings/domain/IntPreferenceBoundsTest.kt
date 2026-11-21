@@ -2,18 +2,18 @@ package dev.jdtech.jellyfin.settings.domain
 
 import android.content.SharedPreferences
 import java.lang.reflect.Proxy
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 /** #559: the still-watching prompt timeout is saved and shown as at least 5 seconds. */
 class IntPreferenceBoundsTest {
     // bounded() only compares preferences, it never reads or writes them.
     private val prefs =
         AppPreferences(
-            Proxy.newProxyInstance(
-                javaClass.classLoader,
-                arrayOf(SharedPreferences::class.java),
-            ) { _, _, _ ->
+            Proxy.newProxyInstance(javaClass.classLoader, arrayOf(SharedPreferences::class.java)) {
+                _,
+                _,
+                _ ->
                 error("not used")
             } as SharedPreferences
         )

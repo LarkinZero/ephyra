@@ -16,6 +16,11 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Provider
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -23,11 +28,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,9 +36,9 @@ import org.robolectric.annotation.Config
 
 /**
  * CE (#560): a download that fails and will be retried goes straight to waiting for its retry. The
- * queue used to publish it as Failed first; with nothing else in flight the download service saw
- * an empty queue in between and stopped, while the retry still had to run. The service now follows
- * the pump, which is active for as long as the queue has work.
+ * queue used to publish it as Failed first; with nothing else in flight the download service saw an
+ * empty queue in between and stopped, while the retry still had to run. The service now follows the
+ * pump, which is active for as long as the queue has work.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class)
@@ -69,11 +69,10 @@ class DownloadQueueRetryTransitionTest {
             entries.all { it.state is DownloadQueue.EntryState.Pending && it.retryCount == 1 }
         }
 
-        val failed =
-            published.filter { entries ->
-                entries.any { it.state is DownloadQueue.EntryState.Failed }
-            }
-        assertEquals("Published as failed before the retry: $failed", 0, failed.size)
+        val failed = published.filter { entries ->
+            entries.any { it.state is DownloadQueue.EntryState.Failed }
+        }
+        assertEquals(0, failed.size, message = "Published as failed before the retry: $failed")
         assertTrue(queue.entries.value.all { it.retryAt != null })
     }
 
@@ -97,7 +96,7 @@ class DownloadQueueRetryTransitionTest {
 
         assertTrue(hasDownloadWork(queue.entries.value))
         assertTrue(queue.pumpActive.value)
-        assertEquals("The pump went idle with retries waiting: $idle", 0, idle.size)
+        assertEquals(0, idle.size, message = "The pump went idle with retries waiting: $idle")
     }
 
     @Test
@@ -139,13 +138,24 @@ class DownloadQueueRetryTransitionTest {
             await(queue) { it.single().state is DownloadQueue.EntryState.Completed }
             Thread.sleep(round % 3L)
             runBlocking { queue.enqueue(later) }
-            assertTrue("Round $round: no pump for the new download", queue.pumpActive.value)
+            assertTrue(
+                queue.pumpActive.value,
+                message = "Round $round: no pump for the new download",
+            )
             val watch =
-                queue.pumpActive.onEach { if (!it) idle.add(queue.entries.value) }.launchIn(observer)
+                queue.pumpActive
+                    .onEach { if (!it) idle.add(queue.entries.value) }
+                    .launchIn(observer)
             await(queue) { entries ->
-                entries.any { it.id == later.id && it.state is DownloadQueue.EntryState.Downloading }
+                entries.any {
+                    it.id == later.id && it.state is DownloadQueue.EntryState.Downloading
+                }
             }
-            assertEquals("Round $round: the pump went idle with work: $idle", 0, idle.size)
+            assertEquals(
+                0,
+                idle.size,
+                message = "Round $round: the pump went idle with work: $idle",
+            )
             watch.cancel()
 
             downloader.progressOf[downloader.idOf.getValue(later.id)] =
@@ -156,7 +166,11 @@ class DownloadQueueRetryTransitionTest {
 
     @Test
     fun `work is anything running, paused or waiting`() {
-        fun entry(state: DownloadQueue.EntryState, retryAt: Long? = null, offline: Boolean = false) =
+        fun entry(
+            state: DownloadQueue.EntryState,
+            retryAt: Long? = null,
+            offline: Boolean = false,
+        ) =
             DownloadQueue.Entry(
                 id = first.id,
                 item = first,
@@ -173,7 +187,9 @@ class DownloadQueueRetryTransitionTest {
         assertTrue(hasDownloadWork(listOf(entry(DownloadQueue.EntryState.Paused))))
         assertTrue(hasDownloadWork(listOf(entry(DownloadQueue.EntryState.Pending))))
         // Waiting for a retry and waiting for the network are work too: this is #560.
-        assertTrue(hasDownloadWork(listOf(entry(DownloadQueue.EntryState.Pending, retryAt = 30_000L))))
+        assertTrue(
+            hasDownloadWork(listOf(entry(DownloadQueue.EntryState.Pending, retryAt = 30_000L)))
+        )
         assertTrue(hasDownloadWork(listOf(entry(DownloadQueue.EntryState.Pending, offline = true))))
         assertTrue(
             hasDownloadWork(
@@ -220,7 +236,11 @@ class DownloadQueueRetryTransitionTest {
 
     @Test
     fun `the notification says what the queue is doing`() {
-        fun entry(state: DownloadQueue.EntryState, retryAt: Long? = null, offline: Boolean = false) =
+        fun entry(
+            state: DownloadQueue.EntryState,
+            retryAt: Long? = null,
+            offline: Boolean = false,
+        ) =
             DownloadQueue.Entry(
                 id = UUID.randomUUID(),
                 item = first,
@@ -338,8 +358,9 @@ class DownloadQueueRetryTransitionTest {
         override suspend fun getProgress(downloadId: Long?) =
             downloadId?.let { progressOf[it] } ?: progress
 
-        override suspend fun getProgress(downloadIds: List<Long>) =
-            downloadIds.associateWith { progressOf[it] ?: progress }
+        override suspend fun getProgress(downloadIds: List<Long>) = downloadIds.associateWith {
+            progressOf[it] ?: progress
+        }
 
         override suspend fun getActiveDownloads() = emptyList<Downloader.ActiveDownload>()
 
@@ -354,6 +375,8 @@ class DownloadQueueRetryTransitionTest {
         override suspend fun getPendingDownloads() = emptyList<Downloader.PendingDownload>()
 
         override suspend fun sweepOrphans() = Unit
+
+        override suspend fun finalizeFinishedMediaStreams() = Unit
 
         override suspend fun finalizeDownload(downloadId: Long) = true
     }

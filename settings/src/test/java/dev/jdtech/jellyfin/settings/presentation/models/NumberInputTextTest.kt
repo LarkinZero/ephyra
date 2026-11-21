@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.settings.presentation.models
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class NumberInputTextTest {
     private val strings = mapOf(PREFIX to "every", SUFFIX to "episodes", OFF to "Off")

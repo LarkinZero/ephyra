@@ -2,14 +2,14 @@ package dev.jdtech.jellyfin.utils
 
 import androidx.media3.ui.CaptionStyleCompat
 import dev.jdtech.jellyfin.settings.domain.Constants
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for the pure-Kotlin pieces of [SubtitleStyle].
  *
- * The mapper deliberately avoids depending on `android.graphics.Color` (which needs the
- * Android framework) so these run as a plain JVM test without Robolectric.
+ * The mapper deliberately avoids depending on `android.graphics.Color` (which needs the Android
+ * framework) so these run as a plain JVM test without Robolectric.
  */
 class SubtitleStyleTest {
 

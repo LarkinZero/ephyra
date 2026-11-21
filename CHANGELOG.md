@@ -13,6 +13,177 @@ following the Findroid version they were based on.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.7.0] — 2026-11-14
+
+The Android TV app now runs on Android 9, which brings it to Fire OS 7 sticks. The server hears
+about a pause or a resume on the phone right away, also while playing in the background, and
+item pages show their backdrop again.
+
+### Added
+- Android TV: the TV app runs on Android 9 (API 28) and newer, so it installs on Fire OS 7
+  devices such as the Fire TV Stick 3rd gen, Lite, 4K and 4K Max. Phones and tablets still need
+  Android 10 (#675).
+- Home: when a row changes, its cards slide into place instead of jumping (#640).
+
+### Fixed
+- Player: a pause or a resume reaches the server at once instead of up to 5 s later, progress
+  reports arrive in order, and a pause while playing in the background is no longer lost (#674).
+- Player: with background audio on, progress is still reported after going to Home (#677).
+- Item pages: the backdrop is no longer covered by a fade; on wide layouts only its bottom edge
+  fades into the page (#631).
+- Cast: transcodes for a receiver that plays HEVC are encoded to H.264, as the receiver expects
+  (#673).
+- Sync: an unplayed mark on a download that never had a last played date is sent to the server,
+  and a login the server refused is logged as one line instead of a stack trace (#635, by
+  @jaretclifton).
+
+### Maintenance
+- Dependency updates: Google Cast framework 23, Robolectric 4.18, KSP 2.3.14.
+
+## [v2.6.0] — 2026-11-14
+
+Shuffle comes to the phone and tablet, subtitles that run early or late can be put right during
+playback, and downloads stay in step with the server: progress made on another device reaches
+them, and what you watch offline moves up in Continue Watching everywhere. A season download can
+leave out the episodes you've already seen. The player now runs on Ephyra's own build of mpv.
+
+A warm welcome to Ephyra's new contributor, Jaret ([@jaretclifton](https://github.com/jaretclifton)).
+Shuffle on the phone, the offline sync and the season download question are his: five pull
+requests, each one tested on his own devices and server, reworked carefully after every review,
+and a pleasure to merge. Thank you, Jaret!
+
+### Added
+- Shuffle on the phone and tablet: a button next to Play on a show's and a season's page plays
+  its episodes in random order, also on a Cast receiver. A whole series starts in one request
+  instead of one per season (#638, by @jaretclifton).
+- Player: subtitle sync. A side sheet moves the subtitles earlier or later in steps of 0.1 s,
+  without reloading, and lists the lines around the current one so you can line one up with
+  what is said. Phone and TV, ExoPlayer and mpv (#619).
+- Downloads: a season or show download asks whether to download only the unwatched episodes or
+  all of them, when some are watched (#636, by @jaretclifton).
+
+### Changed
+- Sync: progress watched offline tells the server when it was watched, so the item moves up in
+  Continue Watching on every device. A later play on another device is kept rather than
+  overwritten (#633, by @jaretclifton).
+- Sync: downloads take over the progress made on other devices, so a download resumes where you
+  left it anywhere. When another device played an item after you did offline, its progress wins
+  (#635, by @jaretclifton).
+- Playback: stopping a downloaded item follows the server's resume settings (Dashboard →
+  Playback → Resume), so it keeps the same position and watched state as on the server, also
+  offline. Stopping early no longer marks a watched item unwatched (#637, by
+  @jaretclifton).
+- Player (mpv): Ephyra's own build of libmpv 1.1.0, with mpv 0.42, FFmpeg 9.0.2 and
+  libplacebo 7.387.0 (#655).
+
+### Fixed
+- Player (mpv): AV1 video with film grain could show a broken picture on some GPUs; the grain is
+  now applied by the decoder (#652).
+- Player (mpv): an item with external subtitles no longer holds up the app while they download
+  (#617).
+
+### Maintenance
+- The formatting check covers the Kotlin sources again (#661).
+
+## [v2.5.0] — 2026-11-13
+
+Ephyra can cast. The new proprietary variant of the phone app adds Google Cast: pick a
+Chromecast or Google TV from the top bar and the phone becomes the remote. The libre variant
+stays free of Google code, and the two install over each other. When the server doesn't answer,
+Home now says so and takes you to your downloads.
+
+### Added
+- Cast: a proprietary variant of the phone app with Google Cast. Pick a device from the Cast
+  button in the top bar and cast from any item; a mini player follows you while you browse and
+  the Cast player has seek, previous and next, volume, audio and subtitle tracks, chapters with
+  thumbnails and skip segments. On a tablet the Cast player sits beside the page. Servers on
+  plain HTTP can cast too (#626).
+- Releases and betas carry both phone variants: `-libre-` without Google code and
+  `-proprietary-` with Cast. They share the application ID and signing key, so switching keeps
+  your login, settings and downloads (#641).
+- Home: while the server doesn't answer, a banner says so and leads to Downloads, which open and
+  play without it. It goes by itself when the server is back, and stays away in Offline Mode
+  (#281).
+
+### Fixed
+- Phone: an episode's page shows the show's backdrop again (#630).
+
+### Maintenance
+- Gradle 9.9.1 and kotlinx-serialization 1.13.0.
+
+## [v2.4.5] — 2026-11-12
+
+Mostly player fixes, and many of them are about files the server has to convert: you can now
+pick another audio track or a subtitle from inside the file while it transcodes, and the audio
+language chosen for a series is used there too. On TV a lost connection says so and every
+playback problem has "Try again". Continue Watching and Next Up show the wide art with the
+title on it.
+
+### Changed
+- Home: the Continue Watching and Next Up cards show the title art of the movie or series, as
+  the web client does. "Use episode images" under Interface > Home brings the episode images
+  back. Phone and TV (#608).
+- Player: on the phone the seek bar's thumbnails take half the memory and the next ones are
+  loaded ahead, so they show sooner while scrubbing (#615).
+- TV: the app starts and scrolls more smoothly right after an install or update, from a
+  baseline profile (#286).
+
+### Fixed
+- Player: while the server transcodes, the audio dialog lists all of the file's audio tracks
+  and picking one switches to it. A track picked by hand in a movie is kept through a quality
+  switch (#596).
+- Player: the audio language saved for a series is also used when the server transcodes,
+  where the server's default track used to play (#580).
+- Player: the subtitles inside the file can be picked while the server transcodes (#597).
+- Player: Play on a show gives its episode the seek bar thumbnails and chapters, and an
+  episode without thumbnails no longer shows those of the one before (#594).
+- Player: moving on from the closing outro, by a skip, the "Up next" card or autoplay, marks
+  the episode watched (#616).
+- Player: a file that fails to open is no longer counted as played on the server (#601).
+- Player: the server's dashboard shows a transcode as a transcode instead of direct play
+  (#599).
+- Player (mpv): a file that cannot be opened gives one error that says what went wrong,
+  instead of two to four. When the server can't be reached the player waits for the network
+  and loads again, as ExoPlayer does (#576).
+- Player (mpv): leaving the player, or turning the screen off, could freeze the app on some
+  devices (#460).
+- Player: the episode list can be used from a keyboard: focus starts on the playing episode
+  and the arrows move through the list instead of changing the volume (#588).
+- TV: when the connection drops the player says "Connection lost" and continues by itself when
+  the network is back. Every playback problem has "Try again", and Play after an error loads
+  the item again (#463).
+- TV: after Home or standby the player plays on if it was playing, instead of sitting paused
+  with nothing on screen (#462).
+- TV: the seek bar's thumbnail no longer covers the title, the skip button or the "Up next"
+  card (#464).
+- Downloads: downloaded external subtitles are finished properly, also the ones earlier
+  versions left half-named (#573).
+- Home: on Android 17, with local network access turned off, the app says so and offers
+  "Allow access" instead of "Error loading data" (#571).
+- Login: a failed Quick Connect says why in plain words: the code expired, or Quick Connect is
+  turned off on the server. Add server no longer shows technical error text either (#606).
+
+## [v2.4.4] — 2026-11-12
+
+Playback with ExoPlayer starts faster for files with Dolby Digital Plus audio in an mp4: they
+now play directly instead of going through the server, which on a TV box could take ten seconds
+or more before a picture. The rest are small fixes to the phone player, offline Home and the
+item pages.
+
+### Fixed
+- Player (ExoPlayer): an mp4 with Dolby Digital Plus (E-AC-3) audio plays directly. When a file
+  does go through the server, HEVC video is passed on as it is where the device can decode it,
+  instead of being re-encoded, and leaving the player ends the server's conversion at once
+  instead of a minute later (#589).
+- Player: the first key after a tap on the player works. Space pauses and an arrow seeks,
+  where that first key used to do nothing (#448).
+- Player: in a window too narrow for all the buttons in the top row, the row starts at its end,
+  so audio, subtitles and episodes are in view, and a fading edge shows there is more (#456).
+- Player: at a large font size the title no longer leaves the window at the top (#585).
+- Home: offline with nothing downloaded, Home says so and points to Downloads (#585).
+- Item pages: the back and home buttons are readable on a page without artwork, also in the
+  light theme (#585).
+
 ## [v2.4.3] — 2026-11-12
 
 A quick follow-up to v2.4.2. Progress watched from a download after the network dropped in the
@@ -900,6 +1071,11 @@ Initial CE fork off findroid `1.0.2`. These rapid early iterations established t
 `nl.midasvo.findroid.ce` application ID, downloads and SD-card storage improvements, and ongoing
 tracking of upstream. See the git history between the corresponding tags for commit-level detail.
 
+[v2.7.0]: https://github.com/midasvo/ephyra/releases/tag/v2.7.0
+[v2.6.0]: https://github.com/midasvo/ephyra/releases/tag/v2.6.0
+[v2.5.0]: https://github.com/midasvo/ephyra/releases/tag/v2.5.0
+[v2.4.5]: https://github.com/midasvo/ephyra/releases/tag/v2.4.5
+[v2.4.4]: https://github.com/midasvo/ephyra/releases/tag/v2.4.4
 [v2.4.3]: https://github.com/midasvo/ephyra/releases/tag/v2.4.3
 [v2.4.2]: https://github.com/midasvo/ephyra/releases/tag/v2.4.2
 [v2.4.1]: https://github.com/midasvo/ephyra/releases/tag/v2.4.1

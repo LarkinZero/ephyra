@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.ce.presentation.settings
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
 /** The steps of a TV number setting (#420): whole seconds for milliseconds, never below zero. */
 class TvSettingsNumberStepsTest {

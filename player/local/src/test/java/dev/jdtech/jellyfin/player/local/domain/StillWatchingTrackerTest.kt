@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.player.local.domain
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * Unit tests for [StillWatchingTracker] — the "Are you still watching?" threshold logic.
@@ -125,7 +125,8 @@ class StillWatchingTrackerTest {
 
     @Test
     fun `wouldPromptOnAutoAdvance follows inactivity`() {
-        val tracker = StillWatchingTracker(autoAdvanceThreshold = 0, inactivityThresholdMs = 60_000L)
+        val tracker =
+            StillWatchingTracker(autoAdvanceThreshold = 0, inactivityThresholdMs = 60_000L)
         tracker.reset(nowMs = 0L)
         assertFalse(tracker.wouldPromptOnAutoAdvance(nowMs = 59_999L))
         assertTrue(tracker.wouldPromptOnAutoAdvance(nowMs = 60_000L))

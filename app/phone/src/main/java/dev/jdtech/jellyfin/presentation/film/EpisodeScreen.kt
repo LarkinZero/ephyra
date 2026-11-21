@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.PlayerActivity
@@ -45,29 +46,33 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeOverview
 import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
+import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.presentation.cast.LocalCastPlayback
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
-import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
-import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
-import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
+import dev.jdtech.jellyfin.presentation.film.components.WatchHistoryText
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
+import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
@@ -75,7 +80,6 @@ import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import dev.jdtech.jellyfin.utils.format
-import android.widget.Toast
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 
@@ -91,8 +95,10 @@ fun EpisodeScreen(
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val castPlayback = LocalCastPlayback.current
     val uriHandler = LocalUriHandler.current
-    val isOfflineMode = LocalOfflineMode.current
+    // CE (#281): with the server away the page of a deleted download cannot load again either.
+    val serverAway = LocalServerStatus.current.unreachable
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     // Not read here: a progress tick must only recompose the download card.
@@ -112,15 +118,16 @@ fun EpisodeScreen(
                 viewModel.loadEpisode(episodeId = episodeId)
             }
             is DownloaderEvent.Deleted -> {
-                if (isOfflineMode) {
+                if (serverAway) {
                     navigateBack()
                 } else {
                     viewModel.loadEpisode(episodeId = episodeId)
                 }
             }
             is DownloaderEvent.Failed -> {
-                val message = event.errorText?.asString(context.resources)
-                    ?: context.getString(CoreR.string.download_failed)
+                val message =
+                    event.errorText?.asString(context.resources)
+                        ?: context.getString(CoreR.string.download_failed)
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
         }
@@ -150,18 +157,31 @@ fun EpisodeScreen(
         onAction = { action ->
             when (action) {
                 is EpisodeAction.Play -> {
-                    val intent = Intent(context, PlayerActivity::class.java)
-                    intent.putExtra("itemId", episodeId.toString())
-                    intent.putExtra("itemKind", BaseItemKind.EPISODE.serialName)
-                    intent.putExtra("startFromBeginning", action.startFromBeginning)
-                    intent.putExtra("mediaSourceId", action.mediaSourceId)
-                    context.startActivity(intent)
+                    // CE (#626): on the Cast receiver when one is connected.
+                    if (
+                        !castPlayback.play(
+                            episodeId,
+                            BaseItemKind.EPISODE,
+                            action.startFromBeginning,
+                            action.mediaSourceId,
+                            shuffle = false,
+                        )
+                    ) {
+                        val intent = Intent(context, PlayerActivity::class.java)
+                        intent.putExtra("itemId", episodeId.toString())
+                        intent.putExtra("itemKind", BaseItemKind.EPISODE.serialName)
+                        intent.putExtra("startFromBeginning", action.startFromBeginning)
+                        intent.putExtra("mediaSourceId", action.mediaSourceId)
+                        context.startActivity(intent)
+                    }
                 }
-                is EpisodeAction.OpenExternalLink -> openExternalLink(context, uriHandler, action.url)
+                is EpisodeAction.OpenExternalLink ->
+                    openExternalLink(context, uriHandler, action.url)
                 is EpisodeAction.OnBackClick -> navigateBack()
                 is EpisodeAction.OnHomeClick -> navigateHome()
                 is EpisodeAction.NavigateToPerson -> navigateToPerson(action.personId)
-                is EpisodeAction.NavigateToSeason -> navigateToSeason(action.seasonId, action.seriesId)
+                is EpisodeAction.NavigateToSeason ->
+                    navigateToSeason(action.seasonId, action.seriesId)
                 is EpisodeAction.NavigateToSeries -> navigateToSeries(action.seriesId)
                 else -> Unit
             }
@@ -187,10 +207,7 @@ private fun EpisodeScreenLayout(
     // No chip when there is nothing to describe: offline, a download has no track data.
     val onMediaInfoClick = { mediaInfoOpen = true }.takeIf { mediaInfoSources.isNotEmpty() }
     if (mediaInfoOpen && mediaInfoSources.isNotEmpty()) {
-        MediaInfoSheet(
-            sources = mediaInfoSources,
-            onDismissRequest = { mediaInfoOpen = false },
-        )
+        MediaInfoSheet(sources = mediaInfoSources, onDismissRequest = { mediaInfoOpen = false })
     }
 
     // CE: medium and expanded windows get the hero layout (docs/tablet/4-design.md §6).
@@ -213,7 +230,13 @@ private fun EpisodeScreenLayout(
 
     val scrollState = rememberScrollState()
     // CE (#437): the artwork under the top bar, if any; shared by the header and the bar.
-    val artwork = rememberArtworkState(state.episode, ArtworkPlacement.Header)
+    // CE (#630): the show's backdrop, or the episode's image with "Use episode images" on.
+    val artwork =
+        rememberArtworkState(
+            state.episode,
+            ArtworkPlacement.Header,
+            episodeImageFirst = state.useEpisodeImages,
+        )
 
     var downloadQualityDialogOpen by remember { mutableStateOf(false) }
 
@@ -238,10 +261,11 @@ private fun EpisodeScreenLayout(
                                             episode.parentIndexNumber,
                                         )
                                     }
-                            val episodeNumberText = stringResource(
-                                id = CoreR.string.episode_number,
-                                episode.indexNumber,
-                            )
+                            val episodeNumberText =
+                                stringResource(
+                                    id = CoreR.string.episode_number,
+                                    episode.indexNumber,
+                                )
                             val prefixText = "$seasonName - $episodeNumberText"
                             Text(
                                 text = prefixText,
@@ -249,13 +273,25 @@ private fun EpisodeScreenLayout(
                                 maxLines = 1,
                                 style = MaterialTheme.typography.labelLarge,
                             )
-                            Text(
-                                text = episode.name,
-                                modifier = Modifier.copyOnLongClick(episode.name),
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 3,
-                                style = MaterialTheme.typography.headlineMedium,
-                            )
+                            // CE (#618): hidden, the title is only the line above; holding it
+                            // reveals the episode.
+                            if (LocalSpoilers.current.hides(episode)) {
+                                Text(
+                                    text = stringResource(CoreR.string.ce_spoiler_title_hidden),
+                                    modifier = Modifier.revealOnLongClick(episode),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 3,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                )
+                            } else {
+                                Text(
+                                    text = episode.name,
+                                    modifier = Modifier.copyOnLongClick(episode.name),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 3,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                )
+                            }
                         }
                     },
                 )
@@ -275,10 +311,11 @@ private fun EpisodeScreenLayout(
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
-                        val runtimeText = stringResource(
-                            CoreR.string.runtime_minutes,
-                            episode.runtimeTicks.div(Constants.TICKS_PER_MINUTE),
-                        )
+                        val runtimeText =
+                            stringResource(
+                                CoreR.string.runtime_minutes,
+                                episode.runtimeTicks.div(Constants.TICKS_PER_MINUTE),
+                            )
                         Text(
                             text = runtimeText,
                             modifier = Modifier.copyOnLongClick(runtimeText),
@@ -288,7 +325,7 @@ private fun EpisodeScreenLayout(
                             val ratingText = "%.1f".format(communityRating)
                             Row(
                                 modifier = Modifier.copyOnLongClick(ratingText),
-                                verticalAlignment = Alignment.Bottom
+                                verticalAlignment = Alignment.Bottom,
                             ) {
                                 Icon(
                                     painter = painterResource(CoreR.drawable.ic_star),
@@ -345,7 +382,7 @@ private fun EpisodeScreenLayout(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    OverviewText(text = episode.overview)
+                    EpisodeOverview(episode)
                     EpisodeWatchAndLinks(episode, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
@@ -360,12 +397,13 @@ private fun EpisodeScreenLayout(
                 }
                 Spacer(Modifier.height(paddingBottom))
             }
-        } ?: run {
-            LoadingOrError(
-                error = state.error,
-                onRetryClick = { onAction(EpisodeAction.OnRetryClick) },
-            )
         }
+            ?: run {
+                LoadingOrError(
+                    error = state.error,
+                    onRetryClick = { onAction(EpisodeAction.OnRetryClick) },
+                )
+            }
 
         LightStatusBarOverArtwork(artwork.hasArtwork, rememberTopBarBackgroundAlpha(scrollState))
         ItemTopBar(
@@ -393,6 +431,26 @@ private fun EpisodeScreenLayout(
     }
 }
 
+/**
+ * The episode's overview, or (CE, #618) while "Hide spoilers" hides the episode the line that says
+ * so, which a press and hold reveals.
+ */
+@Composable
+internal fun EpisodeOverview(episode: FindroidEpisode, maxCollapsedLines: Int = Int.MAX_VALUE) {
+    val spoilers = LocalSpoilers.current
+    if (spoilers.hides(episode) && episode.overview.isNotBlank()) {
+        Text(
+            text = spoilerFreeOverview(episode.overview, hidden = true),
+            modifier = Modifier.revealOnLongClick(episode),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontStyle = FontStyle.Italic,
+        )
+    } else {
+        OverviewText(text = episode.overview, maxCollapsedLines = maxCollapsedLines)
+    }
+}
+
 /** CE (#332): the watch history and the outside links, right below the overview. */
 @Composable
 internal fun EpisodeWatchAndLinks(episode: FindroidEpisode, onAction: (EpisodeAction) -> Unit) {
@@ -400,7 +458,7 @@ internal fun EpisodeWatchAndLinks(episode: FindroidEpisode, onAction: (EpisodeAc
         Spacer(Modifier.height(MaterialTheme.spacings.medium))
         WatchHistoryText(playCount = episode.playCount, lastPlayedDate = episode.lastPlayedDate)
     }
-    if (episode.externalLinks.isNotEmpty() && !LocalOfflineMode.current) {
+    if (episode.externalLinks.isNotEmpty()) {
         Spacer(Modifier.height(MaterialTheme.spacings.medium))
         ExternalLinksRow(episode.externalLinks) { url ->
             onAction(EpisodeAction.OpenExternalLink(url))

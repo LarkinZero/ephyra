@@ -50,8 +50,8 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,8 +61,8 @@ import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowDialog
 
 /**
- * A long overview on the TV movie, show and season pages is cut, takes focus between the page's
- * top and its buttons, and opens in full on OK (#545). A short one takes no focus.
+ * A long overview on the TV movie, show and season pages is cut, takes focus between the page's top
+ * and its buttons, and opens in full on OK (#545). A short one takes no focus.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -134,7 +134,7 @@ class DetailOverviewTest {
 
     private fun assertOnScreen(text: String) {
         val bounds = rule.onNodeWithText(text).getUnclippedBoundsInRoot()
-        assertTrue("$text is above the screen: $bounds", bounds.top >= 0.dp)
+        assertTrue(bounds.top >= 0.dp, message = "$text is above the screen: $bounds")
     }
 
     /** Focus is on one of the cast cards. */
@@ -176,13 +176,16 @@ class DetailOverviewTest {
     /** Pixels in the ring's colour around the overview, on the page's window (not the dialog's). */
     private fun ringPixelsAroundOverview(primary: Color): Int {
         val box = rule.onNode(overview).getBoundsInRoot()
-        val area = Rect(box.left.value, box.top.value, box.right.value, box.bottom.value).inflate(8f)
+        val area =
+            Rect(box.left.value, box.top.value, box.right.value, box.bottom.value).inflate(8f)
         val pixels = rule.onAllNodes(isRoot()).onFirst().captureToImage().toPixelMap()
         var found = 0
-        for (x in area.left.roundToInt().coerceAtLeast(0) until
-            area.right.roundToInt().coerceAtMost(pixels.width)) {
-            for (y in area.top.roundToInt().coerceAtLeast(0) until
-                area.bottom.roundToInt().coerceAtMost(pixels.height)) {
+        for (x in
+            area.left.roundToInt().coerceAtLeast(0) until
+                area.right.roundToInt().coerceAtMost(pixels.width)) {
+            for (y in
+                area.top.roundToInt().coerceAtLeast(0) until
+                    area.bottom.roundToInt().coerceAtMost(pixels.height)) {
                 val c = pixels[x, y]
                 if (
                     abs(c.red - primary.red) < 0.08f &&
@@ -206,7 +209,7 @@ class DetailOverviewTest {
         press(Key.DirectionUp)
         rule.onNode(overview).assertIsFocused()
         val focused = ringPixelsAroundOverview(primary)
-        assertTrue("$focused ring pixels around the focused overview", focused > 100)
+        assertTrue(focused > 100, message = "$focused ring pixels around the focused overview")
 
         press(Key.DirectionCenter)
         rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertIsFocused()
@@ -233,12 +236,7 @@ class DetailOverviewTest {
         val show = dummyShow.copy(name = "Long Show", overview = longOverview)
         setTvContent {
             ShowScreenLayout(
-                state =
-                    ShowState(
-                        show = show,
-                        seasons = listOf(dummySeason),
-                        actors = actors,
-                    ),
+                state = ShowState(show = show, seasons = listOf(dummySeason), actors = actors),
                 onAction = {},
             )
         }

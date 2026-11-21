@@ -7,9 +7,9 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,8 +17,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * #456: the episode sheet is 92 % opaque, so the player's top-row controls under it showed
- * through. The sheet reports where it opens, and the player hides the controls under it.
+ * #456: the episode sheet is 92 % opaque, so the player's top-row controls under it showed through.
+ * The sheet reports where it opens, and the player hides the controls under it.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class, qualifiers = "w1280dp-h800dp-land-mdpi")
@@ -110,8 +110,8 @@ class EpisodeSheetCoverTest {
         // The sheet is offered from 840 dp wide, where it takes the largest share of the window.
         for (width in listOf(840, 841, 1024, 1067, 1280, 1400, 1600)) {
             val hidden = controlsUnderEpisodeSheet(lowerControls(width, 600), sheetIn(width, 600))
-            assertFalse("at $width dp", "play/pause" in hidden)
-            assertFalse("at $width dp", "rewind" in hidden)
+            assertFalse("play/pause" in hidden, message = "at $width dp")
+            assertFalse("rewind" in hidden, message = "at $width dp")
         }
     }
 

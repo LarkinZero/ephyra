@@ -49,6 +49,11 @@ abstract class BasePlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        sessionStore.onUiStarted()
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -79,15 +84,20 @@ abstract class BasePlayerActivity : AppCompatActivity() {
             wasPip = true
         } else {
             viewModel.playWhenReady = viewModel.player.playWhenReady
-            if (pausesOnLeave) {
+            if (pausesOnLeave && viewModel.player.playWhenReady) {
+                // CE (#674): the view model reports this pause itself.
                 viewModel.player.playWhenReady = false
+            } else {
+                viewModel.updatePlaybackProgress()
             }
-            viewModel.updatePlaybackProgress()
         }
     }
 
     override fun onStop() {
         super.onStop()
+        // CE (#677): the player's own progress loop stops with the activity, so the view model's
+        // background loop takes over, also while the activity is kept (after Home).
+        sessionStore.onUiStopped()
 
         if (wasPip) {
             if (viewModel.isBackgroundAudioEnabled && viewModel.player.isPlaying) {

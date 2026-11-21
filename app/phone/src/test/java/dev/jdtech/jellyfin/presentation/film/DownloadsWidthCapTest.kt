@@ -19,7 +19,7 @@ import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,10 +28,10 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * #434: a row on the Downloads screen never exceeds 720 dp (docs/tablet/4-design.md §5), also
- * the items that span the whole grid (the storage summary, the Downloading group and its header),
- * which the grid measures at the full width of the line. They stay at the start, in line with the
- * columns below.
+ * #434: a row on the Downloads screen never exceeds 720 dp (docs/tablet/4-design.md §5), also the
+ * items that span the whole grid (the storage summary, the Downloading group and its header), which
+ * the grid measures at the full width of the line. They stay at the start, in line with the columns
+ * below.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -55,14 +55,12 @@ class DownloadsWidthCapTest {
         val speed = rule.onNodeWithText("/s", substring = true).getUnclippedBoundsInRoot()
         val cancel =
             rule
-                .onNodeWithContentDescription(
-                    rule.activity.getString(CoreR.string.cancel_download)
-                )
+                .onNodeWithContentDescription(rule.activity.getString(CoreR.string.cancel_download))
                 .getUnclippedBoundsInRoot()
-        assertTrue("speed ends at ${speed.right}", speed.right <= capRightEdge)
-        assertTrue("cancel ends at ${cancel.right}", cancel.right <= capRightEdge)
+        assertTrue(speed.right <= capRightEdge, message = "speed ends at ${speed.right}")
+        assertTrue(cancel.right <= capRightEdge, message = "cancel ends at ${cancel.right}")
         // Aligned to the start like the columns below, not centred.
-        assertTrue("cancel starts at ${cancel.left}", cancel.left < 720.dp)
+        assertTrue(cancel.left < 720.dp, message = "cancel starts at ${cancel.left}")
     }
 
     @Test
@@ -70,10 +68,11 @@ class DownloadsWidthCapTest {
     fun `the finished downloads stay in two columns`() {
         show()
 
-        val titles = movies.take(2).map { movie ->
-            rule.onNodeWithText(movie.name).getUnclippedBoundsInRoot()
-        }
-        assertTrue("second column starts at ${titles[1].left}", titles[1].left > 600.dp)
+        val titles =
+            movies.take(2).map { movie ->
+                rule.onNodeWithText(movie.name).getUnclippedBoundsInRoot()
+            }
+        assertTrue(titles[1].left > 600.dp, message = "second column starts at ${titles[1].left}")
     }
 
     @Test
@@ -83,11 +82,9 @@ class DownloadsWidthCapTest {
 
         val cancel =
             rule
-                .onNodeWithContentDescription(
-                    rule.activity.getString(CoreR.string.cancel_download)
-                )
+                .onNodeWithContentDescription(rule.activity.getString(CoreR.string.cancel_download))
                 .getUnclippedBoundsInRoot()
-        assertTrue("cancel ends at ${cancel.right}", cancel.right <= capRightEdge)
+        assertTrue(cancel.right <= capRightEdge, message = "cancel ends at ${cancel.right}")
     }
 
     private fun show() {

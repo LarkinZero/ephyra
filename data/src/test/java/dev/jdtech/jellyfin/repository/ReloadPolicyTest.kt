@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.repository
 
 import java.util.UUID
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class ReloadPolicyTest {
     private var now = 1_000L

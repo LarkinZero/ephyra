@@ -1,10 +1,10 @@
 package dev.jdtech.jellyfin.utils
 
 import java.util.Locale
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.jellyfin.sdk.model.DateTime
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class CoreExtensionsTest {
     @Test
@@ -25,7 +25,7 @@ class CoreExtensionsTest {
         assertEquals("Dec 7, 1903", dateTime.format(Locale.US))
         for (tag in listOf("en-US", "nl", "de", "ja", "ar", "es-419")) {
             val formatted = dateTime.format(Locale.forLanguageTag(tag))
-            assertTrue("$tag: $formatted", "1903" in formatted)
+            assertTrue("1903" in formatted, message = "$tag: $formatted")
         }
     }
 }

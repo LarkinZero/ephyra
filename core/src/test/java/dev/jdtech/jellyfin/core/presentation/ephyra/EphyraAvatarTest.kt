@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.core.presentation.ephyra
 
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class EphyraAvatarTest {
     @Test

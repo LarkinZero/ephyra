@@ -40,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerImage
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -48,8 +50,8 @@ private val GroupOuterCorner = 20.dp
 private val GroupInnerCorner = 4.dp
 
 /**
- * Corner shape for row [index] of a grouped list of [count] rows: large outer corners on the
- * first and last row, small inner ones in between, so adjacent rows read as one rounded group.
+ * Corner shape for row [index] of a grouped list of [count] rows: large outer corners on the first
+ * and last row, small inner ones in between, so adjacent rows read as one rounded group.
  */
 fun groupedItemShape(index: Int, count: Int): Shape {
     val top = if (index == 0) GroupOuterCorner else GroupInnerCorner
@@ -67,9 +69,9 @@ fun downloadRowSize(context: Context, bytes: Long): String =
     Formatter.formatShortFileSize(context, bytes).replace(' ', ' ')
 
 /**
- * One row of the Downloads screen: 16:9 artwork, up to four lines of text and an optional
- * trailing control. Shared by in-progress downloads and the downloaded library. [metaMinLines]
- * reserves room for a [meta] that changes, so the row keeps its height as the text updates.
+ * One row of the Downloads screen: 16:9 artwork, up to four lines of text and an optional trailing
+ * control. Shared by in-progress downloads and the downloaded library. [metaMinLines] reserves room
+ * for a [meta] that changes, so the row keeps its height as the text updates.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -89,14 +91,11 @@ fun DownloadRow(
     onPlayClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
     footer: String? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    Surface(
-        shape = shape,
-        color = containerColor,
-        modifier = modifier,
-    ) {
+    Surface(shape = shape, color = containerColor, modifier = modifier) {
         Column(
             modifier =
                 Modifier.fillMaxWidth()
@@ -104,6 +103,7 @@ fun DownloadRow(
                         if (onClick != null || onLongClick != null) {
                             Modifier.combinedClickable(
                                 onClick = onClick ?: {},
+                                onLongClickLabel = onLongClickLabel,
                                 onLongClick = onLongClick,
                             )
                         } else Modifier
@@ -175,8 +175,8 @@ fun DownloadRow(
 }
 
 /**
- * 16:9 artwork for a download row, preferring wide images over cropped posters. With
- * [onPlayClick] it shows a play glyph and the whole artwork starts playback.
+ * 16:9 artwork for a download row, preferring wide images over cropped posters. With [onPlayClick]
+ * it shows a play glyph and the whole artwork starts playback.
  */
 @Composable
 fun DownloadArtwork(
@@ -192,6 +192,8 @@ fun DownloadArtwork(
             else -> listOf(item.images.backdrop, item.images.primary)
         }
     val playLabel = stringResource(CoreR.string.play)
+    // CE (#618): an episode's still comes first here, so a hidden one is blurred.
+    val hidden = LocalSpoilers.current.hides(item)
     Box(
         modifier =
             modifier
@@ -211,7 +213,16 @@ fun DownloadArtwork(
         ArtworkImage(
             sources = sources,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+                Modifier.fillMaxSize()
+                    .spoilerImage(
+                        hidden = hidden,
+                        fallback = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        // The play glyph sits where the icon would.
+                        iconTint =
+                            if (onPlayClick != null) Color.Transparent
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
         )
         if (showPlayedBadge && item.played) {
             PlayedBadge(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp))

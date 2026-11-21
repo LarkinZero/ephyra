@@ -44,40 +44,39 @@ fun PlaybackDebugInfo.toSections(context: Context): List<PlaybackInfoSection> {
             context.getString(R.string.playback_info_audio) to formatAudio(originalAudio),
             context.getString(R.string.playback_info_container) to (originalContainer ?: "—"),
         )
-    val outputRows =
-        buildList {
+    val outputRows = buildList {
+        add(
+            context.getString(R.string.playback_info_mode) to
+                context.getString(
+                    when (playbackMethod) {
+                        PlaybackMethod.TRANSCODE -> R.string.playback_info_mode_transcode
+                        PlaybackMethod.DIRECT_PLAY -> R.string.playback_info_mode_direct_play
+                        PlaybackMethod.LOCAL_FILE -> R.string.playback_info_mode_local
+                    }
+                )
+        )
+        add(context.getString(R.string.playback_info_video) to formatVideo(outputVideo))
+        add(context.getString(R.string.playback_info_audio) to formatAudio(outputAudio))
+        add(context.getString(R.string.playback_info_container) to (outputContainer ?: "—"))
+        if (streamBitrate != null) {
             add(
-                context.getString(R.string.playback_info_mode) to
-                    context.getString(
-                        when (playbackMethod) {
-                            PlaybackMethod.TRANSCODE -> R.string.playback_info_mode_transcode
-                            PlaybackMethod.DIRECT_PLAY -> R.string.playback_info_mode_direct_play
-                            PlaybackMethod.LOCAL_FILE -> R.string.playback_info_mode_local
-                        },
-                    ),
+                context.getString(R.string.playback_info_stream_bitrate) to
+                    formatBitrate(streamBitrate)
             )
-            add(context.getString(R.string.playback_info_video) to formatVideo(outputVideo))
-            add(context.getString(R.string.playback_info_audio) to formatAudio(outputAudio))
-            add(context.getString(R.string.playback_info_container) to (outputContainer ?: "—"))
-            if (streamBitrate != null) {
+        }
+        if (playbackMethod == PlaybackMethod.TRANSCODE) {
+            add(
+                context.getString(R.string.playback_info_transcode_speed) to
+                    (transcodeFrameRate?.let { "%.1f fps".format(Locale.ROOT, it) } ?: "—")
+            )
+            if (hardwareAcceleration != null) {
                 add(
-                    context.getString(R.string.playback_info_stream_bitrate) to
-                        formatBitrate(streamBitrate),
+                    context.getString(R.string.playback_info_hardware_acceleration) to
+                        hardwareAcceleration
                 )
-            }
-            if (playbackMethod == PlaybackMethod.TRANSCODE) {
-                add(
-                    context.getString(R.string.playback_info_transcode_speed) to
-                        (transcodeFrameRate?.let { "%.1f fps".format(Locale.ROOT, it) } ?: "—"),
-                )
-                if (hardwareAcceleration != null) {
-                    add(
-                        context.getString(R.string.playback_info_hardware_acceleration) to
-                            hardwareAcceleration,
-                    )
-                }
             }
         }
+    }
     return listOf(
         PlaybackInfoSection(context.getString(R.string.playback_info_original), originalRows),
         PlaybackInfoSection(context.getString(R.string.playback_info_output), outputRows),
@@ -87,21 +86,25 @@ fun PlaybackDebugInfo.toSections(context: Context): List<PlaybackInfoSection> {
 private fun formatVideo(track: PlaybackTrackInfo?): String =
     track?.let {
         listOfNotNull(
-            it.codec,
-            if (it.width != null && it.height != null) "${it.width}×${it.height}" else null,
-            it.bitrate?.let(::formatBitrate),
-            it.frameRate?.let { frameRate -> "%.2f fps".format(Locale.ROOT, frameRate) },
-        ).joinToString(" · ").ifBlank { "—" }
+                it.codec,
+                if (it.width != null && it.height != null) "${it.width}×${it.height}" else null,
+                it.bitrate?.let(::formatBitrate),
+                it.frameRate?.let { frameRate -> "%.2f fps".format(Locale.ROOT, frameRate) },
+            )
+            .joinToString(" · ")
+            .ifBlank { "—" }
     } ?: "—"
 
 private fun formatAudio(track: PlaybackTrackInfo?): String =
     track?.let {
         listOfNotNull(
-            it.codec,
-            it.channels,
-            it.sampleRate?.let { sampleRate -> "${sampleRate / 1000} kHz" },
-            it.bitrate?.let(::formatBitrate),
-        ).joinToString(" · ").ifBlank { "—" }
+                it.codec,
+                it.channels,
+                it.sampleRate?.let { sampleRate -> "${sampleRate / 1000} kHz" },
+                it.bitrate?.let(::formatBitrate),
+            )
+            .joinToString(" · ")
+            .ifBlank { "—" }
     } ?: "—"
 
 private fun formatBitrate(bitrate: Int): String =

@@ -1,6 +1,9 @@
 package dev.jdtech.jellyfin.film.presentation.home
 
 import java.io.IOException
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -13,17 +16,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * Mechanism-level proof for the crash documented in BUGREPORT_ANALYSIS.md.
  *
- * Reproduces the structured-concurrency behaviour of [HomeViewModel.loadData] in
- * isolation — no Android, no ViewModel, no Jellyfin SDK — so the crash can be
- * demonstrated deterministically without a device.
+ * Reproduces the structured-concurrency behaviour of [HomeViewModel.loadData] in isolation — no
+ * Android, no ViewModel, no Jellyfin SDK — so the crash can be demonstrated deterministically
+ * without a device.
  *
  * Before the fix, `loadData()` ran, in essence:
  * ```
@@ -33,21 +33,21 @@ import org.junit.Test
  *     } catch (e: Exception) { ... }
  * }
  * ```
+ *
  * Now the `awaitAll` sits in a `coroutineScope { }`, and each `async` catches its own failure.
  *
  * Each test builds a scope shaped like `viewModelScope` (a [SupervisorJob]) with a
- * [CoroutineExceptionHandler] installed, so we can observe whether an exception
- * "escapes". Escaping == reaching the scope's exception handler. In the real
- * `viewModelScope`, which has no handler, that handler is the app's uncaught
- * exception handler == process crash.
+ * [CoroutineExceptionHandler] installed, so we can observe whether an exception "escapes". Escaping
+ * == reaching the scope's exception handler. In the real `viewModelScope`, which has no handler,
+ * that handler is the app's uncaught exception handler == process crash.
  */
 class LoadDataConcurrencyMechanismTest {
 
     /**
-     * THE BUG. An exception thrown inside an `async { }` child coroutine propagates
-     * to the parent [launch] Job *independently* of `awaitAll()` / `await()`. The
-     * `try/catch` around `awaitAll` catches the re-thrown exception, yet the failure
-     * still reaches the scope's exception handler — i.e. the app still crashes.
+     * THE BUG. An exception thrown inside an `async { }` child coroutine propagates to the parent
+     * [launch] Job *independently* of `awaitAll()` / `await()`. The `try/catch` around `awaitAll`
+     * catches the re-thrown exception, yet the failure still reaches the scope's exception handler
+     * — i.e. the app still crashes.
      */
     @Test
     fun `async child failure escapes the try-catch around awaitAll`() = runBlocking {
@@ -74,25 +74,25 @@ class LoadDataConcurrencyMechanismTest {
         job.join()
 
         // The developer DID add a try/catch, and it even caught something...
-        assertNotNull("try/catch around awaitAll caught an exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch around awaitAll caught an exception")
         // ...but the async-child failure ALSO propagated to the parent Job and
         // reached the scope's exception handler. In the real viewModelScope — which
         // installs no handler — this is the app's uncaught exception handler == crash.
         val escapedException = withTimeoutOrNull(2_000) { escaped.await() }
         assertNotNull(
-            "async-child failure escaped the try/catch and would crash the app",
             escapedException,
+            message = "async-child failure escaped the try/catch and would crash the app",
         )
         assertTrue(
-            "the escaped exception is the offline IOException",
             escapedException is IOException,
+            message = "the escaped exception is the offline IOException",
         )
     }
 
     /**
-     * UPSTREAM behaviour. Plain sequential `suspend` calls in the `launch` body. A
-     * thrown exception is an ordinary throw inside the coroutine body, fully
-     * contained by the `try/catch`. Nothing escapes — no crash.
+     * UPSTREAM behaviour. Plain sequential `suspend` calls in the `launch` body. A thrown exception
+     * is an ordinary throw inside the coroutine body, fully contained by the `try/catch`. Nothing
+     * escapes — no crash.
      */
     @Test
     fun `sequential suspend calls are fully contained by the try-catch`() = runBlocking {
@@ -116,18 +116,18 @@ class LoadDataConcurrencyMechanismTest {
             }
         job.join()
 
-        assertNotNull("try/catch caught the exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch caught the exception")
         assertNull(
-            "nothing escaped: sequential calls do not crash the app",
             withTimeoutOrNull(500) { escaped.await() },
+            message = "nothing escaped: sequential calls do not crash the app",
         )
     }
 
     /**
      * PROPOSED FIX — Option A in BUGREPORT_ANALYSIS.md. Wrapping the `awaitAll` in a
-     * `coroutineScope { }` makes a child failure surface as an ordinary thrown
-     * exception at the `coroutineScope` call site — caught by the `try/catch`, never
-     * propagating to the parent Job. Parallel loading is preserved.
+     * `coroutineScope { }` makes a child failure surface as an ordinary thrown exception at the
+     * `coroutineScope` call site — caught by the `try/catch`, never propagating to the parent Job.
+     * Parallel loading is preserved.
      */
     @Test
     fun `coroutineScope wrapper keeps the async failure inside the try-catch`() = runBlocking {
@@ -155,10 +155,10 @@ class LoadDataConcurrencyMechanismTest {
             }
         job.join()
 
-        assertNotNull("try/catch caught the exception", caughtByTryCatch)
+        assertNotNull(caughtByTryCatch, message = "try/catch caught the exception")
         assertNull(
-            "nothing escaped: coroutineScope { } contains the failure",
             withTimeoutOrNull(500) { escaped.await() },
+            message = "nothing escaped: coroutineScope { } contains the failure",
         )
     }
 
@@ -177,24 +177,23 @@ class LoadDataConcurrencyMechanismTest {
         var results: List<Result<String>> = emptyList()
         val job =
             scope.launch(Dispatchers.Default) {
-                results =
-                    coroutineScope {
-                        awaitAll(
-                            async { runCatching { offlineCall("getNextUp()") } },
-                            async {
-                                runCatching {
-                                    delay(50)
-                                    "loaded"
-                                }
-                            },
-                        )
-                    }
+                results = coroutineScope {
+                    awaitAll(
+                        async { runCatching { offlineCall("getNextUp()") } },
+                        async {
+                            runCatching {
+                                delay(50)
+                                "loaded"
+                            }
+                        },
+                    )
+                }
             }
         job.join()
 
-        assertTrue("the failing row reports its failure", results[0].isFailure)
-        assertTrue("the other row finished", results[1].getOrNull() == "loaded")
-        assertNull("nothing escaped", withTimeoutOrNull(500) { escaped.await() })
+        assertTrue(results[0].isFailure, message = "the failing row reports its failure")
+        assertTrue(results[1].getOrNull() == "loaded", message = "the other row finished")
+        assertNull(withTimeoutOrNull(500) { escaped.await() }, message = "nothing escaped")
     }
 
     /** Models a network call that fails because the device is offline. */

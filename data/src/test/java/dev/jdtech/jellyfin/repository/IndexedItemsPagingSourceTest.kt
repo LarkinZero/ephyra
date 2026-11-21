@@ -4,11 +4,11 @@ import androidx.paging.PagingSource.LoadParams
 import androidx.paging.PagingSource.LoadResult
 import dev.jdtech.jellyfin.models.FindroidItem
 import java.lang.reflect.Proxy
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class IndexedItemsPagingSourceTest {
     private class Request(val start: Int, val limit: Int, val includeTotal: Boolean)

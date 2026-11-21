@@ -1,10 +1,10 @@
 package dev.jdtech.jellyfin.profilelock
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class ProfilePinHasherTest {
     @Test
@@ -50,6 +50,8 @@ class ProfilePinHasherTest {
     fun `a damaged hash never verifies`() {
         val salt = ProfilePinHasher.newSalt()
         assertFalse(ProfilePinHasher.verify("1234", salt, "not base64!"))
-        assertFalse(ProfilePinHasher.verify("1234", "not base64!", ProfilePinHasher.hash("1234", salt)))
+        assertFalse(
+            ProfilePinHasher.verify("1234", "not base64!", ProfilePinHasher.hash("1234", salt))
+        )
     }
 }

@@ -3,8 +3,8 @@ package dev.jdtech.jellyfin.player.local.domain
 import kotlin.math.max
 
 /**
- * Where the thumbnail for a playback position sits: which sprite-sheet, and the pixel offset of
- * its cell in that sheet (at full size).
+ * Where the thumbnail for a playback position sits: which sprite-sheet, and the pixel offset of its
+ * cell in that sheet (at full size).
  */
 data class TrickplayTileLocation(
     /** Index of the thumbnail over the whole item. */
@@ -30,8 +30,7 @@ data class TrickplayTiles(
 ) {
     val tilesPerSheet: Int = max(1, tileWidth * tileHeight)
 
-    val sheetCount: Int =
-        if (thumbnailCount <= 0) 0 else (thumbnailCount - 1) / tilesPerSheet + 1
+    val sheetCount: Int = if (thumbnailCount <= 0) 0 else (thumbnailCount - 1) / tilesPerSheet + 1
 
     /** The cell for [positionMs], clamped to the first and last thumbnail; null without data. */
     fun locate(positionMs: Long): TrickplayTileLocation? {
@@ -49,10 +48,15 @@ data class TrickplayTiles(
         )
     }
 
+    /** The sheets before and after [sheetIndex] that exist, for loading ahead while scrubbing. */
+    fun neighbourSheets(sheetIndex: Int): List<Int> =
+        listOf(sheetIndex - 1, sheetIndex + 1).filter { it in 0 until sheetCount }
+
     companion object {
         /**
          * The largest power-of-two sample size that keeps a thumbnail at least [targetWidth] pixels
-         * wide, for `BitmapFactory.Options.inSampleSize`. 1 when the thumbnail is already that small.
+         * wide, for `BitmapFactory.Options.inSampleSize`. 1 when the thumbnail is already that
+         * small.
          */
         fun sampleSize(width: Int, targetWidth: Int): Int {
             if (width <= 0 || targetWidth <= 0) return 1

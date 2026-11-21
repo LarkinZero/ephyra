@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,8 +21,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSection
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,13 +37,7 @@ class HomeScreenLayoutTest {
 
     private fun setLayout(initial: HomeState) {
         state = initial
-        rule.setContent {
-            FindroidTheme {
-                CompositionLocalProvider(LocalOfflineMode provides false) {
-                    HomeScreenLayout(state = state, onAction = {})
-                }
-            }
-        }
+        rule.setContent { FindroidTheme { HomeScreenLayout(state = state, onAction = {}) } }
         rule.mainClock.advanceTimeBy(1_000)
     }
 
@@ -96,7 +88,9 @@ class HomeScreenLayoutTest {
         rule.onNodeWithText(string(CoreR.string.error_loading_data)).assertIsDisplayed()
     }
 
-    /** #392: the card keeps what #377 gave the Home error: details in words, Retry, Share, Close. */
+    /**
+     * #392: the card keeps what #377 gave the Home error: details in words, Retry, Share, Close.
+     */
     @Test
     fun theErrorCardOpensTheErrorDetails() {
         setLayout(loaded.copy(error = Exception("Failed to connect to /10.0.2.2:8096")))

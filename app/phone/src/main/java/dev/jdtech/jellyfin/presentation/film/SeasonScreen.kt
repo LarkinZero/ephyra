@@ -49,24 +49,26 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
+import dev.jdtech.jellyfin.film.presentation.DownloadPrompt
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonEvent
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
-import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.cast.LocalCastPlayback
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
+import dev.jdtech.jellyfin.presentation.film.components.DownloadUnwatchedDialog
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeCard
-import dev.jdtech.jellyfin.presentation.film.components.episodeRowDownloadClick
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
+import dev.jdtech.jellyfin.presentation.film.components.episodeRowDownloadClick
 import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
@@ -74,12 +76,12 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackground
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.Layout
+import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useSeasonListDetail
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -98,6 +100,7 @@ fun SeasonScreen(
     viewModel: SeasonViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val castPlayback = LocalCastPlayback.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     // CE: the episode selected in the expanded list-detail. Kept here, above the width branch, so
     // a rotation to the single-column page and back keeps it (docs/tablet/4-design.md §7).
@@ -105,8 +108,14 @@ fun SeasonScreen(
     // CE (#435): one episode list position for both layouts, kept here for the same reason.
     val episodeListState = rememberSeasonListState()
 
-    ReloadOnResume(shouldReload = { viewModel.shouldReload(seasonId, downloadsOnly, stopEventFollows = true) }) {
-        viewModel.loadSeason(seasonId = seasonId, downloadsOnly = downloadsOnly, seriesId = seriesId)
+    ReloadOnResume(
+        shouldReload = { viewModel.shouldReload(seasonId, downloadsOnly, stopEventFollows = true) }
+    ) {
+        viewModel.loadSeason(
+            seasonId = seasonId,
+            downloadsOnly = downloadsOnly,
+            seriesId = seriesId,
+        )
     }
 
     ObserveAsEvents(viewModel.events) { event ->
@@ -128,11 +137,7 @@ fun SeasonScreen(
                                 event.started,
                                 event.skipped,
                             )
-                        else ->
-                            context.getString(
-                                CoreR.string.download_started,
-                                event.started,
-                            )
+                        else -> context.getString(CoreR.string.download_started, event.started)
                     }
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
@@ -140,21 +145,57 @@ fun SeasonScreen(
     }
 
     val onAction: (SeasonAction) -> Unit = { action ->
-            when (action) {
-                is SeasonAction.Play -> {
+        when (action) {
+            is SeasonAction.Play -> {
+                // CE (#626): on the Cast receiver when one is connected.
+                if (
+                    !castPlayback.play(seasonId, BaseItemKind.SEASON, false, null, shuffle = false)
+                ) {
                     val intent = Intent(context, PlayerActivity::class.java)
                     intent.putExtra("itemId", seasonId.toString())
                     intent.putExtra("itemKind", BaseItemKind.SEASON.serialName)
                     context.startActivity(intent)
                 }
-                is SeasonAction.OnBackClick -> navigateBack()
-                is SeasonAction.OnHomeClick -> navigateHome()
-                is SeasonAction.NavigateToItem -> navigateToItem(action.item)
-                is SeasonAction.NavigateToSeries -> navigateToSeries(action.seriesId)
-                else -> Unit
             }
-            viewModel.onAction(action)
+            // CE (#638): this season's episodes in random order.
+            is SeasonAction.Shuffle -> {
+                // On the Cast receiver when one is connected, as Play does (#626).
+                if (
+                    !castPlayback.play(seasonId, BaseItemKind.SEASON, false, null, shuffle = true)
+                ) {
+                    val intent = Intent(context, PlayerActivity::class.java)
+                    intent.putExtra("itemId", seasonId.toString())
+                    intent.putExtra("itemKind", BaseItemKind.SEASON.serialName)
+                    intent.putExtra("shuffle", true)
+                    context.startActivity(intent)
+                }
+            }
+            is SeasonAction.OnBackClick -> navigateBack()
+            is SeasonAction.OnHomeClick -> navigateHome()
+            is SeasonAction.NavigateToItem -> navigateToItem(action.item)
+            is SeasonAction.NavigateToSeries -> navigateToSeries(action.seriesId)
+            else -> Unit
         }
+        viewModel.onAction(action)
+    }
+
+    // CE (#636): the questions of a season download, shared by the phone and wide layouts: which
+    // episodes (only when some are watched), then the quality.
+    val downloadPrompt by viewModel.downloadPrompt.collectAsStateWithLifecycle()
+    when (val prompt = downloadPrompt) {
+        is DownloadPrompt.Episodes ->
+            DownloadUnwatchedDialog(
+                choice = prompt.choice,
+                onSelect = { unwatchedOnly -> viewModel.chooseEpisodes(unwatchedOnly) },
+                onDismiss = { viewModel.dismissDownloadPrompt() },
+            )
+        DownloadPrompt.Quality ->
+            DownloadQualityDialog(
+                onSelect = { maxBitrate -> viewModel.chooseQuality(maxBitrate) },
+                onDismiss = { viewModel.dismissDownloadPrompt() },
+            )
+        null -> Unit
+    }
 
     // CE: expanded windows show the season as list-detail (docs/tablet/4-design.md §7).
     if (useSeasonListDetail()) {
@@ -164,10 +205,14 @@ fun SeasonScreen(
             onSelectEpisode = { selectedEpisodeId = it },
             lazyListState = episodeListState,
             onAction = onAction,
-            onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
+            onDownloadSeason = { viewModel.downloadSeason() },
             onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
             onReloadSeason = {
-                viewModel.loadSeason(seasonId = seasonId, downloadsOnly = downloadsOnly, seriesId = seriesId)
+                viewModel.loadSeason(
+                    seasonId = seasonId,
+                    downloadsOnly = downloadsOnly,
+                    seriesId = seriesId,
+                )
             },
             navigateToPerson = navigateToPerson,
         )
@@ -177,7 +222,7 @@ fun SeasonScreen(
     SeasonScreenLayout(
         state = state,
         onAction = onAction,
-        onDownloadSeason = { maxBitrate -> viewModel.downloadSeason(maxBitrate) },
+        onDownloadSeason = { viewModel.downloadSeason() },
         onDeleteSeasonDownloads = { viewModel.deleteSeasonDownloads() },
         lazyListState = episodeListState,
     )
@@ -187,7 +232,7 @@ fun SeasonScreen(
 private fun SeasonScreenLayout(
     state: SeasonState,
     onAction: (SeasonAction) -> Unit,
-    onDownloadSeason: (maxBitrate: Int?) -> Unit,
+    onDownloadSeason: () -> Unit,
     onDeleteSeasonDownloads: () -> Unit,
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
@@ -198,7 +243,6 @@ private fun SeasonScreenLayout(
     val paddingEnd = safePadding.end + MaterialTheme.spacings.default
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
 
-    var seasonQualityDialogOpen by remember { mutableStateOf(false) }
     var episodeQualityTarget by remember { mutableStateOf<FindroidEpisode?>(null) }
 
     // Removing a download is deferred behind an Undo snackbar. Until it resolves the episode
@@ -212,19 +256,21 @@ private fun SeasonScreenLayout(
         )
     }
     val hiddenIds = undo.hiddenIds
-    val episodeProgress = remember(state.episodeDownloadProgress, hiddenIds) {
-        state.episodeDownloadProgress - hiddenIds
-    }
-    val offlineMode = LocalOfflineMode.current
+    val episodeProgress =
+        remember(state.episodeDownloadProgress, hiddenIds) {
+            state.episodeDownloadProgress - hiddenIds
+        }
     // These only depend on the episode list, so a progress tick must not redo them.
+    // CE (#281): a list of stored episodes drops a removed one at once, as the Downloads tab
+    // does; it would leave the list once the removal is done. A list from the server keeps it, as
+    // not downloaded.
     val episodes =
-        remember(state.episodes, hiddenIds, offlineMode) {
-            if (offlineMode) state.episodes.filterNot { it.id in hiddenIds } else state.episodes
+        remember(state.episodes, state.storedOnly, hiddenIds) {
+            if (state.storedOnly) state.episodes.filterNot { it.id in hiddenIds }
+            else state.episodes
         }
     val hasDownloads =
-        remember(episodes, hiddenIds) {
-            episodes.any { it.isDownloaded() && it.id !in hiddenIds }
-        }
+        remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
     val anyCanDownload = remember(episodes) { episodes.any { it.canDownload } }
     fun removeDownload(episode: FindroidEpisode, @StringRes message: Int) {
         undo.run(ids = setOf(episode.id), message = context.getString(message, episode.name)) {
@@ -287,6 +333,7 @@ private fun SeasonScreenLayout(
                         onPlayClick = { startFromBeginning ->
                             onAction(SeasonAction.Play(startFromBeginning = startFromBeginning))
                         },
+                        onShuffleClick = { onAction(SeasonAction.Shuffle) },
                         onMarkAsPlayedClick = {
                             when (season.played) {
                                 true -> onAction(SeasonAction.UnmarkAsPlayed)
@@ -300,7 +347,7 @@ private fun SeasonScreenLayout(
                             }
                         },
                         onTrailerClick = {},
-                        onDownloadClick = { seasonQualityDialogOpen = true },
+                        onDownloadClick = onDownloadSeason,
                         onDownloadCancelClick = {},
                         onDownloadDeleteClick = onDeleteSeasonDownloads,
                         modifier =
@@ -330,7 +377,8 @@ private fun SeasonScreenLayout(
                             it.status == DownloadStatus.QUEUED ||
                             it.status == DownloadStatus.PAUSED
                     }
-                val totalCount = episodes.size
+                // Counts an episode behind the Undo snackbar, as the downloaded count does.
+                val totalCount = state.episodes.size
 
                 if (downloadedCount > 0 || downloadingCount > 0) {
                     item {
@@ -362,10 +410,8 @@ private fun SeasonScreenLayout(
                     }
                 }
 
-                itemsIndexed(
-                    items = episodes,
-                    key = { _, episode -> episode.id },
-                ) { index, episode ->
+                itemsIndexed(items = episodes, key = { _, episode -> episode.id }) { index, episode
+                    ->
                     EpisodeCard(
                         episode = episode,
                         shape = groupedItemShape(index, episodes.size),
@@ -397,17 +443,15 @@ private fun SeasonScreenLayout(
                     )
                 }
             }
-        } ?: run {
-            LoadingOrError(
-                error = state.error,
-                onRetryClick = { onAction(SeasonAction.OnRetryClick) },
-            )
         }
+            ?: run {
+                LoadingOrError(
+                    error = state.error,
+                    onRetryClick = { onAction(SeasonAction.OnRetryClick) },
+                )
+            }
 
-        LightStatusBarOverArtwork(
-            artwork.hasArtwork,
-            rememberTopBarBackgroundAlpha(lazyListState),
-        )
+        LightStatusBarOverArtwork(artwork.hasArtwork, rememberTopBarBackgroundAlpha(lazyListState))
         ItemTopBar(
             hasBackButton = true,
             hasHomeButton = true,
@@ -431,15 +475,6 @@ private fun SeasonScreenLayout(
             }
         }
 
-        if (seasonQualityDialogOpen) {
-            DownloadQualityDialog(
-                onSelect = { maxBitrate ->
-                    onDownloadSeason(maxBitrate)
-                    seasonQualityDialogOpen = false
-                },
-                onDismiss = { seasonQualityDialogOpen = false },
-            )
-        }
         episodeQualityTarget?.let { episode ->
             DownloadQualityDialog(
                 onSelect = { maxBitrate ->

@@ -26,6 +26,7 @@ import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedGlow
 import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -45,22 +46,28 @@ fun ItemCard(
     // CE (#423): lines of the title on a vertical card. Home uses 1, so its rows fit above the
     // bottom safe area; the hero shows the focused card's full title.
     titleMaxLines: Int = 2,
+    // CE (#608): see posterSources.
+    preferThumb: Boolean = false,
 ) {
     val width =
         when (direction) {
             Direction.HORIZONTAL -> 260
             Direction.VERTICAL -> 150
         }
+    // CE (#618): holding OK on a hidden episode reveals it.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(item)
     Column(modifier = modifier.width(width.dp).focusGroup()) {
         Surface(
             onClick = { onClick(item) },
+            onLongClick = if (hidden) ({ spoilers.reveal(item) }) else null,
             shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
             border = ClickableSurfaceDefaults.border(focusedBorder = ephyraFocusedBorder()),
             glow = ClickableSurfaceDefaults.glow(focusedGlow = ephyraFocusedGlow()),
             scale = ClickableSurfaceDefaults.scale(focusedScale = EphyraFocusScale),
         ) {
             Box {
-                ItemPoster(item = item, direction = direction)
+                ItemPoster(item = item, direction = direction, preferThumb = preferThumb)
                 ProgressBadge(
                     item = item,
                     modifier =
@@ -74,7 +81,8 @@ fun ItemCard(
                     ) {
                         val progress =
                             if (item.runtimeTicks > 0) {
-                                (item.playbackPositionTicks.toFloat() / item.runtimeTicks.toFloat()).coerceIn(0f, 1f)
+                                (item.playbackPositionTicks.toFloat() / item.runtimeTicks.toFloat())
+                                    .coerceIn(0f, 1f)
                             } else {
                                 0f
                             }
@@ -99,12 +107,20 @@ fun ItemCard(
         val subtitle =
             when (item) {
                 is FindroidEpisode ->
-                    stringResource(
-                        id = R.string.episode_name_extended,
-                        item.parentIndexNumber,
-                        item.indexNumber,
-                        item.name,
-                    )
+                    if (hidden) {
+                        stringResource(
+                            id = R.string.season_episode_number,
+                            item.parentIndexNumber,
+                            item.indexNumber,
+                        )
+                    } else {
+                        stringResource(
+                            id = R.string.episode_name_extended,
+                            item.parentIndexNumber,
+                            item.indexNumber,
+                            item.name,
+                        )
+                    }
                 is FindroidSeason -> if (showSeriesName) item.name else null
                 // CE (#135): the year below the title, a range for a show.
                 is FindroidMovie -> if (showYear) item.productionYear?.toString() else null

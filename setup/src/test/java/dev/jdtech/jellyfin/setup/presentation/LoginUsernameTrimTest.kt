@@ -1,19 +1,21 @@
 package dev.jdtech.jellyfin.setup.presentation
 
+import dev.jdtech.jellyfin.setup.domain.FakeLocalNetworkAccess
+import dev.jdtech.jellyfin.setup.domain.ServerLocalNetworkBlock
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import dev.jdtech.jellyfin.setup.presentation.login.LoginAction
 import dev.jdtech.jellyfin.setup.presentation.login.LoginViewModel
 import java.lang.reflect.Proxy
+import kotlin.test.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#516): the TV login screen passes the username as typed, so a space around it failed the
@@ -39,19 +41,20 @@ class LoginUsernameTrimTest {
             }
         } as SetupRepository
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
     @Test
     fun `a username with spaces around it reaches the repository trimmed`() = runTest {
-        val viewModel = LoginViewModel(repository)
+        val viewModel =
+            LoginViewModel(repository, ServerLocalNetworkBlock(FakeLocalNetworkAccess(), { null }))
 
         viewModel.onAction(LoginAction.OnLoginClick(" demo  ", " pass word "))
 

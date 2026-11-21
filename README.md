@@ -4,9 +4,17 @@
 
 <p align="center">
   <a href="https://github.com/midasvo/ephyra/releases/latest"><img src="https://img.shields.io/github/v/release/midasvo/ephyra?label=release&color=4FD8F0" alt="Latest release"></a>
+  <a href="https://github.com/midasvo/ephyra/releases"><img src="https://img.shields.io/github/downloads/midasvo/ephyra/total?label=downloads&color=4FD8F0" alt="Total downloads"></a>
+  <a href="https://github.com/midasvo/ephyra/issues"><img src="https://img.shields.io/github/issues/midasvo/ephyra?color=4FD8F0" alt="Open issues"></a>
+</p>
+<p align="center">
+  <a href="https://jellyfin.org/"><img src="https://img.shields.io/badge/Jellyfin-12.0%2B-B9A3FF" alt="Jellyfin 12.0 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-B9A3FF" alt="License: GPLv3"></a>
 </p>
-
+<p align="center">
+  <a href="#install"><img src="https://img.shields.io/badge/Android-10%2B-5A6B85?logo=android&logoColor=white" alt="Android 10 or newer on phones and tablets"></a>
+  <a href="#android-tv"><img src="https://img.shields.io/badge/Android%20TV-9%2B-5A6B85?logo=android&logoColor=white" alt="Android TV 9 or newer"></a>
+</p>
 <p align="center">
   <a href="https://midasvo.nl/ephyra/">Website</a> ·
   <a href="#install">Install</a> ·
@@ -19,16 +27,17 @@
 
 Ephyra is a Jellyfin client for Android phones, tablets and Android TV, forked from
 [Findroid](https://github.com/jarnedemeulemeester/findroid). It needs a
-[Jellyfin](https://jellyfin.org/) server and Android 10 or newer.
+[Jellyfin](https://jellyfin.org/) server, and Android 10 or newer on phones and tablets or
+Android 9 or newer on TV.
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="images/screenshots/home.webp" alt="Home with a backdrop carousel, Continue Watching and the start of Latest Movies"><br><sub>Home</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/home.webp" alt="Home with a backdrop carousel, Continue Watching and Next Up"><br><sub>Home</sub></td>
     <td width="33%" align="center"><img src="images/screenshots/movie.webp" alt="Movie page for Sahara with the backdrop, media chips, a Play button and the overview"><br><sub>Movie page</sub></td>
     <td width="33%" align="center"><img src="images/screenshots/episode.webp" alt="Episode page with the episode still, season and episode number, Play button and overview"><br><sub>Episode page</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, three active downloads with progress rings, and a downloaded show"><br><sub>Downloads, with a storage breakdown</sub></td>
+    <td align="center"><img src="images/screenshots/downloads.webp" alt="Downloads screen with a storage bar, two downloads with progress rings, one waiting, and a downloaded show"><br><sub>Downloads, with a storage breakdown</sub></td>
     <td align="center"><img src="images/screenshots/season.webp" alt="Season episode list showing downloaded, downloading and not yet downloaded episodes"><br><sub>Download progress per episode</sub></td>
     <td align="center"><img src="images/screenshots/downloaded-show.webp" alt="Downloaded show page listing episodes by season with their sizes"><br><sub>A page per downloaded show</sub></td>
   </tr>
@@ -46,22 +55,38 @@ Ephyra is a Jellyfin client for Android phones, tablets and Android TV, forked f
 
 ## Install
 
+### Two variants
+
+The phone app comes in two variants with the same application ID and the same signing key, so one
+installs over the other and keeps your login, settings and downloads.
+
+- **libre**: no Google code.
+- **proprietary**: libre plus Google Cast (Chromecast), which needs Google Play services. Without
+  them it still runs; Cast is just unavailable.
+
+Every GitHub release and beta has both, so Obtainium can follow either. The Android TV app is libre
+only. Stores are coming soon: F-Droid and the Amazon Appstore with libre, Google Play with proprietary on
+phones and libre on Android TV.
+
 ### Obtainium
 
 Add `https://github.com/midasvo/ephyra` in [Obtainium](https://github.com/ImranR98/Obtainium).
-Leave **Include prereleases** off and set **Filter APKs by regular expression**:
+Leave **Include prereleases** off and set **Filter APKs by regular expression**. A release has more
+than one APK, so without a filter Obtainium asks which one to install.
 
 | Device | Filter |
 |---|---|
-| Phone or tablet | `-libre-arm64-v8a\.apk$` |
+| Phone or tablet, libre | `-libre-arm64-v8a\.apk$` |
+| Phone or tablet, proprietary (Cast) | `-proprietary-arm64-v8a\.apk$` |
 | Android TV, 64-bit | `.*-tv-arm64-v8a\.apk` |
 | Android TV, 32-bit (Xiaomi Mi Box and similar) | `.*-tv-armeabi-v7a\.apk` |
 
 ### Releases page
 
 Download from [Releases](https://github.com/midasvo/ephyra/releases):
-`ephyra-v<version>-libre-<abi>.apk` for phones and tablets, `ephyra-v<version>-libre-tv-<abi>.apk`
-for Android TV. Nearly everything is `arm64-v8a`; 32-bit TV boxes need `armeabi-v7a`.
+`ephyra-v<version>-libre-<abi>.apk` or `ephyra-v<version>-proprietary-<abi>.apk` for phones and
+tablets, `ephyra-v<version>-libre-tv-<abi>.apk` for Android TV. Nearly everything is `arm64-v8a`;
+32-bit TV boxes need `armeabi-v7a`.
 
 ### F-Droid
 
@@ -83,8 +108,8 @@ app, **Ephyra Beta**, with its own data. Untested; expect bugs.
 
 Obtainium: add the repository URL again with **Include prereleases** on, **Filter release titles by
 regular expression** `^Beta`, and **Filter APKs by regular expression**
-`-beta\.\d+-libre-arm64-v8a\.apk$` (TV, 32-bit: `-beta\.\d+-libre-tv-armeabi-v7a\.apk$`). The title
-filter stops the entry from switching to stable right after a release.
+`-beta\.\d+-libre-arm64-v8a\.apk$` (with Cast: `-beta\.\d+-proprietary-arm64-v8a\.apk$`; TV, 32-bit:
+`-beta\.\d+-libre-tv-armeabi-v7a\.apk$`). The title filter stops the entry from switching to stable right after a release.
 
 ## What Ephyra adds to Findroid
 
@@ -92,9 +117,14 @@ filter stops the entry from switching to stable right after a release.
 
 - Resumable, with SD card support. Built on OkHttp, not Android's DownloadManager.
 - A quality per download: the original, or a server conversion from 4K down to 360p.
-- Whole seasons or series at once, with a limit on concurrent downloads.
+- Whole seasons or series at once, or only their unwatched episodes, with a limit on concurrent
+  downloads.
 - Downloads screen with progress per episode and per show, a storage breakdown, multi-select and undo.
 - Smart Downloads (opt-in): keeps the next episodes of what you're watching, removes them once watched.
+- No offline mode to switch on: downloads open and play when the server can't be reached, and a
+  banner on the other screens leads to them.
+- In step with the server: what you watch offline is sent when you're back and moves up in Continue
+  Watching, and progress made on your other devices reaches your downloads.
 
 **Playback**
 
@@ -103,20 +133,38 @@ filter stops the entry from switching to stable right after a release.
 - Platform decoder first (Atmos), ffmpeg if a decoder fails.
 - PGS, VobSub and DVB subtitles without transcoding. Subtitle colour, outline, font and size, on
   ExoPlayer and mpv, with a switch to override a track's own styling.
+- Subtitle sync during playback: move subtitles earlier or later, or line one up with what is said.
 - Version picker before playing, quality switch during playback.
 - Audio and subtitle choice remembered per series and per user, on ExoPlayer, mpv and downloads.
-- Plays on into the next season. Chapter list. Skip, ask or ignore per media segment type.
+- Plays on into the next season. Shuffle a show or a season. Chapter list. Skip, ask or ignore per media segment type.
   "Still watching?" prompt after a run of autoplayed episodes.
 - "Up next" card with a countdown at the end of an episode. Sleep timer.
 - Background audio with lock screen controls (opt-in, Settings → Player → Background playback).
+
+**Cast**
+
+- Google Chromecast: pick a device from the top bar and cast from any item. A mini player and a
+  remote control player (seek, previous and next, volume, audio and subtitle tracks, skip segments)
+  take over. Phone and tablet only, in the proprietary variant ([Install](#two-variants)).
+
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="images/screenshots/cast-devices.webp" alt="The Cast to a device sheet over Home, listing Living room TV and Bedroom"><br><sub>Pick a device from the top bar</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/cast-player.webp" alt="The Cast player for Sahara on Living room TV with the poster, seek bar, transport controls, audio, subtitle and chapter buttons and volume"><br><sub>The phone becomes the remote</sub></td>
+    <td width="33%" align="center"><img src="images/screenshots/cast-mini.webp" alt="Home with the Cast button lit and a mini player for Sahara above the bottom bar"><br><sub>A mini player while you browse</sub></td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center"><img src="images/screenshots/tablet-cast.webp" alt="Big Buck Bunny's page on a tablet with the Cast player beside it: connected to Living room TV, with the seek bar, transport controls, track buttons and volume"><br><sub>On a tablet the Cast player sits beside the page</sub></td>
+  </tr>
+</table>
 
 **Library**
 
 - Favorites tab.
 - Home rows you choose and reorder (Settings → Interface → Home rows).
 - Hide-watched filter, kept across libraries.
-- Offline mode switches on by itself without a connection. Downloads open even when the server
-  doesn't answer.
+- When the server doesn't answer, a banner says so and leads to your downloads, which open and
+  play without it. It goes by itself when the server is back.
 - Error screens with Retry, and real empty states.
 - Long-press to copy text on detail screens. Option to hide cast and crew.
 - HDR10+ and Dolby Atmos badges on movie and episode pages.
@@ -196,7 +244,7 @@ Same login and server as the phone app, same releases (the `-tv-` APKs). Built f
 - Library grid with an A to Z jump bar, a counter and the hide-watched filter.
 - Episodes open in their season, details first. Cast rows and person pages.
 - Player: D-pad seeking, media keys, trickplay thumbnails, an overlay with the series, end time,
-  previous, next and the queue.
+  previous, next and the queue. Subtitle sync.
 - Refresh rate switching to match the video.
 - Continue Watching and Next Up in the Android TV home screen's Watch Next row.
 - Screensaver with your library's artwork. Optional theme music on show pages.

@@ -194,4 +194,21 @@
     <string name="ce_number_off">Fra</string>
     <string name="ce_pref_player_keep_landscape">Hold afspilleren i liggende format</string>
     <string name="ce_pref_player_keep_landscape_summary">Afspil videoer i liggende format, også når du vender tabletten på højkant</string>
+    <string name="ce_pref_home_episode_images">Brug episodebilleder</string>
+    <string name="ce_pref_home_episode_images_summary">Vis episodens billede i stedet for seriens billede i Fortsæt med at se og Næste</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Cast til et tv</string>
+    <string name="ce_pref_cast_enabled_summary">Vis Cast-knappen, og søg efter Chromecast-enheder på dit netværk</string>
+    <string name="ce_pref_cast_max_bitrate">Maksimal bitrate</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Serveren sænker kvaliteten af alt, der ligger over, mens du caster</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbit/s</string>
+    <string name="ce_pref_cast_hevc">Tv\'et afspiller HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Send HEVC-video (H.265), som den er, i stedet for at konvertere den til H.264. En 4K-Chromecast får det af sig selv; slå det til for et andet tv eller en boks, der afspiller HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Vis episodens billede i stedet for seriens billede i Fortsæt med at se, i Næste og øverst på episodens side</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmenter på tidslinjen</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Vis intro, resumé, outro, forsmag og reklamer som farvede dele af tidslinjen</string>
+    <string name="ce_pref_hide_spoilers">Skjul spoilere</string>
+    <string name="ce_pref_hide_spoilers_summary">Slør billedet, og skjul titel og beskrivelse af afsnit, du ikke har set. Tryk og hold på et for at vise det</string>
+    <string name="ce_pref_side_backdrop">Baggrund ved siden af teksten</string>
+    <string name="ce_pref_side_backdrop_summary">På en tablet i liggende format vises et elements baggrund i sin egen form ved siden af titlen i stedet for i fuld bredde</string>
 </resources>

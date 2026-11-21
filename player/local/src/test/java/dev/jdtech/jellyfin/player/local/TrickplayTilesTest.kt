@@ -2,9 +2,9 @@ package dev.jdtech.jellyfin.player.local
 
 import dev.jdtech.jellyfin.player.local.domain.TrickplayTileLocation
 import dev.jdtech.jellyfin.player.local.domain.TrickplayTiles
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
 class TrickplayTilesTest {
 
@@ -83,5 +83,14 @@ class TrickplayTilesTest {
         assertEquals(2, TrickplayTiles.sampleSize(320, 160))
         assertEquals(4, TrickplayTiles.sampleSize(640, 160))
         assertEquals(1, TrickplayTiles.sampleSize(320, 0))
+    }
+
+    @Test
+    fun `the neighbours of a sheet are the ones that exist`() {
+        // #615: 250 thumbnails at 100 a sheet is three sheets.
+        assertEquals(listOf(1), tiles.neighbourSheets(0))
+        assertEquals(listOf(0, 2), tiles.neighbourSheets(1))
+        assertEquals(listOf(1), tiles.neighbourSheets(2))
+        assertEquals(emptyList<Int>(), tiles.copy(thumbnailCount = 100).neighbourSheets(0))
     }
 }

@@ -52,7 +52,7 @@ constructor(
 
     /**
      * @param indexed CE (#135): load the grid with placeholders, so it knows its length and can
-     *   jump, and build a [LetterIndex] when sorting by name. TV uses this, phone doesn't.
+     *   jump, and build a [LetterIndex] when sorting by name. TV and phone (#672) both use it.
      */
     fun setup(parentId: UUID, libraryType: CollectionType, indexed: Boolean = false) {
         this.parentId = parentId
@@ -61,14 +61,18 @@ constructor(
     }
 
     /** CE (#371): what the first load was for, so a surviving ViewModel doesn't load again. */
-    private data class LoadKey(val parentId: UUID, val libraryType: CollectionType, val indexed: Boolean)
+    private data class LoadKey(
+        val parentId: UUID,
+        val libraryType: CollectionType,
+        val indexed: Boolean,
+    )
 
     private var loadedFor: LoadKey? = null
 
     /**
      * CE (#371): the screen's first load. Loads once per ViewModel, so going back to the grid keeps
-     * it, and a new ViewModel after process death loads. A saved flag in the screen would skip that.
-     * A sort or filter change still calls [loadItems].
+     * it, and a new ViewModel after process death loads. A saved flag in the screen would skip
+     * that. A sort or filter change still calls [loadItems].
      */
     fun loadItemsIfNeeded() {
         val key = LoadKey(parentId, libraryType, indexed)
@@ -83,9 +87,20 @@ constructor(
                 CollectionType.Movies -> listOf(BaseItemKind.MOVIE)
                 CollectionType.TvShows -> listOf(BaseItemKind.SERIES)
                 CollectionType.BoxSets -> listOf(BaseItemKind.BOX_SET)
+                // CE (#671): every type here has to map to an item, or the indexed pager's
+                // positions shift. Photos don't, so they stay out.
+                CollectionType.MusicVideos -> listOf(BaseItemKind.MUSIC_VIDEO)
+                CollectionType.HomeVideos,
                 CollectionType.Mixed,
                 CollectionType.Folders ->
-                    listOf(BaseItemKind.FOLDER, BaseItemKind.MOVIE, BaseItemKind.SERIES)
+                    listOf(
+                        BaseItemKind.FOLDER,
+                        BaseItemKind.PHOTO_ALBUM,
+                        BaseItemKind.MOVIE,
+                        BaseItemKind.SERIES,
+                        BaseItemKind.VIDEO,
+                        BaseItemKind.MUSIC_VIDEO,
+                    )
                 else -> null
             }
 
@@ -116,7 +131,13 @@ constructor(
                                 // so they wait for the first page and reuse its total.
                                 onFirstPage = { total ->
                                     if (nameSort) {
-                                        loadLetterIndex(indexKey, total, itemType, recursive, filters)
+                                        loadLetterIndex(
+                                            indexKey,
+                                            total,
+                                            itemType,
+                                            recursive,
+                                            filters,
+                                        )
                                     }
                                 },
                             )
@@ -166,37 +187,46 @@ constructor(
         recursive: Boolean,
         filters: List<ItemFilter>?,
     ) {
-        if (letterIndexCache.containsKey(key)) return
+        // A late first page of a name-sorted grid the user has already left (#672).
+        if (sortBy != SortBy.NAME) return
+        val cached = letterIndexCache[key]
+        if (cached != null) {
+            if (cached.total == total) return
+            // The library changed since the index was built: its positions no longer hold.
+            letterIndexCache.remove(key)
+            if (key == letterIndexKey()) _state.update { it.copy(letterIndex = null) }
+        }
         val ascending = key.ascending
         letterIndexJob?.cancel()
-        letterIndexJob =
-            viewModelScope.launch {
-                val index =
-                    try {
-                        coroutineScope {
-                            val before =
-                                LetterIndex.BOUNDARIES.map { boundary ->
-                                    async {
-                                        jellyfinRepository.getItemCount(
-                                            parentId = parentId,
-                                            includeTypes = itemType,
-                                            recursive = recursive,
-                                            filters = filters,
-                                            nameLessThan = boundary,
-                                        )
-                                    }
+        letterIndexJob = viewModelScope.launch {
+            val index =
+                try {
+                    coroutineScope {
+                        val before =
+                            LetterIndex.BOUNDARIES.map { boundary ->
+                                async {
+                                    jellyfinRepository.getItemCount(
+                                        parentId = parentId,
+                                        includeTypes = itemType,
+                                        recursive = recursive,
+                                        filters = filters,
+                                        nameLessThan = boundary,
+                                    )
                                 }
-                            LetterIndex.build(before.awaitAll(), total, ascending)
-                        }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        Timber.w(e, "Couldn't load the letter index")
-                        null
+                            }
+                        LetterIndex.build(before.awaitAll(), total, ascending)
                     }
-                if (index != null) letterIndexCache[key] = index
-                if (key == letterIndexKey()) _state.update { it.copy(letterIndex = index) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Timber.w(e, "Couldn't load the letter index")
+                    null
+                }
+            if (index != null) letterIndexCache[key] = index
+            if (key == letterIndexKey() && sortBy == SortBy.NAME) {
+                _state.update { it.copy(letterIndex = index) }
             }
+        }
     }
 
     private suspend fun initSorting() {
@@ -204,7 +234,13 @@ constructor(
             sortBy = SortBy.fromString(appPreferences.getValue(appPreferences.sortBy))
             sortOrder = SortOrder.fromString(appPreferences.getValue(appPreferences.sortOrder))
             filterWatched = appPreferences.getValue(appPreferences.filterWatched)
-            _state.emit(_state.value.copy(sortBy = sortBy, sortOrder = sortOrder, filterWatched = filterWatched))
+            _state.emit(
+                _state.value.copy(
+                    sortBy = sortBy,
+                    sortOrder = sortOrder,
+                    filterWatched = filterWatched,
+                )
+            )
         }
     }
 

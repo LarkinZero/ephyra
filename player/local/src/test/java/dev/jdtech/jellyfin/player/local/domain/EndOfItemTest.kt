@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import androidx.media3.common.Player
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * #477: ExoPlayer reported the end of an item a second time, while already paused at it, when the

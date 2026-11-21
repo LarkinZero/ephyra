@@ -35,11 +35,11 @@ The app is **Ephyra**, a fork of [Findroid](https://github.com/jarnedemeulemeest
 # Format the tree
 ./gradlew ktfmtFormat
 
-# Unit tests (CI does not run them: run them yourself before opening a PR)
+# Unit tests of every module and flavour (CI runs them too: run them yourself before opening a PR to save a round trip)
 ./gradlew testDebugUnitTest
 ```
 
-CI on a pull request runs `ktfmtCheck`, the CE translation check and `assembleDebug`. The build needs JDK 21.
+CI on a pull request runs `ktfmtCheck` (when Kotlin files or `gradle/libs.versions.toml` change) and, unless the change touches only docs-like paths (see `build.yaml`), the CE translation check, a debug build of every app variant and the unit tests (`testDebugUnitTest`, which uploads the test reports when it fails). Pushes to `main` run the same jobs; the Beta workflow does not wait for them. The build needs JDK 21.
 
 ## Module Structure
 
@@ -51,6 +51,7 @@ data             — JellyfinRepository interface + Room database + online/offli
 modes/film       — Feature ViewModels and State/Action classes for home, library, search, episode, movie, show, season
 player/core      — Player models shared by the player and its callers (PlayerItem, Track, Trickplay)
 player/local     — ExoPlayer + mpv PlayerViewModel and playback logic
+player/cast      — Google Cast: session and playback on a receiver (real in the proprietary flavor, stubs in libre)
 setup            — Server discovery and login onboarding flow
 settings         — AppPreferences (DataStore) and settings screen
 baselineprofile  — Macrobenchmark module for app/phone: baseline profile and startup benchmark
@@ -77,7 +78,9 @@ Events that fire once (navigation, toasts) use a `Channel<FooEvent>` exposed as 
 
 **Navigation:** Navigation 3 with `@Serializable` route objects. `NavigationRoot.kt` in `app/phone` is the single source of truth for the nav graph.
 
-**Offline mode:** `RepositoryModule` provides `JellyfinRepositoryImpl` or `JellyfinRepositoryOfflineImpl`, depending on `isOfflineModeActive()` (the preference, or no connection). The UI reads the same state from the `LocalOfflineMode` CompositionLocal.
+**Downloads without the server:** there is no offline mode (#281). `RepositoryModule` always provides `JellyfinRepositoryImpl`. Its item getters (`getMovie`, `getEpisode`, `getShow`, `getSeason`, `getItem`) return the Room copy of a downloaded item when the server fails or takes over 3 s (`StoredFallback.kt`), `getPlaybackSources` picks a finished download before asking the server, and user data written while the server is away is marked `toBeSynced` and sent by `UserDataSync`/`SyncWorker`. The Downloads screens read Room only. Screens that need the server show the unreachable banner (see below).
+
+**Server reachability:** `ServerReachability` (in `core`) follows the app's own requests and probes the server on a network change, on return to the app and after a failed request. Phone screens read it through `LocalServerStatus` and show the unreachable banner (`ServerOrErrorCard`) with a way to Downloads. It is not started on TV.
 
 ## Key Patterns
 
@@ -87,7 +90,9 @@ Events that fire once (navigation, toasts) use a `Channel<FooEvent>` exposed as 
 
 **ItemButtonsBar:** The shared download/play/favorite buttons component. Accepts `canDownload` and `isDownloaded` overrides so aggregate items (seasons, shows) can pass computed values instead of deriving from the item directly.
 
-**Build variants:** Only one flavor (`libre`). Build types are `debug`, `release`, `staging`. Always use `Libre` variants (e.g. `assembleLibreDebug`, `compileLibreDebugKotlin`).
+**Build variants:** Build types are `debug`, `release`, `staging`. The default flavor is `libre`: use its variants (e.g. `assembleLibreDebug`, `compileLibreDebugKotlin`) unless the change is about Cast. `libre` must stay free of Google code. Both phone flavors share one application ID and signing key (one installs over the other); the TV app has only `libre`. Channels: Google Play phone `proprietary`, Google Play TV `libre`, Amazon Appstore `libre` (Fire OS has no Play Services), F-Droid `libre`, GitHub releases and betas both (`ephyra-v<version>-libre-<abi>.apk`, `-proprietary-<abi>.apk`, `-libre-tv-<abi>.apk`).
+
+**Cast (#626):** `app/phone` and `player/cast` have a second flavor, `proprietary`, with Google Cast (Play Services). Everything that touches the Cast SDK is in `player/cast/src/proprietary`; `player/cast/src/libre` has stubs that say Cast is not supported, and `player/cast/src/main` (interfaces, models, ViewModels) and the Cast UI in `app/phone/.../presentation/cast` compile in both. A change there must compile in both flavors (`compileLibreDebugKotlin` and `compileProprietaryDebugKotlin`). Releases and betas attach the `proprietary` APKs, and the Google Play phone bundle is `proprietary` (#641). The Cast surfaces (top bar button, device sheet, mini player, player) are stateless layouts fed by one `CastViewModel`; `CastHost` wraps the navigation display and is the only Cast code `NavigationRoot` knows. Emulators find no receivers: a debug build of the `proprietary` flavor has a stand-in (`adb shell setprop debug.ephyra.cast fake`, see `player/cast/src/debug/.../FakeCast.kt`) to look at every state. Anything about a real receiver still needs a real one (memory note `cast-device-test`).
 
 **App ID:** `nl.midasvo.findroid.ce` (this is a fork — do not revert to the upstream `dev.jdtech.jellyfin` ID, and do not change it to match the Ephyra name: existing installs update over it).
 
@@ -104,6 +109,7 @@ Events that fire once (navigation, toasts) use a `Channel<FooEvent>` exposed as 
 - **Conventional commits**, on every commit: `type(scope): summary`, such as `fix(player): …` or `feat(profiles): …`. The release skill picks the next version from them: `feat` is a minor release, `type!:` or a `BREAKING CHANGE` footer a major one, anything else a patch. Use `feat` only for something a user gets.
 - Branches are `feat/<issue>-<slug>`, `fix/<issue>-<slug>` or `docs/<slug>`. The PR title follows the same convention and names the issue.
 - Pull requests are merged with a merge commit, once the checks are green. `main` has no required checks, so `gh pr merge --auto` merges at once: wait for the checks yourself.
+- **Sourcery** (`sourcery-ai[bot]`) reviews every PR a couple of minutes after it opens, and again after a push. Its `Sourcery review` check passes whatever it finds, so a green check doesn't mean the review is dealt with. Before merging, read its review (the "Prompt for AI Agents" block in the review body lists every comment with its file and line) and answer each inline comment in its thread: fix it and say in which commit, or say why it doesn't apply (for example a setting that only exists on phones). Be critical: Sourcery is often wrong or theoretical, so check each finding against the code before acting on it, and push back when it doesn't hold. A reply that disagrees, with the reason, is a fine answer. Don't add code just to make a comment go away. Don't merge with a Sourcery comment that has no reply. A push brings a new review: after the last push, wait until the `Sourcery review` check has finished (it stays pending while Sourcery reviews) and answer that review too, then merge. Reply with `gh api repos/midasvo/ephyra/pulls/<pr>/comments/<comment-id>/replies -f body='…'`. A finding that is real but outside the PR becomes an issue, linked in the reply.
 - Don't edit `CHANGELOG.md` or the version in a feature PR. The release skill writes both.
 
 ## Docs
@@ -120,6 +126,7 @@ Read the one that fits the change before starting:
 | Screenshots for the README, the site or the Play listing | `docs/screenshots.md` |
 | Track selection or subtitle styling | `docs/track-test-series.md` |
 | Google Play | `docs/play-store.md` |
+| A server or an emulator to test on | `docs/dev-environment.md`, through the `test-server` and `test-devices` skills |
 
 The numbered files in `docs/mpv-research/`, `docs/tablet/` and `docs/tv-research/` are research from before the work was done. Where they differ from the code, the code is right.
 

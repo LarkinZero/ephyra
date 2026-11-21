@@ -35,8 +35,8 @@ import dev.jdtech.jellyfin.viewmodels.AboutState
 import java.net.SocketTimeoutException
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,10 +64,12 @@ class FocusRingTest {
 
     private fun PixelMap.count(area: Rect, test: (Color) -> Boolean): Int {
         var found = 0
-        for (x in area.left.roundToInt().coerceAtLeast(0) until
-            area.right.roundToInt().coerceAtMost(width)) {
-            for (y in area.top.roundToInt().coerceAtLeast(0) until
-                area.bottom.roundToInt().coerceAtMost(height)) {
+        for (x in
+            area.left.roundToInt().coerceAtLeast(0) until
+                area.right.roundToInt().coerceAtMost(width)) {
+            for (y in
+                area.top.roundToInt().coerceAtLeast(0) until
+                    area.bottom.roundToInt().coerceAtMost(height)) {
                 if (test(this[x, y])) found++
             }
         }
@@ -99,7 +101,7 @@ class FocusRingTest {
 
         val pixels = rule.onRoot().captureToImage().toPixelMap()
         val ring = pixels.count(bounds(TV_LOAD_ERROR_RETRY_TAG).inflate(12f), ::isRing)
-        assertTrue("$ring ring-coloured pixels around Retry", ring > 100)
+        assertTrue(ring > 100, message = "$ring ring-coloured pixels around Retry")
     }
 
     @Test
@@ -125,7 +127,10 @@ class FocusRingTest {
         val edge = Rect(box.left, box.center.y - 50f, box.left + 3f, box.center.y + 50f)
         assertEquals(300, pixels.count(edge, ::isRing))
         // #539: the box ends inside the bottom safe area.
-        assertTrue("the box ends at ${box.bottom}", box.bottom <= 540f - TvSafeArea.vertical.value)
+        assertTrue(
+            box.bottom <= 540f - TvSafeArea.vertical.value,
+            message = "the box ends at ${box.bottom}",
+        )
     }
 
     @Test
@@ -146,7 +151,7 @@ class FocusRingTest {
         val button = bounds(ABOUT_LICENSES_TAG)
         val pixels = rule.onRoot().captureToImage().toPixelMap()
         val ring = pixels.count(button.inflate(12f), ::isRing)
-        assertTrue("$ring ring-coloured pixels around Open-source licenses", ring > 100)
+        assertTrue(ring > 100, message = "$ring ring-coloured pixels around Open-source licenses")
 
         // Below the safe area, under the button: only the page's background.
         val background = pixels[pixels.width - 1, pixels.height - 1]

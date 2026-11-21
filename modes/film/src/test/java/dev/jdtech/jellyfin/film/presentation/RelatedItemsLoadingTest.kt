@@ -17,6 +17,9 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.IOException
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -25,12 +28,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#332): the extras, collections and "More like this" rows are requested only when the page
@@ -47,21 +47,23 @@ class RelatedItemsLoadingTest {
 
     private val extra = movie(UUID.randomUUID(), "Behind the scenes")
     private val similar = movie(UUID.randomUUID(), "Similar")
-    private val collection = FindroidBoxSet(id = UUID.randomUUID(), name = "Saga", images = FindroidImages())
+    private val collection =
+        FindroidBoxSet(id = UUID.randomUUID(), name = "Saga", images = FindroidImages())
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
     @Test
     fun `loading the movie asks for none of the related rows`() = runBlocking {
-        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
+        val viewModel =
+            movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
         viewModel.loadMovie(itemId)
         withTimeout(5_000) { viewModel.state.first { it.movie != null } }
 
@@ -71,19 +73,21 @@ class RelatedItemsLoadingTest {
 
     @Test
     fun `the movie's related rows load once, each from its own request`() = runBlocking {
-        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
+        val viewModel =
+            movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
         viewModel.loadMovie(itemId)
         withTimeout(5_000) { viewModel.state.first { it.movie != null } }
 
         viewModel.loadRelated(itemId)
         val related =
             withTimeout(5_000) {
-                viewModel.state.first {
-                    it.related.extras.isNotEmpty() &&
-                        it.related.collections.isNotEmpty() &&
-                        it.related.similar.isNotEmpty()
+                    viewModel.state.first {
+                        it.related.extras.isNotEmpty() &&
+                            it.related.collections.isNotEmpty() &&
+                            it.related.similar.isNotEmpty()
+                    }
                 }
-            }.related
+                .related
 
         assertEquals(listOf(extra), related.extras)
         assertEquals(listOf(collection), related.collections)
@@ -97,7 +101,8 @@ class RelatedItemsLoadingTest {
 
     @Test
     fun `no extras request when the movie has none`() = runBlocking {
-        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 0, specialFeatures = 0))
+        val viewModel =
+            movieViewModel(movie(itemId, "Movie", localTrailers = 0, specialFeatures = 0))
         viewModel.loadMovie(itemId)
         withTimeout(5_000) { viewModel.state.first { it.movie != null } }
 
@@ -111,7 +116,8 @@ class RelatedItemsLoadingTest {
     fun `a failing request leaves only its own row empty`() = runBlocking {
         failing += "getSimilarItems"
         failing += "getItemCollections"
-        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = null))
+        val viewModel =
+            movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = null))
         viewModel.loadMovie(itemId)
         withTimeout(5_000) { viewModel.state.first { it.movie != null } }
 
@@ -143,8 +149,11 @@ class RelatedItemsLoadingTest {
         viewModel.loadRelated(itemId)
         val related =
             withTimeout(5_000) {
-                viewModel.state.first { it.related.similar.isNotEmpty() && it.related.extras.isNotEmpty() }
-            }.related
+                    viewModel.state.first {
+                        it.related.similar.isNotEmpty() && it.related.extras.isNotEmpty()
+                    }
+                }
+                .related
 
         assertEquals(listOf(similar), related.similar)
         assertTrue(related.collections.isEmpty())
@@ -155,7 +164,8 @@ class RelatedItemsLoadingTest {
     @Test
     fun `rows switched off in the settings are never requested`() = runBlocking {
         switchedOff += listOf("pref_detail_extras", "pref_detail_similar")
-        val viewModel = movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
+        val viewModel =
+            movieViewModel(movie(itemId, "Movie", localTrailers = 1, specialFeatures = 2))
         viewModel.loadMovie(itemId)
         withTimeout(5_000) { viewModel.state.first { it.movie != null } }
 
@@ -233,7 +243,9 @@ class RelatedItemsLoadingTest {
 
         calls.clear()
         viewModel.loadMovie(itemId)
-        withTimeout(5_000) { viewModel.state.first { "getMovie" in synchronized(calls) { calls.toList() } } }
+        withTimeout(5_000) {
+            viewModel.state.first { "getMovie" in synchronized(calls) { calls.toList() } }
+        }
 
         assertEquals(listOf("getMovie"), calls)
     }
@@ -274,7 +286,9 @@ class RelatedItemsLoadingTest {
                 "getSeasons",
                 "getEpisodes" -> emptyList<Any>()
                 "getExtras" -> {
-                    synchronized(calls) { extraArgs.add(args!![1] as Boolean to args[2] as Boolean) }
+                    synchronized(calls) {
+                        extraArgs.add(args!![1] as Boolean to args[2] as Boolean)
+                    }
                     listOf(extra)
                 }
                 "getItemCollections" -> listOf(collection)
@@ -295,12 +309,7 @@ class RelatedItemsLoadingTest {
             }
         } as ServerDatabaseDao
 
-    private fun movie(
-        id: UUID,
-        name: String,
-        localTrailers: Int = 0,
-        specialFeatures: Int? = 0,
-    ) =
+    private fun movie(id: UUID, name: String, localTrailers: Int = 0, specialFeatures: Int? = 0) =
         FindroidMovie(
             id = id,
             name = name,

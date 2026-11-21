@@ -22,13 +22,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import dev.jdtech.jellyfin.ce.ui.focus.EphyraFocusGlowAlpha
+import dev.jdtech.jellyfin.core.presentation.ephyra.SeekBarSegment
+import dev.jdtech.jellyfin.core.presentation.ephyra.seekBarSegmentColor
+import dev.jdtech.jellyfin.presentation.theme.darkScheme
 
 /**
  * CE (#126): the TV seek bar. It takes focus like any button. While focused, Left/Right move a
@@ -38,6 +41,8 @@ import dev.jdtech.jellyfin.ce.ui.focus.EphyraFocusGlowAlpha
  * @param positionMs the playback position. Read only while drawing and on a key, so the bar redraws
  *   with each progress tick without recomposing (#257).
  * @param pendingMs the position being picked, or null; hoisted so the time label can show it.
+ * @param segmentMarkers the item's media segments (#681), drawn as ranges of the track. The played
+ *   part goes over them.
  */
 @Composable
 fun TvSeekBar(
@@ -51,6 +56,7 @@ fun TvSeekBar(
     onInteraction: () -> Unit,
     modifier: Modifier = Modifier,
     chapterMarkers: List<Float> = emptyList(),
+    segmentMarkers: List<SeekBarSegment> = emptyList(),
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -138,6 +144,19 @@ fun TvSeekBar(
             strokeWidth = stroke,
             cap = StrokeCap.Round,
         )
+        // CE (#681): segments over the unplayed track; the played line goes over them (VISION
+        // §3.4).
+        segmentMarkers.forEach { segment ->
+            val start = size.width * segment.start
+            val end = size.width * segment.end
+            if (end <= start) return@forEach
+            drawLine(
+                color = darkScheme.seekBarSegmentColor(segment.type),
+                start = Offset(start, y),
+                end = Offset(end, y),
+                strokeWidth = stroke,
+            )
+        }
         drawLine(
             color = color,
             start = Offset(0f, y),

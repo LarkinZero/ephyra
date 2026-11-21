@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadQueue
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.film.presentation.DownloadPrompt
+import dev.jdtech.jellyfin.film.presentation.EpisodeDownloadPrompts
 import dev.jdtech.jellyfin.film.presentation.RelatedItems
 import dev.jdtech.jellyfin.film.presentation.RelatedItemsRequest
 import dev.jdtech.jellyfin.film.presentation.detailSections
+import dev.jdtech.jellyfin.film.presentation.inFlightIds
 import dev.jdtech.jellyfin.film.presentation.keeping
 import dev.jdtech.jellyfin.film.presentation.launchRelatedItems
 import dev.jdtech.jellyfin.film.presentation.selectEpisodesToDownload
@@ -34,6 +37,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -116,9 +120,10 @@ constructor(
                         if (downloadsOnly) null
                         else
                             serverOrStored(
-                                storedSeasonsAsync.await().takeIf { it.isNotEmpty() }?.let {
-                                    suspend { null }
-                                }
+                                storedSeasonsAsync
+                                    .await()
+                                    .takeIf { it.isNotEmpty() }
+                                    ?.let { suspend { null } }
                             ) {
                                 getNextUp(showId)
                             }
@@ -132,10 +137,9 @@ constructor(
                     }
                     // The download counts are extras: when they fail, the page still shows.
                     val localCountsAsync = async { optional { getLocalEpisodeCounts(showId) } }
-                    val serverTotalsAsync =
-                        async {
-                            if (downloadsOnly) null else optional { getServerEpisodeTotals(showId) }
-                        }
+                    val serverTotalsAsync = async {
+                        if (downloadsOnly) null else optional { getServerEpisodeTotals(showId) }
+                    }
 
                     val show = showAsync.await()
                     val displayCastAndCrew =
@@ -171,8 +175,8 @@ constructor(
                     if (relatedFor == showId) loadRelated(showId)
 
                     if (localCounts == null) return@coroutineScope
-                    // Offline, the stored episodes are all there is, and they say nothing about
-                    // what the server allows to download.
+                    // On the downloads-only page the stored episodes are all there is, and they
+                    // say nothing about what the server allows to download.
                     val totals =
                         if (downloadsOnly)
                             localCounts.mapValues { SeasonEpisodeTotals(total = it.value.total) }
@@ -203,10 +207,13 @@ constructor(
         }
     }
 
-    /** Stored and downloaded episodes per season, from Room only. */
+    /** Stored and downloaded episodes per season, from Room only, of the current server (#718). */
     private suspend fun getLocalEpisodeCounts(showId: UUID): Map<UUID, SeasonEpisodeCounts> =
         withContext(Dispatchers.IO) {
-            database.getSeasonEpisodeCounts(showId).associateBy { it.seasonId }
+            val serverId =
+                appPreferences.getValue(appPreferences.currentServer)
+                    ?: return@withContext emptyMap()
+            database.getSeasonEpisodeCounts(showId, serverId).associateBy { it.seasonId }
         }
 
     private data class SeasonEpisodeTotals(val total: Int = 0, val canDownload: Boolean = false)
@@ -239,7 +246,7 @@ constructor(
     /**
      * CE (#332): the extras and "More like this" rows, each from its own request. The page calls
      * this once it has drawn the show, so these requests never delay it; they are made once per
-     * show. Not on the downloads-only page, and offline the repository has none.
+     * show. Not on the downloads-only page.
      */
     fun loadRelated(showId: UUID) {
         val show = _state.value.show?.takeIf { it.id == showId } ?: return
@@ -279,43 +286,71 @@ constructor(
         }
     }
 
-    fun downloadSeasons(seasonIds: Set<UUID>, maxBitrate: Int? = null) {
+    /** CE (#636): the questions of a download, see [EpisodeDownloadPrompts]. */
+    private val downloadPrompts = EpisodeDownloadPrompts()
+
+    /** CE (#636): the open question of a download (which episodes, then the quality), or null. */
+    val downloadPrompt: StateFlow<DownloadPrompt?> = downloadPrompts.prompt
+
+    /** CE (#636): the answer to [DownloadPrompt.Episodes]. */
+    fun chooseEpisodes(unwatchedOnly: Boolean) = downloadPrompts.chooseEpisodes(unwatchedOnly)
+
+    /** CE (#636): the answer to [DownloadPrompt.Quality], which starts the download. */
+    fun chooseQuality(maxBitrate: Int?) {
+        val answer = downloadPrompts.chooseQuality(maxBitrate) ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            // Episodes already in flight count as skipped so the toast count
-            // matches what actually got added to the queue.
-            val liveQueuedIds =
-                downloadQueue.entries.value
-                    .filter {
-                        it.state is DownloadQueue.EntryState.Pending ||
-                            it.state is DownloadQueue.EntryState.Downloading ||
-                            it.state is DownloadQueue.EntryState.Paused
-                    }
-                    .map { it.id }
-                    .toSet()
-            val episodes =
-                seasonIds.flatMap { seasonId ->
-                    repository.getEpisodes(
-                        seriesId = showId,
-                        seasonId = seasonId,
-                        fields = showEpisodeFields,
-                    )
-                }
-            val (toQueue, skipped) = selectEpisodesToDownload(episodes, liveQueuedIds)
-            downloadQueue.enqueueAll(toQueue, maxBitrate)
-            eventsChannel.send(ShowEvent.DownloadResult(toQueue.size, skipped, 0))
-            loadShow(showId)
+            enqueue(answer.episodes, answer.maxBitrate, answer.unwatchedOnly)
         }
+    }
+
+    /** CE (#636): the open question was cancelled, so nothing is downloaded. */
+    fun dismissDownloadPrompt() = downloadPrompts.dismiss()
+
+    /**
+     * CE (#636): asks the questions of a download of [episodes], or, when every one of them is
+     * downloaded or in flight already, says so at once without asking anything.
+     */
+    private suspend fun startDownload(episodes: List<FindroidEpisode>) {
+        val inFlightIds = downloadQueue.inFlightIds()
+        if (selectEpisodesToDownload(episodes, inFlightIds).toQueue.isEmpty()) {
+            enqueue(episodes, maxBitrate = null, unwatchedOnly = false)
+        } else {
+            downloadPrompts.start(episodes, inFlightIds)
+        }
+    }
+
+    fun downloadSeasons(seasonIds: Set<UUID>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val episodes = seasonIds.flatMap { seasonId ->
+                repository.getEpisodes(
+                    seriesId = showId,
+                    seasonId = seasonId,
+                    fields = showEpisodeFields,
+                )
+            }
+            startDownload(episodes)
+        }
+    }
+
+    private suspend fun enqueue(
+        episodes: List<FindroidEpisode>,
+        maxBitrate: Int?,
+        unwatchedOnly: Boolean,
+    ) {
+        // Episodes already in flight count as skipped so the toast count
+        // matches what actually got added to the queue.
+        val (toQueue, skipped) =
+            selectEpisodesToDownload(episodes, downloadQueue.inFlightIds(), unwatchedOnly)
+        downloadQueue.enqueueAll(toQueue, maxBitrate)
+        eventsChannel.send(ShowEvent.DownloadResult(toQueue.size, skipped, 0))
+        loadShow(showId)
     }
 
     fun deleteShowDownloads() {
         viewModelScope.launch(Dispatchers.IO) {
             for (season in _state.value.seasons) {
                 val episodes =
-                    repository.getEpisodes(
-                        seriesId = showId,
-                        seasonId = season.id,
-                        offline = true,
-                    )
+                    repository.getEpisodes(seriesId = showId, seasonId = season.id, offline = true)
                 for (episode in episodes) {
                     val localSource =
                         episode.sources.firstOrNull { it.type == FindroidSourceType.LOCAL }
@@ -360,7 +395,10 @@ constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Timber.e(e, if (played) "Failed to mark as played" else "Failed to unmark as played")
+                Timber.e(
+                    e,
+                    if (played) "Failed to mark as played" else "Failed to unmark as played",
+                )
                 return@launch
             }
             reloadPolicy.changedHere()
@@ -368,8 +406,9 @@ constructor(
             try {
                 coroutineScope {
                     val nextUpAsync = async { if (downloadsOnly) null else getNextUp(showId) }
-                    val seasonsAsync =
-                        async { repository.getSeasons(showId, offline = downloadsOnly) }
+                    val seasonsAsync = async {
+                        repository.getSeasons(showId, offline = downloadsOnly)
+                    }
                     val nextUp = nextUpAsync.await()
                     val seasons = seasonsAsync.await()
                     _state.update { state -> state.copy(nextUp = nextUp, seasons = seasons) }

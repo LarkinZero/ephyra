@@ -1,18 +1,21 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -32,7 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -54,8 +60,9 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
-import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.LetterFastScroller
+import dev.jdtech.jellyfin.presentation.film.components.ServerOrErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -63,6 +70,7 @@ import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
 import dev.jdtech.jellyfin.presentation.utils.Layout
 import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
 import dev.jdtech.jellyfin.presentation.utils.plus
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -79,7 +87,8 @@ fun LibraryScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
-        viewModel.setup(parentId = libraryId, libraryType = libraryType)
+        // CE (#672): placeholders, so the fast scroller can jump anywhere, and the letter index.
+        viewModel.setup(parentId = libraryId, libraryType = libraryType, indexed = true)
         // CE (#371): the ViewModel decides, a saved flag would skip the load after process death.
         viewModel.loadItemsIfNeeded()
     }
@@ -113,6 +122,8 @@ private fun LibraryScreenLayout(
 
     var showSortByDialog by remember { mutableStateOf(false) }
 
+    val gridState = rememberLazyGridState()
+
     Scaffold(
         modifier =
             Modifier.fillMaxSize()
@@ -130,9 +141,17 @@ private fun LibraryScreenLayout(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onAction(LibraryAction.ToggleWatchedFilter(!state.filterWatched)) }) {
+                    IconButton(
+                        onClick = {
+                            onAction(LibraryAction.ToggleWatchedFilter(!state.filterWatched))
+                        }
+                    ) {
                         Icon(
-                            painter = painterResource(if (state.filterWatched) CoreR.drawable.ic_eye_off else CoreR.drawable.ic_eye),
+                            painter =
+                                painterResource(
+                                    if (state.filterWatched) CoreR.drawable.ic_eye_off
+                                    else CoreR.drawable.ic_eye
+                                ),
                             contentDescription = stringResource(CoreR.string.toggle_watched),
                         )
                     }
@@ -143,7 +162,7 @@ private fun LibraryScreenLayout(
                         )
                     }
                 },
-                windowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+                windowInsets = topAndSideInsets,
                 scrollBehavior = scrollBehavior,
             )
         },
@@ -152,28 +171,50 @@ private fun LibraryScreenLayout(
             ErrorGroup(
                 loadStates = items.loadState,
                 onRefresh = { items.refresh() },
-                modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
+                modifier = Modifier.padding(contentPadding + innerPadding),
             )
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyVerticalGrid(
-                    columns = GridCellsAdaptiveWithMinColumns(minSize = Layout.gridMinCell(currentWidthClass()), minColumns = 2),
+                    columns =
+                        GridCellsAdaptiveWithMinColumns(
+                            minSize = Layout.gridMinCell(currentWidthClass()),
+                            minColumns = 2,
+                        ),
                     modifier = Modifier.fillMaxSize(),
+                    state = gridState,
                     contentPadding = contentPadding + innerPadding,
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                 ) {
                     items(count = items.itemCount, key = items.itemKey { it.id }) {
                         val item = items[it]
-                        item?.let { item ->
+                        if (item == null) {
+                            // CE (#672): not loaded yet, for example right after a jump. A cell
+                            // with no height would make the grid compose and load far ahead.
+                            ItemCardSkeleton()
+                        } else {
+                            // No animateItem() (#257, #672): the grid pages and jumps.
                             ItemCard(
                                 item = item,
                                 direction = Direction.VERTICAL,
                                 onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
                 }
+                val layoutDirection = LocalLayoutDirection.current
+                LetterFastScroller(
+                    gridState = gridState,
+                    itemCount = items.itemCount,
+                    letterIndex = state.letterIndex,
+                    modifier =
+                        Modifier.align(Alignment.TopEnd)
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = innerPadding.calculateBottomPadding(),
+                                end = innerPadding.calculateEndPadding(layoutDirection),
+                            ),
+                )
                 if (items.itemCount == 0) {
                     when (items.loadState.refresh) {
                         is LoadState.Loading ->
@@ -202,6 +243,26 @@ private fun LibraryScreenLayout(
             },
             onDismissRequest = { showSortByDialog = false },
         )
+    }
+}
+
+/** CE (#672): the shape of a vertical [ItemCard] while its page loads. */
+@Composable
+private fun ItemCardSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.width(Layout.cardVertical(currentWidthClass()))) {
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .aspectRatio(0.66f)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+        // One line of title and the card's bottom spacer: most titles fit on one line, so the
+        // row keeps its height when the page comes in (a two-line title still grows it).
+        val titleLine =
+            with(LocalDensity.current) { MaterialTheme.typography.bodyMedium.lineHeight.toDp() }
+        Spacer(modifier = Modifier.height(titleLine + 2.dp))
     }
 }
 
@@ -253,12 +314,14 @@ private fun ErrorGroup(
             else -> null
         }
 
+    // CE (#281): the unreachable banner while the server does not answer, also with no failed load.
+    ServerOrErrorCard(
+        error = loadStateError?.error,
+        onShowStacktrace = { showErrorDialog = true },
+        onRetryClick = onRefresh,
+        modifier = modifier,
+    )
     loadStateError?.let {
-        ErrorCard(
-            onShowStacktrace = { showErrorDialog = true },
-            onRetryClick = onRefresh,
-            modifier = modifier,
-        )
         if (showErrorDialog) {
             ErrorDialog(
                 exception = it.error,

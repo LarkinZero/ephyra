@@ -11,15 +11,22 @@ import java.time.ZoneId
  * The Watch Next candidates for the server's Continue Watching [resume] items and [nextUp]
  * episodes, in that order. Items that can't be shown in the row (no duration, nothing to resume)
  * are left out.
+ *
+ * [hideSpoilers] (#618): an unwatched episode goes to the launcher without its still, its title and
+ * its overview, which the launcher shows outside the app. A reveal in the app doesn't reach it.
  */
 fun watchNextCandidates(
     resume: List<FindroidItem>,
     nextUp: List<FindroidEpisode>,
+    hideSpoilers: Boolean = false,
 ): List<WatchNextEntry> =
-    resume.mapNotNull { it.toWatchNextEntry(WatchNextKind.CONTINUE) } +
-        nextUp.mapNotNull { it.toWatchNextEntry(WatchNextKind.NEXT) }
+    resume.mapNotNull { it.toWatchNextEntry(WatchNextKind.CONTINUE, hideSpoilers) } +
+        nextUp.mapNotNull { it.toWatchNextEntry(WatchNextKind.NEXT, hideSpoilers) }
 
-fun FindroidItem.toWatchNextEntry(kind: WatchNextKind): WatchNextEntry? {
+fun FindroidItem.toWatchNextEntry(
+    kind: WatchNextKind,
+    hideSpoilers: Boolean = false,
+): WatchNextEntry? {
     if (runtimeTicks <= 0) return null
     if (kind == WatchNextKind.CONTINUE && (played || playbackPositionTicks <= 0)) return null
     val durationMs = runtimeTicks / TICKS_PER_MS
@@ -27,16 +34,20 @@ fun FindroidItem.toWatchNextEntry(kind: WatchNextKind): WatchNextEntry? {
     return when (this) {
         is FindroidEpisode -> {
             // The episode's own thumbnail is landscape; the series poster is the fallback.
-            val landscape = images.primary ?: images.showBackdrop
+            val hidden = hideSpoilers && !played
+            val landscape =
+                if (hidden) images.showBackdrop else images.primary ?: images.showBackdrop
             WatchNextEntry(
                 itemId = id.toString(),
                 kind = kind,
                 itemType = WatchNextItemType.EPISODE,
-                title = seriesName.ifBlank { name },
-                episodeTitle = name,
+                // Without a series name the launcher still needs a title: the episode's would
+                // give it away, so it says nothing more than the season and episode numbers do.
+                title = seriesName.ifBlank { if (hidden) "" else name },
+                episodeTitle = if (hidden) null else name,
                 seasonNumber = parentIndexNumber,
                 episodeNumber = indexNumber,
-                description = overview.take(MAX_DESCRIPTION_LENGTH),
+                description = if (hidden) "" else overview.take(MAX_DESCRIPTION_LENGTH),
                 posterUri = (landscape ?: images.showPrimary)?.sized(portrait = landscape == null),
                 posterIsPortrait = landscape == null,
                 durationMs = durationMs,
@@ -75,7 +86,8 @@ private fun Uri.sized(portrait: Boolean): String =
         .toString()
 
 /** The Jellyfin SDK reads dates into the device's time zone. */
-private fun LocalDateTime.toEpochMs(): Long = atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+private fun LocalDateTime.toEpochMs(): Long =
+    atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
 private const val TICKS_PER_MS = 10_000L
 private const val MAX_DESCRIPTION_LENGTH = 300

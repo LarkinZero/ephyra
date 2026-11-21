@@ -21,13 +21,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.rows.animateRowItem
+import dev.jdtech.jellyfin.core.presentation.rows.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 
 @Composable
 fun HomeView(
@@ -76,6 +77,8 @@ fun HomeView(
                     direction = Direction.VERTICAL,
                     showSeriesName = true,
                     onClick = { onAction(HomeAction.OnItemClick(item)) },
+                    // CE (#640): a card that joins or moves fades and slides into place.
+                    modifier = animateRowItem(),
                 )
             }
         }

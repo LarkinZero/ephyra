@@ -1,15 +1,15 @@
 package dev.jdtech.jellyfin.player.local.mpv
 
 import dev.jdtech.jellyfin.player.local.mpv.MpvStreamBreak.Outcome
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * #445: on mpv a lost connection reached `eof-reached` like a real end, so the item was reported
  * finished (often at its full length) and the next episode started. The sequences below are the
- * ones mpv logged on the emulators (Night of the Living Dead, 5717211 ms, on the demo server).
- * When in doubt the answer must be [Outcome.Finished], the behaviour before the fix.
+ * ones mpv logged on the emulators (Night of the Living Dead, 5717211 ms, on the demo server). When
+ * in doubt the answer must be [Outcome.Finished], the behaviour before the fix.
  */
 class MpvStreamBreakTest {
 
@@ -39,7 +39,7 @@ class MpvStreamBreakTest {
     }
 
     private fun assertBroken(expectedPositionMs: Long, outcome: Outcome) {
-        assertTrue("expected a break, got $outcome", outcome is Outcome.Broken)
+        assertTrue(outcome is Outcome.Broken, message = "expected a break, got $outcome")
         assertEquals(expectedPositionMs, (outcome as Outcome.Broken).positionMs)
     }
 
@@ -53,8 +53,8 @@ class MpvStreamBreakTest {
             streamBreak.onErrorLog(
                 "ffmpeg/demuxer",
                 "mov,mp4,m4a,3gp,3g2,mj2: stream 1, offset 0x182a6977: partial file",
-            now,
-        )
+                now,
+            )
         }
         streamBreak.onErrorLog("lavf", "...treating it as fatal error.", now)
         // No frame after the failed seek: keep-open jumps to the last frame.
@@ -108,7 +108,11 @@ class MpvStreamBreakTest {
         // Recorded on the phone (720 kbps cap, network off for 6 s): the HLS demuxer skipped every
         // remaining segment in that second and mpv then passed on what ffmpeg had already read.
         play(toMs = 4_999_127L, aheadMs = 5_516L, fromMs = 4_973_001L)
-        streamBreak.onErrorLog("ffmpeg", "tcp: Connection to tcp://demo.jellyfin.org:443 failed", now)
+        streamBreak.onErrorLog(
+            "ffmpeg",
+            "tcp: Connection to tcp://demo.jellyfin.org:443 failed",
+            now,
+        )
         now += 30L
         streamBreak.onBufferedEnd(5_006_593L, now)
         repeat(40) { networkErrors() }
@@ -144,8 +148,16 @@ class MpvStreamBreakTest {
     @Test
     fun `decoder and output errors during normal playback are a real end`() {
         play(toMs = duration - 60_000L, aheadMs = 120_000L)
-        streamBreak.onErrorLog("ffmpeg/video", "h264_mediacodec: Both surface and native_window are NULL", now)
-        streamBreak.onErrorLog("vo/gpu-next/libplacebo", "libplacebo compiled without LittleCMS 2 support!", now)
+        streamBreak.onErrorLog(
+            "ffmpeg/video",
+            "h264_mediacodec: Both surface and native_window are NULL",
+            now,
+        )
+        streamBreak.onErrorLog(
+            "vo/gpu-next/libplacebo",
+            "libplacebo compiled without LittleCMS 2 support!",
+            now,
+        )
         streamBreak.onErrorLog("vo/gpu-next/aimagereader", "acquireLatestImage failed: -30001", now)
         streamBreak.onPosition(duration, duration)
 
@@ -156,7 +168,11 @@ class MpvStreamBreakTest {
     fun `decoder errors with a buffer short of the end are not a break`() {
         // A file whose duration is longer than its content, with no network trouble.
         play(toMs = 4_000_000L, aheadMs = 0L)
-        streamBreak.onErrorLog("ffmpeg/video", "h264_mediacodec: Both surface and native_window are NULL", now)
+        streamBreak.onErrorLog(
+            "ffmpeg/video",
+            "h264_mediacodec: Both surface and native_window are NULL",
+            now,
+        )
 
         assertEquals(Outcome.Finished, streamBreak.atEndOfFile(duration))
     }
@@ -165,7 +181,11 @@ class MpvStreamBreakTest {
     fun `a short drop that recovers is a real end later`() {
         play(toMs = 600_000L, aheadMs = 60_000L)
         networkErrors()
-        streamBreak.onErrorLog("ffmpeg", "tcp: Connection to tcp://demo.jellyfin.org:443 failed", now)
+        streamBreak.onErrorLog(
+            "ffmpeg",
+            "tcp: Connection to tcp://demo.jellyfin.org:443 failed",
+            now,
+        )
         // The connection is back: data arrives again and playback runs to the end.
         play(toMs = duration, aheadMs = 60_000L, fromMs = 610_000L)
 
@@ -225,10 +245,18 @@ class MpvStreamBreakTest {
     fun `only the stream and demuxer layers count`() {
         val network = "tcp: Failed to resolve hostname demo.jellyfin.org"
         listOf("ffmpeg", "ffmpeg/demuxer", "lavf", "demux", "stream", "stream/http").forEach {
-            assertTrue(it, MpvStreamBreak.isStreamError(it, network))
+            assertTrue(MpvStreamBreak.isStreamError(it, network), message = it)
         }
-        listOf("ffmpeg/video", "ffmpeg/audio", "vd", "ad", "vo/gpu-next", "ao/audiotrack", "cplayer")
-            .forEach { assertTrue(it, !MpvStreamBreak.isStreamError(it, network)) }
+        listOf(
+                "ffmpeg/video",
+                "ffmpeg/audio",
+                "vd",
+                "ad",
+                "vo/gpu-next",
+                "ao/audiotrack",
+                "cplayer",
+            )
+            .forEach { assertTrue(!MpvStreamBreak.isStreamError(it, network), message = it) }
         // Recorded on the tablet at a seek near the end of an episode: the hardware decoder.
         assertTrue(
             !MpvStreamBreak.isStreamError(

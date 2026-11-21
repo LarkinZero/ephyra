@@ -7,6 +7,9 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.IOException
 import java.lang.reflect.Proxy
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -16,12 +19,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.jellyfin.sdk.model.api.PublicSystemInfo
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /** #543: a server renamed on the server is renamed in the app on the next Home load. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -30,13 +30,13 @@ class HomeViewModelServerNameTest {
     private val updated = mutableListOf<Server>()
     private var systemInfo: () -> PublicSystemInfo = { info(SERVER_ID, "New name") }
 
-    @Before
+    @BeforeEach
     fun setUp() {
         // viewModelScope is built with Dispatchers.Main.immediate; provide one.
         Dispatchers.setMain(StandardTestDispatcher())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

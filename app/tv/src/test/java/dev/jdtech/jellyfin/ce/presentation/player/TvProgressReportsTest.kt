@@ -1,7 +1,7 @@
 package dev.jdtech.jellyfin.ce.presentation.player
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * #458: the TV player never reported progress. It now reports every few seconds, when playback
@@ -12,7 +12,8 @@ class TvProgressReportsTest {
     private var now = 100_000L
     private var playing = true
     private var sent = 0
-    private val reports = TvProgressReports(send = { sent++ }, isPlaying = { playing }, now = { now })
+    private val reports =
+        TvProgressReports(send = { sent++ }, isPlaying = { playing }, now = { now })
 
     @Test
     fun `the first report goes out`() {

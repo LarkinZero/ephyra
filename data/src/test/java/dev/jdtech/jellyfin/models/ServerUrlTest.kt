@@ -3,6 +3,8 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.model.api.AudioSpatialFormat
 import org.jellyfin.sdk.model.api.MediaProtocol
@@ -13,9 +15,7 @@ import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRange
 import org.jellyfin.sdk.model.api.VideoRangeType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * The server's transcode and subtitle URLs start with a slash, and the stored address of a server
@@ -82,8 +82,10 @@ class ServerUrlTest {
             .path
     }
 
-    private fun subtitlePath(base: String, deliveryUrl: String? = "/Videos/$itemId/source/Subtitles/2/0/Stream.srt") =
-        subtitle(deliveryUrl).toFindroidMediaStream(repository(base)).path
+    private fun subtitlePath(
+        base: String,
+        deliveryUrl: String? = "/Videos/$itemId/source/Subtitles/2/0/Stream.srt",
+    ) = subtitle(deliveryUrl).toFindroidMediaStream(repository(base)).path
 
     @Test
     fun `serverUrl joins with one slash whatever the two sides bring`() {
@@ -91,7 +93,10 @@ class ServerUrlTest {
         assertEquals("https://host/jf/videos/1", serverUrl("https://host/jf", "/videos/1"))
         assertEquals("https://host/jf/videos/1", serverUrl("https://host/jf/", "videos/1"))
         assertEquals("https://host/jf/videos/1", serverUrl("https://host/jf", "videos/1"))
-        assertEquals("http://10.0.0.2:8096/videos/1", serverUrl("http://10.0.0.2:8096", "/videos/1"))
+        assertEquals(
+            "http://10.0.0.2:8096/videos/1",
+            serverUrl("http://10.0.0.2:8096", "/videos/1"),
+        )
     }
 
     @Test

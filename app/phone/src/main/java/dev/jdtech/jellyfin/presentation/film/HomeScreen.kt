@@ -3,13 +3,10 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +23,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -41,6 +42,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSuggestions
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeView
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
+import dev.jdtech.jellyfin.core.presentation.rows.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
 import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
@@ -50,19 +52,20 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
-import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
+import dev.jdtech.jellyfin.presentation.film.components.ErrorCardInitialHeight
 import dev.jdtech.jellyfin.presentation.film.components.ErrorState
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
 import dev.jdtech.jellyfin.presentation.film.components.ProfileBottomSheet
+import dev.jdtech.jellyfin.presentation.film.components.ServerOrErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ServerSelectionBottomSheet
 import dev.jdtech.jellyfin.presentation.film.components.TopContentScrim
+import dev.jdtech.jellyfin.presentation.film.components.showsServerOrErrorCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
-import dev.jdtech.jellyfin.presentation.utils.rememberLazyListStateAtStart
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.launch
 
@@ -80,7 +83,9 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ReloadOnResume(shouldReload = { viewModel.shouldReload(stopEventFollows = true) }) { viewModel.loadData(silent = true) }
+    ReloadOnResume(shouldReload = { viewModel.shouldReload(stopEventFollows = true) }) {
+        viewModel.loadData(silent = true)
+    }
 
     HomeScreenLayout(
         state = state,
@@ -131,10 +136,24 @@ internal fun HomeScreenLayout(
     // #392: a failed load with rows on screen says so in a card under the header, as My media and
     // Library do, so the header keeps its width and the server name its room. With nothing on
     // screen the list shows ErrorState instead.
-    val showErrorCard = state.error != null && !state.isEmpty
+    // CE (#281): while the server does not answer, the card is the unreachable banner, also with
+    // no failed load at all. A Home with nothing on it and a failed load shows ErrorState, which
+    // says the same, so the banner leaves that to it.
+    val showErrorState = state.isEmpty && !state.isLoading && state.error != null
+    val cardError = state.error.takeIf { !state.isEmpty }
+    val showErrorCard = !showErrorState && showsServerOrErrorCard(cardError)
+    // CE (#571): the rows start under the card at its real height, which is more than one row with
+    // a large font or with the "Allow access" button.
+    val density = LocalDensity.current
+    var errorCardHeight by remember { mutableStateOf(ErrorCardInitialHeight) }
     val contentPaddingTop by
         animateDpAsState(
-            targetValue = if (showErrorCard) safePadding.top + 144.dp else scrimHeight,
+            targetValue =
+                if (showErrorCard) {
+                    safePadding.top + 80.dp + errorCardHeight + MaterialTheme.spacings.medium
+                } else {
+                    scrimHeight
+                },
             label = "content_padding",
         )
 
@@ -158,8 +177,14 @@ internal fun HomeScreenLayout(
             shownUserId = state.user?.id
         } else if (state.user?.id != shownUserId) {
             shownUserId = state.user?.id
-            userFade.animateTo(0f, tween(EphyraMotion.DURATION_SHORT, easing = EphyraMotion.EasingExit))
-            userFade.animateTo(1f, tween(EphyraMotion.DURATION_MEDIUM, easing = EphyraMotion.EasingEnter))
+            userFade.animateTo(
+                0f,
+                tween(EphyraMotion.DURATION_SHORT, easing = EphyraMotion.EasingExit),
+            )
+            userFade.animateTo(
+                1f,
+                tween(EphyraMotion.DURATION_MEDIUM, easing = EphyraMotion.EasingEnter),
+            )
         }
     }
 
@@ -170,7 +195,10 @@ internal fun HomeScreenLayout(
     val listState = rememberLazyListStateAtStart(firstKey = rows.firstOrNull()?.id)
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
-        PullToRefreshBox(isRefreshing = state.isLoading, onRefresh = { onAction(HomeAction.OnRetryClick) }) {
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { onAction(HomeAction.OnRetryClick) },
+        ) {
             LazyColumn(
                 modifier =
                     Modifier.fillMaxSize()
@@ -195,6 +223,7 @@ internal fun HomeScreenLayout(
                                 itemsPadding = itemsPadding,
                                 onAction = onAction,
                                 modifier = Modifier.animateItem(),
+                                preferThumb = !state.useEpisodeImages,
                             )
                         is HomeItem.ViewItem ->
                             HomeView(
@@ -217,14 +246,6 @@ internal fun HomeScreenLayout(
                                 onRetryClick = { onAction(HomeAction.OnRetryClick) },
                                 modifier = placeholderModifier,
                             )
-                        } else if (state.nothingDownloaded) {
-                            // CE: offline, Home's rows are the downloads.
-                            EmptyState(
-                                icon = CoreR.drawable.ic_download,
-                                title = stringResource(CoreR.string.ce_home_offline_empty_title),
-                                modifier = placeholderModifier,
-                                body = stringResource(CoreR.string.ce_home_offline_empty_body),
-                            )
                         } else {
                             EmptyState(
                                 icon = CoreR.drawable.ic_home,
@@ -240,16 +261,17 @@ internal fun HomeScreenLayout(
         }
 
         if (showErrorCard) {
-            ErrorCard(
+            ServerOrErrorCard(
+                error = cardError,
                 onShowStacktrace = { showErrorDialog = true },
                 onRetryClick = { onAction(HomeAction.OnRetryClick) },
                 modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(
+                    Modifier.padding(
                             start = paddingStart,
                             top = safePadding.top + 80.dp,
                             end = paddingEnd,
-                        ),
+                        )
+                        .onSizeChanged { errorCardHeight = with(density) { it.height.toDp() } },
             )
         }
 

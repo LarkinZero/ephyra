@@ -192,4 +192,21 @@
     <string name="ce_number_off">關閉</string>
     <string name="ce_pref_player_keep_landscape">播放器保持橫向</string>
     <string name="ce_pref_player_keep_landscape_summary">就算將平板電腦轉直，影片都係橫向播放</string>
+    <string name="ce_pref_home_episode_images">使用劇集圖片</string>
+    <string name="ce_pref_home_episode_images_summary">喺「繼續觀看」同「下一集」顯示單集嘅圖片，而唔係劇集嘅圖片</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">投放去電視</string>
+    <string name="ce_pref_cast_enabled_summary">顯示投放按鈕，同埋喺你嘅網絡搵 Chromecast 裝置</string>
+    <string name="ce_pref_cast_max_bitrate">最高位元率</string>
+    <string name="ce_pref_cast_max_bitrate_summary">投放嗰陣，伺服器會將高過呢個數值嘅內容降低畫質</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">電視播到 HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">直接傳送 HEVC (H.265) 影片，唔轉做 H.264。4K Chromecast 會自動咁做；如果其他電視或者機頂盒播到 HEVC，就開啟呢個選項</string>
+    <string name="ce_pref_home_episode_images_summary_phone">喺「繼續觀看」、「下一集」同單集頁面頂部顯示單集嘅圖片，而唔係劇集嘅圖片</string>
+    <string name="pref_player_media_segments_on_seek_bar">進度列上嘅片段</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">喺進度列上用顏色顯示片頭、前情提要、片尾、預告同廣告</string>
+    <string name="ce_pref_hide_spoilers">隱藏劇透</string>
+    <string name="ce_pref_hide_spoilers_summary">模糊未睇過嘅集數嘅圖片，並隱藏佢哋嘅標題同簡介。長按一集就會顯示</string>
+    <string name="ce_pref_side_backdrop">背景圖喺文字旁邊</string>
+    <string name="ce_pref_side_backdrop_summary">平板打橫時，將項目嘅背景圖以原本形狀顯示喺標題旁邊，而唔係鋪滿成個闊度</string>
 </resources>

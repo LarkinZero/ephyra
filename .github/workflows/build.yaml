@@ -1,16 +1,62 @@
 name: Build
 
+# Changes that touch only paths no Gradle build and no translation check reads (docs, the site,
+# Markdown, store metadata, branding sources, the Claude skills other than translate-strings) don't
+# run this workflow. The last matching pattern wins, so the translate-strings skill is put back
+# after the Markdown and .claude/ exclusions: its script is the "Verify CE translations" job.
 on:
   push:
     branches:
       - main
+    paths: &build-paths
+      - "**"
+      - "!docs/**"
+      - "!site/**"
+      - "!**.md"
+      - "!images/**"
+      - "!fastlane/**"
+      - "!.claude/**"
+      - "!.github/ISSUE_TEMPLATE/**"
+      - "!.github/FUNDING.yml"
+      - "!LICENSE"
+      - ".claude/skills/translate-strings/**"
   pull_request:
     branches:
       - main
+    paths: *build-paths
 
+# actions: write is for the "Cancel superseded runs" job, which stops the runs of older commits
+# of the same PR. It compares commits, which a concurrency group does not do.
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
+# The jobs run in parallel. Together the assemble jobs build what `./gradlew assembleDebug` builds:
+# every debug app variant and the debug AARs of the library modules (in the phone libre job, which
+# compiles all of those modules anyway).
 jobs:
-  assemble:
-    name: Assemble
+  cancel-superseded:
+    name: Cancel superseded runs
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Cancel superseded runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: bash .github/scripts/cancel-superseded-runs.sh
+
+  translations:
+    name: Verify CE translations
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,6 +67,40 @@ jobs:
           git remote add upstream https://github.com/jarnedemeulemeester/findroid.git 2>/dev/null || true
           git fetch upstream main --depth=1
           python3 .claude/skills/translate-strings/scripts/check-translations.py
+
+  assemble:
+    name: Assemble ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: phone (libre)
+            artifact: debug-apks-phone-libre
+            tasks: >-
+              :app:phone:assembleLibreDebug
+              :core:assembleDebug
+              :data:assembleDebug
+              :modes:film:assembleDebug
+              :player:cast:assembleLibreDebug
+              :player:core:assembleDebug
+              :player:local:assembleDebug
+              :settings:assembleDebug
+              :setup:assembleDebug
+            apks: app/phone/build/outputs/apk/libre/debug/*.apk
+          - name: phone (proprietary)
+            artifact: debug-apks-phone-proprietary
+            tasks: :app:phone:assembleProprietaryDebug :player:cast:assembleProprietaryDebug
+            apks: app/phone/build/outputs/apk/proprietary/debug/*.apk
+          - name: TV
+            artifact: debug-apks-tv
+            # Every TV flavor (libre only today).
+            tasks: :app:tv:assembleDebug
+            apks: app/tv/build/outputs/apk/*/debug/*.apk
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Set up JDK
         uses: actions/setup-java@v6
         with:
@@ -31,45 +111,68 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
-        # Upload all build artifacts in separate steps. This can be shortened once https://github.com/actions/upload-artifact/pull/354 is merged.
-      - name: Upload artifact phone-libre-arm64-v8a-debug.apk
+        run: ./gradlew ${{ matrix.tasks }}
+
+      - name: Upload debug APKs
         uses: actions/upload-artifact@v7
         with:
-          name: phone-libre-arm64-v8a-debug.apk
-          path: ./app/phone/build/outputs/apk/libre/debug/phone-libre-arm64-v8a-debug.apk
-      - name: Upload artifact phone-libre-armeabi-v7a-debug.apk
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.apks }}
+          if-no-files-found: error
+
+  # The debug unit tests of every module and flavor. The assemble jobs never compile the test
+  # sources, so a test that stops compiling only shows up here (#720). `--continue` runs the other
+  # modules' tests after a failure, so the reports show every failing module at once.
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --continue
+
+      # One row per module and flavor, so a module that suddenly runs no tests stands out.
+      - name: Summarize test results
+        if: always()
+        shell: python3 {0}
+        run: |
+          import glob, os, xml.etree.ElementTree as ET
+          from collections import Counter
+          totals = {}
+          for path in sorted(glob.glob("**/build/test-results/*/TEST-*.xml", recursive=True)):
+              task = os.path.dirname(path).replace("/build/test-results/", " ")
+              suite = ET.parse(path).getroot()
+              row = totals.setdefault(task, Counter())
+              for key in ("tests", "failures", "errors", "skipped"):
+                  row[key] += int(suite.get(key, 0))
+          lines = ["| Tests | Count | Failed | Skipped |", "|---|---:|---:|---:|"]
+          for task, row in totals.items():
+              lines.append(f"| {task} | {row['tests']} | {row['failures'] + row['errors']} | {row['skipped']} |")
+          all_rows = sum(totals.values(), Counter())
+          lines.append(f"| **All** | **{all_rows['tests']}** | **{all_rows['failures'] + all_rows['errors']}** | **{all_rows['skipped']}** |")
+          print("\n".join(lines))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("\n".join(lines) + "\n")
+
+      - name: Upload test reports
+        if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: phone-libre-armeabi-v7a-debug.apk
-          path: ./app/phone/build/outputs/apk/libre/debug/phone-libre-armeabi-v7a-debug.apk
-      - name: Upload artifact phone-libre-x86_64-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: phone-libre-x86_64-debug.apk
-          path: ./app/phone/build/outputs/apk/libre/debug/phone-libre-x86_64-debug.apk
-      - name: Upload artifact phone-libre-x86-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: phone-libre-x86-debug.apk
-          path: ./app/phone/build/outputs/apk/libre/debug/phone-libre-x86-debug.apk
-      - name: Upload artifact tv-libre-arm64-v8a-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: tv-libre-arm64-v8a-debug.apk
-          path: ./app/tv/build/outputs/apk/libre/debug/tv-libre-arm64-v8a-debug.apk
-      - name: Upload artifact tv-libre-armeabi-v7a-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: tv-libre-armeabi-v7a-debug.apk
-          path: ./app/tv/build/outputs/apk/libre/debug/tv-libre-armeabi-v7a-debug.apk
-      - name: Upload artifact tv-libre-x86_64-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: tv-libre-x86_64-debug.apk
-          path: ./app/tv/build/outputs/apk/libre/debug/tv-libre-x86_64-debug.apk
-      - name: Upload artifact tv-libre-x86-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: tv-libre-x86-debug.apk
-          path: ./app/tv/build/outputs/apk/libre/debug/tv-libre-x86-debug.apk
+          name: unit-test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 7

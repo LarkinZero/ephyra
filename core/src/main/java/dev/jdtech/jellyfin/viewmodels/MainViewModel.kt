@@ -3,20 +3,27 @@ package dev.jdtech.jellyfin.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.core.presentation.spoiler.SpoilerReveals
+import dev.jdtech.jellyfin.core.reachability.ServerReachability
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.profilelock.ProfileLock
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import dev.jdtech.jellyfin.utils.NetworkConnectivity
-import dev.jdtech.jellyfin.utils.UiOfflineDecision
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -25,12 +32,44 @@ class MainViewModel
 constructor(
     private val appPreferences: AppPreferences,
     private val database: ServerDatabaseDao,
-    private val networkConnectivity: NetworkConnectivity,
     private val profileLock: ProfileLock,
-    private val uiOfflineDecision: UiOfflineDecision,
+    private val serverReachability: ServerReachability,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
+
+    /**
+     * CE (#281): what the screens show about the server. Apart from [MainState], so a probe result
+     * recomposes the banner and not the navigation.
+     */
+    val serverStatus: StateFlow<ServerStatus> =
+        serverReachability.state
+            .mapLatest { reachability ->
+                ServerStatus(
+                    unreachable = reachability.unreachable,
+                    confirmedUnreachable = reachability.confirmedUnreachable,
+                    // Only asked when it is shown: the banner points at Downloads when there are
+                    // any.
+                    hasDownloads = !reachability.unreachable || hasDownloads(),
+                )
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, ServerStatus())
+
+    /** The banner's Retry: asks whether the server is there, without waiting for the answer. */
+    fun checkServer() = serverReachability.check()
+
+    private suspend fun hasDownloads(): Boolean =
+        try {
+            val serverId = appPreferences.getValue(appPreferences.currentServer)
+            serverId != null &&
+                (database.countMoviesByServerId(serverId) > 0 ||
+                    database.countShowsByServerId(serverId) > 0)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Not knowing must not take the way to Downloads away.
+            true
+        }
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -43,10 +82,14 @@ constructor(
 
     init {
         check()
-    }
-
-    override fun onCleared() {
-        uiOfflineDecision.clear(this)
+        // CE (#618): reveals belong to the user who made them.
+        viewModelScope.launch {
+            appPreferences
+                .observe(appPreferences.sessionUserId)
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { SpoilerReveals.clear() }
+        }
     }
 
     fun loadServerAndUser() {
@@ -124,34 +167,33 @@ constructor(
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
-                    appPreferences.observe(appPreferences.offlineMode),
                     appPreferences.observe(appPreferences.showFavoritesTab),
                     askUserOnStart,
                     profileLocked,
+                    appPreferences.observe(appPreferences.hideSpoilers),
+                    appPreferences.observe(appPreferences.sideBackdrop),
                 ) { values ->
                     val flags = values[0] as SetupFlags
                     val dynamicColors = values[1] as Boolean
-                    val offlineMode = values[2] as Boolean
-                    val showFavoritesTab = values[3] as Boolean
-                    val askUserOnStart = values[4] as Boolean
-                    val profileLocked = values[5] as Boolean
+                    val showFavoritesTab = values[2] as Boolean
+                    val askUserOnStart = values[3] as Boolean
+                    val profileLocked = values[4] as Boolean
+                    val hideSpoilers = values[5] as Boolean
+                    val sideBackdrop = values[6] as Boolean
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
                         hasServers = flags.hasServers,
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
-                        isOfflineMode = offlineMode || !networkConnectivity.isOnline(),
                         showFavoritesTab = showFavoritesTab,
                         askUserOnStart = askUserOnStart,
                         profileLocked = profileLocked,
+                        hideSpoilers = hideSpoilers,
+                        sideBackdrop = sideBackdrop,
                     )
                 }
-                .collect { mainState ->
-                    // CE (#427): screens created from now on get the repository this UI shows.
-                    uiOfflineDecision.set(this@MainViewModel, mainState.isOfflineMode)
-                    _state.emit(mainState)
-                }
+                .collect { mainState -> _state.emit(mainState) }
         }
     }
 
@@ -168,9 +210,25 @@ data class MainState(
     val hasServers: Boolean = false,
     val hasCurrentServer: Boolean = false,
     val hasCurrentUser: Boolean = false,
-    val isOfflineMode: Boolean = false,
     val showFavoritesTab: Boolean = true,
     val askUserOnStart: Boolean = false,
     /** CE (#299): the current profile asks for its PIN before Home shows. */
     val profileLocked: Boolean = false,
+    /** CE (#618): unwatched episodes hide their still, title and overview. */
+    val hideSpoilers: Boolean = false,
+    /** CE (#622): item pages show the backdrop at 16:9 beside the text in landscape. */
+    val sideBackdrop: Boolean = false,
+)
+
+/**
+ * CE (#281): the server as the screens see it.
+ *
+ * [unreachable] shows the banner. [confirmedUnreachable] also leaves out what needs the server
+ * (downloading, trailers): not on one failed probe alone, which a slow server can cause.
+ * [hasDownloads] is whether pointing at Downloads makes sense.
+ */
+data class ServerStatus(
+    val unreachable: Boolean = false,
+    val confirmedUnreachable: Boolean = false,
+    val hasDownloads: Boolean = true,
 )

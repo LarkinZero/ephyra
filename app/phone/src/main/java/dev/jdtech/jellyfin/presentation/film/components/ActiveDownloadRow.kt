@@ -13,14 +13,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadProgress
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloadStatus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.film.presentation.downloads.ActiveDownload
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -69,10 +70,15 @@ fun ActiveDownloadRow(
 
     val item = activeDownload.item
     val (title, supporting) = downloadTitles(item)
+    // CE (#618): a hidden episode is revealed by a press and hold, as in the other lists.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(item)
     DownloadRow(
         item = item,
         title = title,
         supporting = supporting,
+        onLongClick = if (hidden) ({ spoilers.reveal(item) }) else null,
+        onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         meta = statusLine(activeDownload),
         metaColor =
             if (status == DownloadStatus.FAILED) MaterialTheme.colorScheme.error
@@ -109,19 +115,28 @@ fun ActiveDownloadRow(
 }
 
 /**
- * Title and optional second line for a download row. Episodes put the series name first and
- * the episode on its own line, so a long series name can't truncate away which episode it is.
+ * Title and optional second line for a download row. Episodes put the series name first and the
+ * episode on its own line, so a long series name can't truncate away which episode it is.
  */
 @Composable
 fun downloadTitles(item: FindroidItem): Pair<String, String?> {
     if (item !is FindroidEpisode) return item.name to null
+    // CE (#618): a hidden episode is only its number.
     val episodeLabel =
-        stringResource(
-            CoreR.string.episode_name_extended,
-            item.parentIndexNumber,
-            item.indexNumber,
-            item.name,
-        )
+        if (LocalSpoilers.current.hides(item)) {
+            stringResource(
+                CoreR.string.season_episode_number,
+                item.parentIndexNumber,
+                item.indexNumber,
+            )
+        } else {
+            stringResource(
+                CoreR.string.episode_name_extended,
+                item.parentIndexNumber,
+                item.indexNumber,
+                item.name,
+            )
+        }
     return if (item.seriesName.isNotEmpty()) item.seriesName to episodeLabel
     else episodeLabel to null
 }

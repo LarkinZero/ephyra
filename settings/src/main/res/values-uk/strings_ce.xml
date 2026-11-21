@@ -198,4 +198,21 @@
     <string name="ce_number_off">Вимк.</string>
     <string name="ce_pref_player_keep_landscape">Тримати плеєр в альбомній орієнтації</string>
     <string name="ce_pref_player_keep_landscape_summary">Відтворювати відео в альбомній орієнтації, навіть якщо повернути планшет вертикально</string>
+    <string name="ce_pref_home_episode_images">Використовувати зображення серій</string>
+    <string name="ce_pref_home_episode_images_summary">Показувати зображення серії замість зображення серіалу в «Продовжити перегляд» і «Далі»</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Трансляція на телевізор</string>
+    <string name="ce_pref_cast_enabled_summary">Показувати кнопку трансляції та шукати пристрої Chromecast у вашій мережі</string>
+    <string name="ce_pref_cast_max_bitrate">Максимальний бітрейт</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Під час трансляції сервер знижує якість усього, що його перевищує</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Мбіт/с</string>
+    <string name="ce_pref_cast_hevc">Телевізор відтворює HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Надсилати відео HEVC (H.265) як є, не перетворюючи на H.264. Chromecast 4K отримує його так автоматично; увімкніть для іншого телевізора чи приставки, що відтворює HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Показувати зображення серії замість зображення серіалу в «Продовжити перегляд», у «Далі» та вгорі сторінки серії</string>
+    <string name="pref_player_media_segments_on_seek_bar">Сегменти на смузі перемотування</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Показувати вступ, стислий переказ, титри, анонс і рекламу кольоровими частинами смуги перемотування</string>
+    <string name="ce_pref_hide_spoilers">Приховувати спойлери</string>
+    <string name="ce_pref_hide_spoilers_summary">Розмивати зображення та приховувати назву й опис непереглянутих серій. Натисніть і утримуйте серію, щоб показати її</string>
+    <string name="ce_pref_side_backdrop">Фон поруч із текстом</string>
+    <string name="ce_pref_side_backdrop_summary">На планшеті в альбомній орієнтації показувати фон елемента в його власній формі поруч із назвою, а не на всю ширину</string>
 </resources>

@@ -27,6 +27,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerImage
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidFolder
@@ -42,8 +45,20 @@ enum class Direction {
 }
 
 @Composable
-fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Modifier) {
-    val sources = remember(item.images, direction) { posterSources(item, direction) }
+fun ItemPoster(
+    item: FindroidItem,
+    direction: Direction,
+    modifier: Modifier = Modifier,
+    // CE (#608): see posterSources.
+    preferThumb: Boolean = false,
+) {
+    // CE (#618): a hidden episode's still is blurred where it comes first, and left out where it
+    // is only the last resort behind the show's art.
+    val hidden = LocalSpoilers.current.hides(item)
+    val sources =
+        remember(item.images, direction, preferThumb, hidden) {
+            posterSources(item, direction, preferThumb, hideStill = hidden)
+        }
 
     // CE (#135): without artwork, or when none of it loads, the card shows the title and an icon
     // instead of an empty rectangle. A failed load moves on to the next source (#416).
@@ -60,10 +75,12 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
         if (imageUri == null) {
             PosterPlaceholder(
                 item = item,
-                // A vertical episode poster is the show's, a horizontal one the episode's own.
+                // A vertical episode poster is the show's, a horizontal one the episode's own,
+                // unless the card prefers the show's thumb.
                 title =
-                    if (item is FindroidEpisode && direction == Direction.VERTICAL) item.seriesName
-                    else item.name,
+                    if (item is FindroidEpisode && (direction == Direction.VERTICAL || preferThumb))
+                        item.seriesName
+                    else spoilerFreeName(item, hidden),
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -72,7 +89,13 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onError = { index++ },
-                modifier = Modifier.fillMaxSize(),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .spoilerImage(
+                            hidden = hidden && imageUri == item.images.primary,
+                            fallback = MaterialTheme.colorScheme.surfaceVariant,
+                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
             )
         }
     }
@@ -80,14 +103,33 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
 
 /**
  * The artwork a card tries, in order: a horizontal movie its backdrop, a vertical episode its
- * show's poster, a vertical season its own poster and then its show's (#416), anything else its
- * own poster.
+ * show's poster, a vertical season its own poster and then its show's (#416), anything else its own
+ * poster.
+ *
+ * With [preferThumb] (#608) a horizontal card starts with the thumb, the wide art with the title on
+ * it, of the movie or of the episode's series, then the backdrop. An episode's own image, a frame
+ * from the episode, comes last. The Continue Watching and Next Up rows ask for it.
  */
-internal fun posterSources(item: FindroidItem, direction: Direction): List<Uri> =
+internal fun posterSources(
+    item: FindroidItem,
+    direction: Direction,
+    preferThumb: Boolean = false,
+    hideStill: Boolean = false,
+): List<Uri> =
     when (direction) {
         Direction.HORIZONTAL ->
             when (item) {
-                is FindroidMovie -> listOf(item.images.backdrop)
+                is FindroidMovie ->
+                    if (preferThumb) listOf(item.images.thumb, item.images.backdrop)
+                    else listOf(item.images.backdrop)
+                is FindroidEpisode ->
+                    if (preferThumb && hideStill) {
+                        listOf(item.images.showThumb, item.images.showBackdrop)
+                    } else if (preferThumb) {
+                        listOf(item.images.showThumb, item.images.showBackdrop, item.images.primary)
+                    } else {
+                        listOf(item.images.primary)
+                    }
                 else -> listOf(item.images.primary)
             }
         Direction.VERTICAL ->
@@ -111,7 +153,8 @@ private fun PosterPlaceholder(item: FindroidItem, title: String, modifier: Modif
         }
     Column(
         modifier = modifier.padding(MaterialTheme.spacings.small),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small, Alignment.CenterVertically),
+        verticalArrangement =
+            Arrangement.spacedBy(MaterialTheme.spacings.small, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(

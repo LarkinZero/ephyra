@@ -28,8 +28,8 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonState
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,11 +91,11 @@ class PersonHeaderTest {
         // The card's node holds its poster, title and year.
         val bottom = rule.onNodeWithTag(personMediaCardTag(movies[0].id)).getUnclippedBoundsInRoot()
         assertTrue(
-            "first row ends at ${bottom.bottom}, below the safe area",
             bottom.bottom <= 540.dp - TvSafeArea.vertical,
+            message = "first row ends at ${bottom.bottom}, below the safe area",
         )
         val name = rule.onNodeWithTag(PERSON_BIOGRAPHY_TAG).getUnclippedBoundsInRoot()
-        assertTrue("header scrolled off: $name", name.top >= 0.dp)
+        assertTrue(name.top >= 0.dp, message = "header scrolled off: $name")
     }
 
     @Test
@@ -127,9 +127,9 @@ class PersonHeaderTest {
         rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertIsFocused()
         val scrollBefore = scrollPosition()
         pressInDialog(Key.DirectionDown)
-        assertTrue("Down didn't scroll the text", scrollPosition() > scrollBefore)
+        assertTrue(scrollPosition() > scrollBefore, message = "Down didn't scroll the text")
         pressInDialog(Key.DirectionUp)
-        assertEquals(scrollBefore, scrollPosition(), 0.5f)
+        assertEquals(scrollBefore, scrollPosition(), absoluteTolerance = 0.5f)
 
         // Back on the remote, as the dialog's window gets it.
         rule.runOnUiThread { ShadowDialog.getLatestDialog().onBackPressed() }
@@ -140,8 +140,8 @@ class PersonHeaderTest {
     }
 
     /**
-     * The dialog is centred, so a height within the screen less the safe area above and below
-     * keeps all of it inside the safe area.
+     * The dialog is centred, so a height within the screen less the safe area above and below keeps
+     * all of it inside the safe area.
      */
     private fun assertDialogFitsSafeArea(fontScale: Float) {
         setPerson(biography = longBiography.repeat(3), fontScale = fontScale)
@@ -150,18 +150,17 @@ class PersonHeaderTest {
 
         val dialog = rule.onNodeWithTag(TV_TEXT_DIALOG_TAG).getUnclippedBoundsInRoot()
         assertTrue(
-            "dialog is ${dialog.height} tall at font scale $fontScale",
             dialog.height <= 540.dp - TvSafeArea.vertical * 2,
+            message = "dialog is ${dialog.height} tall at font scale $fontScale",
         )
         // The text still scrolls to the end inside it.
         rule.onNodeWithTag(TV_TEXT_DIALOG_TEXT_TAG).assertIsFocused()
         val scrollBefore = scrollPosition()
         pressInDialog(Key.DirectionDown)
-        assertTrue("Down didn't scroll the text", scrollPosition() > scrollBefore)
+        assertTrue(scrollPosition() > scrollBefore, message = "Down didn't scroll the text")
     }
 
-    @Test
-    fun `the dialog fits inside the safe area`() = assertDialogFitsSafeArea(fontScale = 1f)
+    @Test fun `the dialog fits inside the safe area`() = assertDialogFitsSafeArea(fontScale = 1f)
 
     @Test
     fun `the dialog fits inside the safe area at font scale 1_3`() =

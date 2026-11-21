@@ -44,41 +44,46 @@ import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.revealOnLongClick
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeEpisodeLine
+import dev.jdtech.jellyfin.film.presentation.DownloadPrompt
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
 import dev.jdtech.jellyfin.film.presentation.show.ShowEvent
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
-import dev.jdtech.jellyfin.utils.AfterFirstFrame
-import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidShow
+import dev.jdtech.jellyfin.presentation.cast.LocalCastPlayback
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.AirScheduleText
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
 import dev.jdtech.jellyfin.presentation.film.components.CriticRating
-import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
-import dev.jdtech.jellyfin.presentation.film.components.ItemsRow
-import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
+import dev.jdtech.jellyfin.presentation.film.components.DownloadUnwatchedDialog
+import dev.jdtech.jellyfin.presentation.film.components.ExternalLinksRow
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
+import dev.jdtech.jellyfin.presentation.film.components.ItemsRow
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.SeasonSelectionDialog
+import dev.jdtech.jellyfin.presentation.film.components.TaglineText
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
 import dev.jdtech.jellyfin.presentation.film.components.rememberTopBarBackgroundAlpha
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.useWideItemLayout
+import dev.jdtech.jellyfin.utils.AfterFirstFrame
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.copyOnLongClick
 import dev.jdtech.jellyfin.utils.getShowDateString
 import java.util.UUID
@@ -95,11 +100,14 @@ fun ShowScreen(
     viewModel: ShowViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val castPlayback = LocalCastPlayback.current
     val uriHandler = LocalUriHandler.current
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ReloadOnResume(shouldReload = { viewModel.shouldReload(showId, downloadsOnly, stopEventFollows = true) }) {
+    ReloadOnResume(
+        shouldReload = { viewModel.shouldReload(showId, downloadsOnly, stopEventFollows = true) }
+    ) {
         viewModel.loadShow(showId = showId, downloadsOnly = downloadsOnly)
     }
 
@@ -125,15 +133,29 @@ fun ShowScreen(
                                 event.started,
                                 event.skipped,
                             )
-                        else ->
-                            context.getString(
-                                CoreR.string.download_started,
-                                event.started,
-                            )
+                        else -> context.getString(CoreR.string.download_started, event.started)
                     }
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    // CE (#636): the questions of a season download, shared by the phone and wide layouts: which
+    // episodes (only when some are watched), then the quality.
+    val downloadPrompt by viewModel.downloadPrompt.collectAsStateWithLifecycle()
+    when (val prompt = downloadPrompt) {
+        is DownloadPrompt.Episodes ->
+            DownloadUnwatchedDialog(
+                choice = prompt.choice,
+                onSelect = { unwatchedOnly -> viewModel.chooseEpisodes(unwatchedOnly) },
+                onDismiss = { viewModel.dismissDownloadPrompt() },
+            )
+        DownloadPrompt.Quality ->
+            DownloadQualityDialog(
+                onSelect = { maxBitrate -> viewModel.chooseQuality(maxBitrate) },
+                onDismiss = { viewModel.dismissDownloadPrompt() },
+            )
+        null -> Unit
     }
 
     ShowScreenLayout(
@@ -141,10 +163,34 @@ fun ShowScreen(
         onAction = { action ->
             when (action) {
                 is ShowAction.Play -> {
-                    val intent = Intent(context, PlayerActivity::class.java)
-                    intent.putExtra("itemId", showId.toString())
-                    intent.putExtra("itemKind", BaseItemKind.SERIES.serialName)
-                    context.startActivity(intent)
+                    // CE (#626): on the Cast receiver when one is connected.
+                    if (
+                        !castPlayback.play(
+                            showId,
+                            BaseItemKind.SERIES,
+                            false,
+                            null,
+                            shuffle = false,
+                        )
+                    ) {
+                        val intent = Intent(context, PlayerActivity::class.java)
+                        intent.putExtra("itemId", showId.toString())
+                        intent.putExtra("itemKind", BaseItemKind.SERIES.serialName)
+                        context.startActivity(intent)
+                    }
+                }
+                // CE (#638): every season's episodes, Specials left out, in random order.
+                is ShowAction.Shuffle -> {
+                    // On the Cast receiver when one is connected, as Play does (#626).
+                    if (
+                        !castPlayback.play(showId, BaseItemKind.SERIES, false, null, shuffle = true)
+                    ) {
+                        val intent = Intent(context, PlayerActivity::class.java)
+                        intent.putExtra("itemId", showId.toString())
+                        intent.putExtra("itemKind", BaseItemKind.SERIES.serialName)
+                        intent.putExtra("shuffle", true)
+                        context.startActivity(intent)
+                    }
                 }
                 is ShowAction.PlayTrailer -> {
                     try {
@@ -163,9 +209,7 @@ fun ShowScreen(
             }
             viewModel.onAction(action)
         },
-        onDownloadSeasons = { seasonIds, maxBitrate ->
-            viewModel.downloadSeasons(seasonIds, maxBitrate)
-        },
+        onDownloadSeasons = { seasonIds -> viewModel.downloadSeasons(seasonIds) },
         onDeleteShowDownloads = { viewModel.deleteShowDownloads() },
     )
 }
@@ -174,7 +218,7 @@ fun ShowScreen(
 private fun ShowScreenLayout(
     state: ShowState,
     onAction: (ShowAction) -> Unit,
-    onDownloadSeasons: (seasonIds: Set<UUID>, maxBitrate: Int?) -> Unit,
+    onDownloadSeasons: (seasonIds: Set<UUID>) -> Unit,
     onDeleteShowDownloads: () -> Unit,
 ) {
     // CE: medium and expanded windows get the hero layout (docs/tablet/4-design.md §6).
@@ -194,8 +238,6 @@ private fun ShowScreenLayout(
     val artwork = rememberArtworkState(state.show, ArtworkPlacement.Header)
 
     var seasonSelectionDialogOpen by remember { mutableStateOf(false) }
-    // Seasons picked in the selection dialog, awaiting a quality choice.
-    var pendingDownloadSeasonIds by remember { mutableStateOf<Set<UUID>?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.show?.let { show ->
@@ -244,10 +286,11 @@ private fun ShowScreenLayout(
                             modifier = Modifier.copyOnLongClick(dateText),
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        val runtimeText = stringResource(
-                            CoreR.string.runtime_minutes,
-                            show.runtimeTicks.div(Constants.TICKS_PER_MINUTE),
-                        )
+                        val runtimeText =
+                            stringResource(
+                                CoreR.string.runtime_minutes,
+                                show.runtimeTicks.div(Constants.TICKS_PER_MINUTE),
+                            )
                         Text(
                             text = runtimeText,
                             modifier = Modifier.copyOnLongClick(runtimeText),
@@ -257,14 +300,14 @@ private fun ShowScreenLayout(
                             Text(
                                 text = officialRating,
                                 modifier = Modifier.copyOnLongClick(officialRating),
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                         show.communityRating?.let { communityRating ->
                             val ratingText = "%.1f".format(communityRating)
                             Row(
                                 modifier = Modifier.copyOnLongClick(ratingText),
-                                verticalAlignment = Alignment.Bottom
+                                verticalAlignment = Alignment.Bottom,
                             ) {
                                 Icon(
                                     painter = painterResource(CoreR.drawable.ic_star),
@@ -289,6 +332,7 @@ private fun ShowScreenLayout(
                         onPlayClick = { startFromBeginning ->
                             onAction(ShowAction.Play(startFromBeginning = startFromBeginning))
                         },
+                        onShuffleClick = { onAction(ShowAction.Shuffle) },
                         onMarkAsPlayedClick = {
                             when (show.played) {
                                 true -> onAction(ShowAction.UnmarkAsPlayed)
@@ -335,6 +379,8 @@ private fun ShowScreenLayout(
                     ShowLinks(show, onAction)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     state.nextUp?.let { nextUp ->
+                        // CE (#618): a hidden Next Up is only its number, until held.
+                        val hidden = LocalSpoilers.current.hides(nextUp)
                         Text(
                             text = stringResource(CoreR.string.next_up),
                             style = MaterialTheme.typography.titleMedium,
@@ -344,7 +390,17 @@ private fun ShowScreenLayout(
                             modifier =
                                 Modifier.widthIn(max = 420.dp)
                                     .clip(MaterialTheme.shapes.small)
-                                    .clickable { onAction(ShowAction.NavigateToItem(nextUp)) }
+                                    .then(
+                                        if (hidden) {
+                                            Modifier.revealOnLongClick(nextUp) {
+                                                onAction(ShowAction.NavigateToItem(nextUp))
+                                            }
+                                        } else {
+                                            Modifier.clickable {
+                                                onAction(ShowAction.NavigateToItem(nextUp))
+                                            }
+                                        }
+                                    )
                         ) {
                             ItemPoster(
                                 item = nextUp,
@@ -353,13 +409,7 @@ private fun ShowScreenLayout(
                             )
                             Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
                             Text(
-                                text =
-                                    stringResource(
-                                        id = CoreR.string.episode_name_extended,
-                                        nextUp.parentIndexNumber,
-                                        nextUp.indexNumber,
-                                        nextUp.name,
-                                    ),
+                                text = spoilerFreeEpisodeLine(nextUp, hidden),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
@@ -377,8 +427,7 @@ private fun ShowScreenLayout(
                     }
                     LazyRow(
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacings.default),
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                     ) {
                         items(items = state.seasons, key = { item -> item.id }) { season ->
                             ItemCard(
@@ -408,12 +457,13 @@ private fun ShowScreenLayout(
                 )
                 Spacer(Modifier.height(paddingBottom))
             }
-        } ?: run {
-            LoadingOrError(
-                error = state.error,
-                onRetryClick = { onAction(ShowAction.OnRetryClick) },
-            )
         }
+            ?: run {
+                LoadingOrError(
+                    error = state.error,
+                    onRetryClick = { onAction(ShowAction.OnRetryClick) },
+                )
+            }
 
         LightStatusBarOverArtwork(artwork.hasArtwork, rememberTopBarBackgroundAlpha(scrollState))
         ItemTopBar(
@@ -429,20 +479,11 @@ private fun ShowScreenLayout(
             SeasonSelectionDialog(
                 seasons = state.downloadableSeasons,
                 onConfirm = { selectedSeasonIds ->
-                    pendingDownloadSeasonIds = selectedSeasonIds
+                    onDownloadSeasons(selectedSeasonIds)
                     seasonSelectionDialogOpen = false
                 },
                 onDismiss = { seasonSelectionDialogOpen = false },
                 seasonDownloadInfo = state.seasonDownloadInfo,
-            )
-        }
-        pendingDownloadSeasonIds?.let { seasonIds ->
-            DownloadQualityDialog(
-                onSelect = { maxBitrate ->
-                    onDownloadSeasons(seasonIds, maxBitrate)
-                    pendingDownloadSeasonIds = null
-                },
-                onDismiss = { pendingDownloadSeasonIds = null },
             )
         }
     }
@@ -451,7 +492,7 @@ private fun ShowScreenLayout(
 /** CE (#332): the show's outside links, below the info text. */
 @Composable
 internal fun ShowLinks(show: FindroidShow, onAction: (ShowAction) -> Unit) {
-    if (show.externalLinks.isEmpty() || LocalOfflineMode.current) return
+    if (show.externalLinks.isEmpty()) return
     Spacer(Modifier.height(MaterialTheme.spacings.medium))
     ExternalLinksRow(show.externalLinks) { url -> onAction(ShowAction.OpenExternalLink(url)) }
 }
@@ -486,7 +527,7 @@ private fun EpisodeScreenLayoutPreview() {
         ShowScreenLayout(
             state = ShowState(show = dummyShow),
             onAction = {},
-            onDownloadSeasons = { _, _ -> },
+            onDownloadSeasons = {},
             onDeleteShowDownloads = {},
         )
     }

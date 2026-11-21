@@ -17,9 +17,9 @@ import dev.jdtech.jellyfin.film.presentation.search.SearchState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.useDockedSearch
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,9 +27,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * #439: on a tablet or an unfolded fold the open search stays docked: the field keeps the
- * collapsed bar's place and at most 720 dp (docs/tablet/4-design.md §3 and §5), the results use
- * the whole width beside it. A phone keeps the full-screen search in both orientations.
+ * #439: on a tablet or an unfolded fold the open search stays docked: the field keeps the collapsed
+ * bar's place and at most 720 dp (docs/tablet/4-design.md §3 and §5), the results use the whole
+ * width beside it. A phone keeps the full-screen search in both orientations.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class)
@@ -45,12 +45,12 @@ class SearchBarDockedTest {
         show(docked = true)
 
         val field = rule.onNode(hasSetTextAction()).getUnclippedBoundsInRoot()
-        assertEquals(24f, field.left.value, 1f)
-        assertTrue("field is ${field.width} wide", field.width <= 720.dp + 1.dp)
+        assertEquals(24f, field.left.value, absoluteTolerance = 1f)
+        assertTrue(field.width <= 720.dp + 1.dp, message = "field is ${field.width} wide")
 
         // The sixth poster of a row of 180 dp cells lies well past the field's end.
         val sixth = rule.onNodeWithText("Movie 6").getUnclippedBoundsInRoot()
-        assertTrue("sixth result starts at ${sixth.left}", sixth.left > field.right)
+        assertTrue(sixth.left > field.right, message = "sixth result starts at ${sixth.left}")
     }
 
     @Test
@@ -60,7 +60,7 @@ class SearchBarDockedTest {
 
         val window = rule.onRoot().getUnclippedBoundsInRoot()
         val field = rule.onNode(hasSetTextAction()).getUnclippedBoundsInRoot()
-        assertEquals(window.width.value, field.width.value, 1f)
+        assertEquals(window.width.value, field.width.value, absoluteTolerance = 1f)
     }
 
     @Test
@@ -86,9 +86,7 @@ class SearchBarDockedTest {
     private fun assertDocked(expected: Boolean) {
         var docked: Boolean? = null
         rule.setContent { docked = useDockedSearch() }
-        rule.runOnIdle {
-            if (expected) assertTrue(docked == true) else assertFalse(docked == true)
-        }
+        rule.runOnIdle { if (expected) assertTrue(docked == true) else assertFalse(docked == true) }
     }
 
     private fun show(docked: Boolean) {

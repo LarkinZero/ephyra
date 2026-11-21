@@ -1,10 +1,10 @@
 package dev.jdtech.jellyfin.player.local.domain
 
 import androidx.media3.common.MimeTypes
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /** Unit tests for what [AudioDecoderFallback] remembers and which decoders it leaves to ffmpeg. */
 class AudioDecoderFallbackTest {

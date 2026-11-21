@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +28,9 @@ class ScreensaverSettingsScreenTest {
         val appPreferences =
             AppPreferences(context.getSharedPreferences("screensaver_test", Context.MODE_PRIVATE))
         rule.setContent {
-            FindroidTheme { ScreensaverSettingsScreen(appPreferences = appPreferences, onBack = {}) }
+            FindroidTheme {
+                ScreensaverSettingsScreen(appPreferences = appPreferences, onBack = {})
+            }
         }
         rule.waitForIdle()
 
@@ -37,7 +39,7 @@ class ScreensaverSettingsScreenTest {
             // On a row about 1300 dp wide, the value sits at the far end, not right after the
             // label.
             val gap = bounds(value).left - bounds(label).right
-            assertTrue("$label: gap between label and value is $gap", gap > 400.dp)
+            assertTrue(gap > 400.dp, message = "$label: gap between label and value is $gap")
         }
     }
 

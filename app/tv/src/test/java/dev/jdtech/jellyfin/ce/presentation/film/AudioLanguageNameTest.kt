@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.ce.presentation.film
 
 import java.util.Locale
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
 /** The language in the season page's audio chip (#415). */
 class AudioLanguageNameTest {

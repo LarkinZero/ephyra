@@ -198,4 +198,21 @@
     <string name="ce_number_off">Vypnuto</string>
     <string name="ce_pref_player_keep_landscape">Ponechat přehrávač na šířku</string>
     <string name="ce_pref_player_keep_landscape_summary">Přehrávat videa na šířku, i když tablet otočíte na výšku</string>
+    <string name="ce_pref_home_episode_images">Používat obrázky epizod</string>
+    <string name="ce_pref_home_episode_images_summary">Zobrazit obrázek epizody místo obrázku seriálu v řadách Pokračovat ve sledování a Další</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Odesílat do televize</string>
+    <string name="ce_pref_cast_enabled_summary">Zobrazit tlačítko Odeslat a hledat zařízení Chromecast ve vaší síti</string>
+    <string name="ce_pref_cast_max_bitrate">Maximální datový tok</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Při odesílání server sníží kvalitu všeho, co ho překračuje</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mb/s</string>
+    <string name="ce_pref_cast_hevc">Televize přehrává HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Posílat video HEVC (H.265) beze změny místo převodu na H.264. Chromecast 4K ho tak dostává automaticky; zapněte pro jinou televizi nebo box, které HEVC přehrají</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Zobrazit obrázek epizody místo obrázku seriálu v řadách Pokračovat ve sledování a Další a v horní části stránky epizody</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmenty na posuvníku</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Zobrazit úvod, rekapitulaci, závěr, upoutávku a reklamy jako barevné části posuvníku</string>
+    <string name="ce_pref_hide_spoilers">Skrýt spoilery</string>
+    <string name="ce_pref_hide_spoilers_summary">Rozmaže obrázek a skryje název a popis epizod, které jste neviděli. Podržením epizodu odkryjete</string>
+    <string name="ce_pref_side_backdrop">Pozadí vedle textu</string>
+    <string name="ce_pref_side_backdrop_summary">Na tabletu na šířku zobrazit pozadí položky v jeho vlastním tvaru vedle názvu místo přes celou šířku</string>
 </resources>

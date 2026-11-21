@@ -10,14 +10,12 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
@@ -27,16 +25,14 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonState
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import java.util.UUID
-import org.junit.Assert.assertTrue
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/**
- * "Open → Back → same card focused" for the CE person screen (#136, ADR 0003).
- */
+/** "Open → Back → same card focused" for the CE person screen (#136, ADR 0003). */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], application = Application::class, qualifiers = "w1920dp-h1080dp")
 class PersonFocusRestoreTest {
@@ -126,7 +122,7 @@ class PersonFocusRestoreTest {
         setUpPerson()
         rule.waitForIdle()
         rule.onNode(card(movies[0])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -139,7 +135,7 @@ class PersonFocusRestoreTest {
         rule.waitForIdle()
 
         rule.onNode(card(movies[1])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -153,12 +149,12 @@ class PersonFocusRestoreTest {
         rule.onRoot().performKeyInput { pressKey(Key.DirectionDown) }
         rule.waitForIdle()
         rule.onNode(card(shows[0])).assertIsFocused()
-        assertTrue("second section didn't scroll", nameTop() < 0f)
+        assertTrue(nameTop() < 0f, message = "second section didn't scroll")
 
         rule.onRoot().performKeyInput { pressKey(Key.DirectionUp) }
         rule.waitForIdle()
         rule.onNode(card(movies[0])).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 
     @Test
@@ -174,6 +170,6 @@ class PersonFocusRestoreTest {
         rule.waitForIdle()
 
         rule.onNode(card(target)).assertIsFocused()
-        assertTrue("name scrolled off: ${nameTop()}", nameTop() >= 0f)
+        assertTrue(nameTop() >= 0f, message = "name scrolled off: ${nameTop()}")
     }
 }

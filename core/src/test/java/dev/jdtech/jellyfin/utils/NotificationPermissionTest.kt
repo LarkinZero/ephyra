@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.utils
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 /** CE (#372): when starting a download asks for the notification permission. */
 class NotificationPermissionTest {

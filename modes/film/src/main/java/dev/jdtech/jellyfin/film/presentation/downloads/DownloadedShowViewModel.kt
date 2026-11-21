@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.getLocalSourcesForItems
 import dev.jdtech.jellyfin.models.toFindroidEpisode
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import java.io.File
 import java.util.UUID
@@ -29,6 +30,7 @@ constructor(
     private val downloadQueue: DownloadQueue,
     private val downloader: Downloader,
     private val database: ServerDatabaseDao,
+    private val appPreferences: AppPreferences,
 ) : ViewModel() {
     private val _state = MutableStateFlow(DownloadedShowState())
     val state = _state.asStateFlow()
@@ -39,7 +41,11 @@ constructor(
                 withContext(Dispatchers.IO) {
                     val userId = repository.getUserId()
                     // Episodes with only a `.download` source are still in progress.
-                    val allEpisodes = database.getEpisodesByShowId(showId)
+                    // CE (#718): the ones the current server downloaded.
+                    val allEpisodes =
+                        appPreferences.getValue(appPreferences.currentServer)?.let {
+                            database.getEpisodesByShowIdOfServer(showId, it)
+                        } ?: emptyList()
                     // One query for every episode's sources, reused for the filter, the
                     // conversion and the sizes.
                     val sourcesByEpisode =
@@ -51,23 +57,14 @@ constructor(
                                     !it.path.endsWith(".download")
                                 }
                             }
-                            .map {
-                                it.toFindroidEpisode(
-                                    database,
-                                    userId,
-                                    sourcesByEpisode,
-                                )
+                            .map { it.toFindroidEpisode(database, userId, sourcesByEpisode) }
+                            .sortedWith(compareBy({ it.parentIndexNumber }, { it.indexNumber }))
+                    val sizes = episodes.associate { ep ->
+                        ep.id to
+                            sourcesByEpisode[ep.id].orEmpty().sumOf { src ->
+                                File(src.path).takeIf { it.exists() }?.length() ?: 0L
                             }
-                            .sortedWith(
-                                compareBy({ it.parentIndexNumber }, { it.indexNumber })
-                            )
-                    val sizes =
-                        episodes.associate { ep ->
-                            ep.id to
-                                sourcesByEpisode[ep.id].orEmpty().sumOf { src ->
-                                    File(src.path).takeIf { it.exists() }?.length() ?: 0L
-                                }
-                        }
+                    }
                     episodes to sizes
                 }
             val seasons =
@@ -80,7 +77,9 @@ constructor(
                             episodes = seasonEpisodes,
                         )
                     }
-            _state.emit(DownloadedShowState(seasons = seasons, itemSizes = sizes, isLoading = false))
+            _state.emit(
+                DownloadedShowState(seasons = seasons, itemSizes = sizes, isLoading = false)
+            )
         }
     }
 

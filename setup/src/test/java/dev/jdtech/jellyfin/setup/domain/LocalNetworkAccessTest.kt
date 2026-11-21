@@ -1,13 +1,13 @@
 package dev.jdtech.jellyfin.setup.domain
 
 import java.net.InetAddress
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * CE (#376): on Android 17 a denied local network permission made discovery and every address on
@@ -20,8 +20,14 @@ class LocalNetworkAccessTest {
     @Test
     fun `the permission does not exist before Android 17, granted or not`() {
         for (sdk in listOf(29, 30, 33, 34, 35, 36)) {
-            assertFalse("API $sdk", localNetworkAccessDenied(sdkInt = sdk, granted = false))
-            assertFalse("API $sdk", localNetworkAccessDenied(sdkInt = sdk, granted = true))
+            assertFalse(
+                localNetworkAccessDenied(sdkInt = sdk, granted = false),
+                message = "API $sdk",
+            )
+            assertFalse(
+                localNetworkAccessDenied(sdkInt = sdk, granted = true),
+                message = "API $sdk",
+            )
         }
     }
 
@@ -56,7 +62,7 @@ class LocalNetworkAccessTest {
                 "::ffff:10.0.2.2",
             )
         for (address in local) {
-            assertTrue(address, isLocalNetworkAddress(bytes(address)))
+            assertTrue(isLocalNetworkAddress(bytes(address)), message = address)
         }
     }
 
@@ -84,7 +90,7 @@ class LocalNetworkAccessTest {
                 "::ffff:127.0.0.1",
             )
         for (address in notLocal) {
-            assertFalse(address, isLocalNetworkAddress(bytes(address)))
+            assertFalse(isLocalNetworkAddress(bytes(address)), message = address)
         }
     }
 
@@ -123,7 +129,7 @@ class LocalNetworkAccessTest {
 
     @Test
     fun `an IP address is parsed without a lookup, a name is not parsed`() {
-        assertArrayEquals(byteArrayOf(10, 0, 2, 2), parseIpAddress("10.0.2.2"))
+        assertContentEquals(byteArrayOf(10, 0, 2, 2), parseIpAddress("10.0.2.2"))
         assertEquals(16, parseIpAddress("fe80::1")!!.size)
         assertNull(parseIpAddress("demo.jellyfin.org"))
         assertNull(parseIpAddress("nas"))

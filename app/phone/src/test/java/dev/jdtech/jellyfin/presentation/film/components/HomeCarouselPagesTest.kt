@@ -20,8 +20,8 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.WidthClass
 import java.util.UUID
 import kotlin.math.abs
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,9 +55,7 @@ class HomeCarouselPagesTest {
         assertEquals(2, carouselPageCount(WidthClass.Expanded, compactHeight = true))
     }
 
-    @Test
-    @Config(qualifiers = "w411dp-h914dp-port")
-    fun `a phone shows one page`() = assertPages(1)
+    @Test @Config(qualifiers = "w411dp-h914dp-port") fun `a phone shows one page`() = assertPages(1)
 
     @Test
     @Config(qualifiers = "w914dp-h411dp-land")
@@ -101,8 +99,8 @@ class HomeCarouselPagesTest {
         val pager = window - rail - margin * 2
         val expectedPage: Dp = (pager - 16.dp * (expected - 1)) / expected
         assertTrue(
-            "page is $page in a $window window, expected $expectedPage",
             abs((page - expectedPage).value) <= 1f,
+            message = "page is $page in a $window window, expected $expectedPage",
         )
     }
 }

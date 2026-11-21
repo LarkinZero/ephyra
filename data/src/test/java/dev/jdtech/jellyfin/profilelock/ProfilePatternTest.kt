@@ -1,9 +1,9 @@
 package dev.jdtech.jellyfin.profilelock
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class ProfilePatternTest {
     @Test
@@ -53,8 +53,12 @@ class ProfilePatternTest {
         val salt = ProfilePinHasher.newSalt()
         val hash = ProfilePinHasher.hash("0-1-2-5-8", salt)
 
-        assertTrue(ProfilePinHasher.verify(ProfileLockEntry.Pattern(listOf(0, 1, 2, 5, 8)), salt, hash))
-        assertFalse(ProfilePinHasher.verify(ProfileLockEntry.Pattern(listOf(0, 1, 2, 5)), salt, hash))
+        assertTrue(
+            ProfilePinHasher.verify(ProfileLockEntry.Pattern(listOf(0, 1, 2, 5, 8)), salt, hash)
+        )
+        assertFalse(
+            ProfilePinHasher.verify(ProfileLockEntry.Pattern(listOf(0, 1, 2, 5)), salt, hash)
+        )
         assertFalse(ProfilePinHasher.verify(ProfileLockEntry.Pattern(listOf(0, 1, 2)), salt, hash))
     }
 }

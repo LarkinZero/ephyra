@@ -194,4 +194,21 @@
     <string name="ce_number_off">Desativado</string>
     <string name="ce_pref_player_keep_landscape">Manter o player na horizontal</string>
     <string name="ce_pref_player_keep_landscape_summary">Reproduzir os vídeos na horizontal, mesmo quando você gira o tablet para a vertical</string>
+    <string name="ce_pref_home_episode_images">Usar imagens dos episódios</string>
+    <string name="ce_pref_home_episode_images_summary">Mostrar a imagem do episódio em vez da imagem da série em Continuar assistindo e A seguir</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">Transmitir para uma TV</string>
+    <string name="ce_pref_cast_enabled_summary">Mostrar o botão Transmitir e procurar dispositivos Chromecast na sua rede</string>
+    <string name="ce_pref_cast_max_bitrate">Taxa de bits máxima</string>
+    <string name="ce_pref_cast_max_bitrate_summary">Durante a transmissão, o servidor reduz a qualidade de tudo o que a ultrapassar</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">A TV reproduz HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">Enviar o vídeo HEVC (H.265) como está em vez de convertê-lo para H.264. Um Chromecast 4K recebe assim automaticamente; ative para outra TV ou box que reproduza HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">Mostrar a imagem do episódio em vez da imagem da série em Continuar assistindo, em A seguir e no topo da página do episódio</string>
+    <string name="pref_player_media_segments_on_seek_bar">Segmentos na barra de progresso</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">Mostrar a abertura, o resumo, o encerramento, a prévia e os comerciais como partes coloridas da barra de progresso</string>
+    <string name="ce_pref_hide_spoilers">Ocultar spoilers</string>
+    <string name="ce_pref_hide_spoilers_summary">Desfoca a imagem e oculta o título e a sinopse dos episódios que você não assistiu. Toque e segure um episódio para mostrá-lo</string>
+    <string name="ce_pref_side_backdrop">Fundo ao lado do texto</string>
+    <string name="ce_pref_side_backdrop_summary">Em um tablet na horizontal, mostrar o fundo de um item no próprio formato ao lado do título em vez de em toda a largura</string>
 </resources>

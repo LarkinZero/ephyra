@@ -196,4 +196,21 @@
     <string name="ce_number_off">כבוי</string>
     <string name="ce_pref_player_keep_landscape">להשאיר את הנגן לרוחב</string>
     <string name="ce_pref_player_keep_landscape_summary">להפעיל סרטונים לרוחב, גם כשמסובבים את הטאבלט לאורך</string>
+    <string name="ce_pref_home_episode_images">שימוש בתמונות של פרקים</string>
+    <string name="ce_pref_home_episode_images_summary">הצגת תמונת הפרק במקום תמונת הסדרה ב\"המשך צפייה\" וב\"הבא בתור\"</string>
+    <string name="ce_pref_cast_group">Chromecast</string>
+    <string name="ce_pref_cast_enabled">הפעלה בטלוויזיה (Cast)</string>
+    <string name="ce_pref_cast_enabled_summary">הצגת לחצן ה-Cast וחיפוש מכשירי Chromecast ברשת שלך</string>
+    <string name="ce_pref_cast_max_bitrate">קצב סיביות מרבי</string>
+    <string name="ce_pref_cast_max_bitrate_summary">בזמן ההעברה לטלוויזיה השרת מוריד את האיכות של כל מה שמעל הקצב הזה</string>
+    <string name="ce_pref_cast_max_bitrate_suffix">Mbps</string>
+    <string name="ce_pref_cast_hevc">הטלוויזיה מפעילה HEVC</string>
+    <string name="ce_pref_cast_hevc_summary">שליחת וידאו HEVC (H.265) כמו שהוא במקום להמיר אותו ל-H.264. ‏Chromecast 4K מקבל זאת אוטומטית; יש להפעיל עבור טלוויזיה או ממיר אחרים שמפעילים HEVC</string>
+    <string name="ce_pref_home_episode_images_summary_phone">הצגת תמונת הפרק במקום תמונת הסדרה ב\"המשך צפייה\", ב\"הבא בתור\" ובראש דף הפרק</string>
+    <string name="pref_player_media_segments_on_seek_bar">מקטעים בסרגל ההתקדמות</string>
+    <string name="pref_player_media_segments_on_seek_bar_summary">הצגת הפתיח, הסיכום, הסיום, התצוגה המקדימה והפרסומות כחלקים צבעוניים בסרגל ההתקדמות</string>
+    <string name="ce_pref_hide_spoilers">הסתרת ספוילרים</string>
+    <string name="ce_pref_hide_spoilers_summary">טשטוש התמונה והסתרת השם והתקציר של פרקים שלא צפית בהם. יש ללחוץ לחיצה ארוכה על פרק כדי להציג אותו</string>
+    <string name="ce_pref_side_backdrop">רקע לצד הטקסט</string>
+    <string name="ce_pref_side_backdrop_summary">בטאבלט במצב לרוחב, הצג את הרקע של פריט בצורתו המקורית לצד הכותרת במקום לכל הרוחב</string>
 </resources>

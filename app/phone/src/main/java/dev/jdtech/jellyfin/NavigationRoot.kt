@@ -10,15 +10,16 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.res.painterResource
@@ -52,6 +53,7 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
+import dev.jdtech.jellyfin.presentation.cast.CastHost
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadedShowScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
@@ -65,21 +67,21 @@ import dev.jdtech.jellyfin.presentation.film.PersonScreen
 import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
-import dev.jdtech.jellyfin.presentation.settings.LicensesScreen
 import dev.jdtech.jellyfin.presentation.settings.HomeRowsScreen
+import dev.jdtech.jellyfin.presentation.settings.LicensesScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
 import dev.jdtech.jellyfin.presentation.settings.SubtitleStyleScreen
-import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinGateScreen
-import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinScreen
 import dev.jdtech.jellyfin.presentation.setup.addresses.ServerAddressesScreen
 import dev.jdtech.jellyfin.presentation.setup.addserver.AddServerScreen
 import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
 import dev.jdtech.jellyfin.presentation.setup.permission.PermissionScreen
+import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinGateScreen
+import dev.jdtech.jellyfin.presentation.setup.pin.ProfilePinScreen
 import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.useDockedSearch
 import dev.jdtech.jellyfin.setup.presentation.permission.PermissionAction
 import dev.jdtech.jellyfin.setup.presentation.permission.PermissionViewModel
@@ -140,10 +142,7 @@ fun NavigationRoot(
     // Navigation state for both modes is hoisted so that it survives switching between them.
     val setupBackStack = rememberNavBackStack(setupStartRoute)
     val navigationState =
-        rememberNavigationState(
-            startRoute = HomeRoute,
-            topLevelRoutes = TOP_LEVEL_ROUTES,
-        )
+        rememberNavigationState(startRoute = HomeRoute, topLevelRoutes = TOP_LEVEL_ROUTES)
     val navigator = remember(navigationState) { Navigator(navigationState) }
 
     val entryDecorators = rememberModeEntryDecorators()
@@ -202,7 +201,6 @@ fun NavigationRoot(
                 navigationState = navigationState,
                 navigator = navigator,
                 entryDecorators = entryDecorators.main,
-                isOfflineMode = LocalOfflineMode.current,
                 showFavoritesTab = showFavoritesTab,
                 searchExpanded = searchExpanded,
                 searchFromHome = searchFromHome,
@@ -225,13 +223,15 @@ fun NavigationRoot(
  * theme switch or a resize, and the search must stay open with its query and results.
  */
 @Composable
-internal fun rememberSearchExpanded(): MutableState<Boolean> =
-    rememberSaveable { mutableStateOf(false) }
+internal fun rememberSearchExpanded(): MutableState<Boolean> = rememberSaveable {
+    mutableStateOf(false)
+}
 
 /** Whether Home's search button opened the My media search (#394), saved like the open state. */
 @Composable
-internal fun rememberSearchFromHome(): MutableState<Boolean> =
-    rememberSaveable { mutableStateOf(false) }
+internal fun rememberSearchFromHome(): MutableState<Boolean> = rememberSaveable {
+    mutableStateOf(false)
+}
 
 /**
  * The My media search: whether it is open, and whether Home's search button opened it (#394).
@@ -392,7 +392,6 @@ private fun MainNavigation(
     navigationState: NavigationState,
     navigator: Navigator,
     entryDecorators: List<NavEntryDecorator<NavKey>>,
-    isOfflineMode: Boolean,
     showFavoritesTab: Boolean,
     searchExpanded: MutableState<Boolean>,
     searchFromHome: MutableState<Boolean>,
@@ -403,7 +402,6 @@ private fun MainNavigation(
         remember(searchExpanded, searchFromHome) { MediaSearch(searchExpanded, searchFromHome) }
     val navigationItems =
         when {
-            isOfflineMode -> listOf(homeTab, downloadsTab)
             showFavoritesTab -> listOf(homeTab, favoritesTab, mediaTab, downloadsTab)
             else -> listOf(homeTab, mediaTab, downloadsTab)
         }
@@ -489,13 +487,34 @@ private fun MainNavigation(
         layoutType = customNavSuiteType,
         state = navigationSuiteScaffoldState,
     ) {
-        NavDisplay(
-            entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-            onBack = { navigator.goBack() },
-            transitionSpec = { GLOBAL_TRANSITION_SPEC },
-            popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
-            predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
-        )
+        // CE (#281): the unreachable banner and the error pages lead to the Downloads tab, except
+        // on that tab itself.
+        val serverStatus = LocalServerStatus.current
+        val openDownloads: (() -> Unit)? =
+            if (topLevelRoute == DownloadsRoute || DownloadsRoute !in tabRoutes) {
+                null
+            } else {
+                { navigator.navigate(DownloadsRoute) }
+            }
+        CompositionLocalProvider(
+            LocalServerStatus provides serverStatus.copy(openDownloads = openDownloads)
+        ) {
+            // CE (#626): the Cast mini player and player sit around the screens; without Cast in
+            // the build this is the display alone.
+            CastHost(
+                route = navigationState.currentBackStack().lastOrNull(),
+                showBottomBar = showBottomBar,
+                serverUnreachable = serverStatus.unreachable,
+            ) {
+                NavDisplay(
+                    entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+                    onBack = { navigator.goBack() },
+                    transitionSpec = { GLOBAL_TRANSITION_SPEC },
+                    popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
+                    predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
+                )
+            }
+        }
     }
 }
 
@@ -665,13 +684,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<DownloadsRoute> {
         DownloadsScreen(
             onItemClick =
-                resumedAction { item ->
-                    navigateToItem(
-                        navigator,
-                        item,
-                        downloadsOnly = true,
-                    )
-                },
+                resumedAction { item -> navigateToItem(navigator, item, downloadsOnly = true) },
             onShowClick =
                 resumedAction { show ->
                     navigator.navigate(
@@ -711,9 +724,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         )
     }
     entry<FavoritesRoute> {
-        FavoritesScreen(
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-        )
+        FavoritesScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
     }
     entry<MovieRoute> { key ->
         MovieScreen(
@@ -735,11 +746,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateHome = dropUnlessResumed { navigator.navigateHome() },
             navigateToItem =
                 resumedAction { item ->
-                    navigateToItem(
-                        navigator,
-                        item,
-                        downloadsOnly = key.downloadsOnly,
-                    )
+                    navigateToItem(navigator, item, downloadsOnly = key.downloadsOnly)
                 },
             navigateToPerson =
                 resumedAction { personId ->
@@ -756,11 +763,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateHome = dropUnlessResumed { navigator.navigateHome() },
             navigateToItem =
                 resumedAction { item ->
-                    navigateToItem(
-                        navigator,
-                        item,
-                        downloadsOnly = key.downloadsOnly,
-                    )
+                    navigateToItem(navigator, item, downloadsOnly = key.downloadsOnly)
                 },
             navigateToSeries =
                 resumedAction { seriesId ->
@@ -800,13 +803,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             personId = UUID.fromString(key.personId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateHome = dropUnlessResumed { navigator.navigateHome() },
-            navigateToItem =
-                resumedAction { item ->
-                    navigateToItem(
-                        navigator,
-                        item,
-                    )
-                },
+            navigateToItem = resumedAction { item -> navigateToItem(navigator, item) },
         )
     }
     entry<SettingsRoute> { key ->
@@ -860,8 +857,12 @@ private fun navigateToItem(
                 CollectionRoute(collectionId = item.id.toString(), collectionName = item.name)
             )
         is FindroidMovie -> navigator.navigate(MovieRoute(movieId = item.id.toString()))
-        is FindroidShow -> navigator.navigate(ShowRoute(showId = item.id.toString(), downloadsOnly = downloadsOnly))
-        is FindroidSeason -> navigator.navigate(
+        is FindroidShow ->
+            navigator.navigate(
+                ShowRoute(showId = item.id.toString(), downloadsOnly = downloadsOnly)
+            )
+        is FindroidSeason ->
+            navigator.navigate(
                 SeasonRoute(
                     seasonId = item.id.toString(),
                     downloadsOnly = downloadsOnly,

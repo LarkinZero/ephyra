@@ -2,9 +2,9 @@ package dev.jdtech.jellyfin.repository
 
 import java.time.LocalDateTime
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
 class NextUpDateCutoffTest {
     private val now = LocalDateTime.of(2026, 11, 1, 12, 0)

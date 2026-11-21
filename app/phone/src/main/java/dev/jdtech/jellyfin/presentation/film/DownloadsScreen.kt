@@ -8,14 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -98,9 +94,9 @@ import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.Layout
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.WidthClass
 import dev.jdtech.jellyfin.presentation.utils.currentWidthClass
+import dev.jdtech.jellyfin.presentation.utils.topAndSideInsets
 import java.util.UUID
 
 /** Queues longer than this collapse behind a "Show all" toggle. */
@@ -143,8 +139,7 @@ fun DownloadsScreen(
         onDismissDownload = { viewModel.dismissCompletedDownload(it) },
         onRetryDownload = { viewModel.retryDownload(it) },
         onRetryClick = { viewModel.loadItems() },
-        // The library can't be browsed offline, so the empty state offers no way there.
-        onBrowseLibraryClick = onBrowseLibraryClick.takeUnless { LocalOfflineMode.current },
+        onBrowseLibraryClick = onBrowseLibraryClick,
         onStorageClick = onStorageClick,
     )
 }
@@ -192,7 +187,9 @@ internal fun DownloadsScreenLayout(
     val sections =
         remember(state.sections, hiddenIds) {
             state.sections
-                .map { section -> section.copy(items = section.items.filterNot { it.id in hiddenIds }) }
+                .map { section ->
+                    section.copy(items = section.items.filterNot { it.id in hiddenIds })
+                }
                 .filter { it.items.isNotEmpty() }
         }
     val libraryItems = remember(sections) { sections.flatMap { it.items } }
@@ -218,7 +215,8 @@ internal fun DownloadsScreenLayout(
 
     // Multi-select: entered from the top bar or by long-pressing a row.
     var selecting by rememberSaveable { mutableStateOf(false) }
-    var selectedIds by rememberSaveable(stateSaver = UuidSetSaver) { mutableStateOf(emptySet<UUID>()) }
+    var selectedIds by
+        rememberSaveable(stateSaver = UuidSetSaver) { mutableStateOf(emptySet<UUID>()) }
     fun exitSelection() {
         selecting = false
         selectedIds = emptySet()
@@ -272,7 +270,7 @@ internal fun DownloadsScreenLayout(
                     SortMenu(sortOrder = state.sortOrder, onSortOrderChange = onSortOrderChange)
                 }
             }
-            val insets = WindowInsets.statusBars.union(WindowInsets.displayCutout)
+            val insets = topAndSideInsets
             if (compact) {
                 LargeTopAppBar(
                     title = title,
@@ -292,7 +290,7 @@ internal fun DownloadsScreenLayout(
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets = topAndSideInsets,
     ) { innerPadding ->
         if (queueItems.isEmpty() && sections.isEmpty()) {
             val contentModifier = Modifier.padding(innerPadding).fillMaxSize()
@@ -311,7 +309,8 @@ internal fun DownloadsScreenLayout(
         // One column below Expanded, which lays out exactly like the list it replaces.
         val spacing = if (expandedWidth) Layout.gutter(widthClass) else 2.dp
         LazyVerticalGrid(
-            columns = if (expandedWidth) GridCells.Adaptive(minSize = 480.dp) else GridCells.Fixed(1),
+            columns =
+                if (expandedWidth) GridCells.Adaptive(minSize = 480.dp) else GridCells.Fixed(1),
             modifier = Modifier.padding(innerPadding).fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(spacing),
@@ -485,8 +484,8 @@ private fun LazyGridScope.downloadingSection(
 
 /**
  * CE (#434): a grid measures each item at the exact width of its cell or span, so a `widthIn` on
- * the item itself has no effect. The item fills its cell and [content] gets the cap of a row
- * (720 dp, 4-design.md §5), at the start, in line with the columns below.
+ * the item itself has no effect. The item fills its cell and [content] gets the cap of a row (720
+ * dp, 4-design.md §5), at the start, in line with the columns below.
  */
 @Composable
 private fun RowWidth(
@@ -555,7 +554,9 @@ private fun LibraryRow(
                 when (item) {
                     is FindroidShow ->
                         episodeCount?.let {
-                            add(pluralStringResource(CoreR.plurals.downloaded_episode_count, it, it))
+                            add(
+                                pluralStringResource(CoreR.plurals.downloaded_episode_count, it, it)
+                            )
                         }
                     is FindroidMovie -> {
                         item.productionYear?.let { add(it.toString()) }
@@ -579,7 +580,9 @@ private fun LibraryRow(
         state = dismissState,
         enableDismissFromStartToEnd = false,
         gesturesEnabled = selected == null,
-        backgroundContent = { SwipeActionBackground(icon = CoreR.drawable.ic_trash, shape = shape) },
+        backgroundContent = {
+            SwipeActionBackground(icon = CoreR.drawable.ic_trash, shape = shape)
+        },
         modifier = modifier,
     ) {
         DownloadRow(
@@ -603,7 +606,8 @@ private fun LibraryRow(
 @Composable
 private fun SectionHeader(title: String, modifier: Modifier = Modifier, trailing: String? = null) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 20.dp, bottom = 8.dp),
+        modifier =
+            modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 20.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

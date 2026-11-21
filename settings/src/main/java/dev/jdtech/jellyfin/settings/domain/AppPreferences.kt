@@ -31,6 +31,13 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // 0 is no limit. The web client's default is 365.
     val homeNextUpMaxDays = Preference("pref_home_next_up_max_days", 0)
     val homeLatest = Preference<Boolean>("home_latest", true)
+    // CE (#608): Continue Watching and Next Up show the series' or movie's thumb (the wide art
+    // with the title on it) unless this is on, like the web client's setting of the same name.
+    // On the phone the header of the episode page follows it too (#630).
+    val homeEpisodeImages = Preference("pref_home_episode_images", false)
+    // CE (#622): in a landscape window on a tablet, the item page shows its backdrop at 16:9
+    // beside the text instead of across the full width. Off by default; phone app only.
+    val sideBackdrop = Preference("pref_side_backdrop", false)
     // CE (#138): the Android TV launcher's Watch Next row. Only the TV app shows and uses it.
     val tvWatchNext = Preference("pref_tv_watch_next", true)
     // CE (#140): Android TV screensaver.
@@ -53,10 +60,20 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val detailExtras = Preference("pref_detail_extras", true)
     val detailCollections = Preference("pref_detail_collections", true)
     val detailSimilar = Preference("pref_detail_similar", true)
+    // CE (#618): an unwatched episode's still, title and overview are hidden until held.
+    val hideSpoilers = Preference("pref_hide_spoilers", false)
     // CE (#188): show the Favorites tab in the bottom navigation bar.
     val showFavoritesTab = Preference("pref_show_favorites_tab", true)
     // CE (#245): open on the user list when the server has more than one saved user.
     val askUserOnStart = Preference("pref_ask_user_on_start", false)
+
+    // CE (#626): Cast, in builds that have it. 0 Mbps is no limit of the user's: the receiver's
+    // device profile still has its own.
+    val castEnabled = Preference("pref_cast_enabled", true)
+    val castMaxBitrateMbps = Preference("pref_cast_max_bitrate_mbps", 0)
+    // The receiver does not tell a sender which codecs it plays, so HEVC is sent as it is only to
+    // the models known to play it, and to every receiver once the user says theirs does.
+    val castReceiverHevc = Preference("pref_cast_receiver_hevc", false)
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
@@ -100,8 +117,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // manufacturer check — see mpv-android/mpv-android#1283, still unfixed.
     // "audiotrack" is also what mpv's own autoprobe order picks on Android, and what
     // mpv-android uses. aaudio stays selectable for anyone who wants it.
-    val playerMpvAo =
-        Preference("pref_player_mpv_ao", Constants.MpvAudioOutput.AUDIOTRACK)
+    val playerMpvAo = Preference("pref_player_mpv_ao", Constants.MpvAudioOutput.AUDIOTRACK)
 
     // Player - gestures
     val playerGestures = Preference("pref_player_gestures", true)
@@ -152,6 +168,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
                 Constants.PlayerMediaSegmentsAutoSkip.ALWAYS,
             )
 
+    /** CE (#681): draw every media segment as a range of the seek bar. Phone, TV and Cast. */
+    val playerMediaSegmentsOnSeekBar = Preference("pref_player_media_segments_on_seek_bar", true)
+
     val playerMediaSegmentsNextEpisodeThreshold
         get() = Preference("pref_player_media_segments_next_episode_threshold", 5_000L)
 
@@ -179,8 +198,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
         get() = Preference("pref_player_media_segments_outro_action", MediaSegmentsMigration.ASK)
 
     val playerMediaSegmentsRecapAction
-        get() =
-            Preference("pref_player_media_segments_recap_action", MediaSegmentsMigration.IGNORE)
+        get() = Preference("pref_player_media_segments_recap_action", MediaSegmentsMigration.IGNORE)
 
     val playerMediaSegmentsPreviewAction
         get() =
@@ -225,10 +243,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
             Constants.SubtitleStyle.DEFAULT_BG_COLOR,
         )
     val subtitleEdgeColor =
-        Preference<String?>(
-            "pref_subtitle_edge_color",
-            Constants.SubtitleStyle.DEFAULT_EDGE_COLOR,
-        )
+        Preference<String?>("pref_subtitle_edge_color", Constants.SubtitleStyle.DEFAULT_EDGE_COLOR)
     val subtitleEdgeType =
         Preference<String?>("pref_subtitle_edge_type", Constants.SubtitleStyle.EDGE_OUTLINE)
     val subtitleFontFamily =
@@ -236,8 +251,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val subtitleFontScale = Preference("pref_subtitle_font_scale", 100)
     // CE (#300): apply the style above to subtitles that bring their own (ASS/SSA), on both
     // backends. Off by default, so those tracks look the way their authors made them.
-    val subtitleOverrideEmbeddedStyles =
-        Preference("pref_subtitle_override_embedded_styles", false)
+    val subtitleOverrideEmbeddedStyles = Preference("pref_subtitle_override_embedded_styles", false)
 
     // Downloads
     val downloadOverMobileData = Preference("pref_downloads_mobile_data", false)
@@ -279,9 +293,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val sortBy = Preference("pref_sort_by", "SortName")
     val sortOrder = Preference("pref_sort_order", "Ascending")
 
-    // Offline mode
-    val offlineMode = Preference("pref_offline_mode", false)
-
     // Permissions
     val localNetworkPermissionDecided = Preference("pref_permission_local_network_decided", false)
 
@@ -294,23 +305,32 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
         Preference("pref_player_media_segments_actions_migrated", false)
 
     /**
-     * CE (#271): one-shot move from the old global media segment switches (show skip button,
-     * auto skip, and their type lists) to one stored action per segment type, so the settings
-     * show every type's effective value. An action the user already picked per type is kept. See
+     * CE (#281): the Offline Mode setting is gone, and nothing reads its value. It is removed so an
+     * older build installed over this one does not start in Offline Mode either.
+     */
+    fun removeOfflineMode() {
+        if (sharedPreferences.contains(OFFLINE_MODE_KEY)) {
+            sharedPreferences.edit().remove(OFFLINE_MODE_KEY).apply()
+        }
+    }
+
+    /**
+     * CE (#271): one-shot move from the old global media segment switches (show skip button, auto
+     * skip, and their type lists) to one stored action per segment type, so the settings show every
+     * type's effective value. An action the user already picked per type is kept. See
      * [MediaSegmentsMigration.actions] for the mapping.
      */
     fun migrateMediaSegmentActions() {
         if (getValue(mediaSegmentActionsMigrated)) return
         val preferences = playerMediaSegmentsActions
-        val explicit =
-            preferences.mapValues { (_, preference) ->
-                // Read without the default: an absent value is "never picked".
-                try {
-                    sharedPreferences.getString(preference.backendName, null)
-                } catch (_: ClassCastException) {
-                    null
-                }
+        val explicit = preferences.mapValues { (_, preference) ->
+            // Read without the default: an absent value is "never picked".
+            try {
+                sharedPreferences.getString(preference.backendName, null)
+            } catch (_: ClassCastException) {
+                null
             }
+        }
         val actions =
             MediaSegmentsMigration.actions(
                 explicit = explicit,
@@ -329,8 +349,8 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
      *
      * Flipping [playerMpvAo]'s default is not enough on its own: the settings picker persists a
      * value on *any* tap, including on the row that is already selected, so everyone who merely
-     * opened Audio output while troubleshooting the freeze has "aaudio" written to disk — which
-     * is exactly the population that hit the bug. Rewrite that one value once.
+     * opened Audio output while troubleshooting the freeze has "aaudio" written to disk — which is
+     * exactly the population that hit the bug. Rewrite that one value once.
      *
      * Guarded by [mpvAoAaudioMigrated] so a deliberate re-selection afterwards sticks; we correct
      * an accidental value, we don't keep overruling the user.
@@ -399,8 +419,16 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
             is Float -> editor.putFloat(preference.backendName, value as Float)
             is String? -> editor.putString(preference.backendName, value as String?)
             is Set<*> -> editor.putStringSet(preference.backendName, value as Set<String>)
-            else -> throw IllegalArgumentException("Unsupported preference type: ${preference.defaultValue}")
+            else ->
+                throw IllegalArgumentException(
+                    "Unsupported preference type: ${preference.defaultValue}"
+                )
         }
         editor.apply()
+    }
+
+    private companion object {
+        /** The key the Offline Mode setting was stored under, see [removeOfflineMode]. */
+        const val OFFLINE_MODE_KEY = "pref_offline_mode"
     }
 }

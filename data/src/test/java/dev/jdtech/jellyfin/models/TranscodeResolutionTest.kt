@@ -15,9 +15,9 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
- * A lowered bitrate alone leaves the server at the source resolution: the "720p - 4 Mbps" rung
- * came back as a 1920x1080 transcode at 4 Mbps. The rung's resolution has to travel on the stream
- * URL as `MaxWidth`/`MaxHeight`.
+ * A lowered bitrate alone leaves the server at the source resolution: the "720p - 4 Mbps" rung came
+ * back as a 1920x1080 transcode at 4 Mbps. The rung's resolution has to travel on the stream URL as
+ * `MaxWidth`/`MaxHeight`.
  */
 class TranscodeResolutionTest {
     private val itemId = UUID.fromString("11111111-1111-1111-1111-111111111111")

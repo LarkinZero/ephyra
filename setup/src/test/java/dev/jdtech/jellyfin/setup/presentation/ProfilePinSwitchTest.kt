@@ -17,6 +17,11 @@ import dev.jdtech.jellyfin.setup.presentation.users.UsersEvent
 import dev.jdtech.jellyfin.setup.presentation.users.UsersViewModel
 import java.lang.reflect.Proxy
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -25,30 +30,26 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 /**
- * CE (#299): the profile switch, the start lock and the Profile PIN settings, on a fake server
- * with two saved users. The demo server used for device tests has one user, so the switch between
- * two profiles is only covered here.
+ * CE (#299): the profile switch, the start lock and the Profile PIN settings, on a fake server with
+ * two saved users. The demo server used for device tests has one user, so the switch between two
+ * profiles is only covered here.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfilePinSwitchTest {
     private val adult = User(id = UUID.randomUUID(), name = "Adult", serverId = "s")
     private val kid = User(id = UUID.randomUUID(), name = "Kid", serverId = "s")
     private val users = mutableMapOf(adult.id to adult, kid.id to kid)
-    private val server = Server(id = "s", name = "Home", currentServerAddressId = null, currentUserId = kid.id)
+    private val server =
+        Server(id = "s", name = "Home", currentServerAddressId = null, currentUserId = kid.id)
     private val lock = ProfileLock(fakeDao(), Dispatchers.Unconfined)
     private val repository = fakeRepository()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         runBlocking {
@@ -58,7 +59,7 @@ class ProfilePinSwitchTest {
         }
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }

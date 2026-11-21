@@ -37,7 +37,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,6 +48,7 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -71,13 +71,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
-import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.Glow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.IconButton
 import androidx.tv.material3.MaterialTheme
@@ -90,20 +89,20 @@ import dev.jdtech.jellyfin.ce.ui.focus.ephyraButtonBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedBorder
 import dev.jdtech.jellyfin.ce.ui.focus.ephyraFocusedGlow
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.ephyra.SeekBarSegment
+import dev.jdtech.jellyfin.core.presentation.ephyra.seekBarSegments
 import dev.jdtech.jellyfin.di.SubtitleStyleEntryPoint
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
 import dev.jdtech.jellyfin.player.local.R as PlayerR
+import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.domain.StillWatchingTracker
-import dev.jdtech.jellyfin.player.local.domain.getTrackNames
 import dev.jdtech.jellyfin.player.local.presentation.PlayerAction
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.player.local.presentation.label
 import dev.jdtech.jellyfin.player.local.presentation.toSections
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
-import dev.jdtech.jellyfin.player.local.presentation.label
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.ui.components.ItemPoster
 import dev.jdtech.jellyfin.ui.components.ProgressBadge
@@ -113,10 +112,7 @@ import dev.jdtech.jellyfin.utils.applySubtitleStyle
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withTimeoutOrNull
 
 private enum class PlayerDialog {
     AUDIO,
@@ -165,21 +161,33 @@ fun TvPlayerScreen(
     }
     val sleepTimerRemainingMs = remember { { sleepTimer.value.remainingMs } }
     val player = viewModel.player
-    var playbackError by remember { mutableStateOf<PlaybackException?>(null) }
+    // CE (#463): the last error that was not the start of a wait for the network, until playback
+    // resumes or is tried again. The wait itself is in uiState.
+    var playbackError by remember { mutableStateOf<PlayerEvents.PlayerError?>(null) }
+    val problem =
+        playbackProblem(
+            waitingForNetwork = uiState.waitingForNetwork,
+            hasError = playbackError != null,
+            nothingLoaded = playbackError?.nothingLoaded == true,
+        )
     var controlsVisible by remember { mutableStateOf(true) }
     var interactions by remember { mutableIntStateOf(0) }
+    // CE (#462): play again after Home or standby if it was playing, or show the controls.
+    val resumeOnReturn = remember { TvResumeOnReturn() }
 
     ObserveAsEvents(viewModel.eventsChannelFlow) { event ->
         when (event) {
             // Sent when the queue ends, or when an episode ends with autoplay off.
             is PlayerEvents.NavigateBack -> navigateBack()
             // CE (#131): shown as a message with a way out, instead of a black screen.
-            is PlayerEvents.PlayerError -> playbackError = event.error
+            is PlayerEvents.PlayerError -> if (!event.waitingForNetwork) playbackError = event
             is PlayerEvents.IsPlayingChanged -> Unit
             // CE (#298): paused by the sleep timer; the controls come up with focus on Play.
             is PlayerEvents.SleepTimerFired -> {
                 controlsVisible = true
                 interactions++
+                // #462: fired while the app was away: the return must not undo its pause.
+                resumeOnReturn.cancel()
             }
         }
     }
@@ -194,8 +202,9 @@ fun TvPlayerScreen(
     }
     val seekSettings = remember {
         TvSeekSettings(
-            backMs = appPreferences.getValue(appPreferences.playerTvSeekBackInc).toLongOrNull()
-                ?: 10_000L,
+            backMs =
+                appPreferences.getValue(appPreferences.playerTvSeekBackInc).toLongOrNull()
+                    ?: 10_000L,
             forwardMs =
                 appPreferences.getValue(appPreferences.playerTvSeekForwardInc).toLongOrNull()
                     ?: 30_000L,
@@ -215,36 +224,66 @@ fun TvPlayerScreen(
         if (window != null) {
             viewModel.attachWindow(window)
         }
-        onDispose {
-            viewModel.detachWindow()
-        }
+        onDispose { viewModel.detachWindow() }
     }
 
     // The media session is owned by PlayerViewModel; building a second one here would crash,
     // as Media3 requires session IDs to be unique.
     var lifecycle by remember { mutableStateOf(Lifecycle.Event.ON_CREATE) }
+    val currentShowStillWatching by rememberUpdatedState(uiState.showStillWatching)
+    val currentPlaybackError by rememberUpdatedState(playbackError)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event -> lifecycle = event }
+        val observer = LifecycleEventObserver { _, event ->
+            // #462: the PlayerView's update below pauses on ON_PAUSE; this decides what the
+            // return does. Before the update runs, so playWhenReady is still the user's.
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> resumeOnReturn.onPause(player.playWhenReady)
+                Lifecycle.Event.ON_RESUME -> {
+                    val blocked = currentShowStillWatching || currentPlaybackError != null
+                    when (resumeOnReturn.onResume(blocked)) {
+                        TvResumeOnReturn.Action.PLAY -> player.play()
+                        TvResumeOnReturn.Action.SHOW_CONTROLS ->
+                            if (!player.isPlaying) {
+                                controlsVisible = true
+                                interactions++
+                            }
+                        TvResumeOnReturn.Action.NONE -> Unit
+                    }
+                }
+                else -> Unit
+            }
+            lifecycle = event
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        val playerListener =
+            object : Player.Listener {
+                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                    resumeOnReturn.onPlayWhenReadyChanged(playWhenReady)
+                }
+            }
+        player.addListener(playerListener)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            player.removeListener(playerListener)
+        }
     }
 
     // #458: progress reports to the server, as the phone player sends them: every
-    // TvProgressReports.INTERVAL_MS while the screen is shown and started, at once when playback
-    // pauses, and on ON_PAUSE (in the PlayerView's update below). Nothing posts after Home or
-    // after the screen is left.
+    // TvProgressReports.INTERVAL_MS while the screen is shown and started, and on ON_PAUSE (in the
+    // PlayerView's update below). A pause or a resume is reported at once by PlayerViewModel
+    // itself (#674). Nothing posts after Home or after the screen is left.
     val progressReports = remember {
-        TvProgressReports(send = viewModel::updatePlaybackProgress, isPlaying = { player.isPlaying })
+        TvProgressReports(
+            send = viewModel::updatePlaybackProgress,
+            isPlaying = { player.isPlaying },
+        )
     }
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
                 progressReports.report()
-                val playing = isPlaying
-                withTimeoutOrNull(TvProgressReports.INTERVAL_MS) {
-                    if (playing) snapshotFlow { isPlaying }.first { !it } else awaitCancellation()
-                }
+                delay(TvProgressReports.INTERVAL_MS)
             }
         }
     }
@@ -368,9 +407,13 @@ fun TvPlayerScreen(
             }
 
             // #486: on what the player means to do, so a press during buffering pauses.
+            // #463: Play on a player that stopped on an error loads again.
             override fun togglePlayPause() {
-                if (showsPlayButton(player.playWhenReady, player.playbackState)) player.play()
-                else player.pause()
+                if (showsPlayButton(player.playWhenReady, player.playbackState)) {
+                    retryPlayback(player)
+                } else {
+                    player.pause()
+                }
                 showControls()
             }
 
@@ -434,7 +477,11 @@ fun TvPlayerScreen(
                     // Any key means someone is watching, as a touch does on phone: it resets the
                     // still-watching counters.
                     if (event.type == KeyEventType.KeyDown) viewModel.markUserInteraction()
-                    keyHandler.onKeyEvent(event.key.nativeKeyCode, native.action, native.repeatCount)
+                    keyHandler.onKeyEvent(
+                        event.key.nativeKeyCode,
+                        native.action,
+                        native.repeatCount,
+                    )
                 }
                 .focusRequester(rootFocus)
                 .focusable()
@@ -478,13 +525,16 @@ fun TvPlayerScreen(
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.TopEnd).zIndex(2f).padding(top = 64.dp, end = 24.dp),
         ) {
-            val sections = remember(uiState.playbackInfo, context) { uiState.playbackInfo?.toSections(context) }
+            val sections =
+                remember(uiState.playbackInfo, context) {
+                    uiState.playbackInfo?.toSections(context)
+                }
             Column(
                 modifier =
                     Modifier.width(420.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.Black.copy(alpha = 0.88f))
-                        .padding(20.dp),
+                        .padding(20.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -543,7 +593,7 @@ fun TvPlayerScreen(
                 bufferingShown(
                     playbackState = playerState,
                     fileLoaded = uiState.fileLoaded,
-                    hasError = playbackError != null,
+                    hasError = problem != null,
                     pendingSeek = pendingSeekMs != null,
                     stillWatching = uiState.showStillWatching,
                 ),
@@ -561,7 +611,8 @@ fun TvPlayerScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
-                        Modifier.align(Alignment.TopCenter).padding(top = MaterialTheme.spacings.large),
+                        Modifier.align(Alignment.TopCenter)
+                            .padding(top = MaterialTheme.spacings.large),
                 ) {
                     indicatorFrame?.let {
                         TrickplayThumbnail(
@@ -621,6 +672,11 @@ fun TvPlayerScreen(
             Clock()
         }
 
+        // CE (#464): while the seek bar's thumbnail shows, what it can cover gives way.
+        val seekPreview = rememberTrickplayFrame(uiState.currentTrickplay, pendingSeekMs)
+        val giveWayAlpha =
+            rememberGiveWayAlpha(seekPreviewShown(pendingSeekMs != null, seekPreview != null))
+
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(),
@@ -640,7 +696,8 @@ fun TvPlayerScreen(
                             playPauseFocus.requestFocus()
                         },
                         modifier =
-                            Modifier.padding(
+                            Modifier.givesWayToSeekPreview(giveWayAlpha)
+                                .padding(
                                     end = MaterialTheme.spacings.default * 2,
                                     bottom = MaterialTheme.spacings.medium,
                                 )
@@ -657,7 +714,8 @@ fun TvPlayerScreen(
                             playPauseFocus.requestFocus()
                         },
                         modifier =
-                            Modifier.padding(
+                            Modifier.givesWayToSeekPreview(giveWayAlpha)
+                                .padding(
                                     end = MaterialTheme.spacings.default * 2,
                                     bottom = MaterialTheme.spacings.medium,
                                 )
@@ -667,8 +725,15 @@ fun TvPlayerScreen(
                 val item = uiState.currentItem
                 PlayerControls(
                     seriesName = item?.seriesName,
-                    title = item?.let { episodeLine(it.parentIndexNumber, it.indexNumber, it.indexNumberEnd, it.name) }
-                        ?: uiState.currentItemTitle,
+                    title =
+                        item?.let {
+                            episodeLine(
+                                it.parentIndexNumber,
+                                it.indexNumber,
+                                it.indexNumberEnd,
+                                it.name,
+                            )
+                        } ?: uiState.currentItemTitle,
                     playbackSpeed = viewModel.playbackSpeed,
                     queue = queue,
                     queueOpen = queueOpen,
@@ -677,16 +742,23 @@ fun TvPlayerScreen(
                     durationMs = durationMs,
                     showPause = !showsPlayButton(playerPlayWhenReady, playerState),
                     pendingSeekMs = pendingSeekMs,
-                    trickplay = uiState.currentTrickplay,
+                    seekPreview = seekPreview,
+                    giveWayAlpha = giveWayAlpha,
                     seekSettings = seekSettings,
                     chapterMarkers =
                         remember(uiState.currentChapters, durationMs) {
                             val duration = durationMs
                             if (duration > 0) {
-                                uiState.currentChapters.map { it.startPosition.toFloat() / duration }
+                                uiState.currentChapters.map {
+                                    it.startPosition.toFloat() / duration
+                                }
                             } else {
                                 emptyList()
                             }
+                        },
+                    segmentMarkers =
+                        remember(uiState.currentSegments, durationMs) {
+                            seekBarSegments(uiState.currentSegments, durationMs)
                         },
                     hasChapters = uiState.currentChapters.isNotEmpty(),
                     sleepTimerActive = sleepTimerActive,
@@ -721,9 +793,24 @@ fun TvPlayerScreen(
         onDispose { player.removeListener(recoveryListener) }
     }
 
-    playbackError?.let { error ->
-        PlaybackErrorDialog(
-            message = error.message?.takeIf { it.isNotBlank() } ?: error.errorCodeName,
+    problem?.let {
+        TvPlaybackProblemDialog(
+            problem = it,
+            retrying = playerState == androidx.media3.common.Player.STATE_BUFFERING,
+            onRetry = {
+                playbackError = null
+                if (it == PlaybackProblem.START_FAILED) {
+                    viewModel.initializePlayer(
+                        itemId = itemId,
+                        itemKind = itemKind,
+                        startFromBeginning = startFromBeginning,
+                        mediaSourceId = mediaSourceId,
+                        shuffle = shuffle,
+                    )
+                } else {
+                    retryPlayback(player)
+                }
+            },
             onExit = navigateBack,
         )
     }
@@ -758,31 +845,28 @@ fun TvPlayerScreen(
             interactions++
         }
         when (open) {
-            PlayerDialog.AUDIO,
-            PlayerDialog.SUBTITLES -> {
-                val trackType =
-                    if (open == PlayerDialog.AUDIO) C.TRACK_TYPE_AUDIO else C.TRACK_TYPE_TEXT
-                // Read once when the dialog opens; the tracks don't change while it's shown.
-                val groups = remember {
-                    player.currentTracks.groups.filter { it.type == trackType && it.isSupported }
-                }
-                val names = remember { groups.getTrackNames(context).toList() }
-                val selected = groups.indexOfFirst { it.isSelected }
-                // Subtitles can be turned off. Audio can't: silence is never what's wanted.
-                val withNone = open == PlayerDialog.SUBTITLES
+            PlayerDialog.AUDIO -> {
+                val choices = remember { viewModel.trackChoices(C.TRACK_TYPE_AUDIO, context) }
                 TvSelectionDialog(
-                    title =
-                        stringResource(
-                            if (withNone) PlayerR.string.select_subtitle_track
-                            else PlayerR.string.select_audio_track
-                        ),
-                    options =
-                        if (withNone) listOf(stringResource(PlayerR.string.none)) + names
-                        else names,
-                    selectedIndex = if (withNone) selected + 1 else selected.coerceAtLeast(0),
-                    onSelect = { index ->
-                        viewModel.switchToTrack(trackType, if (withNone) index - 1 else index)
+                    title = stringResource(PlayerR.string.select_audio_track),
+                    options = choices.names,
+                    selectedIndex = choices.selected.coerceAtLeast(0),
+                    onSelect = { index -> viewModel.switchToTrack(C.TRACK_TYPE_AUDIO, index) },
+                    onDismiss = close,
+                )
+            }
+            PlayerDialog.SUBTITLES -> {
+                val choices = remember { viewModel.trackChoices(C.TRACK_TYPE_TEXT, context) }
+                // Observed: the next item starts at 0 also while the dialog is open.
+                val delayMs by viewModel.subtitleDelay.collectAsStateWithLifecycle()
+                TvSubtitleDialog(
+                    options = listOf(stringResource(PlayerR.string.none)) + choices.names,
+                    selectedIndex = choices.selected + 1,
+                    subtitleDelayMs = delayMs,
+                    onSelectTrack = { index ->
+                        viewModel.switchToTrack(C.TRACK_TYPE_TEXT, index - 1)
                     },
+                    onDelayChanged = { newDelay -> viewModel.setSubtitleDelay(newDelay) },
                     onDismiss = close,
                 )
             }
@@ -838,9 +922,11 @@ private fun PlayerControls(
     durationMs: Long,
     showPause: Boolean,
     pendingSeekMs: Long?,
-    trickplay: Trickplay?,
+    seekPreview: ImageBitmap?,
+    giveWayAlpha: () -> Float,
     seekSettings: TvSeekSettings,
     chapterMarkers: List<Float>,
+    segmentMarkers: List<SeekBarSegment>,
     hasChapters: Boolean,
     sleepTimerActive: Boolean,
     sleepTimerRemainingMs: () -> Long?,
@@ -867,6 +953,7 @@ private fun PlayerControls(
                     color = Color.White.copy(alpha = 0.8f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.givesWayToSeekPreview(giveWayAlpha),
                 )
             }
             Text(
@@ -875,6 +962,7 @@ private fun PlayerControls(
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.givesWayToSeekPreview(giveWayAlpha),
             )
             // A pending seek shows where it lands: the remaining time and end time follow it.
             val shownPositionMs =
@@ -883,14 +971,17 @@ private fun PlayerControls(
                 remember(shownPositionMs, durationMs) {
                     { (durationMs - shownPositionMs()).coerceAtLeast(0L) }
                 }
-            // CE (#134): the thumbnail sits above the time row, over where the pending position lands.
+            // CE (#134): the thumbnail sits above the time row, over where the pending position
+            // lands.
             Box(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         TimeText(
                             timeMs = shownPositionMs,
                             prefix = "",
-                            color = if (pendingSeekMs != null) MaterialTheme.colorScheme.primary else Color.White,
+                            color =
+                                if (pendingSeekMs != null) MaterialTheme.colorScheme.primary
+                                else Color.White,
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         if (sleepTimerActive) SleepTimerText(remainingMs = sleepTimerRemainingMs)
@@ -910,12 +1001,12 @@ private fun PlayerControls(
                         onSeek = callbacks.onSeek,
                         onInteraction = onInteraction,
                         chapterMarkers = chapterMarkers,
+                        segmentMarkers = segmentMarkers,
                     )
                 }
-                val frame = rememberTrickplayFrame(trickplay, pendingSeekMs)
-                if (frame != null && pendingSeekMs != null) {
+                if (seekPreview != null && pendingSeekMs != null) {
                     TrickplayThumbnail(
-                        frame = frame,
+                        frame = seekPreview,
                         timeText = formatTime(pendingSeekMs),
                         modifier =
                             Modifier.aboveAt(
@@ -931,20 +1022,17 @@ private fun PlayerControls(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                 modifier =
-                    Modifier.focusRestorer(playPauseFocus)
-                        .focusGroup()
-                        .onPreviewKeyEvent { event ->
-                            // Down from the buttons opens the queue below them.
-                            val down =
-                                event.key == Key.DirectionDown &&
-                                    event.type == KeyEventType.KeyDown
-                            if (down && queue.isNotEmpty() && !queueOpen) {
-                                callbacks.onOpenQueue()
-                                true
-                            } else {
-                                false
-                            }
-                        },
+                    Modifier.focusRestorer(playPauseFocus).focusGroup().onPreviewKeyEvent { event ->
+                        // Down from the buttons opens the queue below them.
+                        val down =
+                            event.key == Key.DirectionDown && event.type == KeyEventType.KeyDown
+                        if (down && queue.isNotEmpty() && !queueOpen) {
+                            callbacks.onOpenQueue()
+                            true
+                        } else {
+                            false
+                        }
+                    },
             ) {
                 ControlButton(
                     icon = CoreR.drawable.ic_skip_back,
@@ -962,7 +1050,8 @@ private fun PlayerControls(
                 )
                 ControlButton(
                     icon = CoreR.drawable.ic_skip_forward,
-                    contentDescription = stringResource(PlayerR.string.player_controls_next_episode),
+                    contentDescription =
+                        stringResource(PlayerR.string.player_controls_next_episode),
                     focusRequester = remember { FocusRequester() },
                     // Stays enabled on the last episode (and does nothing there): turning it off
                     // while it has focus, as the last episode starts, would lose focus.
@@ -998,7 +1087,9 @@ private fun PlayerControls(
                     onFocus = onInteraction,
                 )
                 ControlButton(
-                    icon = if (sleepTimerActive) CoreR.drawable.ic_moon_star else CoreR.drawable.ic_moon,
+                    icon =
+                        if (sleepTimerActive) CoreR.drawable.ic_moon_star
+                        else CoreR.drawable.ic_moon,
                     contentDescription = stringResource(PlayerR.string.sleep_timer),
                     focusRequester = dialogOpenerFocus.getValue(PlayerDialog.SLEEP_TIMER),
                     onClick = { onOpenDialog(PlayerDialog.SLEEP_TIMER) },
@@ -1196,14 +1287,20 @@ private fun QueueCard(
                 )
                 ProgressBadge(
                     item = item,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.extraSmall),
+                    modifier =
+                        Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.extraSmall),
                 )
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
             Text(
                 text =
                     if (item is FindroidEpisode) {
-                        episodeLine(item.parentIndexNumber, item.indexNumber, item.indexNumberEnd, item.name)
+                        episodeLine(
+                            item.parentIndexNumber,
+                            item.indexNumber,
+                            item.indexNumberEnd,
+                            item.name,
+                        )
                     } else {
                         item.name
                     },
@@ -1240,38 +1337,6 @@ private fun Clock() {
             style = MaterialTheme.typography.titleLarge,
             color = Color.White,
         )
-    }
-}
-
-@Composable
-private fun PlaybackErrorDialog(message: String, onExit: () -> Unit) {
-    Dialog(onDismissRequest = onExit) {
-        Surface(
-            modifier = Modifier.width(560.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                modifier = Modifier.padding(MaterialTheme.spacings.large),
-            ) {
-                Text(
-                    text = stringResource(PlayerR.string.player_error_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                val focusRequester = remember { FocusRequester() }
-                LaunchedEffect(Unit) { focusWhenReady(focusRequester) }
-                Button(onClick = onExit, modifier = Modifier.focusRequester(focusRequester)) {
-                    Text(text = stringResource(PlayerR.string.player_controls_exit))
-                }
-            }
-        }
     }
 }
 
@@ -1321,7 +1386,10 @@ private fun StillWatchingDialog(endsAtMs: Long, onContinue: () -> Unit, onStop: 
                 val focusRequester = remember { FocusRequester() }
                 LaunchedEffect(Unit) { focusWhenReady(focusRequester) }
                 Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-                    Button(onClick = onContinue, modifier = Modifier.focusRequester(focusRequester)) {
+                    Button(
+                        onClick = onContinue,
+                        modifier = Modifier.focusRequester(focusRequester),
+                    ) {
                         Text(text = stringResource(PlayerR.string.still_watching_continue))
                     }
                     Button(onClick = onStop) {
@@ -1373,9 +1441,7 @@ private fun ControlButton(
     IconButton(
         onClick = onClick,
         modifier =
-            Modifier.focusRequester(focusRequester).onFocusChanged {
-                if (it.isFocused) onFocus()
-            },
+            Modifier.focusRequester(focusRequester).onFocusChanged { if (it.isFocused) onFocus() },
     ) {
         Icon(painter = painterResource(id = icon), contentDescription = contentDescription)
     }
@@ -1390,7 +1456,10 @@ private fun SeekIndicatorView(indicator: SeekIndicator, durationMs: Long, modifi
         modifier =
             modifier
                 .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
-                .padding(horizontal = MaterialTheme.spacings.medium, vertical = MaterialTheme.spacings.small),
+                .padding(
+                    horizontal = MaterialTheme.spacings.medium,
+                    vertical = MaterialTheme.spacings.small,
+                ),
     ) {
         Icon(
             painter =

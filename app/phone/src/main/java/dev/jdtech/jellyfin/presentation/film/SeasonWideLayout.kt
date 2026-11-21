@@ -78,6 +78,8 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisodes
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
+import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
+import dev.jdtech.jellyfin.core.presentation.spoiler.spoilerFreeName
 import dev.jdtech.jellyfin.film.domain.withMediaInfo
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
@@ -86,19 +88,20 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.cast.LocalCastPlayback
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkPlacement
 import dev.jdtech.jellyfin.presentation.film.components.ArtworkState
-import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.DownloadQualityDialog
 import dev.jdtech.jellyfin.presentation.film.components.DownloadRow
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeDownloadControl
-import dev.jdtech.jellyfin.presentation.film.components.episodeRowDownloadClick
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.LoadingOrError
+import dev.jdtech.jellyfin.presentation.film.components.MediaInfoSheet
+import dev.jdtech.jellyfin.presentation.film.components.episodeRowDownloadClick
 import dev.jdtech.jellyfin.presentation.film.components.groupedItemShape
 import dev.jdtech.jellyfin.presentation.film.components.playDownloadedItem
 import dev.jdtech.jellyfin.presentation.film.components.rememberArtworkState
@@ -107,7 +110,7 @@ import dev.jdtech.jellyfin.presentation.film.components.rememberUndoController
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LightStatusBarOverArtwork
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalServerStatus
 import dev.jdtech.jellyfin.presentation.utils.ReloadOnResume
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
@@ -122,9 +125,9 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 private fun listPaneWidth(windowWidth: Dp): Dp = (windowWidth * 0.4f).coerceIn(360.dp, 480.dp)
 
 /**
- * The episode the list-detail selects when the season opens, so the detail pane is never empty:
- * the first one not watched yet (the one the user most likely plays next), else the first.
- * Missing episodes (known to the server, no file) are only picked when there is nothing else.
+ * The episode the list-detail selects when the season opens, so the detail pane is never empty: the
+ * first one not watched yet (the one the user most likely plays next), else the first. Missing
+ * episodes (known to the server, no file) are only picked when there is nothing else.
  */
 internal fun defaultSelectedEpisode(episodes: List<FindroidEpisode>): FindroidEpisode? =
     episodes.firstOrNull { !it.played && !it.missing }
@@ -133,20 +136,20 @@ internal fun defaultSelectedEpisode(episodes: List<FindroidEpisode>): FindroidEp
 
 /**
  * The episode list position of the Season page, shared by the single-column page and the
- * list-detail (4-design.md §13, criterion 2). Both lists hold the same items in the same order
- * (the header, the download summary when shown, then the episodes), so a rotation that switches
- * between them keeps the same episode at the top.
+ * list-detail (4-design.md §13, criterion 2). Both lists hold the same items in the same order (the
+ * header, the download summary when shown, then the episodes), so a rotation that switches between
+ * them keeps the same episode at the top.
  *
  * A rotation recreates the activity, and the list's own saved position is not enough (#435):
- * - The list is first measured before the window insets arrive, with a bottom padding short by
- *   the navigation bar, so a list scrolled near its end is clamped back by that much.
- * - The other orientation's list may be shorter, so it clamps the position too, and rotating
- *   back would start from the clamped one.
+ * - The list is first measured before the window insets arrive, with a bottom padding short by the
+ *   navigation bar, so a list scrolled near its end is clamped back by that much.
+ * - The other orientation's list may be shorter, so it clamps the position too, and rotating back
+ *   would start from the clamped one.
  *
- * So the position the user left the list at is saved apart from the list, and changes only when
- * the list moves after a restore has settled. Once per restore it is applied again over the next
- * frames until it holds; that stops as soon as anything else moves the list (the user's scroll,
- * or the list-detail scrolling the selected episode into view), and never runs on an ordinary
+ * So the position the user left the list at is saved apart from the list, and changes only when the
+ * list moves after a restore has settled. Once per restore it is applied again over the next frames
+ * until it holds; that stops as soon as anything else moves the list (the user's scroll, or the
+ * list-detail scrolling the selected episode into view), and never runs on an ordinary
  * recomposition. A position the list can no longer reach, because the season has fewer episodes
  * now, is given up, and the list's own position is saved from then on.
  */
@@ -179,9 +182,9 @@ private const val RESTORE_ITEMS_TIMEOUT_MS = 2_000L
  * Scrolls [state] to [target] once its items are laid out, and again on each of the next frames
  * while the list is still short of it, unless something else moved the list in between.
  *
- * Gives up without scrolling when the list does not hold the target item within about two
- * seconds: the season may have fewer episodes than when the position was saved (offline, a
- * removed download, a library change), and the list stays where it is.
+ * Gives up without scrolling when the list does not hold the target item within about two seconds:
+ * the season may have fewer episodes than when the position was saved (offline, a removed download,
+ * a library change), and the list stays where it is.
  *
  * Returns whether the list's position is now the one to keep: false only when the list is still
  * short of a target it holds, clamped by its layout (the other orientation's shorter list).
@@ -209,13 +212,13 @@ internal suspend fun restorePosition(state: LazyListState, target: Pair<Int, Int
 
 /**
  * The Season page at Expanded width (docs/tablet/4-design.md §7): the season header and its
- * episodes on the left, the selected episode's page on the right. Selecting an episode changes
- * the right pane; it does not navigate.
+ * episodes on the left, the selected episode's page on the right. Selecting an episode changes the
+ * right pane; it does not navigate.
  *
- * [selectedEpisodeId], [onSelectEpisode] and [lazyListState] are owned by `SeasonScreen`, above
- * its width branch, so the selection and the list position survive a rotation to the
- * single-column page and back (see [rememberSeasonListState]). The detail pane is
- * driven by an `EpisodeViewModel` per selected episode (see [SeasonEpisodeDetailPane]).
+ * [selectedEpisodeId], [onSelectEpisode] and [lazyListState] are owned by `SeasonScreen`, above its
+ * width branch, so the selection and the list position survive a rotation to the single-column page
+ * and back (see [rememberSeasonListState]). The detail pane is driven by an `EpisodeViewModel` per
+ * selected episode (see [SeasonEpisodeDetailPane]).
  */
 @Composable
 fun SeasonListDetail(
@@ -224,7 +227,7 @@ fun SeasonListDetail(
     onSelectEpisode: (UUID) -> Unit,
     lazyListState: LazyListState,
     onAction: (SeasonAction) -> Unit,
-    onDownloadSeason: (maxBitrate: Int?) -> Unit,
+    onDownloadSeason: () -> Unit,
     onDeleteSeasonDownloads: () -> Unit,
     onReloadSeason: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
@@ -284,7 +287,7 @@ fun SeasonWideLayout(
     selectedEpisodeId: UUID?,
     onSelectEpisode: (UUID) -> Unit,
     onAction: (SeasonAction) -> Unit,
-    onDownloadSeason: (maxBitrate: Int?) -> Unit,
+    onDownloadSeason: () -> Unit,
     onDeleteSeasonDownloads: () -> Unit,
     detailPane: @Composable (episodeId: UUID) -> Unit,
     lazyListState: LazyListState = rememberLazyListState(),
@@ -302,7 +305,6 @@ fun SeasonWideLayout(
     // CE (#437): the artwork under the top bar, if any; shared by the header and the bar.
     val artwork = rememberArtworkState(state.season, ArtworkPlacement.Header)
 
-    var seasonQualityDialogOpen by remember { mutableStateOf(false) }
     var episodeQualityTarget by remember { mutableStateOf<FindroidEpisode?>(null) }
 
     // Downloads removed from the list wait behind an Undo snackbar, as on the single-column page.
@@ -318,10 +320,13 @@ fun SeasonWideLayout(
         remember(state.episodeDownloadProgress, hiddenIds) {
             state.episodeDownloadProgress - hiddenIds
         }
-    val offlineMode = LocalOfflineMode.current
+    // CE (#281): a list of stored episodes drops a removed one at once, as the Downloads tab
+    // does; it would leave the list once the removal is done. A list from the server keeps it, as
+    // not downloaded.
     val episodes =
-        remember(state.episodes, hiddenIds, offlineMode) {
-            if (offlineMode) state.episodes.filterNot { it.id in hiddenIds } else state.episodes
+        remember(state.episodes, state.storedOnly, hiddenIds) {
+            if (state.storedOnly) state.episodes.filterNot { it.id in hiddenIds }
+            else state.episodes
         }
     val hasDownloads =
         remember(episodes, hiddenIds) { episodes.any { it.isDownloaded() && it.id !in hiddenIds } }
@@ -345,7 +350,8 @@ fun SeasonWideLayout(
                 it.status == DownloadStatus.PAUSED
         }
     LaunchedEffect(episodes.isNotEmpty(), selectedEpisodeId) {
-        if (revealedSelection || episodes.isEmpty() || selectedEpisodeId == null) return@LaunchedEffect
+        if (revealedSelection || episodes.isEmpty() || selectedEpisodeId == null)
+            return@LaunchedEffect
         revealedSelection = true
         val scrolled =
             lazyListState.firstVisibleItemIndex > 0 ||
@@ -400,9 +406,12 @@ fun SeasonWideLayout(
                                         if (episodes.isNotEmpty()) DownloaderState() else null,
                                     onPlayClick = { startFromBeginning ->
                                         onAction(
-                                            SeasonAction.Play(startFromBeginning = startFromBeginning)
+                                            SeasonAction.Play(
+                                                startFromBeginning = startFromBeginning
+                                            )
                                         )
                                     },
+                                    onShuffleClick = { onAction(SeasonAction.Shuffle) },
                                     onMarkAsPlayedClick = {
                                         when (season.played) {
                                             true -> onAction(SeasonAction.UnmarkAsPlayed)
@@ -416,7 +425,7 @@ fun SeasonWideLayout(
                                         }
                                     },
                                     onTrailerClick = {},
-                                    onDownloadClick = { seasonQualityDialogOpen = true },
+                                    onDownloadClick = onDownloadSeason,
                                     onDownloadCancelClick = {},
                                     onDownloadDeleteClick = onDeleteSeasonDownloads,
                                     modifier =
@@ -438,7 +447,7 @@ fun SeasonWideLayout(
                                 item {
                                     DownloadSummary(
                                         state = state,
-                                        totalCount = episodes.size,
+                                        totalCount = state.episodes.size,
                                         modifier =
                                             Modifier.padding(
                                                 start = paddingStart,
@@ -542,15 +551,6 @@ fun SeasonWideLayout(
             }
         }
 
-        if (seasonQualityDialogOpen) {
-            DownloadQualityDialog(
-                onSelect = { maxBitrate ->
-                    onDownloadSeason(maxBitrate)
-                    seasonQualityDialogOpen = false
-                },
-                onDismiss = { seasonQualityDialogOpen = false },
-            )
-        }
         episodeQualityTarget?.let { episode ->
             DownloadQualityDialog(
                 onSelect = { maxBitrate ->
@@ -681,9 +681,12 @@ internal fun CompactEpisodeRow(
             }
             .joinToString(" · ")
 
+    // CE (#618): a hidden episode is "Episode 5" until held.
+    val spoilers = LocalSpoilers.current
+    val hidden = spoilers.hides(episode)
     DownloadRow(
         item = episode,
-        title = episode.name,
+        title = spoilerFreeName(episode, hidden),
         titleStyle = MaterialTheme.typography.titleSmall,
         meta = meta,
         shape = shape,
@@ -697,6 +700,8 @@ internal fun CompactEpisodeRow(
         showPlayedBadge = true,
         onPlayClick = onPlayClick,
         onClick = onClick,
+        onLongClick = if (hidden) ({ spoilers.reveal(episode) }) else null,
+        onLongClickLabel = if (hidden) stringResource(CoreR.string.ce_spoiler_reveal) else null,
         trailing =
             if (showDownloadControl) {
                 {
@@ -715,9 +720,9 @@ internal fun CompactEpisodeRow(
 
 /**
  * The detail pane: the episode's wide page without its top bar, driven by an `EpisodeViewModel`
- * (and a `DownloaderViewModel`) keyed on the episode, so switching episodes shows the right one
- * and switching back finds it loaded. Play, watched, favourite and download act through
- * `EpisodeAction` and the downloader as on the episode page.
+ * (and a `DownloaderViewModel`) keyed on the episode, so switching episodes shows the right one and
+ * switching back finds it loaded. Play, watched, favourite and download act through `EpisodeAction`
+ * and the downloader as on the episode page.
  */
 @Composable
 private fun SeasonEpisodeDetailPane(
@@ -728,7 +733,8 @@ private fun SeasonEpisodeDetailPane(
     onDownloadChanged: () -> Unit,
 ) {
     val context = LocalContext.current
-    val isOfflineMode = LocalOfflineMode.current
+    val castPlayback = LocalCastPlayback.current
+    val serverAway = LocalServerStatus.current.unreachable
     val viewModel: EpisodeViewModel = hiltViewModel(key = "season-detail-episode-$episodeId")
     val downloaderViewModel: DownloaderViewModel =
         hiltViewModel(key = "season-detail-downloader-$episodeId")
@@ -757,8 +763,9 @@ private fun SeasonEpisodeDetailPane(
                 currentOnDownloadChanged()
             }
             is DownloaderEvent.Deleted -> {
-                // Offline, the season drops the episode and the selection moves on.
-                if (!isOfflineMode) viewModel.loadEpisode(episodeId = episodeId)
+                // With the server away the season (from Room) drops the episode and the
+                // selection moves on.
+                if (!serverAway) viewModel.loadEpisode(episodeId = episodeId)
                 currentOnDownloadChanged()
             }
             is DownloaderEvent.Failed -> {
@@ -775,10 +782,7 @@ private fun SeasonEpisodeDetailPane(
     val episodeSources = state.episode?.sources
     val mediaInfoSources = remember(episodeSources) { episodeSources.orEmpty().withMediaInfo() }
     if (mediaInfoOpen && mediaInfoSources.isNotEmpty()) {
-        MediaInfoSheet(
-            sources = mediaInfoSources,
-            onDismissRequest = { mediaInfoOpen = false },
-        )
+        MediaInfoSheet(sources = mediaInfoSources, onDismissRequest = { mediaInfoOpen = false })
     }
 
     // CE (#437): this pane's artwork is under the status bar until its band has faded in.
@@ -802,12 +806,23 @@ private fun SeasonEpisodeDetailPane(
         onAction = { action ->
             when (action) {
                 is EpisodeAction.Play -> {
-                    val intent = Intent(context, PlayerActivity::class.java)
-                    intent.putExtra("itemId", episodeId.toString())
-                    intent.putExtra("itemKind", BaseItemKind.EPISODE.serialName)
-                    intent.putExtra("startFromBeginning", action.startFromBeginning)
-                    intent.putExtra("mediaSourceId", action.mediaSourceId)
-                    context.startActivity(intent)
+                    // CE (#626): on the Cast receiver when one is connected.
+                    if (
+                        !castPlayback.play(
+                            episodeId,
+                            BaseItemKind.EPISODE,
+                            action.startFromBeginning,
+                            action.mediaSourceId,
+                            shuffle = false,
+                        )
+                    ) {
+                        val intent = Intent(context, PlayerActivity::class.java)
+                        intent.putExtra("itemId", episodeId.toString())
+                        intent.putExtra("itemKind", BaseItemKind.EPISODE.serialName)
+                        intent.putExtra("startFromBeginning", action.startFromBeginning)
+                        intent.putExtra("mediaSourceId", action.mediaSourceId)
+                        context.startActivity(intent)
+                    }
                 }
                 is EpisodeAction.NavigateToPerson -> navigateToPerson(action.personId)
                 else -> Unit
@@ -822,9 +837,9 @@ private fun SeasonEpisodeDetailPane(
 }
 
 /**
- * CE (#437): the detail pane has no top bar of its own (the page's is over the list), so this
- * band keeps the scrolled episode from running under the status bar. It fades in as the list's
- * top bar does.
+ * CE (#437): the detail pane has no top bar of its own (the page's is over the list), so this band
+ * keeps the scrolled episode from running under the status bar. It fades in as the list's top bar
+ * does.
  */
 @Composable
 private fun DetailPaneStatusBarBackground(alpha: () -> Float) {
