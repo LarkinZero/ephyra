@@ -14,7 +14,6 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
-import android.text.format.DateUtils
 import android.util.Rational
 import android.util.TypedValue
 import android.view.InputDevice
@@ -54,9 +53,7 @@ import androidx.media3.ui.PlayerView
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowMetricsCalculator
-import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.ephyra.EphyraMotion
 import dev.jdtech.jellyfin.core.presentation.spoiler.LocalSpoilers
 import dev.jdtech.jellyfin.core.presentation.spoiler.Spoilers
@@ -65,7 +62,6 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.player.local.PlaybackSessionStore
 import dev.jdtech.jellyfin.player.local.R as PlayerR
-import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.player.local.presentation.toSections
@@ -73,7 +69,6 @@ import dev.jdtech.jellyfin.presentation.player.ChapterListDialogFragment
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeSheet
 import dev.jdtech.jellyfin.presentation.player.PlayerUpNextCard
 import dev.jdtech.jellyfin.presentation.player.QualitySelectionDialogFragment
-import dev.jdtech.jellyfin.presentation.player.SleepTimerDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.StillWatchingDialogFragment
 import dev.jdtech.jellyfin.presentation.player.SubtitleSyncDialogFragment
@@ -743,9 +738,6 @@ class PlayerActivity : BasePlayerActivity() {
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
         val speedButton = binding.playerView.findViewById<ImageButton>(R.id.btn_speed)
-        val sleepTimerButton = binding.playerView.findViewById<ImageButton>(R.id.btn_sleep_timer)
-        val sleepTimerRemaining =
-            binding.playerView.findViewById<TextView>(R.id.sleep_timer_remaining)
         val qualityButton = binding.playerView.findViewById<ImageButton>(R.id.btn_quality)
         val playbackInfoButton =
             binding.playerView.findViewById<ImageButton>(R.id.btn_playback_info)
@@ -905,8 +897,6 @@ class PlayerActivity : BasePlayerActivity() {
                                 subtitleButton.imageAlpha = 255
                                 speedButton.isEnabled = true
                                 speedButton.imageAlpha = 255
-                                sleepTimerButton.isEnabled = true
-                                sleepTimerButton.imageAlpha = 255
                                 qualityButton.isEnabled = true
                                 qualityButton.imageAlpha = 255
                                 pipButton.isEnabled = true
@@ -961,8 +951,6 @@ class PlayerActivity : BasePlayerActivity() {
                                 // loaded the player stays, and Play retries.
                                 if (event.nothingLoaded) finishPlayback()
                             }
-                            // CE (#298): paused with the controls up, so a tap on play resumes.
-                            is PlayerEvents.SleepTimerFired -> binding.playerView.showController()
                         }
                     }
                 }
@@ -970,29 +958,6 @@ class PlayerActivity : BasePlayerActivity() {
                 // CE (#272): the skip button gives way to the "Up next" card.
                 launch {
                     viewModel.upNext.collect { updateSkipSegmentButton(viewModel.uiState.value) }
-                }
-
-                // CE (#298): the sleep timer button shows when it runs and how long is left.
-                launch {
-                    val activeTint =
-                        MaterialColors.getColor(
-                            sleepTimerButton,
-                            androidx.appcompat.R.attr.colorPrimary,
-                        )
-                    viewModel.sleepTimerState.collect { state ->
-                        val active = state.option != SleepTimerOption.Off
-                        sleepTimerButton.setImageResource(
-                            if (active) CoreR.drawable.ic_moon_star else CoreR.drawable.ic_moon
-                        )
-                        sleepTimerButton.setColorFilter(if (active) activeTint else Color.WHITE)
-                        val remainingMs = state.remainingMs
-                        sleepTimerRemaining.isVisible = active && remainingMs != null
-                        if (remainingMs != null) {
-                            // Rounded up, so it reads 0:00 only as it pauses.
-                            sleepTimerRemaining.text =
-                                DateUtils.formatElapsedTime((remainingMs + 999) / 1000)
-                        }
-                    }
                 }
 
                 launch {
@@ -1032,9 +997,6 @@ class PlayerActivity : BasePlayerActivity() {
 
         speedButton.isEnabled = false
         speedButton.imageAlpha = 75
-
-        sleepTimerButton.isEnabled = false
-        sleepTimerButton.imageAlpha = 75
 
         qualityButton.isEnabled = false
         qualityButton.imageAlpha = 75
@@ -1090,10 +1052,6 @@ class PlayerActivity : BasePlayerActivity() {
 
         speedButton.setOnClickListener {
             SpeedSelectionDialogFragment().show(supportFragmentManager, "speedselectiondialog")
-        }
-
-        sleepTimerButton.setOnClickListener {
-            SleepTimerDialogFragment().show(supportFragmentManager, "sleeptimerdialog")
         }
 
         qualityButton.setOnClickListener {

@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -67,8 +66,6 @@ import dev.jdtech.jellyfin.player.local.domain.SegmentDecision
 import dev.jdtech.jellyfin.player.local.domain.SegmentTracker
 import dev.jdtech.jellyfin.player.local.domain.SessionTrackPicks
 import dev.jdtech.jellyfin.player.local.domain.SkipTarget
-import dev.jdtech.jellyfin.player.local.domain.SleepTimer
-import dev.jdtech.jellyfin.player.local.domain.SleepTimerOption
 import dev.jdtech.jellyfin.player.local.domain.StillWatchingTracker
 import dev.jdtech.jellyfin.player.local.domain.StoredChoice
 import dev.jdtech.jellyfin.player.local.domain.StreamSwitches
@@ -275,35 +272,11 @@ constructor(
      */
     val queue: StateFlow<List<FindroidItem>> = _queue.asStateFlow()
 
-    /**
-     * CE (#298): the sleep timer, for this player session only. [sleepTimerState] has its setting
-     * and the time until it pauses, updated every second while it runs.
-     */
-    private val sleepTimer = SleepTimer()
-    private var sleepTimerJob: Job? = null
-
     /** CE (#450): waiting for the network after the connection was lost. */
     private val networkRecovery = NetworkRecovery { SystemClock.elapsedRealtime() }
     private var lastNetworkError: PlaybackException? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var networkRetryJob: Job? = null
-
-    /** The item the sleep timer stopped at the end of, until playback resumes. */
-    private var sleepTimerEndedItemId: String? = null
-    private val _sleepTimerState = MutableStateFlow(SleepTimerState(SleepTimerOption.Off, null))
-    val sleepTimerState: StateFlow<SleepTimerState> = _sleepTimerState.asStateFlow()
-
-    /** The sleep timer choices, with a one-minute one in debuggable builds for testing. */
-    val sleepTimerChoices: List<SleepTimerOption> =
-        SleepTimerOption.choices(
-            debug = application.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-        )
-
-    /**
-     * [remainingMs] is the time until the timer pauses: on the clock for a duration, until the end
-     * of the item (at the current speed) for [SleepTimerOption.EndOfItem], `null` when unknown.
-     */
-    data class SleepTimerState(val option: SleepTimerOption, val remainingMs: Long?)
 
     /**
      * CE (#272): the "Up next" card at the end of an episode, `null` while it is hidden. Updated
@@ -1090,8 +1063,6 @@ constructor(
 
         _uiState.value.currentTrickplay?.loader?.release()
         _uiState.update { it.copy(currentTrickplay = null) }
-        sleepTimerJob?.cancel()
-        sleepTimer.clear()
         playWhenReady = false
         playbackPosition = 0L
         currentMediaItemIndex = 0
@@ -1316,15 +1287,6 @@ constructor(
                     }
                 }
                 is SegmentDecision.AutoSkip -> {
-                    // CE (#298): an outro skip to the next item is where the item ends for the
-                    // timer.
-                    if (decision.target == SkipTarget.NextItem && sleepTimer.stopsAtEndOfItem) {
-                        _uiState.update {
-                            it.copy(currentSegment = null, skipButtonInWindow = false)
-                        }
-                        fireSleepTimer()
-                        return@withContext
-                    }
                     // CE (#272): an outro skip to the next item hands over to the "Up next"
                     // countdown,
                     // or ends the item if the card was cancelled.
@@ -1393,7 +1355,6 @@ constructor(
         // it played. Only releasePlayer clears this: a finished item stays open until the player
         // closes.
         playbackEvents.onPlaying(newId)
-        if (sleepTimer.onItemChanged(mediaItem?.mediaId)) updateSleepTimerState()
 
         viewModelScope.launch {
             try {
@@ -1555,17 +1516,6 @@ constructor(
             viewModelScope.launch(Dispatchers.Main) {
                 refreshPlayingSnapshot()
 
-                // CE (#298): the sleep timer is set for the end of this item, or already fired.
-                // Stay paused on the last frame with the player open; play goes on from here.
-                if (sleepTimer.stopsAtEndOfItem) {
-                    sleepTimerEndedItemId = player.currentMediaItem?.mediaId
-                    fireSleepTimer()
-                    // Already paused by the end of the item, so the pause in fireSleepTimer
-                    // changes nothing and onPlayWhenReadyChanged does not report it (#674).
-                    updatePlaybackProgress()
-                    return@launch
-                }
-
                 // CE (#272): "Cancel" on the "Up next" card: stop here, as with autoplay off.
                 if (
                     player.hasNextMediaItem() &&
@@ -1594,11 +1544,11 @@ constructor(
                 advanceOrAskStillWatching()
             }
         } else {
-            // CE (#674): a pause or a resume (by the user, the notification, a headset, the sleep
-            // timer or a lost audio focus) reaches the server now instead of at the next 5 s
-            // tick. A pause in the background had no tick at all. Not on buffering: playWhenReady
-            // does not change there. The end of an item is left to the branch above, which
-            // reports it itself (a stop, an advance or the sleep timer's pause).
+            // CE (#674): a pause or a resume (by the user, the notification, a headset or a lost
+            // audio focus) reaches the server now instead of at the next 5 s tick. A pause in the
+            // background had no tick at all. Not on buffering: playWhenReady does not change
+            // there. The end of an item is left to the branch above, which reports it itself (a
+            // stop or an advance).
             updatePlaybackProgress()
         }
     }
@@ -1631,8 +1581,8 @@ constructor(
 
     /**
      * CE (#272): show, count down or hide the "Up next" card for the current position. Only for an
-     * episode with a next item, and never when the end of the item belongs to the sleep timer or to
-     * the still-watching prompt (which wins over the countdown).
+     * episode with a next item, and never when the end of the item belongs to the still-watching
+     * prompt (which wins over the countdown).
      */
     private suspend fun updateUpNext() {
         val mediaId = player.currentMediaItem?.mediaId
@@ -1648,7 +1598,6 @@ constructor(
                 player.hasNextMediaItem() &&
                 player.playbackState != Player.STATE_IDLE &&
                 player.playbackState != Player.STATE_ENDED &&
-                !sleepTimer.stopsAtEndOfItem &&
                 !_uiState.value.showStillWatching &&
                 !(autoPlay &&
                     stillWatchingTracker.wouldPromptOnAutoAdvance(System.currentTimeMillis()))
@@ -1776,78 +1725,6 @@ constructor(
         stillWatchingTimeoutJob?.cancel()
         stillWatchingTimeoutJob = null
         _uiState.update { it.copy(showStillWatching = false) }
-    }
-
-    /** CE (#298): set the sleep timer, from now, or turn it off with [SleepTimerOption.Off]. */
-    fun setSleepTimer(option: SleepTimerOption) {
-        markUserInteraction()
-        Timber.d("Sleep timer set to $option")
-        sleepTimer.set(option, SystemClock.elapsedRealtime(), player.currentMediaItem?.mediaId)
-        sleepTimerJob?.cancel()
-        sleepTimerJob = null
-        updateSleepTimerState()
-        if (option == SleepTimerOption.Off) return
-        sleepTimerJob = viewModelScope.launch {
-            while (sleepTimer.option != SleepTimerOption.Off) {
-                if (sleepTimer.isDue(SystemClock.elapsedRealtime())) {
-                    fireSleepTimer()
-                    break
-                }
-                updateSleepTimerState()
-                delay(SLEEP_TIMER_TICK_MS)
-            }
-        }
-    }
-
-    private fun updateSleepTimerState() {
-        val option = sleepTimer.option
-        val remainingMs =
-            sleepTimer.remainingMs(SystemClock.elapsedRealtime())
-                ?: if (option == SleepTimerOption.EndOfItem) {
-                    val duration = player.duration
-                    if (duration == C.TIME_UNSET || duration <= 0) {
-                        null
-                    } else {
-                        ((duration - player.currentPosition).coerceAtLeast(0L) /
-                                playbackSpeed.coerceAtLeast(0.1f))
-                            .toLong()
-                    }
-                } else {
-                    null
-                }
-        _sleepTimerState.value = SleepTimerState(option, remainingMs)
-    }
-
-    /**
-     * The sleep timer went off: pause, and hold autoplay until the user resumes. The player stays
-     * open on the paused item. The pause is reported by [onPlayWhenReadyChanged] (#674); at the end
-     * of an item, where the player is paused already, its caller reports it.
-     */
-    private fun fireSleepTimer() {
-        Timber.d("Sleep timer fired, pausing")
-        sleepTimer.fire()
-        sleepTimerJob?.cancel()
-        sleepTimerJob = null
-        player.pause()
-        updateSleepTimerState()
-        eventsChannel.trySend(PlayerEvents.SleepTimerFired)
-    }
-
-    /**
-     * Play was pressed after the sleep timer stopped at the end of [endedItemId]: go on to the next
-     * item, as autoplay would have. ExoPlayer does that by itself when play is pressed at the end
-     * of an item; mpv stays on the last frame. A user who seeked back first just plays on.
-     */
-    private fun continueAfterSleepTimerEnd(endedItemId: String) {
-        sleepTimerEndedItemId = null
-        viewModelScope.launch(Dispatchers.Main) {
-            if (player.currentMediaItem?.mediaId != endedItemId) return@launch
-            val duration = player.duration
-            if (duration == C.TIME_UNSET || duration - player.currentPosition > END_TOLERANCE_MS) {
-                return@launch
-            }
-            if (player.hasNextMediaItem()) autoAdvanceToNextItem()
-        }
     }
 
     /**
@@ -2850,10 +2727,6 @@ constructor(
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
         eventsChannel.trySend(PlayerEvents.IsPlayingChanged(isPlaying))
-        if (isPlaying) {
-            sleepTimer.onResumed()
-            sleepTimerEndedItemId?.let { continueAfterSleepTimerEnd(it) }
-        }
         if (isBackgroundAudioEnabled) sessionStore.onPlayingChanged(isPlaying)
         if (isPlaying && isBackgroundAudioEnabled) startBackgroundProgressReports()
         if (isPlaying) reportPlayingIfReportedPaused()
@@ -2934,13 +2807,7 @@ sealed interface PlayerEvents {
                 PlayerError(error, nothingLoaded = currentMediaItem == null)
         }
     }
-
-    /** CE (#298): the sleep timer paused playback. */
-    data object SleepTimerFired : PlayerEvents
 }
-
-/** How often a running sleep timer updates [PlayerViewModel.sleepTimerState] and checks its end. */
-private const val SLEEP_TIMER_TICK_MS = 1_000L
 
 /** CE (#619): the largest subtitle file read for the sync sheet's cues. */
 private const val MAX_SUBTITLE_BYTES = 5L * 1024 * 1024
@@ -2961,6 +2828,3 @@ internal fun episodeLabel(item: PlayerItem): String? {
     val end = item.indexNumberEnd?.let { "-E%02d".format(it) }.orEmpty()
     return "S%02dE%02d%s".format(season, episode, end)
 }
-
-/** How close to its end an item counts as ended, for resuming after the sleep timer. */
-private const val END_TOLERANCE_MS = 2_000L
